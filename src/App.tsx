@@ -15,7 +15,6 @@ import {
   treeViewCustomizations,
 } from "./theme/customizations";
 import MyProfile from "./pages/Profile";
-// import MainGrid from "./components/MainGrid";
 import Products from "./pages/Products";
 import UploadDocuments from "./pages/UploadDocuments";
 import Settings from "./pages/Settings";
