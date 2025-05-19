@@ -203,13 +203,13 @@ const UserPharmacyManagement: React.FC = () => {
                                                     icon={
                                                         <TrendingUpIcon
                                                             color={getPerformanceColor(
-                                                                calculatePerformanceMetrics({ data: { data: userAnalyticsData?.sales_trends?.data, labels: userAnalyticsData?.sales_trends?.labels }, stockPurchased: userAnalyticsData?.total_purchased, stockRemaining: userAnalyticsData?.remaining_stock }).growthRate
+                                                                calculatePerformanceMetrics({ data: { data: userAnalyticsData?.sales_trends_yearly?.data, labels: userAnalyticsData?.sales_trends_yearly?.labels }, stockPurchased: userAnalyticsData?.total_purchased, stockRemaining: userAnalyticsData?.remaining_stock }).growthRate
                                                             )}
                                                         />
                                                     }
                                                     size="small"
                                                     label={
-                                                        (calculatePerformanceMetrics({ data: { data: userAnalyticsData?.sales_trends?.data, labels: userAnalyticsData?.sales_trends?.labels }, stockPurchased: userAnalyticsData?.total_purchased, stockRemaining: userAnalyticsData?.remaining_stock }).growthRate ?? 0) + '% Growth'
+                                                        (calculatePerformanceMetrics({ data: { data: userAnalyticsData?.sales_trends_yearly?.data, labels: userAnalyticsData?.sales_trends_yearly?.labels }, stockPurchased: userAnalyticsData?.total_purchased, stockRemaining: userAnalyticsData?.remaining_stock }).growthRate ?? 0) + '% Growth'
                                                     }
                                                 />
                                             </TableCell>

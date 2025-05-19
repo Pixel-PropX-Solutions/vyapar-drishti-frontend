@@ -53,9 +53,9 @@ export default function SideMenu() {
     return `${first_name?.[0] ?? ''}${last_name?.[0] ?? ''}`.toUpperCase();
   };
 
-  const handleProfileClick = () => {
-    navigate("/profile");
-  };
+  // const handleProfileClick = () => {
+  //   navigate("/profile");
+  // };
 
   const handleLogout = (e: React.MouseEvent) => {
     e.stopPropagation();
