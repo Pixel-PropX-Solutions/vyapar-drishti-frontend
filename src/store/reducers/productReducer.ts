@@ -10,14 +10,14 @@ import {
   viewProduct,
   viewProductsWithId,
 } from "@/services/products";
-import { PageMeta, Product, ProductListing } from "@/utils/types";
+import { PageMeta, Product, ProductData, ProductListing } from "@/utils/types";
 
 interface ProductState {
   authState: AuthStates;
-  productData: Product | null;
+  productData: ProductData | null;
   categories: Array<string> | null;
   productsListing: Array<ProductListing> | null;
-  productsData: Array<Product> | null;
+  productsData: Array<ProductData> | null;
   loading: boolean;
   deletionModal: boolean;
   productId: string;

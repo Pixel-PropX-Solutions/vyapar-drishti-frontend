@@ -4,7 +4,7 @@ import ProductIcon from "@mui/icons-material/LocalPharmacyOutlined";
 import QuantityIcon from "@mui/icons-material/LocalOffer";
 import ExpiryIcon from "@mui/icons-material/CalendarToday";
 import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
-import { OrderStatus } from "./types";
+import { OrderStatus, ProductSortField, SortOrder } from "./types";
 import { LocalShipping, Cancel, CheckCircle, ReceiptLong } from '@mui/icons-material';
 import ImageIcon from '@mui/icons-material/Image';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
@@ -12,11 +12,35 @@ import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import VideoFileIcon from '@mui/icons-material/VideoFile';
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 
+type ProductSortState = {
+  search: string;
+  category: string;
+  qtyFilter: string;
+  state: string;
+  page_no: number;
+  limit: number;
+  sortField: "" | ProductSortField;
+  sortOrder: "" | SortOrder;
+};
+
+export const handleProductSort = (
+  field: ProductSortField,
+  sortOrder: SortOrder,
+  sortField: ProductSortField,
+  setData: React.Dispatch<React.SetStateAction<ProductSortState>>
+) => {
+  const isAsc = sortField === field && sortOrder === "asc";
+  setData((prevState) => ({
+    ...prevState,
+    sortOrder: isAsc ? "desc" : "asc",
+    sortField: field,
+  }));
+};
 
 const renderAvailability = (
   status: "In Stock" | "Out of Stock" | "Low Stock"
 ) => {
-  const colors:Record<string, "success" | "warning" | "error"> = {
+  const colors: Record<string, "success" | "warning" | "error"> = {
     "In Stock": "success",
     "Low Stock": "warning",
     "Out of Stock": "error",

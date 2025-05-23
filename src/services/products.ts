@@ -1,10 +1,10 @@
 import userApi from "@/api/api";
-import { SingleProduct, StockOutState } from "@/utils/types";
+import { ProductData, SingleProduct, StockOutState } from "@/utils/types";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 export const createProduct = createAsyncThunk(
   "create/product",
-  async ({ data }: { data: SingleProduct }, { rejectWithValue }) => {
+  async ({ data }: { data: ProductData }, { rejectWithValue }) => {
     try {
       const response = await userApi.post(`/product/create/product`, data);
       // console.log("createProduct response", response);
@@ -67,7 +67,7 @@ export const viewAllProducts = createAsyncThunk(
         `/product/view/all/product?search=${searchQuery}&category=${category}&page_no=${pageNumber}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"
         }`
       );
-      // console.log("viewAllProduct response", response.data);
+      console.log("viewAllProduct response", response.data);
 
       if (response.data.success === true) {
         const productsData = response.data.data.docs;

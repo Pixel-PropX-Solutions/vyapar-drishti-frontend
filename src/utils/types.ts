@@ -11,6 +11,21 @@ export type SortField =
   | "available_product_price"
   | "company_name";
 
+export type ProductSortField =
+  | "product_name"
+  | 'selling_price'
+  | 'purchase_price'
+  | "category"
+  | "created_at"
+  | "updated_at"
+  | "opening_quantity"
+  | "opening_purchase_price"
+  | "show_active_stock"
+  | "barcode"
+  | 'unit'
+  | "hsn_code";
+
+
 export enum OrderStatus {
   PENDING = "Pending",
   SHIPPED = "Shipped",
@@ -131,7 +146,7 @@ export interface SingleProduct {
   expiry_date: string;
 }
 
-export interface ProductData {
+export interface ProductCreate {
   // Required fields
   product_name: string
   selling_price: number
@@ -141,7 +156,33 @@ export interface ProductData {
   // Optional fields
   unit?: string;
   hsn_code?: string;
-  puchase_price?: number;
+  purchase_price?: number;
+  barcode?: string;
+  category?: string;
+  image?: string;
+  description?: string;
+  opening_quantity?: number;
+  opening_purchase_price?: number;
+  opening_stock_value?: number;
+
+  // Additonal Optional fields
+  low_stock_alert?: number;
+  show_active_stock?: boolean;
+}
+
+
+export interface GetProduct {
+  // Required fields
+  _id: string
+  product_name: string
+  selling_price: number
+  user_id: string
+  is_deleted: boolean;
+
+  // Optional fields
+  unit?: string;
+  hsn_code?: string;
+  purchase_price?: number;
   barcode?: string;
   category?: string;
   image?: string;
@@ -154,9 +195,8 @@ export interface ProductData {
   low_stock_alert?: number;
   show_active_stock?: boolean;
 
-  state?: string;
-  storage_requirement?: string;
-  expiry_date?: Date;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Product {
