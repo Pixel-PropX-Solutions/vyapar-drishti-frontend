@@ -63,12 +63,12 @@ export default function SelectContent() {
       >
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent:'center', overflow:"hidden" }}>
           <ListItemAvatar>
-            <img src={logo} alt="Dristi Docs" height={40} style={{borderRadius:"100%", overflow:"hidden"}} />
+            <img src={logo} alt="Vyapar Drishti" height={40} style={{borderRadius:"100%", overflow:"hidden"}} />
           </ListItemAvatar>
           
           <Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              Dristi Docs
+              Vyapar Drishti
             </Typography>
             <Typography 
               variant="caption" 
@@ -147,11 +147,11 @@ export default function SelectContent() {
 //         borderRadius: "4px" }}
 //     >
 //       <ListItemAvatar>
-//         <Avatar alt="Dristi Docs">
+//         <Avatar alt="Vyapar Drishti">
 //           <DevicesRoundedIcon sx={{ fontSize: '1rem' }} />
 //         </Avatar>
 //       </ListItemAvatar>
-//       <ListItemText primary="Dristi Docs" secondary={`${role}`} />
+//       <ListItemText primary="Vyapar Drishti" secondary={`${role}`} />
 //       <Divider sx={{ marginTop: '8px' }} />
 //     </ListItem>
 //     // <Select
@@ -179,11 +179,11 @@ export default function SelectContent() {
 //     //   {/* <ListSubheader sx={{ pt: 0 }}>Production</ListSubheader> */}
 //     //   <MenuItem value="" >
 //     //     <ListItemAvatar>
-//     //       <Avatar alt="Dristi Docs">
+//     //       <Avatar alt="Vyapar Drishti">
 //     //         <DevicesRoundedIcon sx={{ fontSize: '1rem' }} />
 //     //       </Avatar>
 //     //     </ListItemAvatar>
-//     //     <ListItemText primary="Dristi Docs" secondary="Web app" />
+//     //     <ListItemText primary="Vyapar Drishti" secondary="Web app" />
 //     //   </MenuItem>
 //     //   {/* <MenuItem value={10}>
 //     //     <ListItemAvatar>

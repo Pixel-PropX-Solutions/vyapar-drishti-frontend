@@ -40,7 +40,6 @@ import { deleteProduct, viewAllProducts } from "@/services/products";
 import { Product } from "@/utils/types";
 import toast from "react-hot-toast";
 import { ROLE_ENUM } from "@/utils/enums";
-import ProductsSideModal from "@/features/products/ProductsSideModal";
 
 const ProductCard: React.FC<{
   product: Product;
@@ -52,7 +51,14 @@ const ProductCard: React.FC<{
     (state: RootState) => state.auth
   );
   const navigate = useNavigate();
-
+  // const formatDate = (dateString: string) => {
+  //   const date = new Date(dateString);
+  //   return date.toLocaleDateString("en-US", {
+  //     year: "numeric",
+  //     month: "short",
+  //     day: "numeric",
+  //   });
+  // };
   const theme = useTheme();
   const handleDelete = () => {
     setOpenDeleteDialog(true);
@@ -72,6 +78,26 @@ const ProductCard: React.FC<{
       }
     );
   };
+  // Check if product is expiring soon (within 3 months)
+  // const getTooltipMessage = () => {
+  //   const expiryDate = new Date(product?.expiry_date);
+  //   const currentDate = new Date();
+  //   const threeMonthsFromNow = new Date();
+  //   threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
+  //   const sixMonthsAfterExpiry = new Date(expiryDate);
+  //   sixMonthsAfterExpiry.setMonth(sixMonthsAfterExpiry.getMonth() + 6);
+
+  //   if (expiryDate <= currentDate) {
+  //     if (currentDate <= sixMonthsAfterExpiry) {
+  //       return "Request Refund";
+  //     } else {
+  //       return "Not Refunded";
+  //     }
+  //   } else if (expiryDate <= threeMonthsFromNow) {
+  //     return "Expiring soon";
+  //   }
+  //   return null;
+  // };
 
   return (
     <Card
@@ -89,6 +115,34 @@ const ProductCard: React.FC<{
         overflow: "visible",
       }}
     >
+      {/* {getTooltipMessage() && (
+        <Tooltip title={getTooltipMessage()}>
+          <Chip
+            label={getTooltipMessage()}
+            size="small"
+            sx={{
+              position: "absolute",
+              top: -10,
+              right: -10,
+              zIndex: 1,
+              borderWidth: "2px",
+              borderColor:
+                getTooltipMessage() === "Expiring soon"
+                  ? theme.palette.error.light
+                  : getTooltipMessage() === "Request Refund"
+                    ? theme.palette.success.main
+                    : theme.palette.primary.main,
+              background:
+                getTooltipMessage() === "Expiring soon"
+                  ? alpha(theme.palette.error.light, 0.2)
+                  : getTooltipMessage() === "Request Refund"
+                    ? theme.palette.success.light
+                    : theme.palette.primary.light,
+            }}
+          />
+        </Tooltip>
+      )} */}
+
       {user?.role === ROLE_ENUM.ADMIN && (<Tooltip title="Add to Cart">
         <DeleteIcon
           onClick={(e) => {
@@ -187,6 +241,51 @@ const ProductCard: React.FC<{
             </Typography>
           </Box>
 
+          {/* <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <CalendarTodayIcon
+              sx={{
+                mr: 1,
+                color:
+                  getTooltipMessage() === "Expiring soon"
+                    ? theme.palette.error.main
+                    : getTooltipMessage() === "Request Refund"
+                      ? theme.palette.success.main
+                      : theme.palette.info.dark,
+
+                fontSize: "1.2rem",
+              }}
+            />
+            <Typography
+              variant="body2"
+              color={
+                getTooltipMessage() === "Expiring soon"
+                  ? theme.palette.error.main
+                  : getTooltipMessage() === "Request Refund"
+                    ? theme.palette.success.main
+                    : theme.palette.info.dark
+              }
+              sx={{
+                borderBottom: "2px solid",
+                borderBottomColor:
+                  getTooltipMessage() === "Expiring soon"
+                    ? theme.palette.error.main
+                    : getTooltipMessage() === "Request Refund"
+                      ? theme.palette.success.main
+                      : theme.palette.info.dark,
+              }}
+            >
+              {getTooltipMessage() === "Expiring soon"
+                ? 'Expirying soon '
+                : getTooltipMessage() === "Request Refund"
+                  ? 'Already Expired '
+                  : 'Expires '}: {formatDate(product?.expiry_date)}
+            </Typography>
+          </Box> */}
         </Stack>
       </CardContent>
       <Dialog
@@ -228,6 +327,260 @@ const ProductCard: React.FC<{
   );
 };
 
+// ProductRow component (list view)
+// const ProductRow: React.FC<{
+//   product: Product;
+//   setRefreshKey: React.Dispatch<React.SetStateAction<number>>;
+// }> = ({ product, setRefreshKey }) => {
+//   const theme = useTheme();
+//   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+//   const dispatch = useDispatch<AppDispatch>();
+//   const navigate = useNavigate();
+//   // const formatDate = (dateString: string) => {
+//   //   const date = new Date(dateString);
+//   //   return date.toLocaleDateString("en-US", {
+//   //     year: "numeric",
+//   //     month: "short",
+//   //     day: "numeric",
+//   //   });
+//   // };
+
+//   const handleDelete = () => {
+//     setOpenDeleteDialog(true);
+//   };
+
+//   const confirmDelete = () => {
+//     toast.promise(
+//       dispatch(deleteProduct(product?._id)).then(() => {
+//         setOpenDeleteDialog(false);
+//         setRefreshKey((prevKey) => prevKey + 1);
+//         navigate("/products");
+//       }),
+//       {
+//         loading: "Deleting product...",
+//         success: <b>Product deleted successfully!</b>,
+//         error: <b>Failed to deleted product. Please try again.</b>,
+//       }
+//     );
+//   };
+
+//   // const getTooltipMessage = () => {
+//   //   const expiryDate = new Date(product?.expiry_date);
+//   //   const currentDate = new Date();
+//   //   const threeMonthsFromNow = new Date();
+//   //   threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
+//   //   const sixMonthsAfterExpiry = new Date(expiryDate);
+//   //   sixMonthsAfterExpiry.setMonth(sixMonthsAfterExpiry.getMonth() + 6);
+
+//   //   if (expiryDate <= currentDate) {
+//   //     if (currentDate <= sixMonthsAfterExpiry) {
+//   //       return "Request Refund";
+//   //     } else {
+//   //       return "Not Refunded";
+//   //     }
+//   //   } else if (expiryDate <= threeMonthsFromNow) {
+//   //     return "Expiring soon";
+//   //   }
+//   //   return null;
+//   // };
+
+//   return (
+//     <Paper
+//       onClick={() => {
+//         navigate(`/products/${product?._id}`);
+//       }}
+//       sx={{
+//         p: 2,
+//         mb: 2,
+//         display: "flex",
+//         position: "relative",
+//         flexDirection: { xs: "column", sm: "row" },
+//         alignItems: { xs: "flex-start", sm: "center" },
+//         border: `2px solid ${alpha(theme.palette.divider, 0.4)}`,
+//         background: alpha(theme.palette.divider, 0.2),
+//         gap: 2,
+//         "&:hover": {
+//           boxShadow: 3,
+//           borderColor: alpha(theme.palette.divider, 0.6),
+//           bgcolor: "rgba(0, 0, 0, 0.01)",
+//         },
+//       }}
+//     >
+//       <Tooltip title="Delete Product">
+//         <DeleteIcon
+//           onClick={(e) => {
+//             e.stopPropagation();
+//             handleDelete();
+//           }}
+//           sx={{
+//             position: "absolute",
+//             bottom: -10,
+//             right: 10,
+//             zIndex: 1,
+//             cursor: "pointer",
+//             border: `2px solid ${theme.palette.error.light}`,
+//             fontSize: "2rem",
+//             color: alpha(theme.palette.text.primary, 0.4),
+//             background: alpha(theme.palette.error.light, 0.2),
+//             borderRadius: "10px",
+//             p: 0.5,
+//             transition: "all 0.2s",
+//             "&:hover": {
+//               transform: "translateY(2px)",
+//               color: alpha(theme.palette.text.primary, 1),
+//               borderColor: theme.palette.error.main,
+//               background: alpha(theme.palette.error.light, 0.3),
+//             },
+//           }}
+//         />
+//       </Tooltip>
+//       <Box sx={{ flex: 2 }}>
+//         <Box
+//           sx={{
+//             display: "flex",
+
+//             alignItems: "center",
+//             gap: 1,
+//             mb: 0.5,
+//           }}
+//         >
+//           <Typography variant="subtitle1" fontWeight="medium">
+//             {product?.product_name}
+//           </Typography>
+//           {/* {getTooltipMessage() && (
+//             <Chip
+//               label="Expiring Soon"
+//               size="small"
+//               sx={{
+//                 borderWidth: "2px",
+//                 borderColor:
+//                   getTooltipMessage() === "Expiring soon"
+//                     ? theme.palette.error.light
+//                     : getTooltipMessage() === "Request Refund"
+//                       ? theme.palette.success.main
+//                       : theme.palette.primary.main,
+//                 background:
+//                   getTooltipMessage() === "Expiring soon"
+//                     ? alpha(theme.palette.error.light, 0.2)
+//                     : getTooltipMessage() === "Request Refund"
+//                       ? theme.palette.success.light
+//                       : theme.palette.primary.light,
+//               }}
+//             />
+//           )} */}
+//         </Box>
+//         <Chip
+//           label={product?.category}
+//           size="small"
+//           sx={{ mb: 0.5, background: theme.palette.primary.light }}
+//         />
+//         <Typography variant="body2" color="text.secondary">
+//           {product?.description}
+//         </Typography>
+//       </Box>
+
+//       <Box sx={{ flex: 1.5, display: "flex", flexDirection: "column", gap: 1 }}>
+//         <Box sx={{ display: "flex", alignItems: "center" }}>
+//           <MedicationIcon
+//             sx={{ mr: 1, color: "text.secondary", fontSize: "0.9rem" }}
+//           />
+//           <Typography variant="body2">
+//             {product?.state} • {product?.no_of_tablets_per_pack} tablets (
+//             {product?.measure_of_unit})
+//           </Typography>
+//         </Box>
+//         <Box sx={{ display: "flex", alignItems: "center" }}>
+//           <InventoryIcon
+//             sx={{ mr: 1, color: "text.secondary", fontSize: "0.9rem" }}
+//           />
+//           <Typography variant="body2">
+//             {product?.storage_requirement}
+//           </Typography>
+//         </Box>
+//       </Box>
+
+//       <Box
+//         sx={{
+//           flex: 1,
+//           display: "flex",
+//           flexDirection: { xs: "row", sm: "column" },
+//           justifyContent: "space-between",
+//           alignItems: { xs: "center", sm: "flex-end" },
+//           alignSelf: { xs: "stretch", sm: "center" },
+//           gap: 1,
+//         }}
+//       >
+//         <Box sx={{ display: "flex", alignItems: "center" }}>
+//           <CurrencyRupeeIcon sx={{ mr: 0.5, color: "text.secondary", fontSize: '1.5rem' }} />
+//           <Typography variant="subtitle1" fontWeight="bold">
+//             {product?.price}
+//           </Typography>
+//         </Box>
+//         {/* <Box sx={{ display: "flex", alignItems: "center" }}>
+//           <CalendarTodayIcon
+//             sx={{
+//               mr: 0.5,
+//               color:
+//                 getTooltipMessage() === "Expiring soon"
+//                   ? theme.palette.error.light
+//                   : getTooltipMessage() === "Request Refund"
+//                     ? theme.palette.success.main
+//                     : theme.palette.primary.main,
+//             }}
+//           />
+//           <Typography
+//             variant="body2"
+//             sx={{
+//               color:
+//                 getTooltipMessage() === "Expiring soon"
+//                   ? theme.palette.error.light
+//                   : getTooltipMessage() === "Request Refund"
+//                     ? theme.palette.success.main
+//                     : theme.palette.primary.main,
+//             }}
+//           >
+//             {formatDate(product?.expiry_date)}
+//           </Typography>
+//         </Box> */}
+//       </Box>
+//       <Dialog
+//         open={openDeleteDialog}
+//         onClose={() => setOpenDeleteDialog(false)}
+//         aria-labelledby="delete-dialog-title"
+//       >
+//         <DialogTitle id="delete-dialog-title">
+//           Delete {product?.product_name}?
+//         </DialogTitle>
+//         <DialogContent>
+//           <Typography>
+//             Are you sure you want to delete this product? This action cannot be
+//             undone.
+//           </Typography>
+//         </DialogContent>
+//         <DialogActions>
+//           <Button
+//             onClick={(e) => {
+//               e.stopPropagation();
+//               setOpenDeleteDialog(false);
+//             }}
+//           >
+//             Cancel
+//           </Button>
+//           <Button
+//             onClick={(e) => {
+//               e.stopPropagation();
+//               confirmDelete();
+//             }}
+//             color="error"
+//             variant="contained"
+//           >
+//             Delete
+//           </Button>
+//         </DialogActions>
+//       </Dialog>
+//     </Paper>
+//   );
+// };
 
 // Loading skeleton for card view
 const CardSkeleton: React.FC = () => (
@@ -257,6 +610,44 @@ const CardSkeleton: React.FC = () => (
   </Card>
 );
 
+// // Loading skeleton for list view
+// const RowSkeleton: React.FC = () => (
+//   <Paper
+//     sx={{
+//       p: 2,
+//       mb: 2,
+//       display: "flex",
+//       flexDirection: { xs: "column", sm: "row" },
+//       gap: 2,
+//     }}
+//   >
+//     <Box sx={{ flex: 2 }}>
+//       <Skeleton variant="text" width="50%" height={32} />
+//       <Skeleton
+//         variant="rectangular"
+//         width={100}
+//         height={24}
+//         sx={{ mb: 0.5 }}
+//       />
+//       <Skeleton variant="text" width="90%" />
+//     </Box>
+
+//     <Box sx={{ flex: 1.5 }}>
+//       {[1, 2].map((item) => (
+//         <Box key={item} sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+//           <Skeleton variant="circular" width={20} height={20} sx={{ mr: 1 }} />
+//           <Skeleton variant="text" width="80%" />
+//         </Box>
+//       ))}
+//     </Box>
+
+//     <Box sx={{ flex: 1, alignSelf: "flex-end" }}>
+//       <Skeleton variant="text" width={80} height={32} />
+//       <Skeleton variant="text" width={120} />
+//     </Box>
+//   </Paper>
+// );
+
 const ProductsListing: React.FC = () => {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -264,7 +655,6 @@ const ProductsListing: React.FC = () => {
   const { productsData, pageMeta } = useSelector(
     (state: RootState) => state.product
   );
-  const [drawer, setDrawer] = useState<boolean>(false);
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   // State for products data and loading
@@ -388,20 +778,21 @@ const ProductsListing: React.FC = () => {
                   color="primary"
                   startIcon={<AddCircleIcon fontSize="large" />}
                   onClick={() => {
-                    setDrawer(true);
-                    // navigate("/add/product");
+                    navigate("/add/product");
                   }}
                   sx={{
                     width: "max-content",
                   }}
                 >
-                  Add Items
+                  Add Products
                 </Button>
               </Grid>
             </Grid>
           </Paper>
         </CardContent>
       </Card>
+
+
 
       {/* Search and filters */}
       <Paper sx={{ mb: 3, width: "100%" }}>
@@ -517,6 +908,34 @@ const ProductsListing: React.FC = () => {
         </Grid>
       </Paper>
 
+      {/* View Toggle and Results Counter */}
+      {/* <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 2,
+        }}
+      >
+        <Typography variant="body2" color="text.secondary">
+          {loading
+            ? "Loading..."
+            : `Showing ${(page - 1) * rowsPerPage + 1}-${Math.min(
+              page * rowsPerPage,
+              totalProducts
+            )} of ${totalProducts} products`}
+        </Typography>
+
+         <IconButton
+          onClick={toggleViewMode}
+          color="primary"
+          size="small"
+          sx={{ border: 1, borderColor: "divider", borderRadius: 1 }}
+        >
+          {viewMode === "grid" ? <ViewListIcon /> : <ViewModuleIcon />}
+        </IconButton> 
+      </Box> */}
+
       {/* Products */}
       <Grid container spacing={3}>
         {loading ? (
@@ -565,6 +984,82 @@ const ProductsListing: React.FC = () => {
         )}
       </Grid>
 
+      {/* {viewMode === "grid" ? (
+        <Grid container spacing={3}>
+          {loading ? (
+            Show skeletons while loading
+            Array(pageSize)
+              .fill(null)
+              .map((_, index) => (
+                <Grid
+                  item
+                  xs={12}
+                  sm={6}
+                  md={4}
+                  lg={3}
+                  key={`skeleton-${index}`}
+                >
+                  <CardSkeleton />
+                </Grid>
+              ))
+          ) : products?.length > 0 ? (
+            // Show products grid
+            products.map((product) => (
+              <Grid
+                item
+                xs={12}
+                sm={6}
+                md={4}
+                lg={3}
+                key={product._id}
+                onClick={() => {
+                  navigate(`/products/${product?._id}`);
+                }}
+              >
+                <ProductCard product={product} setRefreshKey={setRefreshKey} />
+              </Grid>
+            ))
+          ) : (
+            // No products found
+            <Grid item xs={12}>
+              <Paper sx={{ p: 3, textAlign: "center" }}>
+                <Typography variant="h6">No products found</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Try adjusting your search or filter criteria
+                </Typography>
+              </Paper>
+            </Grid>
+          )}
+        </Grid>
+      ) : (
+        // List view
+        <Box>
+          {loading ? (
+            // Show skeletons while loading
+            Array(rowsPerPage)
+              .fill(null)
+              .map((_, index) => <RowSkeleton key={`skeleton-${index}`} />)
+          ) : products?.length > 0 ? (
+            // Show products list
+            products.map((product) => (
+              <ProductRow
+                key={product?._id}
+                product={product}
+                setRefreshKey={setRefreshKey}
+              />
+            ))
+          ) : (
+            // No products found
+            <Paper sx={{ p: 3, textAlign: "center" }}>
+              <Typography variant="h6">No products found</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Try adjusting your search or filter criteria
+              </Typography>
+            </Paper>
+          )}
+        </Box>
+      )} */}
+
       <Box
         sx={{
           display: "flex",
@@ -599,7 +1094,7 @@ const ProductsListing: React.FC = () => {
           />
         )}
       </Box>
-      <ProductsSideModal drawer={drawer} setDrawer={setDrawer} />
+
     </Box>
   );
 };

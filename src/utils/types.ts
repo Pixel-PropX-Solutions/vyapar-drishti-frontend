@@ -18,6 +18,11 @@ export enum OrderStatus {
 }
 export type SortOrder = "asc" | "desc";
 
+export interface Units {
+  label: string;
+  value: string;
+}
+
 export interface PageMeta {
   page: number;
   limit: number;
@@ -126,6 +131,34 @@ export interface SingleProduct {
   expiry_date: string;
 }
 
+export interface ProductData {
+  // Required fields
+  product_name: string
+  selling_price: number
+  user_id: string
+  is_deleted: boolean;
+
+  // Optional fields
+  unit?: string;
+  hsn_code?: string;
+  puchase_price?: number;
+  barcode?: string;
+  category?: string;
+  image?: string;
+  description?: string;
+  opening_quantity?: number;
+  opening_purchase_price?: number;
+  opening_stock_value?: number;
+
+  // Additonal Optional fields
+  low_stock_alert?: number;
+  show_active_stock?: boolean;
+
+  state?: string;
+  storage_requirement?: string;
+  expiry_date?: Date;
+}
+
 export interface Product {
   _id: string;
   product_name: string;
@@ -187,7 +220,8 @@ export interface OrderCreate {
 export interface StockOutState {
   product_id: string,
   quantity: number,
-  unit_price: number
+  unit_price: number,
+  unit: string // added for unit selection
 }
 
 export interface OrderDetailsCreate {
