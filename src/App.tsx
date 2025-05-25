@@ -40,6 +40,12 @@ import InvoiceEditor from "./features/upload-documents/InvoiceEditor";
 import ProductBilling from "./features/products/SellProduct";
 import ViewInventory from "./pages/Inventory";
 import ViewItem from "./features/products/ViewItem";
+import { ContactPage } from "@mui/icons-material";
+import CookiePolicyPage from "./components/Legal/CookiePolicy";
+import PrivacyPolicyPage from "./components/Legal/PrivacyPolicyPage";
+import SecurityPolicyPage from "./components/Legal/SecurityPolicyPage";
+import TermsOfServicePage from "./components/Legal/TermsOfServicePage";
+import PricingPage from "./components/Pricing/PricingPage";
 
 const xThemeComponents = {
   ...chartsCustomizations,
