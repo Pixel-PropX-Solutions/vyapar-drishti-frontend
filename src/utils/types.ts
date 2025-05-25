@@ -47,7 +47,15 @@ export interface PageMeta {
   sale_value?: number;
   positive_stock?: number;
   low_stock?: number;
+}
 
+export interface UploadData {
+  filename: string;
+  format: string;
+  height: number;
+  public_id: string;
+  url: string;
+  width: number;
 }
 
 export interface Name {
@@ -170,6 +178,24 @@ export interface ProductCreate {
   show_active_stock?: boolean;
 }
 
+export interface FormCreateProduct {
+  product_name: string;
+  selling_price: number;
+  unit?: string;
+  is_deleted?: boolean;
+  hsn_code?: string;
+  purchase_price?: number;
+  barcode?: string;
+  category?: string;
+  description?: string;
+  opening_quantity?: number;
+  opening_purchase_price?: number;
+  opening_stock_value?: number;
+  low_stock_alert?: number;
+  show_active_stock?: boolean;
+  image?: File | string;
+}
+
 
 export interface GetProduct {
   // Required fields
@@ -197,6 +223,19 @@ export interface GetProduct {
 
   created_at?: string;
   updated_at?: string;
+}
+
+export interface CategoryCreate {
+  category_name: string;
+  user_id: string;
+  image: string;
+  description: string;
+  is_deleted: boolean;
+}
+
+export interface CategoryLists {
+  _id: string;
+  category_name: string;
 }
 
 export interface Product {

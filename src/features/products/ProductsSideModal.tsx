@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import {
     Box,
     Button,
@@ -10,8 +10,6 @@ import {
     IconButton,
     Autocomplete,
     useTheme,
-    Tab,
-    Tabs,
     Switch,
     FormControlLabel,
     Paper,
@@ -42,33 +40,35 @@ import {
     Timeline,
 } from '@mui/icons-material';
 import toast from 'react-hot-toast';
-import { createProduct } from '@/services/products';
-import { AppDispatch } from '@/store/store';
+import { updateProduct, createProduct } from '@/services/products';
+import { AppDispatch, RootState } from '@/store/store';
+import { useDispatch, useSelector } from 'react-redux';
+import { FormCreateProduct, GetProduct, ProductCreate } from '@/utils/types';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { ProductCreate } from '@/utils/types';
+import CategoryCreateModal from './CategoryCreateModal';
 
 interface SideModalProps {
     drawer: boolean;
+    setRefreshKey: React.Dispatch<React.SetStateAction<number>>;
     setDrawer: React.Dispatch<React.SetStateAction<boolean>>;
+    productToEdit?: GetProduct | null; // <-- Add this prop
 }
 
 const ProductsSideModal = (props: SideModalProps) => {
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
-    const { setDrawer, drawer } = props;
+    const { setDrawer, drawer, setRefreshKey, productToEdit } = props;
     const [isMoreDetails, setIsMoreDetails] = useState(false);
-    const [activeTab, setActiveTab] = useState(0);
+    const [openCategoryModal, setOpenCategoryModal] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const { categoryLists } = useSelector((state: RootState) => state.category);
     const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
     const [isDragActive, setIsDragActive] = useState(false);
-
-    const [data, setData] = useState<ProductCreate>({
+    const [data, setData] = useState<FormCreateProduct>({
         // Required fields
         product_name: '',
         selling_price: 0,
-        user_id: '',
         is_deleted: false,
 
         // Optional fields
@@ -89,9 +89,9 @@ const ProductsSideModal = (props: SideModalProps) => {
     });
 
     // Additional state for new features
-    const [showInOnlineStore, setShowInOnlineStore] = useState(true);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
+
 
     // Validation function
     const validateForm = useCallback(() => {
@@ -109,10 +109,13 @@ const ProductsSideModal = (props: SideModalProps) => {
         return Object.keys(errors).length === 0;
     }, [data]);
 
-    const handleChange = useCallback((field: keyof ProductCreate, value: string) => {
-        setData((prevState: ProductCreate) => ({
+    const handleChange = useCallback((field: keyof ProductCreate, value: string | boolean) => {
+        setData((prevState: FormCreateProduct) => ({
             ...prevState,
-            [field]: value
+            [field]:
+                field === 'show_active_stock'
+                    ? value === true ? true : false
+                    : value
         }));
 
         // Clear validation error when user starts typing
@@ -137,12 +140,11 @@ const ProductsSideModal = (props: SideModalProps) => {
             return;
         }
 
+        setData((prev: FormCreateProduct) => ({ ...prev, image: file }));
         const reader = new FileReader();
         reader.onload = (e) => {
             const result = e.target?.result as string;
             setImagePreview(result);
-            setData((prev: ProductCreate) => ({ ...prev, image: result }));
-            toast.success('Image uploaded successfully!');
         };
         reader.readAsDataURL(file);
     }, []);
@@ -153,7 +155,10 @@ const ProductsSideModal = (props: SideModalProps) => {
         setIsDragActive(false);
 
         const file = e.dataTransfer.files?.[0];
-        if (file) handleImageChange(file);
+        if (file) {
+            handleImageChange(file);
+            setData((prev: FormCreateProduct) => ({ ...prev, image: file }));
+        }
     }, [handleImageChange]);
 
     const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
@@ -175,11 +180,11 @@ const ProductsSideModal = (props: SideModalProps) => {
     const removeImage = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
         setImagePreview(null);
-        setData((prev: ProductCreate) => ({ ...prev, image: '' }));
+        setData((prev: FormCreateProduct) => ({ ...prev, image: '' }));
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
-        toast.success('Image removed successfully!');
+        // toast.success('Image removed successfully!');
     }, []);
 
     // Calculate opening stock value automatically
@@ -188,6 +193,143 @@ const ProductsSideModal = (props: SideModalProps) => {
         const price = parseFloat(data.opening_purchase_price?.toString() || '0');
         return quantity * price;
     }, [data.opening_quantity, data.opening_purchase_price]);
+
+    const handleSubmit = async () => {
+        if (!validateForm()) {
+            toast.error('Please fix the validation errors before submitting.');
+            return;
+        }
+        setIsLoading(true);
+        try {
+            const sanitizedData: any = {
+                product_name: data.product_name.trim(),
+                selling_price: isNaN(parseFloat(data.selling_price.toString())) ? 1 : parseFloat(data.selling_price.toString()),
+                show_active_stock: data.show_active_stock === true,
+                is_deleted: data.is_deleted === false,
+            };
+            if (data.unit && data.unit !== '') sanitizedData.unit = data.unit;
+            if (data.hsn_code && data.hsn_code !== '') sanitizedData.hsn_code = data.hsn_code;
+            if (data.barcode && data.barcode !== '') sanitizedData.barcode = data.barcode;
+            if (data.category && data.category !== '') sanitizedData.category = data.category;
+            if (data.description && data.description !== '') sanitizedData.description = data.description;
+            if (!isNaN(Number(data.purchase_price)) && data.purchase_price !== undefined && data.purchase_price !== null && data.purchase_price !== 0) sanitizedData.purchase_price = parseFloat(data.purchase_price.toString());
+            if (!isNaN(Number(data.opening_quantity)) && data.opening_quantity !== undefined && data.opening_quantity !== null && data.opening_quantity !== 0) sanitizedData.opening_quantity = parseInt(data.opening_quantity.toString(), 10);
+            if (!isNaN(Number(data.opening_purchase_price)) && data.opening_purchase_price !== undefined && data.opening_purchase_price !== null && data.opening_purchase_price !== 0) sanitizedData.opening_purchase_price = parseFloat(data.opening_purchase_price.toString());
+            if (sanitizedData.opening_quantity && sanitizedData.opening_purchase_price) {
+                sanitizedData.opening_stock_value = sanitizedData.opening_quantity * sanitizedData.opening_purchase_price;
+            }
+            if (!isNaN(Number(data.low_stock_alert)) && data.low_stock_alert !== undefined && data.low_stock_alert !== null && data.low_stock_alert !== 0) sanitizedData.low_stock_alert = parseInt(data.low_stock_alert.toString(), 10);
+            if (data.image && typeof data.image !== 'string') sanitizedData.image = data.image;
+            const formData = new FormData();
+            Object.entries(sanitizedData).forEach(([key, value]) => {
+                if (typeof value === 'boolean') {
+                    formData.append(key, value ? 'true' : 'false');
+                } else if (value !== undefined && value !== null) {
+                    formData.append(key, value);
+                }
+            });
+
+            if (productToEdit && productToEdit._id) {
+                await toast.promise(
+                    dispatch(updateProduct({ data: formData, id: productToEdit._id }))
+                        .unwrap()
+                        .then(() => {
+                            navigate(`/products`);
+                            setRefreshKey(prev => prev + 1);
+                        }),
+                    {
+                        loading: "Updating your product...",
+                        success: <b>Product successfully updated! 🎉</b>,
+                        error: <b>Failed to update product. Please try again.</b>,
+                    }
+                );
+            } else {
+                await toast.promise(
+                    dispatch(createProduct({ productData: formData }))
+                        .unwrap()
+                        .then(() => {
+                            navigate(`/products`);
+                            setRefreshKey(prev => prev + 1);
+                        }),
+                    {
+                        loading: "Creating your product...",
+                        success: <b>Product successfully created! 🎉</b>,
+                        error: <b>Failed to create product. Please try again.</b>,
+                    }
+                );
+            }
+            resetForm();
+            setDrawer(false);
+        } catch (error) {
+            console.error('Error creating/updating product:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const resetForm = useCallback(() => {
+        setData({
+            product_name: '',
+            selling_price: 0,
+            is_deleted: false,
+            unit: '',
+            hsn_code: '',
+            purchase_price: 0,
+            barcode: '',
+            category: '',
+            image: '',
+            description: '',
+            opening_quantity: 0,
+            opening_purchase_price: 0,
+            opening_stock_value: 0,
+            low_stock_alert: 0,
+            show_active_stock: true,
+        });
+        setImagePreview(null);
+        setIsMoreDetails(false);
+        setValidationErrors({});
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    }, []);
+
+    const handleClose = useCallback(() => {
+        if (data.product_name || data.selling_price > 0 || imagePreview) {
+            if (window.confirm('You have unsaved changes. Are you sure you want to close?')) {
+                resetForm();
+                setDrawer(false);
+            }
+        } else {
+            setDrawer(false);
+        }
+    }, [data.product_name, data.selling_price, imagePreview, resetForm, setDrawer]);
+
+
+    // Prefill form if editing
+    useEffect(() => {
+        if (productToEdit) {
+            setData({
+                product_name: productToEdit.product_name || '',
+                selling_price: productToEdit.selling_price || 0,
+                is_deleted: productToEdit.is_deleted || false,
+                unit: productToEdit.unit || '',
+                hsn_code: productToEdit.hsn_code || '',
+                purchase_price: productToEdit.purchase_price || 0,
+                barcode: productToEdit.barcode || '',
+                category: productToEdit.category || '',
+                image: productToEdit.image || '',
+                description: productToEdit.description || '',
+                opening_quantity: productToEdit.opening_quantity || 0,
+                opening_purchase_price: productToEdit.opening_purchase_price || 0,
+                opening_stock_value: productToEdit.opening_stock_value || 0,
+                low_stock_alert: productToEdit.low_stock_alert || 0,
+                show_active_stock: productToEdit.show_active_stock !== false,
+            });
+            setImagePreview(productToEdit.image || null);
+        } else {
+            resetForm();
+        }
+    }, [productToEdit, resetForm]);
 
     const renderBasicDetails = () => (
         <Fade in timeout={300}>
@@ -329,7 +471,11 @@ const ProductsSideModal = (props: SideModalProps) => {
                                     fullWidth
                                     size="small"
                                     options={units}
-                                    getOptionLabel={(option) => option.label || ''}
+                                    getOptionLabel={(option) =>
+                                        typeof option === 'string'
+                                            ? option
+                                            : option.label || ''
+                                    }
                                     renderInput={(params) => (
                                         <TextField
                                             {...params}
@@ -503,7 +649,18 @@ const ProductsSideModal = (props: SideModalProps) => {
                                     <Autocomplete
                                         fullWidth
                                         size="small"
-                                        options={['Electronics', 'Clothing', 'Food & Beverages', 'Books', 'Home & Garden']}
+                                        options={[
+                                            ...(categoryLists?.map(cat => ({
+                                                label: cat.category_name,
+                                                value: cat._id
+                                            })) ?? []),
+                                            { label: '➕ Add new category', value: '__add_new__' }
+                                        ]}
+                                        getOptionLabel={(option) =>
+                                            typeof option === 'string'
+                                                ? option
+                                                : option.label || ''
+                                        }
                                         freeSolo
                                         renderInput={(params) => (
                                             <TextField
@@ -512,9 +669,33 @@ const ProductsSideModal = (props: SideModalProps) => {
                                                 size="small"
                                             />
                                         )}
-                                        value={data.category}
+                                        value={
+                                            categoryLists?.map(cat => ({
+                                                label: cat.category_name,
+                                                value: cat._id
+                                            })).find(option => option.value === data.category)
+                                            || (data.category && data.category !== '__add_new__'
+                                                ? { label: data.category, value: data.category }
+                                                : null)
+                                        }
                                         onChange={(_, newValue) => {
-                                            handleChange('category', newValue || '');
+                                            if (
+                                                newValue &&
+                                                typeof newValue === 'object' &&
+                                                'value' in newValue &&
+                                                newValue.value === '__add_new__'
+                                            ) {
+                                                setOpenCategoryModal(true);
+                                            } else {
+                                                handleChange(
+                                                    'category',
+                                                    newValue && typeof newValue === 'object' && 'value' in newValue
+                                                        ? newValue.value
+                                                        : typeof newValue === 'string'
+                                                            ? newValue
+                                                            : ''
+                                                );
+                                            }
                                         }}
                                         sx={{
                                             '& .MuiAutocomplete-endAdornment': { display: 'none' },
@@ -526,6 +707,15 @@ const ProductsSideModal = (props: SideModalProps) => {
                                                     }
                                                 }
                                             }
+                                        }}
+                                    />
+                                    {/* Category Modal */}
+                                    <CategoryCreateModal
+                                        open={openCategoryModal}
+                                        onClose={() => setOpenCategoryModal(false)}
+                                        onCreated={newCategory => {
+                                            handleChange('category', newCategory._id ?? '');
+                                            setOpenCategoryModal(false);
                                         }}
                                     />
                                 </FormControl>
@@ -887,8 +1077,8 @@ const ProductsSideModal = (props: SideModalProps) => {
                                             <FormControlLabel
                                                 control={
                                                     <Switch
-                                                        checked={showInOnlineStore}
-                                                        onChange={(e) => setShowInOnlineStore(e.target.checked)}
+                                                        checked={data.show_active_stock}
+                                                        onChange={(e) => handleChange('show_active_stock', e.target.checked)}
                                                         color="success"
                                                     />
                                                 }
@@ -920,89 +1110,6 @@ const ProductsSideModal = (props: SideModalProps) => {
         </Fade>
     );
 
-    const handleSubmit = async () => {
-        if (!validateForm()) {
-            toast.error('Please fix the validation errors before submitting.');
-            return;
-        }
-
-        setIsLoading(true);
-
-        try {
-            const { _id, ...rest } = data;
-            const sanitizedData = {
-                ...rest,
-                product_name: data.product_name.trim(),
-                selling_price: isNaN(parseFloat(data.selling_price.toString())) ? 0 : parseFloat(data.selling_price.toString()),
-                purchase_price: isNaN(parseFloat((data.purchase_price ?? 0).toString())) ? 0 : parseFloat((data.purchase_price ?? 0).toString()),
-                opening_quantity: parseInt((data.opening_quantity ?? 0).toString(), 10),
-                opening_purchase_price: parseFloat((data.opening_purchase_price ?? 0).toString()),
-                opening_stock_value: calculateStockValue(),
-                low_stock_alert: parseInt((data.low_stock_alert ?? 0).toString(), 10),
-                show_active_stock: data.show_active_stock === true,
-                is_deleted: data.is_deleted === false,
-            };
-
-            await toast.promise(
-                dispatch(createProduct({ data: sanitizedData }))
-                    .unwrap()
-                    .then(() => {
-                        navigate(`/products`);
-                    }),
-                {
-                    loading: "Creating your product...",
-                    success: <b>Product successfully created! 🎉</b>,
-                    error: <b>Failed to create product. Please try again.</b>,
-                }
-            );
-
-            resetForm();
-            setDrawer(false);
-        } catch (error) {
-            console.error('Error creating product:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const resetForm = useCallback(() => {
-        setData({
-            product_name: '',
-            selling_price: 0,
-            user_id: '',
-            is_deleted: false,
-            unit: '',
-            hsn_code: '',
-            purchase_price: 0,
-            barcode: '',
-            category: '',
-            image: '',
-            description: '',
-            opening_quantity: 0,
-            opening_purchase_price: 0,
-            opening_stock_value: 0,
-            low_stock_alert: 0,
-            show_active_stock: true,
-        });
-        setImagePreview(null);
-        setShowInOnlineStore(true);
-        setIsMoreDetails(false);
-        setValidationErrors({});
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-        }
-    }, []);
-
-    const handleClose = useCallback(() => {
-        if (data.product_name || data.selling_price > 0 || imagePreview) {
-            if (window.confirm('You have unsaved changes. Are you sure you want to close?')) {
-                resetForm();
-                setDrawer(false);
-            }
-        } else {
-            setDrawer(false);
-        }
-    }, [data.product_name, data.selling_price, imagePreview, resetForm, setDrawer]);
 
     return (
         <Drawer
@@ -1011,7 +1118,7 @@ const ProductsSideModal = (props: SideModalProps) => {
             onClose={handleClose}
             PaperProps={{
                 sx: {
-                    width: { xs: '100%', sm: 900, md: 1000 },
+                    width: { xs: '100%', sm: 700, md: 800 },
                     backgroundColor: theme.palette.background.default,
                     backgroundImage: `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 100%)`,
                 }
@@ -1051,10 +1158,10 @@ const ProductsSideModal = (props: SideModalProps) => {
                     </Tooltip>
                     <Box>
                         <Typography variant="h4" component="div" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
-                            Add New Product
+                            {productToEdit ? 'Edit Product' : 'Add New Product'}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                            Create a new product for your inventory
+                            {productToEdit ? 'Update product details' : 'Create a new product for your inventory'}
                         </Typography>
                     </Box>
                 </Box>
@@ -1084,43 +1191,10 @@ const ProductsSideModal = (props: SideModalProps) => {
                         transition: 'all 0.3s ease'
                     }}
                 >
-                    {isLoading ? 'Creating...' : 'Create Product'}
+                    {isLoading ? (productToEdit ? 'Updating...' : 'Creating...') : (productToEdit ? 'Update Product' : 'Create Product')}
                 </Button>
             </Box>
 
-            {/* Enhanced Tabs */}
-            <Box sx={{
-                borderBottom: `1px solid ${theme.palette.divider}`,
-                backgroundColor: theme.palette.background.paper,
-                px: 3
-            }}>
-                <Tabs
-                    value={activeTab}
-                    sx={{
-                        '& .MuiTab-root': {
-                            textTransform: 'none',
-                            fontWeight: 600,
-                            fontSize: '1rem',
-                            minHeight: 56,
-                            '&.Mui-selected': {
-                                color: theme.palette.primary.main,
-                            }
-                        },
-                        '& .MuiTabs-indicator': {
-                            height: 3,
-                            borderRadius: '2px 2px 0 0',
-                            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                        }
-                    }}
-                >
-                    <Tab
-                        icon={<LocalOffer />}
-                        iconPosition="start"
-                        label="Product Details"
-                        sx={{ gap: 1 }}
-                    />
-                </Tabs>
-            </Box>
 
             {/* Content with improved scrolling */}
             <Box sx={{
@@ -1136,18 +1210,15 @@ const ProductsSideModal = (props: SideModalProps) => {
                 '&::-webkit-scrollbar-thumb': {
                     backgroundColor: theme.palette.divider,
                     borderRadius: 4,
-                    '&:hover': {
-                        backgroundColor: theme.palette.action.hover,
-                    }
                 }
             }}>
-                {activeTab === 0 && renderBasicDetails()}
+                {renderBasicDetails()}
             </Box>
 
             {/* Enhanced Footer */}
             <Box sx={{
                 p: 3,
-                borderTop: `1px solid ${theme.palette.divider}`,
+                borderTop: `2px solid ${theme.palette.common.black}`,
                 backgroundColor: theme.palette.background.paper,
                 background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
             }}>
@@ -1201,7 +1272,7 @@ const ProductsSideModal = (props: SideModalProps) => {
                                 transition: 'all 0.3s ease'
                             }}
                         >
-                            {isLoading ? 'Creating Product...' : 'Create Product'}
+                            {isLoading ? (productToEdit ? 'Updating Product...' : 'Creating Product...') : (productToEdit ? 'Update Product' : 'Create Product')}
                         </Button>
                     </Stack>
                 </Stack>

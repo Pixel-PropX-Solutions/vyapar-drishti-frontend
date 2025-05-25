@@ -26,7 +26,7 @@ import toast from "react-hot-toast";
 import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import { createProduct } from "@/services/products";
+// import { createProduct } from "@/services/products";
 import { SingleProduct } from "@/utils/types";
 
 export default function CreateProduct() {
@@ -74,18 +74,18 @@ export default function CreateProduct() {
       return;
     }
 
-    toast.promise(
-      dispatch(createProduct({ data: productData }))
-        .unwrap()
-        .then(() => {
-          navigate(`/products`);
-        }),
-      {
-        loading: "Creating product...",
-        success: <b>Product successfully added!</b>,
-        error: <b>Failed to create product. Please try again.</b>,
-      }
-    );
+    // toast.promise(
+    //   dispatch(createProduct({ data: productData }))
+    //     .unwrap()
+    //     .then(() => {
+    //       navigate(`/products`);
+    //     }),
+    //   {
+    //     loading: "Creating product...",
+    //     success: <b>Product successfully added!</b>,
+    //     error: <b>Failed to create product. Please try again.</b>,
+    //   }
+    // );
   };
 
   const steps = [

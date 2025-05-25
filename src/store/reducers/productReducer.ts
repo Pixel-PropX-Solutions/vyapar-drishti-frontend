@@ -1,23 +1,24 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AuthStates } from "@/utils/enums";
 import {
-  createProduct,
   deleteProduct,
   sellProduct,
   updateProduct,
+  createProduct,
   viewAllCategories,
   viewAllProducts,
   viewProduct,
   viewProductsWithId,
 } from "@/services/products";
-import { PageMeta, Product, ProductData, ProductListing } from "@/utils/types";
+import { PageMeta, GetProduct, ProductCreate, ProductListing, UploadData } from "@/utils/types";
 
 interface ProductState {
   authState: AuthStates;
-  productData: ProductData | null;
+  productData: ProductCreate | null;
+  uploadData: UploadData | null;
   categories: Array<string> | null;
   productsListing: Array<ProductListing> | null;
-  productsData: Array<ProductData> | null;
+  productsData: Array<GetProduct> | null;
   loading: boolean;
   deletionModal: boolean;
   productId: string;
@@ -32,6 +33,7 @@ const initialState: ProductState = {
   productsListing: [],
   categories: null,
   productData: null,
+  uploadData: null,
   loading: false,
   deletionModal: false,
   productId: "",
@@ -53,12 +55,36 @@ const productSlice = createSlice({
       state.productId = action.payload.productId;
       state.deletionModal = !state.deletionModal;
     },
-    setProductDataNull(state){
+    setProductDataNull(state) {
       state.productData = null
     }
   },
   extraReducers: (builder) => {
     builder
+      // .addCase(createProduct.pending, (state) => {
+      //   state.error = null;
+      //   state.loading = true;
+      // })
+      // .addCase(createProduct.fulfilled, (state) => {
+      //   state.loading = false;
+      // })
+      // .addCase(createProduct.rejected, (state, action) => {
+      //   state.error = action.payload as string;
+      //   state.loading = false;
+      // })
+
+      // .addCase(uploadImage.pending, (state) => {
+      //   state.error = null;
+      //   state.loading = true;
+      // })
+      // .addCase(uploadImage.fulfilled, (state) => {
+      //   state.loading = false;
+      // })
+      // .addCase(uploadImage.rejected, (state, action) => {
+      //   state.error = action.payload as string;
+      //   state.loading = false;
+      // })
+
       .addCase(createProduct.pending, (state) => {
         state.error = null;
         state.loading = true;
@@ -126,7 +152,7 @@ const productSlice = createSlice({
         state.error = action.payload as string;
         state.loading = false;
       })
-     
+
       .addCase(viewAllCategories.pending, (state) => {
         state.error = null;
         state.loading = true;
