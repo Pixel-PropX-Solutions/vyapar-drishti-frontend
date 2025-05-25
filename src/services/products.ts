@@ -88,31 +88,6 @@ export const viewAllProducts = createAsyncThunk(
   }
 );
 
-export const viewAllCategories = createAsyncThunk(
-  "view/all/categories",
-  async (
-    _,
-    { rejectWithValue }
-  ) => {
-    try {
-      const response = await userApi.get(
-        '/product/view/all/categories'
-      );
-      // console.log("view/all/categories response", response.data);
-
-      if (response.data.success === true) {
-        const categories = response.data.data;
-        return { categories };
-      } else return rejectWithValue(" No access token recieved.");
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Invalid credentials or server error."
-      );
-    }
-  }
-);
-
 export const viewProduct = createAsyncThunk(
   "view/product",
   async (product_id: string, { rejectWithValue }) => {
@@ -121,8 +96,8 @@ export const viewProduct = createAsyncThunk(
       // console.log("view Product response", response.data);
 
       if (response.data.success === true) {
-        const productData = response.data.data;
-        return { productData };
+        const product = response.data.data[0];
+        return { product };
       } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {
       return rejectWithValue(
@@ -160,6 +135,7 @@ export const updateProduct = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
+      console.log("updateProduct data", data);
       const response = await userApi.put(`/product/update/product/${id}`, data);
       console.log("updateProduct response", response);
 
@@ -180,7 +156,7 @@ export const deleteProduct = createAsyncThunk(
   async (id: string, { rejectWithValue }) => {
     try {
       const response = await userApi.delete(`/product/delete/product/${id}`);
-      console.log("deleteProduct response", response);
+      // console.log("deleteProduct response", response);
 
       if (response.data.success === true) {
         return;

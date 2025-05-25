@@ -1,11 +1,9 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
     Box,
     TextField,
     Button,
     Typography,
-    Switch,
-    FormControlLabel,
     IconButton,
     Paper,
     Drawer,
@@ -25,25 +23,30 @@ import {
 } from "@mui/icons-material";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
-import { createCategory } from "@/services/category";
+import { createCategory, updateCategory } from "@/services/category";
 import { AppDispatch } from "@/store/store";
+import { UpdateCategory } from "@/utils/types";
 
 interface CategoryCreateModalProps {
     open: boolean;
     onClose: () => void;
-    onCreated?: (category: { name: string; _id?: string }) => void; // Added callback for created category
+    onCreated: (category: { name: string; _id: string }) => void;
+    onUpdated: () => Promise<void>;
+    category?: UpdateCategory | null;
 }
 
 interface CategoryFormData {
     name: string;
     description: string;
-    image: File | string;
+    image?: File | string;
 }
 
 const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
     open,
     onClose,
-    onCreated
+    onCreated,
+    onUpdated,
+    category,
 }) => {
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
@@ -62,16 +65,6 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
             ...prev,
             [field]: value
         }));
-    };
-
-    const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            setData(prev => ({
-                ...prev,
-                image: file
-            }));
-        }
     };
 
     const handleImageChange = useCallback((file: File) => {
@@ -137,38 +130,95 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
             categoryfileInputRef.current.value = '';
         }
     }, []);
+
+    useEffect(() => {
+        if (open && category) {
+            setData({
+                name: category.category_name || '',
+                description: category.description || '',
+                image: category.image || '',
+            });
+            setImagePreview(
+                typeof category?.image === "string" ? category.image : null
+            );
+        } else if (open && !category) {
+            setData({
+                name: '',
+                description: '',
+                image: '',
+            });
+            setImagePreview(null);
+        }
+    }, [open, category]);
+
     const handleSubmit = async () => {
         setIsLoading(true);
+        const sanitizedData: any = {
+            category_name: data.name.trim(),
+        };
+        if (data.description && data.description !== '') sanitizedData.description = data.description;
+        if (data.image && typeof data.image !== 'string') sanitizedData.image = data.image;
 
-        const formData = new FormData;
-        formData.append('category_name', data.name);
-        formData.append('image', data.image);
-        formData.append('description', data.description);
-        await toast.promise(
-            dispatch(createCategory({ categoryData: formData }))
-                .unwrap()
-                .then((response) => {
-                    const newCategory = {
-                        name: response.category_name,
-                        _id: response._id
-                    };
-                    if (onCreated) {
-                        onCreated(newCategory);
-                    }
-                    setData({
-                        name: '',
-                        description: '',
-                        image: ''
-                    });
-                    setIsLoading(false);
-                    onClose();
-                }),
-            {
-                loading: "Creating your product...",
-                success: <b>Product successfully created! 🎉</b>,
-                error: <b>Failed to create product. Please try again.</b>,
+        const formData = new FormData();
+        Object.entries(sanitizedData).forEach(([key, value]) => {
+            if (typeof value === 'boolean') {
+                formData.append(key, value ? 'true' : 'false');
+            } else if (value !== undefined && value !== null) {
+                formData.append(key, value);
             }
-        );
+        });
+
+        if (category && category._id) {
+            // Edit mode
+            await toast.promise(
+                dispatch(updateCategory({
+                    id: category._id,
+                    data: formData
+                }))
+                    .unwrap()
+                    .then(() => {
+                        setIsLoading(false);
+                        onClose();
+                        onUpdated();
+                    })
+                    .catch(() => {
+                        setIsLoading(false);
+                    }),
+                {
+                    loading: "Updating your category...",
+                    success: <b>Category successfully updated! 🎉</b>,
+                    error: <b>Failed to update category. Please try again.</b>,
+                }
+            );
+        } else {
+            // Create mode
+            await toast.promise(
+                dispatch(createCategory({ categoryData: formData }))
+                    .unwrap()
+                    .then((response) => {
+                        const newCategory = {
+                            name: response.category_name,
+                            _id: response._id
+                        };
+                        onCreated(newCategory);
+                        setData({
+                            name: '',
+                            description: '',
+                            image: ''
+                        });
+                        setIsLoading(false);
+                        onClose();
+                    })
+                    .catch(() => {
+                        setIsLoading(false);
+                    }),
+                {
+                    loading: "Creating your category...",
+                    success: <b>Category successfully created! 🎉</b>,
+                    error: <b>Failed to create category. Please try again.</b>,
+                }
+            );
+        }
     };
 
     return (
@@ -217,10 +267,10 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
                     </Tooltip>
                     <Box>
                         <Typography variant="inherit" fontWeight={600}>
-                            Create Category
+                            {category ? 'Edit Category' : 'Create Category'}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                            Create a new category for your products
+                            {category ? 'Update the details of your category' : 'Create a new category for your products'}
                         </Typography>
                     </Box>
                 </Box>
@@ -229,7 +279,6 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
                     variant="contained"
                     startIcon={<AddCircleOutlineIcon />}
                     onClick={handleSubmit}
-
                     sx={{
                         textTransform: 'none',
                         px: 3,
@@ -250,7 +299,7 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
                         transition: 'all 0.3s ease'
                     }}
                 >
-                    {isLoading ? 'Creating...' : 'Create Category'}
+                    {isLoading ? (category ? 'Updating...' : 'Creating...') : (category ? 'Update Category' : 'Create Category')}
                 </Button>
             </Box>
             <Box sx={{
@@ -424,49 +473,6 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
                                 />
                             </Box>
 
-
-                            {/* <FormControl fullWidth>
-                                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
-                                    Show in Online Store
-                                </Typography>
-                                <Box sx={{
-                                    border: `1px solid ${theme.palette.divider}`,
-                                    borderRadius: 1,
-                                    p: 2,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    backgroundColor: theme.palette.background.paper
-                                }}>
-                                    <Box>
-                                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                            Show in Online Store
-                                        </Typography>
-                                        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                                            Show or hide the category in catalogue/ online store
-                                        </Typography>
-                                    </Box>
-                                    <FormControlLabel
-                                        control={
-                                            <Switch
-                                                checked={data.showInOnlineStore}
-                                                onChange={(e) => handleInputChange('showInOnlineStore', e.target.checked)}
-                                                color="error"
-                                                sx={{
-                                                    '& .MuiSwitch-switchBase.Mui-checked': {
-                                                        color: '#f44336',
-                                                    },
-                                                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                                                        backgroundColor: '#f44336',
-                                                    },
-                                                }}
-                                            />
-                                        }
-                                        label=""
-                                        sx={{ ml: 0 }}
-                                    />
-                                </Box>
-                            </FormControl> */}
                         </Paper>
                     </Grow>
                 </Box>
@@ -516,7 +522,7 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
                                 transition: 'all 0.3s ease'
                             }}
                         >
-                            {isLoading ? 'Creating Category...' : 'Create Category'}
+                            {isLoading ? (category ? 'Updating Category...' : 'Creating Category...') : (category ? 'Update Category' : 'Create Category')}
                         </Button>
                     </Stack>
                 </Stack>

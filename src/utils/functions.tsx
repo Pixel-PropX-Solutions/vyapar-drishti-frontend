@@ -126,7 +126,8 @@ export const inventoryProductColumn: GridColDef[] = [
 // Format the date to a readable format
 export const formatDatewithTime = (dateString: string): string => {
   const date = new Date(dateString);
-  return date.toLocaleDateString("en-IN", {
+  return date.toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
     month: 'short',
     day: 'numeric',
     year: 'numeric',

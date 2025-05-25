@@ -3,26 +3,26 @@ import { CategoryCreate } from "@/utils/types";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 export const createCategory = createAsyncThunk(
-  "category/Create",
-  async (
-    {  categoryData }: {  categoryData: FormData },
-    { rejectWithValue }
-  ) => {
-    try {
-      const createRes = await userApi.post(`/category/create/category`, categoryData);
-      console.log("createCategory response", createRes);
-      if (createRes.data.success === true) {
-        return createRes.data.data;
-      } else {
-        return rejectWithValue("Category creation failed");
-      }
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Upload or creation failed: Invalid input or server error."
-      );
+    "category/Create",
+    async (
+        { categoryData }: { categoryData: FormData },
+        { rejectWithValue }
+    ) => {
+        try {
+            const createRes = await userApi.post(`/category/create/category`, categoryData);
+            console.log("createCategory response", createRes);
+            if (createRes.data.success === true) {
+                return createRes.data.data;
+            } else {
+                return rejectWithValue("Category creation failed");
+            }
+        } catch (error: any) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Upload or creation failed: Invalid input or server error."
+            );
+        }
     }
-  }
 );
 export const viewCategory = createAsyncThunk(
     "view/category",
@@ -53,28 +53,26 @@ export const viewAllCategory = createAsyncThunk(
             limit,
             sortField,
             sortOrder,
-            is_deleted,
         }: {
             searchQuery: string;
             sortField: string;
             pageNumber: number;
             limit: number;
             sortOrder: string;
-            is_deleted: boolean;
         },
         { rejectWithValue }
     ) => {
         try {
             const response = await userApi.get(
-                `/category/view/all/category?search=?search=${searchQuery}&is_deleted=${is_deleted}&page_no=${pageNumber}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"
+                `/category/view/all/category?search=${searchQuery}&is_deleted=False&page_no=${pageNumber}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"
                 }`
             );
-            // console.log("viewAllCategory response", response.data);
+            // console.log("viewAllCategory response", response);
 
             if (response.data.success === true) {
-                const productsData = response.data.data.docs;
+                const categories = response.data.data.docs;
                 const pageMeta = response.data.data.meta;
-                return { productsData, pageMeta };
+                return { categories, pageMeta };
             } else return rejectWithValue("Internal Server Error.");
         } catch (error: any) {
             return rejectWithValue(
@@ -114,7 +112,7 @@ export const viewAllCategories = createAsyncThunk(
 export const updateCategory = createAsyncThunk(
     "update/category",
     async (
-        { data, id }: { data: CategoryCreate; id: string },
+        { data, id }: { data: FormData; id: string },
         { rejectWithValue }
     ) => {
         try {
@@ -138,8 +136,8 @@ export const deleteCategory = createAsyncThunk(
     "delete/category",
     async (id: string, { rejectWithValue }) => {
         try {
-            const response = await userApi.delete(`/category/delete/product/${id}`);
-            console.log("deleteProduct response", response);
+            const response = await userApi.delete(`/category/delete/category/${id}`);
+            console.log("deleteCategory response", response);
 
             if (response.data.success === true) {
                 return;

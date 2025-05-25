@@ -102,7 +102,7 @@ const UserProfile = () => {
       return "No Address";
     }
   };
-  // State for editable fields and edit mode
+
   const [editableData, setEditableData] = useState({
     userName: getFullName(),
     email: user?.email ?? "No Email",
@@ -115,6 +115,8 @@ const UserProfile = () => {
     website,
     businessHours,
   });
+
+
   const [isEditing, setIsEditing] = useState(false); // New state for edit mode
   const [selectedFile, _setSelectedFile] = useState<File | null>(null);
   const [imageUrl, _setImageUrl] = useState<string | null>(null);
@@ -131,36 +133,7 @@ const UserProfile = () => {
     dispatch(getCurrentUser());
   }, [dispatch])
 
-  // const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = event.target.files?.[0];
 
-  //   if (!file) {
-  //     setError("No file selected.");
-  //     return;
-  //   }
-
-  //   if (!ALLOWED_FILE_TYPES.includes(file.type)) {
-  //     setError("Invalid file type. Please upload a JPEG, PNG, or GIF image.");
-  //     return;
-  //   }
-
-  //   if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-  //     setError(
-  //       `File size exceeds ${MAX_FILE_SIZE_MB} MB. Please choose a smaller file.`
-  //     );
-  //     return;
-  //   }
-  //   const reader = new FileReader();
-  //   reader.onloadend = () => {
-  //     if (reader.result && typeof reader.result === "string") {
-  //       setImageUrl(reader.result);
-  //     }
-  //   };
-
-  //   reader.readAsDataURL(file);
-  //   setSelectedFile(file);
-  //   setError("");
-  // };
 
   const handleSave = async () => {
     try {
@@ -178,11 +151,9 @@ const UserProfile = () => {
         body: JSON.stringify(editableData),
       });
       if (!response.ok) throw new Error("Failed to update profile");
-      // Handle success (e.g., show a success message)
       setIsEditing(false); // Exit edit mode after saving
     } catch (error) {
       console.error(error);
-      // Handle error (e.g., show an error message)
     }
   };
 
@@ -198,219 +169,220 @@ const UserProfile = () => {
   };
 
   return (
-    <Card
-      elevation={8}
-      sx={{
-        background: `linear-gradient(135deg, ${theme.palette.background.default} 0%, alpha(${theme.palette.background.default}, 0.6) 100%)`,
-        borderRadius: 1,
-        overflow: "hidden",
-        width: "100%",
-        margin: 0,
-        marginTop: "2rem",
-      }}
-    >
-      <Box
+    <Box sx={{ p: 3, bgcolor: '#f8fafc', minHeight: '100vh', width: '100%' }}>
+      <Card
+        elevation={8}
         sx={{
-          position: "relative",
-          height: "150px",
+          background: `linear-gradient(135deg, ${theme.palette.background.default} 0%, alpha(${theme.palette.background.default}, 0.6) 100%)`,
           borderRadius: 1,
-          backgroundColor: theme.palette.primary.main,
-          backgroundImage: `linear-gradient(135deg,${theme.palette.info.dark} 0%, ${theme.palette.info.light} 100%)`,
-          "&::after": {
-            content: '""',
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: "40px",
-            background:
-              "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.1) 100%)",
-          },
+          overflow: "hidden",
+          width: "100%",
+          margin: 0,
+          marginTop: "2rem",
         }}
-      />
-
-      <CardContent sx={{ mt: -10, position: "relative" }}>
+      >
         <Box
           sx={{
-            position: "absolute",
-            top: -30,
-            left: "50%",
-            transform: "translate(-50%, 0)",
-            zIndex: "100",
+            position: "relative",
+            height: "150px",
+            borderRadius: 1,
+            backgroundColor: theme.palette.primary.main,
+            backgroundImage: `linear-gradient(135deg,${theme.palette.info.dark} 0%, ${theme.palette.info.light} 100%)`,
+            "&::after": {
+              content: '""',
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: "40px",
+              background:
+                "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.1) 100%)",
+            },
           }}
-        >
-          <Typography
-            variant="h4"
+        />
+
+        <CardContent sx={{ mt: -10, position: "relative" }}>
+          <Box
             sx={{
-              fontWeight: 700,
-              color:
-                theme.palette.mode === "light"
-                  ? theme.palette.primary.dark
-                  : theme.palette.primary.main,
+              position: "absolute",
+              top: -30,
+              left: "50%",
+              transform: "translate(-50%, 0)",
+              zIndex: "100",
             }}
           >
-            My Profile
-          </Typography>
-        </Box>
-        <Grid container spacing={4}>
-          {/* Profile Section */}
-          <Grid item xs={12} md={4}>
-            <Box
-              display="flex"
-              flexDirection="column"
-              alignItems="center"
+            <Typography
+              variant="h4"
               sx={{
-                backgroundColor: alpha(theme.palette.background.default, 0.7),
-                borderRadius: 2,
-                p: 3,
-                boxShadow:
+                fontWeight: 700,
+                color:
                   theme.palette.mode === "light"
-                    ? "0 4px 20px rgba(0,0,0,0.1)"
-                    : "0 4px 20px rgba(255,255,255,0.1)",
-                height: "100%",
+                    ? theme.palette.primary.dark
+                    : theme.palette.primary.main,
               }}
             >
-              <Box position="relative">
-                <Avatar
-                  src={
-                    imageUrl ||
-                    `https://api.dicebear.com/5.x/initials/svg?seed=${editableData.userName}`
-                  }
-                  alt={editableData.userName}
-                  sx={{
-                    width: 150,
-                    height: 150,
-                    border: "5px solid white",
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-                  }}
-                />
-                {error && (
-                  <Typography variant="body2" color="error" mt={2}>
-                    {error}
-                  </Typography>
-                )}
-                {selectedFile && (
-                  <Button
-                    variant="contained"
-                    onClick={handleUpload}
-                    component="span"
-                  >
-                    Upload Image
-                  </Button>
-                )}
-
-                <Tooltip title="Verified Professional">
-                  <VerifiedIcon
-                    sx={{
-                      position: "absolute",
-                      bottom: 5,
-                      right: 5,
-                      color: theme.palette.primary.main,
-                      backgroundColor: "white",
-                      borderRadius: "50%",
-                    }}
-                  />
-                </Tooltip>
-              </Box>
-
-              <Typography
-                variant="h4"
-                gutterBottom
-                sx={{ mt: 2, fontWeight: 700 }}
+              My Profile
+            </Typography>
+          </Box>
+          <Grid container spacing={4}>
+            {/* Profile Section */}
+            <Grid item xs={12} md={4}>
+              <Box
+                display="flex"
+                flexDirection="column"
+                alignItems="center"
+                sx={{
+                  backgroundColor: alpha(theme.palette.background.default, 0.7),
+                  borderRadius: 2,
+                  p: 3,
+                  boxShadow:
+                    theme.palette.mode === "light"
+                      ? "0 4px 20px rgba(0,0,0,0.1)"
+                      : "0 4px 20px rgba(255,255,255,0.1)",
+                  height: "100%",
+                }}
               >
-                {isEditing ? (
-                  <input
-                    type="text"
-                    name="email"
-                    style={{
-                      width: "100%",
-                      margin: "auto",
-                      border: "none",
-                      textAlign: "center",
-                      fontWeight: "bold",
-                      fontSize: "1.5rem",
-                      borderBottom: `2px solid ${theme.palette.primary.main} `,
+                <Box position="relative">
+                  <Avatar
+                    src={
+                      imageUrl ||
+                      `https://api.dicebear.com/5.x/initials/svg?seed=${editableData.userName}`
+                    }
+                    alt={editableData.userName}
+                    sx={{
+                      width: 150,
+                      height: 150,
+                      border: "5px solid white",
+                      boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
                     }}
-                    value={editableData.userName}
-                    onChange={handleChange}
                   />
-                ) : (
-                  editableData.userName
-                )}
-              </Typography>
+                  {error && (
+                    <Typography variant="body2" color="error" mt={2}>
+                      {error}
+                    </Typography>
+                  )}
+                  {selectedFile && (
+                    <Button
+                      variant="contained"
+                      onClick={handleUpload}
+                      component="span"
+                    >
+                      Upload Image
+                    </Button>
+                  )}
 
-              <Box display="flex" alignItems="center" gap={1} mb={2}>
-                <Chip
-                  label={editableData.role}
-                  color="primary"
-                  sx={{
-                    fontSize: "1rem",
-                    fontWeight: 600,
-                    backgroundColor: (theme) => theme.palette.primary.main,
-                    py: 2,
-                    px: 1,
-                  }}
-                />
+                  <Tooltip title="Verified Professional">
+                    <VerifiedIcon
+                      sx={{
+                        position: "absolute",
+                        bottom: 5,
+                        right: 5,
+                        color: theme.palette.primary.main,
+                        backgroundColor: "white",
+                        borderRadius: "50%",
+                      }}
+                    />
+                  </Tooltip>
+                </Box>
 
-              </Box>
-
-
-              <Box mt={2} width="100%">
                 <Typography
-                  variant="subtitle1"
-                  fontWeight={600}
-                  color="primary.light"
+                  variant="h4"
+                  gutterBottom
+                  sx={{ mt: 2, fontWeight: 700 }}
                 >
-                  Shop Details
-                </Typography>
-                <Typography variant="h6" gutterBottom fontWeight={700}>
                   {isEditing ? (
                     <input
                       type="text"
                       name="email"
                       style={{
                         width: "100%",
+                        margin: "auto",
                         border: "none",
+                        textAlign: "center",
                         fontWeight: "bold",
-                        fontSize: "1.15rem",
+                        fontSize: "1.5rem",
                         borderBottom: `2px solid ${theme.palette.primary.main} `,
                       }}
-                      value={editableData.shopName}
+                      value={editableData.userName}
                       onChange={handleChange}
                     />
                   ) : (
-                    editableData.shopName
-                  )}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="textSecondary"
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    mb: 2,
-                  }}
-                >
-                  <LocationIcon fontSize="small" />
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      name="email"
-                      style={{
-                        width: "100%",
-                        border: "none",
-                        borderBottom: `2px solid ${theme.palette.primary.main} `,
-                      }}
-                      value={editableData.streetAddress}
-                      onChange={handleChange}
-                    />
-                  ) : (
-                    editableData.streetAddress
+                    editableData.userName
                   )}
                 </Typography>
 
-                {/* <Typography
+                <Box display="flex" alignItems="center" gap={1} mb={2}>
+                  <Chip
+                    label={editableData.role}
+                    color="primary"
+                    sx={{
+                      fontSize: "1rem",
+                      fontWeight: 600,
+                      backgroundColor: (theme) => theme.palette.primary.main,
+                      py: 2,
+                      px: 1,
+                    }}
+                  />
+
+                </Box>
+
+
+                <Box mt={2} width="100%">
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight={600}
+                    color="primary.light"
+                  >
+                    Shop Details
+                  </Typography>
+                  <Typography variant="h6" gutterBottom fontWeight={700}>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="email"
+                        style={{
+                          width: "100%",
+                          border: "none",
+                          fontWeight: "bold",
+                          fontSize: "1.15rem",
+                          borderBottom: `2px solid ${theme.palette.primary.main} `,
+                        }}
+                        value={editableData.shopName}
+                        onChange={handleChange}
+                      />
+                    ) : (
+                      editableData.shopName
+                    )}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      mb: 2,
+                    }}
+                  >
+                    <LocationIcon fontSize="small" />
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="email"
+                        style={{
+                          width: "100%",
+                          border: "none",
+                          borderBottom: `2px solid ${theme.palette.primary.main} `,
+                        }}
+                        value={editableData.streetAddress}
+                        onChange={handleChange}
+                      />
+                    ) : (
+                      editableData.streetAddress
+                    )}
+                  </Typography>
+
+                  {/* <Typography
                   variant="body2"
                   sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}
                 >
@@ -418,231 +390,232 @@ const UserProfile = () => {
                   {businessHours}
                 </Typography> */}
 
-                <Box mt={2}>
-                  <Typography variant="subtitle2" fontWeight={600} gutterBottom>
-                    Specializations
-                  </Typography>
-                  <Box display="flex" flexWrap="wrap" gap={1}>
-                    {specialization.map((spec, index) => (
-                      <Chip
-                        key={index}
-                        label={spec}
-                        size="small"
-                        variant="outlined"
-                        sx={{ backgroundColor: "rgba(255,255,255,0.6)" }}
-                      />
-                    ))}
+                  <Box mt={2}>
+                    <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                      Specializations
+                    </Typography>
+                    <Box display="flex" flexWrap="wrap" gap={1}>
+                      {specialization.map((spec, index) => (
+                        <Chip
+                          key={index}
+                          label={spec}
+                          size="small"
+                          variant="outlined"
+                          sx={{ backgroundColor: "rgba(255,255,255,0.6)" }}
+                        />
+                      ))}
+                    </Box>
                   </Box>
                 </Box>
-              </Box>
 
-              <Box mt={3} display="flex" gap={1} justifyContent="center">
-                <IconButton color="primary" size="small">
-                  <LinkedInIcon />
-                </IconButton>
-                <IconButton color="primary" size="small">
-                  <FacebookIcon />
-                </IconButton>
-                <IconButton color="primary" size="small">
-                  <WebsiteIcon />
-                </IconButton>
-              </Box>
-            </Box>
-          </Grid>
-
-          {/* Contact and Business Information */}
-          <Grid item xs={12} md={8}>
-            <Box
-              sx={{
-                backgroundColor: alpha(theme.palette.background.default, 0.6),
-                borderRadius: 2,
-                p: 3,
-                boxShadow:
-                  theme.palette.mode === "light"
-                    ? "0 4px 20px rgba(0,0,0,0.1)"
-                    : "0 4px 20px rgba(255,255,255,0.1)",
-              }}
-            >
-              <Box
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-                mb={3}
-              >
-                <Typography
-                  variant="h5"
-                  sx={{
-                    fontWeight: 700,
-                    color: theme.palette.primary.main,
-                  }}
-                >
-                  Contact Information
-                </Typography>
-                <Box>
-                  <Button
-                    onClick={isEditing ? handleSave : () => setIsEditing(true)}
-                    variant="outlined"
-                    size="small"
-                    sx={{ borderRadius: 2, marginRight: "10px" }}
-                  >
-                    {isEditing ? "Save Changes" : "Edit Profile"}
-                  </Button>
-                  {isEditing && (
-                    <Button
-                      onClick={() => setIsEditing(false)}
-                      variant="outlined"
-                      size="small"
-                      sx={{ borderRadius: 2 }}
-                    >
-                      Cancel
-                    </Button>
-                  )}
+                <Box mt={3} display="flex" gap={1} justifyContent="center">
+                  <IconButton color="primary" size="small">
+                    <LinkedInIcon />
+                  </IconButton>
+                  <IconButton color="primary" size="small">
+                    <FacebookIcon />
+                  </IconButton>
+                  <IconButton color="primary" size="small">
+                    <WebsiteIcon />
+                  </IconButton>
                 </Box>
               </Box>
+            </Grid>
 
-              <InfoRow
-                theme={theme}
-                icon={<EmailIcon />}
-                label="Email Address"
-                value={
-                  isEditing ? (
-                    <input
-                      type="text"
-                      name="email"
-                      style={{
-                        width: "100%",
-                        border: "none",
-                        fontWeight: "bold",
-                        borderBottom: `2px solid ${theme.palette.primary.main} `,
-                      }}
-                      value={editableData.email}
-                      onChange={handleChange}
-                    />
-                  ) : (
-                    editableData.email
-                  )
-                }
-              />
-              {editableData.licenseNumber && (<InfoRow
-                theme={theme}
-                icon={<LicenseIcon />}
-                label="License Number"
-                value={
-                  isEditing ? (
-                    <input
-                      type="text"
-                      name="licenseNumber"
-                      style={{
-                        width: "100%",
-                        border: "none",
-                        fontWeight: "bold",
-                        borderBottom: `2px solid ${theme.palette.primary.main} `,
-                      }}
-                      value={editableData.licenseNumber}
-                      onChange={handleChange}
-                    />
-                  ) : (
-                    editableData.licenseNumber
-                  )
-                }
-              />)}
-              <InfoRow
-                theme={theme}
-                icon={<HomeIcon />}
-                label="Full Address"
-                value={
-                  isEditing ? (
-                    <input
-                      type="text"
-                      name="fullAddress"
-                      style={{
-                        width: "100%",
-                        border: "none",
-                        fontWeight: "bold",
-                        borderBottom: `2px solid ${theme.palette.primary.main} `,
-                      }}
-                      value={editableData.fullAddress}
-                      onChange={handleChange}
-                    />
-                  ) : (
-                    editableData.fullAddress
-                  )
-                }
-              />
-              <InfoRow
-                theme={theme}
-                icon={<PhoneIcon />}
-                label="Contact Number"
-                value={
-                  isEditing ? (
-                    <input
-                      type="text"
-                      name="phoneNumber"
-                      style={{
-                        width: "100%",
-                        border: "none",
-                        fontWeight: "bold",
-                        borderBottom: `2px solid ${theme.palette.primary.main} `,
-                      }}
-                      value={editableData.phoneNumber}
-                      onChange={handleChange}
-                    />
-                  ) : (
-                    editableData.phoneNumber
-                  )
-                }
-              />
-              <InfoRow
-                theme={theme}
-                icon={<WebsiteIcon />}
-                label="Website"
-                value={
-                  isEditing ? (
-                    <input
-                      type="text"
-                      name="website"
-                      style={{
-                        width: "100%",
-                        border: "none",
-                        fontWeight: "bold",
-                        borderBottom: `2px solid ${theme.palette.primary.main} `,
-                      }}
-                      value={editableData.website}
-                      onChange={handleChange}
-                    />
-                  ) : (
-                    editableData.website
-                  )
-                }
-              />
-              <InfoRow
-                theme={theme}
-                icon={<ScheduleIcon />}
-                label="Business Hours"
-                value={
-                  isEditing ? (
-                    <input
-                      type="text"
-                      name="businessHours"
-                      style={{
-                        width: "100%",
-                        border: "none",
-                        fontWeight: "bold",
-                        borderBottom: `2px solid ${theme.palette.primary.main} `,
-                      }}
-                      value={editableData.businessHours}
-                      onChange={handleChange}
-                    />
-                  ) : (
-                    editableData.businessHours
-                  )
-                }
-              />
-            </Box>
+            {/* Contact and Business Information */}
+            <Grid item xs={12} md={8}>
+              <Box
+                sx={{
+                  backgroundColor: alpha(theme.palette.background.default, 0.6),
+                  borderRadius: 2,
+                  p: 3,
+                  boxShadow:
+                    theme.palette.mode === "light"
+                      ? "0 4px 20px rgba(0,0,0,0.1)"
+                      : "0 4px 20px rgba(255,255,255,0.1)",
+                }}
+              >
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  mb={3}
+                >
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontWeight: 700,
+                      color: theme.palette.primary.main,
+                    }}
+                  >
+                    Contact Information
+                  </Typography>
+                  <Box>
+                    <Button
+                      onClick={isEditing ? handleSave : () => setIsEditing(true)}
+                      variant="outlined"
+                      size="small"
+                      sx={{ borderRadius: 2, marginRight: "10px" }}
+                    >
+                      {isEditing ? "Save Changes" : "Edit Profile"}
+                    </Button>
+                    {isEditing && (
+                      <Button
+                        onClick={() => setIsEditing(false)}
+                        variant="outlined"
+                        size="small"
+                        sx={{ borderRadius: 2 }}
+                      >
+                        Cancel
+                      </Button>
+                    )}
+                  </Box>
+                </Box>
+
+                <InfoRow
+                  theme={theme}
+                  icon={<EmailIcon />}
+                  label="Email Address"
+                  value={
+                    isEditing ? (
+                      <input
+                        type="text"
+                        name="email"
+                        style={{
+                          width: "100%",
+                          border: "none",
+                          fontWeight: "bold",
+                          borderBottom: `2px solid ${theme.palette.primary.main} `,
+                        }}
+                        value={editableData.email}
+                        onChange={handleChange}
+                      />
+                    ) : (
+                      editableData.email
+                    )
+                  }
+                />
+                {editableData.licenseNumber && (<InfoRow
+                  theme={theme}
+                  icon={<LicenseIcon />}
+                  label="License Number"
+                  value={
+                    isEditing ? (
+                      <input
+                        type="text"
+                        name="licenseNumber"
+                        style={{
+                          width: "100%",
+                          border: "none",
+                          fontWeight: "bold",
+                          borderBottom: `2px solid ${theme.palette.primary.main} `,
+                        }}
+                        value={editableData.licenseNumber}
+                        onChange={handleChange}
+                      />
+                    ) : (
+                      editableData.licenseNumber
+                    )
+                  }
+                />)}
+                <InfoRow
+                  theme={theme}
+                  icon={<HomeIcon />}
+                  label="Full Address"
+                  value={
+                    isEditing ? (
+                      <input
+                        type="text"
+                        name="fullAddress"
+                        style={{
+                          width: "100%",
+                          border: "none",
+                          fontWeight: "bold",
+                          borderBottom: `2px solid ${theme.palette.primary.main} `,
+                        }}
+                        value={editableData.fullAddress}
+                        onChange={handleChange}
+                      />
+                    ) : (
+                      editableData.fullAddress
+                    )
+                  }
+                />
+                <InfoRow
+                  theme={theme}
+                  icon={<PhoneIcon />}
+                  label="Contact Number"
+                  value={
+                    isEditing ? (
+                      <input
+                        type="text"
+                        name="phoneNumber"
+                        style={{
+                          width: "100%",
+                          border: "none",
+                          fontWeight: "bold",
+                          borderBottom: `2px solid ${theme.palette.primary.main} `,
+                        }}
+                        value={editableData.phoneNumber}
+                        onChange={handleChange}
+                      />
+                    ) : (
+                      editableData.phoneNumber
+                    )
+                  }
+                />
+                <InfoRow
+                  theme={theme}
+                  icon={<WebsiteIcon />}
+                  label="Website"
+                  value={
+                    isEditing ? (
+                      <input
+                        type="text"
+                        name="website"
+                        style={{
+                          width: "100%",
+                          border: "none",
+                          fontWeight: "bold",
+                          borderBottom: `2px solid ${theme.palette.primary.main} `,
+                        }}
+                        value={editableData.website}
+                        onChange={handleChange}
+                      />
+                    ) : (
+                      editableData.website
+                    )
+                  }
+                />
+                <InfoRow
+                  theme={theme}
+                  icon={<ScheduleIcon />}
+                  label="Business Hours"
+                  value={
+                    isEditing ? (
+                      <input
+                        type="text"
+                        name="businessHours"
+                        style={{
+                          width: "100%",
+                          border: "none",
+                          fontWeight: "bold",
+                          borderBottom: `2px solid ${theme.palette.primary.main} `,
+                        }}
+                        value={editableData.businessHours}
+                        onChange={handleChange}
+                      />
+                    ) : (
+                      editableData.businessHours
+                    )
+                  }
+                />
+              </Box>
+            </Grid>
           </Grid>
-        </Grid>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </Box>
   );
 };
 

@@ -41,24 +41,26 @@ import {
 } from '@mui/icons-material';
 import toast from 'react-hot-toast';
 import { updateProduct, createProduct } from '@/services/products';
+import { viewAllCategories } from '@/services/category';
 import { AppDispatch, RootState } from '@/store/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { FormCreateProduct, GetProduct, ProductCreate } from '@/utils/types';
 import { useNavigate } from 'react-router-dom';
-import CategoryCreateModal from './CategoryCreateModal';
+import CategoryCreateModal from '../category/CategoryCreateModal';
 
 interface SideModalProps {
     drawer: boolean;
     setRefreshKey: React.Dispatch<React.SetStateAction<number>>;
     setDrawer: React.Dispatch<React.SetStateAction<boolean>>;
-    productToEdit?: GetProduct | null; // <-- Add this prop
+    selectedProduct?: GetProduct | null;
+    setSelectedProduct: React.Dispatch<React.SetStateAction<GetProduct | null>>;
 }
 
 const ProductsSideModal = (props: SideModalProps) => {
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
-    const { setDrawer, drawer, setRefreshKey, productToEdit } = props;
+    const { setDrawer, drawer, setRefreshKey, selectedProduct, setSelectedProduct } = props;
     const [isMoreDetails, setIsMoreDetails] = useState(false);
     const [openCategoryModal, setOpenCategoryModal] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -91,6 +93,10 @@ const ProductsSideModal = (props: SideModalProps) => {
     // Additional state for new features
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const [selectedCategoryOption, setSelectedCategoryOption] = useState<{
+        label: string;
+        value: string;
+    } | null>(null);
 
 
     // Validation function
@@ -229,9 +235,9 @@ const ProductsSideModal = (props: SideModalProps) => {
                 }
             });
 
-            if (productToEdit && productToEdit._id) {
+            if (selectedProduct && selectedProduct._id) {
                 await toast.promise(
-                    dispatch(updateProduct({ data: formData, id: productToEdit._id }))
+                    dispatch(updateProduct({ data: formData, id: selectedProduct._id }))
                         .unwrap()
                         .then(() => {
                             navigate(`/products`);
@@ -260,6 +266,7 @@ const ProductsSideModal = (props: SideModalProps) => {
             }
             resetForm();
             setDrawer(false);
+            setSelectedProduct(null); // Reset selectedProduct to null after creation/updation
         } catch (error) {
             console.error('Error creating/updating product:', error);
         } finally {
@@ -298,38 +305,73 @@ const ProductsSideModal = (props: SideModalProps) => {
             if (window.confirm('You have unsaved changes. Are you sure you want to close?')) {
                 resetForm();
                 setDrawer(false);
+                setSelectedProduct(null);
             }
         } else {
             setDrawer(false);
+            setSelectedProduct(null);
         }
-    }, [data.product_name, data.selling_price, imagePreview, resetForm, setDrawer]);
+    }, [data.product_name, data.selling_price, imagePreview, resetForm, setDrawer, setSelectedProduct]);
 
 
     // Prefill form if editing
     useEffect(() => {
-        if (productToEdit) {
+        if (selectedProduct) {
             setData({
-                product_name: productToEdit.product_name || '',
-                selling_price: productToEdit.selling_price || 0,
-                is_deleted: productToEdit.is_deleted || false,
-                unit: productToEdit.unit || '',
-                hsn_code: productToEdit.hsn_code || '',
-                purchase_price: productToEdit.purchase_price || 0,
-                barcode: productToEdit.barcode || '',
-                category: productToEdit.category || '',
-                image: productToEdit.image || '',
-                description: productToEdit.description || '',
-                opening_quantity: productToEdit.opening_quantity || 0,
-                opening_purchase_price: productToEdit.opening_purchase_price || 0,
-                opening_stock_value: productToEdit.opening_stock_value || 0,
-                low_stock_alert: productToEdit.low_stock_alert || 0,
-                show_active_stock: productToEdit.show_active_stock !== false,
+                product_name: selectedProduct.product_name || '',
+                selling_price: selectedProduct.selling_price || 0,
+                is_deleted: selectedProduct.is_deleted || false,
+                unit: selectedProduct.unit || '',
+                hsn_code: selectedProduct.hsn_code || '',
+                purchase_price: selectedProduct.purchase_price || 0,
+                barcode: selectedProduct.barcode || '',
+                category: selectedProduct.category || '',
+                image: selectedProduct.image || '',
+                description: selectedProduct.description || '',
+                opening_quantity: selectedProduct.opening_quantity || 0,
+                opening_purchase_price: selectedProduct.opening_purchase_price || 0,
+                opening_stock_value: selectedProduct.opening_stock_value || 0,
+                low_stock_alert: selectedProduct.low_stock_alert || 0,
+                show_active_stock: selectedProduct.show_active_stock !== false,
             });
-            setImagePreview(productToEdit.image || null);
+            setImagePreview(selectedProduct.image || null);
         } else {
             resetForm();
         }
-    }, [productToEdit, resetForm]);
+    }, [selectedProduct, resetForm]);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                await dispatch(viewAllCategories()).unwrap();
+            } catch (error) {
+                console.error('Failed to fetch categories:', error);
+            }
+        };
+        fetchCategories();
+    }, [dispatch, CategoryCreateModal]);
+
+    // Update selectedCategoryOption when data.category or categoryLists change
+    useEffect(() => {
+        if (categoryLists && data.category) {
+            // If selectedCategoryOption already matches, do nothing
+            if (selectedCategoryOption && selectedCategoryOption.value === data.category) {
+                return;
+            }
+            const found = categoryLists.map(cat => ({
+                label: cat.category_name,
+                value: cat._id
+            })).find(option => option.value === data.category);
+            if (found) {
+                setSelectedCategoryOption(found);
+            } else if (data.category && data.category !== '__add_new__') {
+                // Only set to _id if not already set to a label
+                setSelectedCategoryOption({ label: data.category, value: data.category });
+            } else {
+                setSelectedCategoryOption(null);
+            }
+        }
+    }, [categoryLists, data.category]);
 
     const renderBasicDetails = () => (
         <Fade in timeout={300}>
@@ -485,7 +527,7 @@ const ProductsSideModal = (props: SideModalProps) => {
                                     )}
                                     value={units.find(unit => unit.value === data.unit) || null}
                                     onChange={(_, newValue) => {
-                                        handleChange('unit', newValue ? newValue.value : '');
+                                        handleChange('unit', newValue && typeof newValue === 'object' && 'value' in newValue ? String(newValue.value) : '');
                                     }}
                                     sx={{
                                         '& .MuiAutocomplete-endAdornment': { display: 'none' },
@@ -654,7 +696,7 @@ const ProductsSideModal = (props: SideModalProps) => {
                                                 label: cat.category_name,
                                                 value: cat._id
                                             })) ?? []),
-                                            { label: '➕ Add new category', value: '__add_new__' }
+                                            { label: '+ Add a new category', value: '__add_new__' }
                                         ]}
                                         getOptionLabel={(option) =>
                                             typeof option === 'string'
@@ -662,6 +704,24 @@ const ProductsSideModal = (props: SideModalProps) => {
                                                 : option.label || ''
                                         }
                                         freeSolo
+                                        renderOption={(props, option) => (
+                                            <li
+                                                {...props}
+                                                style={{
+                                                    fontWeight:
+                                                        option.value === '__add_new__'
+                                                            ? 700
+                                                            : 400,
+                                                    color:
+                                                        option.value === '__add_new__'
+                                                            ? theme.palette.primary.main
+                                                            : 'inherit',
+                                                    ...(props.style || {}),
+                                                }}
+                                            >
+                                                {option.label}
+                                            </li>
+                                        )}
                                         renderInput={(params) => (
                                             <TextField
                                                 {...params}
@@ -669,15 +729,7 @@ const ProductsSideModal = (props: SideModalProps) => {
                                                 size="small"
                                             />
                                         )}
-                                        value={
-                                            categoryLists?.map(cat => ({
-                                                label: cat.category_name,
-                                                value: cat._id
-                                            })).find(option => option.value === data.category)
-                                            || (data.category && data.category !== '__add_new__'
-                                                ? { label: data.category, value: data.category }
-                                                : null)
-                                        }
+                                        value={selectedCategoryOption}
                                         onChange={(_, newValue) => {
                                             if (
                                                 newValue &&
@@ -687,10 +739,15 @@ const ProductsSideModal = (props: SideModalProps) => {
                                             ) {
                                                 setOpenCategoryModal(true);
                                             } else {
+                                                setSelectedCategoryOption(newValue && typeof newValue === 'object' && 'value' in newValue
+                                                    ? { label: newValue.label, value: newValue.value }
+                                                    : typeof newValue === 'string'
+                                                        ? { label: newValue, value: newValue }
+                                                        : null);
                                                 handleChange(
                                                     'category',
                                                     newValue && typeof newValue === 'object' && 'value' in newValue
-                                                        ? newValue.value
+                                                        ? String(newValue.value)
                                                         : typeof newValue === 'string'
                                                             ? newValue
                                                             : ''
@@ -708,14 +765,30 @@ const ProductsSideModal = (props: SideModalProps) => {
                                                 }
                                             }
                                         }}
+
                                     />
                                     {/* Category Modal */}
                                     <CategoryCreateModal
                                         open={openCategoryModal}
-                                        onClose={() => setOpenCategoryModal(false)}
-                                        onCreated={newCategory => {
-                                            handleChange('category', newCategory._id ?? '');
+                                        onClose={() => {
                                             setOpenCategoryModal(false);
+                                        }}
+                                        onCreated={async newCategory => {
+                                            // Set Autocomplete to new category and update data.category to newCategory._id
+                                            setSelectedCategoryOption({ label: newCategory.name, value: newCategory._id });
+                                            setData(prev => ({
+                                                ...prev,
+                                                category: newCategory._id,
+                                            }));
+                                            setOpenCategoryModal(false);
+                                            // Optionally refresh categories so the new one appears in the list
+                                            try {
+                                                await dispatch(viewAllCategories()).unwrap();
+                                            } catch (error) {
+                                                // ignore error
+                                                console.error('Failed to refresh categories:', error);
+                                                toast.error('Failed to refresh categories after creating new category.');
+                                            }
                                         }}
                                     />
                                 </FormControl>
@@ -1158,10 +1231,10 @@ const ProductsSideModal = (props: SideModalProps) => {
                     </Tooltip>
                     <Box>
                         <Typography variant="h4" component="div" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
-                            {productToEdit ? 'Edit Product' : 'Add New Product'}
+                            {selectedProduct ? 'Edit Product' : 'Add New Product'}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                            {productToEdit ? 'Update product details' : 'Create a new product for your inventory'}
+                            {selectedProduct ? 'Update product details' : 'Create a new product for your inventory'}
                         </Typography>
                     </Box>
                 </Box>
@@ -1191,7 +1264,7 @@ const ProductsSideModal = (props: SideModalProps) => {
                         transition: 'all 0.3s ease'
                     }}
                 >
-                    {isLoading ? (productToEdit ? 'Updating...' : 'Creating...') : (productToEdit ? 'Update Product' : 'Create Product')}
+                    {isLoading ? (selectedProduct ? 'Updating...' : 'Creating...') : (selectedProduct ? 'Update Product' : 'Create Product')}
                 </Button>
             </Box>
 
@@ -1272,7 +1345,7 @@ const ProductsSideModal = (props: SideModalProps) => {
                                 transition: 'all 0.3s ease'
                             }}
                         >
-                            {isLoading ? (productToEdit ? 'Updating Product...' : 'Creating Product...') : (productToEdit ? 'Update Product' : 'Create Product')}
+                            {isLoading ? (selectedProduct ? 'Updating Product...' : 'Creating Product...') : (selectedProduct ? 'Update Product' : 'Create Product')}
                         </Button>
                     </Stack>
                 </Stack>

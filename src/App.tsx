@@ -23,8 +23,6 @@ import CreateChemistProfile from "./features/profile/chemist/CreateChemistProfil
 import CreateStockistProfile from "./features/profile/stockist/CreateStockistProfile";
 import CreateUserProfile from "./features/profile/createUser";
 import CreateProduct from "./features/products/createProduct";
-import UpdateProduct from "./features/products/UpdateProduct";
-import ProductView from "./features/products/viewProduct";
 import Chemists from "./pages/Chemist";
 import ChemistProfile from "./features/profile/chemist/Chemistprofile";
 import StockistProfile from "./features/profile/stockist/StockistProfile";
@@ -35,18 +33,13 @@ import CreateOrder from "./features/order/createOrder";
 import ViewOrder from "./features/order/viewOrder";
 import UpdateOrderProduct from "./features/order/updateOrder";
 import LandingPage from "./components/LandingPage/LandingPage";
-import ContactPage from "./components/Contact/ContactPage";
 import AboutPage from "./components/About/AboutPage";
-import PricingPage from "./components/Pricing/PricingPage";
-import PrivacyPolicyPage from "./components/Legal/PrivacyPolicyPage";
-import TermsOfServicePage from "./components/Legal/TermsOfServicePage";
-import SecurityPolicyPage from "./components/Legal/SecurityPolicyPage";
-import CookiePolicyPage from "./components/Legal/CookiePolicy";
 import Timeline from "./features/inventory/timeline";
 import Warehouse from "./features/inventory/warehouse";
 import InvoiceEditor from "./features/upload-documents/InvoiceEditor";
 import ProductBilling from "./features/products/SellProduct";
 import ViewInventory from "./pages/Inventory";
+import ViewItem from "./features/products/ViewItem";
 
 const xThemeComponents = {
   ...chartsCustomizations,
@@ -123,9 +116,8 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/" element={<AdminDashboard />} />
                 <Route path="/profile" element={<MyProfile />} />
                 <Route path="/add/product" element={<CreateProduct />} />
-                <Route path="/products/:id" element={<ProductView />} />
+                <Route path="/products/:id" element={<ViewItem />} />
                 <Route path="/products" element={<Products />} />
-                <Route path="/products/update/:id" element={<UpdateProduct />} />
                 <Route path="/inventory" element={<ViewInventory />} />
                 <Route path="/upload" element={<UploadDocuments />} />
                 <Route path="/settings" element={<Settings />} />
@@ -155,20 +147,19 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/" element={<AdminDashboard />} />
                 <Route path="/profile" element={<MyProfile />} />
                 <Route path="/add/product" element={<CreateProduct />} />
-                <Route path="/products/:id" element={<ProductView />} />
+                <Route path="/products/:id" element={<ViewItem />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/inventory" element={<Warehouse />} />
                 <Route path="/timeline" element={<Timeline />} />
                 <Route path="/orders" element={<OrdersPage />} />
                 <Route path="/orders/create" element={<CreateOrder />} />
                 <Route path="/orders/:orderId" element={<ViewOrder />} />
-                <Route path="/orders/:orderId/product" element={<UpdateOrderProduct />} />                   // used for both update and add
+                <Route path="/orders/:orderId/product" element={<UpdateOrderProduct />} />
                 <Route path="/invoice" element={<InvoiceEditor />} />
                 <Route path="/upload" element={<UploadDocuments />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/stockists" element={<Stockist />} />
-                {/* <Route path="/stockists/:stockistId" element={<StockistProfile />} /> */}
                 <Route path="/chemists/:chemistId" element={<ChemistProfile />} />
                 <Route path="/sell" element={<ProductBilling />} />
                 <Route path="/*" element={<Navigate to="/" replace />} />

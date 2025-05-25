@@ -1,13 +1,13 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AuthStates } from "@/utils/enums";
-import { PageMeta, GetProduct, ProductCreate, ProductListing, UploadData, CategoryLists } from "@/utils/types";
+import { PageMeta, GetProduct, ProductCreate, UploadData, CategoryLists, GetCategory } from "@/utils/types";
 import { deleteCategory, updateCategory, createCategory, viewAllCategories, viewAllCategory, viewCategory } from "@/services/category";
 
 interface CategoryState {
     authState: AuthStates;
     productData: ProductCreate | null;
     uploadData: UploadData | null;
-    categories: Array<string> | null;
+    categories: Array<GetCategory> | null;
     categoryLists: Array<CategoryLists> | null;
     productsData: Array<GetProduct> | null;
     loading: boolean;
@@ -22,7 +22,7 @@ const initialState: CategoryState = {
     authState: AuthStates.INITIALIZING,
     productsData: [],
     categoryLists: [],
-    categories: null,
+    categories: [],
     productData: null,
     uploadData: null,
     loading: false,
@@ -98,7 +98,7 @@ const categorySlice = createSlice({
             .addCase(
                 viewAllCategory.fulfilled,
                 (state, action: PayloadAction<any>) => {
-                    state.productsData = action.payload.productsData;
+                    state.categories = action.payload.categories;
                     state.pageMeta = action.payload.pageMeta;
                     state.loading = false;
                 }

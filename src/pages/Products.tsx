@@ -8,18 +8,11 @@ import {
   InputAdornment,
   MenuItem,
   Pagination,
-  Skeleton,
   useMediaQuery,
   useTheme,
   Tooltip,
   alpha,
-  DialogActions,
-  Dialog,
-  DialogTitle,
-  DialogContent,
   Button,
-  Avatar,
-  Stack,
   IconButton,
   Table,
   TableBody,
@@ -30,408 +23,43 @@ import {
   Chip,
   Card,
   CardContent,
-  Fade,
-  Zoom,
   Badge,
   Divider,
-  Alert,
   TableSortLabel,
   Tab,
   Tabs,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import DeleteIcon from "@mui/icons-material/Delete";
-import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
 import AddCircleIcon from "@mui/icons-material/AddCircle";
-import EditIcon from "@mui/icons-material/Edit";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import InventoryIcon from "@mui/icons-material/Inventory";
-import CategoryIcon from "@mui/icons-material/Category";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { deleteProduct, viewAllProducts } from "@/services/products";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import toast from "react-hot-toast";
-import { GetProduct, ProductSortField, SortOrder } from "@/utils/types";
+import { CategorySortField, GetCategory, GetProduct, ProductSortField, SortOrder, UpdateCategory } from "@/utils/types";
 import ProductsSideModal from "@/features/products/ProductsSideModal";
-import { viewAllCategories } from "@/services/category";
-
-interface ProductRowProps {
-  product: GetProduct;
-  onDelete: (id: string) => void;
-  onEdit: (product: GetProduct) => void;
-  onView: (product: GetProduct) => void;
-  index: number;
-}
-
-const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdit, onView, index }) => {
-  const theme = useTheme();
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-
-  const confirmDelete = () => {
-    onDelete(product?._id ?? '');
-    setOpenDeleteDialog(false);
-  };
-
-  const getInitials = (name: string): string => {
-    return name
-      .split(' ')
-      .map(word => word.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
-  const getAvatarColor = (name: string): string => {
-    const colors = [
-      '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-      '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
-    ];
-    const index = name.length % colors.length;
-    return colors[index];
-  };
-
-  const getStockStatus = (quantity: number) => {
-    if (quantity === 0) return { label: 'Out of Stock', color: 'error' as const, icon: <TrendingDownIcon fontSize="small" /> };
-    if (quantity < 10) return { label: 'Low Stock', color: 'warning' as const, icon: <TrendingDownIcon fontSize="small" /> };
-    return { label: 'In Stock', color: 'success' as const, icon: <TrendingUpIcon fontSize="small" /> };
-  };
-
-  const stockStatus = getStockStatus(product?.opening_quantity || 0);
-  const profit = (product.selling_price - (product.purchase_price || 0));
-  const profitMargin = product.purchase_price ? ((profit / product.selling_price) * 100) : 0;
-
-  return (
-    <>
-      <Fade in timeout={300 + index * 100}>
-        <TableRow
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          sx={{
-            cursor: 'pointer',
-            width: '100%',
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
-            boxShadow: isHovered ? `0 8px 25px ${alpha(theme.palette.primary.main, 0.15)}` : 'none',
-            "&:hover": {
-              bgcolor: alpha(theme.palette.primary.main, 0.02),
-            },
-            borderLeft: `4px solid ${isHovered ? theme.palette.primary.main : 'transparent'}`,
-          }}
-          onClick={() => onView(product)}
-        >
-          {/* Product Info */}
-          <TableCell sx={{ pl: 3, pr: 1 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
-              <Avatar
-                sx={{
-                  width: 48,
-                  height: 48,
-                  mr: 2,
-                  bgcolor: getAvatarColor(product.product_name),
-                  fontSize: '1rem',
-                  fontWeight: 700,
-                  boxShadow: `0 4px 12px ${alpha(getAvatarColor(product.product_name), 0.3)}`,
-                  transition: 'all 0.3s ease',
-                  transform: isHovered ? 'scale(1.1)' : 'scale(1)',
-                }}
-                src={product?.image ? product.image : ''}
-              >
-                {(getInitials(product.product_name))}
-              </Avatar>
-              <Box sx={{ flex: 1 }}>
-                <Typography
-                  variant="subtitle1"
-                  sx={{
-                    fontWeight: 600,
-                    fontSize: '0.95rem',
-                    color: theme.palette.text.primary,
-                    mb: 0.5,
-                    transition: 'color 0.3s ease',
-                  }}
-                >
-                  {product.product_name}
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Chip
-                    icon={<CategoryIcon />}
-                    label={product.category || 'Uncategorized'}
-                    size="small"
-                    variant="outlined"
-                    sx={{
-                      fontSize: '0.7rem',
-                      height: '20px',
-                      borderRadius: '10px',
-                      bgcolor: alpha(theme.palette.primary.main, 0.08),
-                      borderColor: alpha(theme.palette.primary.main, 0.2),
-                      color: theme.palette.primary.main,
-                    }}
-                  />
-                </Box>
-              </Box>
-            </Box>
-          </TableCell>
-
-          {/* Quantity with Status */}
-          <TableCell align="center" sx={{ px: 1 }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 700,
-                  fontSize: '1.1rem',
-                  color: theme.palette.text.primary,
-                }}
-              >
-                {product.opening_quantity}
-              </Typography>
-              <Chip
-                icon={stockStatus.icon}
-                label={stockStatus.label}
-                color={stockStatus.color}
-                size="small"
-                sx={{
-                  fontSize: '0.7rem',
-                  height: '22px',
-                  fontWeight: 600,
-                }}
-              />
-            </Box>
-          </TableCell>
-
-          {/* Selling Price */}
-          <TableCell align="right" sx={{ px: 1 }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 600,
-                    fontSize: '1rem',
-                    color: theme.palette.text.secondary,
-                  }}
-                >
-                  {product.barcode && (`#${product.barcode}`)}
-                </Typography>
-              </Box>
-            </Box>
-          </TableCell>
-          <TableCell align="right" sx={{ px: 1 }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <CurrencyRupeeIcon sx={{ fontSize: '1.1rem', mr: 0.5, color: theme.palette.success.main }} />
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: '1.1rem',
-                    color: theme.palette.success.main,
-                  }}
-                >
-                  {product.selling_price.toFixed(2)}
-                </Typography>
-              </Box>
-              {profitMargin > 0 && (
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: profitMargin > 20 ? theme.palette.success.main : theme.palette.warning.main,
-                    fontSize: '0.7rem',
-                    fontWeight: 600,
-                  }}
-                >
-                  {profitMargin.toFixed(1)}% margin
-                </Typography>
-              )}
-            </Box>
-          </TableCell>
-
-          {/* Purchase Price */}
-          <TableCell align="right" sx={{ px: 1 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-              <CurrencyRupeeIcon sx={{ fontSize: '1rem', mr: 0.5, color: theme.palette.text.secondary }} />
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 600,
-                  fontSize: '1rem',
-                  color: theme.palette.text.primary,
-                }}
-              >
-                {(product?.purchase_price ?? 0).toFixed(2)}
-              </Typography>
-            </Box>
-          </TableCell>
-
-          {/* Actions */}
-          <TableCell align="right" sx={{ pr: 3, pl: 1 }}>
-            <Zoom in={isHovered} timeout={200}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'flex-end' }}>
-                <Tooltip title="View Details" arrow>
-                  <IconButton
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onView(product);
-                    }}
-                    sx={{
-                      bgcolor: alpha(theme.palette.info.main, 0.1),
-                      color: theme.palette.info.main,
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        bgcolor: alpha(theme.palette.info.main, 0.2),
-                        transform: 'scale(1.1)',
-                      },
-                    }}
-                  >
-                    <VisibilityIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-
-                <Tooltip title="Edit Product" arrow>
-                  <IconButton
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEdit(product);
-                    }}
-                    sx={{
-                      bgcolor: alpha(theme.palette.warning.main, 0.1),
-                      color: theme.palette.warning.main,
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        bgcolor: alpha(theme.palette.warning.main, 0.2),
-                        transform: 'scale(1.1)',
-                      },
-                    }}
-                  >
-                    <EditIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-
-                <Tooltip title="Delete Product" arrow>
-                  <IconButton
-                    size="small"
-                    onClick={(e) => {
-                      setOpenDeleteDialog(true);
-                      e.stopPropagation();
-                    }}
-                    sx={{
-                      bgcolor: alpha(theme.palette.error.main, 0.1),
-                      color: theme.palette.error.main,
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        bgcolor: alpha(theme.palette.error.main, 0.2),
-                        transform: 'scale(1.1)',
-                      },
-                    }}
-                  >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              </Box>
-            </Zoom>
-          </TableCell>
-        </TableRow>
-      </Fade>
-
-      <Dialog
-        open={openDeleteDialog}
-        onClose={() => setOpenDeleteDialog(false)}
-        aria-labelledby="delete-dialog-title"
-        PaperProps={{
-          sx: {
-            borderRadius: 3,
-            boxShadow: `0 24px 50px ${alpha(theme.palette.error.main, 0.2)}`,
-          }
-        }}
-      >
-        <DialogTitle
-          id="delete-dialog-title"
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 2,
-            color: theme.palette.error.main,
-            fontWeight: 600,
-          }}
-        >
-          <DeleteIcon />
-          Delete {product.product_name}?
-        </DialogTitle>
-        <DialogContent>
-          <Alert severity="warning" sx={{ mb: 2 }}>
-            This action cannot be undone. The product will be permanently removed from your inventory.
-          </Alert>
-          <Typography>
-            Are you sure you want to delete "<strong>{product.product_name}</strong>"?
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{ p: 3, gap: 1 }}>
-          <Button
-            onClick={() => setOpenDeleteDialog(false)}
-            variant="outlined"
-            sx={{ borderRadius: 2 }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={confirmDelete}
-            color="error"
-            variant="contained"
-            sx={{ borderRadius: 2 }}
-            startIcon={<DeleteIcon />}
-          >
-            Delete Product
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </>
-  );
-};
-
-const RowSkeleton: React.FC = () => (
-  <TableRow>
-    <TableCell>
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <Skeleton variant="circular" width={48} height={48} sx={{ mr: 2 }} />
-        <Box sx={{ flex: 1 }}>
-          <Skeleton variant="text" width={140} height={28} />
-          <Skeleton variant="rectangular" width={100} height={20} sx={{ borderRadius: 1, mt: 0.5 }} />
-        </Box>
-      </Box>
-    </TableCell>
-    <TableCell align="center">
-      <Skeleton variant="text" width={60} height={32} sx={{ mx: 'auto' }} />
-      <Skeleton variant="rectangular" width={80} height={22} sx={{ borderRadius: 1, mx: 'auto', mt: 0.5 }} />
-    </TableCell>
-    <TableCell align="right">
-      <Skeleton variant="text" width={80} height={32} sx={{ ml: 'auto' }} />
-    </TableCell>
-    <TableCell align="right">
-      <Skeleton variant="text" width={80} height={32} sx={{ ml: 'auto' }} />
-    </TableCell>
-    <TableCell align="right">
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
-        <Skeleton variant="circular" width={32} height={32} />
-        <Skeleton variant="circular" width={32} height={32} />
-        <Skeleton variant="circular" width={32} height={32} />
-      </Box>
-    </TableCell>
-  </TableRow>
-);
+import { deleteCategory, viewAllCategories, viewAllCategory } from "@/services/category";
+import TabPanel from "@/features/upload-documents/components/TabPanel";
+import { ProductRow } from "@/features/products/ProductRow";
+import { DeletedProductRow } from "@/features/products/DeletedProductRow";
+import { CategoryRow } from "@/features/category/CategoryRow";
+import CategoryCreateModal from "@/features/category/CategoryCreateModal";
+import { CategoryRowSkeleton } from "@/features/category/CategoryRowSekeleton";
+import { ProductRowSkeleton } from "@/common/ProductRowSkeleton";
+import { DeletedProductRowSkeleton } from "@/common/DeletedProductRowSkeleton";
+import { useNavigate } from "react-router-dom";
 
 const ProductsListing: React.FC = () => {
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
   const { productsData, pageMeta } = useSelector((state: RootState) => state.product);
-  const { categoryLists } = useSelector((state: RootState) => state.category);
-
+  const { categoryLists, categories } = useSelector((state: RootState) => state.category);
+  const [categoriesData, setCategoriesData] = useState<GetCategory[]>([]);
+  
   const [products, setProducts] = useState<GetProduct[]>([]);
   const [data, setData] = useState({
     searchTerm: '',
@@ -441,12 +69,21 @@ const ProductsListing: React.FC = () => {
     is_deleted: false,
     sortBy: "created_at" as ProductSortField,
     sortOrder: "asc" as SortOrder,
+
+    // Category Filters
+    searchQuery: '',
+    pageNumber: 1,
+    limit: 10,
+    sortField: 'created_at' as CategorySortField,
+    categorySortOrder: 'asc' as SortOrder,
   });
-  const { searchTerm, categoryFilter, is_deleted, page, rowsPerPage, sortBy, sortOrder } = data;
+  const { searchTerm, categoryFilter, is_deleted, page, rowsPerPage, sortBy, sortOrder, categorySortOrder, sortField, limit, pageNumber, searchQuery } = data;
   const [loading, setLoading] = useState<boolean>(false);
   const [refreshKey, setRefreshKey] = useState<number>(0);
   const [drawer, setDrawer] = useState<boolean>(false);
+  const [openCategoryModal, setOpenCategoryModal] = useState<boolean>(false);
   const [selectedProduct, setSelectedProduct] = useState<GetProduct | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<UpdateCategory | null>(null);
   const [selectedTab, setSelectedTab] = useState(0);
   const totalProducts = products.length;
   const lowStockCount = products.filter(p => (p?.opening_quantity ?? 0) < 10).length;
@@ -478,21 +115,19 @@ const ProductsListing: React.FC = () => {
   };
 
   const handleView = (product: GetProduct) => {
-    // console.log("View product:", product);
-    toast.success(`Viewing details for ${product.product_name}`)
+    navigate(`/products/${product._id}`);
   };
 
   const handleRefresh = () => {
     setLoading(true);
     setRefreshKey((prev) => prev + 1);
-    // fetchProducts();
   };
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     if (newValue === 0) {
       setData((prevState) => ({ ...prevState, is_deleted: false }));
     } else if (newValue === 1) {
-      setData((prevState) => ({ ...prevState, is_deleted: false }));
+      fetchCategory();
     }
     else if (newValue === 2) {
       setData((prevState) => ({ ...prevState, is_deleted: true }));
@@ -520,9 +155,29 @@ const ProductsListing: React.FC = () => {
   }, [page, searchTerm, rowsPerPage, sortOrder, categoryFilter, is_deleted, sortBy, dispatch]);
 
 
+  const fetchCategory = useCallback(async () => {
+    setLoading(true);
+    dispatch(
+      viewAllCategory({
+        searchQuery: searchQuery,
+        pageNumber: pageNumber,
+        limit: limit,
+        sortField: sortField,
+        sortOrder: categorySortOrder,
+      })
+    )
+      .unwrap()
+      .then(() => {
+        setLoading(false);
+      });
+  }, [categorySortOrder, dispatch, limit, pageNumber, refreshKey, searchQuery, sortField]);
+
+
   useEffect(() => {
     fetchProducts();
-    dispatch(viewAllCategories());
+    dispatch(
+      viewAllCategories()
+    );
   }, [page, searchTerm, rowsPerPage, sortOrder, categoryFilter, sortBy, refreshKey, dispatch, fetchProducts]);
 
   useEffect(() => {
@@ -530,6 +185,12 @@ const ProductsListing: React.FC = () => {
       setProducts(productsData);
     }
   }, [productsData, pageMeta]);
+
+  useEffect(() => {
+    if (categories && pageMeta) {
+      setCategoriesData(categories);
+    }
+  }, [categories, pageMeta]);
 
   return (
     <Box sx={{ p: 3, bgcolor: '#f8fafc', minHeight: '100vh', width: '100%' }}>
@@ -668,7 +329,16 @@ const ProductsListing: React.FC = () => {
             <Button
               variant="contained"
               size="large"
-              onClick={() => setDrawer(true)}
+              onClick={() => {
+                if (selectedTab === 1) {
+                  setOpenCategoryModal(true);
+                  setSelectedCategory(null);
+                } else {
+                  setDrawer(true);
+                  setSelectedProduct(null);
+                }
+
+              }}
               startIcon={<AddCircleIcon />}
               sx={{
                 bgcolor: 'white',
@@ -687,7 +357,7 @@ const ProductsListing: React.FC = () => {
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               }}
             >
-              Add New Product
+              {selectedTab === 1 ? ('Add New Category') : ('Add New Items')}
             </Button>
           </Grid>
         </Grid>
@@ -836,180 +506,491 @@ const ProductsListing: React.FC = () => {
         </Grid>
       </Paper>
 
-      {/* Enhanced Table */}
-      <TableContainer
-        component={Paper}
-        elevation={0}
-        sx={{
-          width: '100%',
-          borderRadius: 3,
-          border: `1px solid ${alpha(theme.palette.divider, 1)}`,
-          boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
-          // overflow: 'hidden',
-        }}
-      >
-        <Table sx={{ width: '100%' }}>
-          <TableHead>
-            <TableRow
-              sx={{
-                bgcolor: alpha(theme.palette.grey[50], 0.8),
-                width: '100%',
-                '& .MuiTableCell-head': {
-                  borderBottom: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-                }
-              }}
-            >
-              <TableCell sx={{ pl: 3, pr: 1 }}>
-                <Tooltip title="Sort by Product Name" arrow>
-                  <TableSortLabel
-                    active={sortBy === "product_name"}
-                    direction={sortBy === "product_name" ? sortOrder : "asc"}
-                    onClick={() => {
-                      setData((prevState) => ({
-                        ...prevState,
-                        sortBy: "product_name",
-                        sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
-                      }));
-                    }}
-                  >
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                      Product Information
-                    </Typography>
-                  </TableSortLabel>
-                </Tooltip>
-              </TableCell>
-              <TableCell align="center" sx={{ px: 1 }}>
-                <Tooltip title="Sort by Item Quantity" arrow>
-                  <TableSortLabel
-                    active={sortBy === "opening_quantity"}
-                    direction={sortBy === "opening_quantity" ? sortOrder : "asc"}
-                    onClick={() => {
-                      setData((prevState) => ({
-                        ...prevState,
-                        sortBy: "opening_quantity",
-                        sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
-                      }));
-                    }}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                      <InventoryIcon fontSize="small" />
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                        Stock Status
-                      </Typography>
-                    </Box>
-                  </TableSortLabel>
-                </Tooltip>
-              </TableCell>
-              <TableCell align="right" sx={{ px: 1 }}>
-                <Tooltip title="Sort by Bar-Code" arrow>
-                  <TableSortLabel
-                    active={sortBy === "barcode"}
-                    direction={sortBy === "barcode" ? sortOrder : "asc"}
-                    onClick={() => {
-                      setData((prevState) => ({
-                        ...prevState,
-                        sortBy: "barcode",
-                        sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
-                      }));
-                    }}
-                  >
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                      Bar-Code
-                    </Typography>
-                  </TableSortLabel>
-                </Tooltip>
-              </TableCell>
-              <TableCell align="right" sx={{ px: 1 }}>
-                <Tooltip title="Sort by Selling Price" arrow>
-                  <TableSortLabel
-                    active={sortBy === "selling_price"}
-                    direction={sortBy === "selling_price" ? sortOrder : "asc"}
-                    onClick={() => {
-                      setData((prevState) => ({
-                        ...prevState,
-                        sortBy: "selling_price",
-                        sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
-                      }));
-                    }}
-                  >
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                      Selling Price
-                    </Typography>
-                  </TableSortLabel>
-                </Tooltip>
-              </TableCell>
-              <TableCell align="right" sx={{ px: 1 }}>
-                <Tooltip title="Sort by Purchase Price" arrow>
-                  <TableSortLabel
-                    active={sortBy === "purchase_price"}
-                    direction={sortBy === "purchase_price" ? sortOrder : "asc"}
-                    onClick={() => {
-                      setData((prevState) => ({
-                        ...prevState,
-                        sortBy: "purchase_price",
-                        sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
-                      }));
-                    }}
-                  >
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                      Purchase Price
-                    </Typography>
-                  </TableSortLabel>
-                </Tooltip>
-              </TableCell>
-              <TableCell align="center" >
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                  Actions
-                </Typography>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {loading ? (
-              Array(rowsPerPage)
-                .fill(null)
-                .map((_, index) => <RowSkeleton key={`skeleton-${index}`} />)
-            ) : products.length > 0 ? (
-              products.map((product, index) => (
-                <ProductRow
-                  key={product._id}
-                  product={product}
-                  onDelete={handleDelete}
-                  onEdit={handleEdit}
-                  onView={handleView}
-                  index={index}
-                />
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={5} sx={{ textAlign: "center", py: 8 }}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                    <InventoryIcon sx={{ fontSize: '4rem', color: theme.palette.text.disabled }} />
-                    <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 600 }}>
-                      No products found
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Try adjusting your search or filter criteria, or add your first product
-                    </Typography>
-                    <Button
-                      variant="contained"
-                      startIcon={<AddCircleIcon />}
-                      sx={{
-                        mt: 2,
-                        borderRadius: 2,
-                        textTransform: 'none',
-                        fontWeight: 600,
+
+      <TabPanel value={selectedTab} index={0}>
+        {/* Enhanced Table */}
+        <TableContainer
+          component={Paper}
+          elevation={0}
+          sx={{
+            width: '100%',
+            borderRadius: 3,
+            border: `1px solid ${alpha(theme.palette.divider, 1)}`,
+            boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
+            // overflow: 'hidden',
+          }}
+        >
+          <Table sx={{ width: '100%' }}>
+            <TableHead>
+              <TableRow
+                sx={{
+                  bgcolor: alpha(theme.palette.grey[50], 0.8),
+                  width: '100%',
+                  '& .MuiTableCell-head': {
+                    borderBottom: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                  }
+                }}
+              >
+                <TableCell sx={{ pl: 3, pr: 1 }}>
+                  <Tooltip title="Sort by Product Name" arrow>
+                    <TableSortLabel
+                      active={sortBy === "product_name"}
+                      direction={sortBy === "product_name" ? sortOrder : "asc"}
+                      onClick={() => {
+                        setData((prevState) => ({
+                          ...prevState,
+                          sortBy: "product_name",
+                          sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
+                        }));
                       }}
                     >
-                      Add Your First Product
-                    </Button>
-                  </Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                        Product Information
+                      </Typography>
+                    </TableSortLabel>
+                  </Tooltip>
+                </TableCell>
+                <TableCell align="center" sx={{ px: 1 }}>
+                  <Tooltip title="Sort by Item Quantity" arrow>
+                    <TableSortLabel
+                      active={sortBy === "opening_quantity"}
+                      direction={sortBy === "opening_quantity" ? sortOrder : "asc"}
+                      onClick={() => {
+                        setData((prevState) => ({
+                          ...prevState,
+                          sortBy: "opening_quantity",
+                          sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
+                        }));
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                        <InventoryIcon fontSize="small" />
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                          Opening Stock Status
+                        </Typography>
+                      </Box>
+                    </TableSortLabel>
+                  </Tooltip>
+                </TableCell>
+                <TableCell align="right" sx={{ px: 1 }}>
+                  <Tooltip title="Sort by Bar-Code" arrow>
+                    <TableSortLabel
+                      active={sortBy === "barcode"}
+                      direction={sortBy === "barcode" ? sortOrder : "asc"}
+                      onClick={() => {
+                        setData((prevState) => ({
+                          ...prevState,
+                          sortBy: "barcode",
+                          sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
+                        }));
+                      }}
+                    >
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                        Bar-Code
+                      </Typography>
+                    </TableSortLabel>
+                  </Tooltip>
+                </TableCell>
+                <TableCell align="right" sx={{ px: 1 }}>
+                  <Tooltip title="Sort by Selling Price" arrow>
+                    <TableSortLabel
+                      active={sortBy === "selling_price"}
+                      direction={sortBy === "selling_price" ? sortOrder : "asc"}
+                      onClick={() => {
+                        setData((prevState) => ({
+                          ...prevState,
+                          sortBy: "selling_price",
+                          sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
+                        }));
+                      }}
+                    >
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                        Selling Price
+                      </Typography>
+                    </TableSortLabel>
+                  </Tooltip>
+                </TableCell>
+                <TableCell align="right" sx={{ px: 1 }}>
+                  <Tooltip title="Sort by Purchase Price" arrow>
+                    <TableSortLabel
+                      active={sortBy === "purchase_price"}
+                      direction={sortBy === "purchase_price" ? sortOrder : "asc"}
+                      onClick={() => {
+                        setData((prevState) => ({
+                          ...prevState,
+                          sortBy: "purchase_price",
+                          sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
+                        }));
+                      }}
+                    >
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                        Purchase Price
+                      </Typography>
+                    </TableSortLabel>
+                  </Tooltip>
+                </TableCell>
+                <TableCell align="center" >
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                    Actions
+                  </Typography>
                 </TableCell>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {loading ? (
+                Array([1, 2, 3, 4, 5])
+                  .map((_, index) => <ProductRowSkeleton key={`skeleton-${index}`} />)
+              ) : products.length > 0 ? (
+                products.map((product, index) => (
+                  <ProductRow
+                    key={product._id}
+                    product={product}
+                    onDelete={handleDelete}
+                    onEdit={handleEdit}
+                    onView={handleView}
+                    index={index}
+                  />
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} sx={{ textAlign: "center", py: 8 }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                      <InventoryIcon sx={{ fontSize: '4rem', color: theme.palette.text.disabled }} />
+                      <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 600 }}>
+                        No products found
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Try adjusting your search or filter criteria, or add your first product
+                      </Typography>
+                      <Button
+                        variant="contained"
+                        onClick={() => {
+                          setDrawer(true);
+                          setSelectedProduct(null);
+                        }}
+                        startIcon={<AddCircleIcon />}
+                        sx={{
+                          mt: 2,
+                          borderRadius: 2,
+                          textTransform: 'none',
+                          fontWeight: 600,
+                        }}
+                      >
+                        Add Your First Product
+                      </Button>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </TabPanel>
+
+      <TabPanel value={selectedTab} index={1}>
+        <TableContainer
+          component={Paper}
+          elevation={0}
+          sx={{
+            width: '100%',
+            borderRadius: 3,
+            border: `1px solid ${alpha(theme.palette.divider, 1)}`,
+            boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
+          }}
+        >
+          <Table sx={{ width: '100%' }}>
+            <TableHead>
+              <TableRow
+                sx={{
+                  bgcolor: alpha(theme.palette.grey[50], 0.8),
+                  width: '100%',
+                  '& .MuiTableCell-head': {
+                    borderBottom: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                  }
+                }}
+              >
+                <TableCell sx={{ pl: 3, pr: 1 }}>
+                  <Tooltip title="Sort by Category Name" arrow>
+                    <TableSortLabel
+                      active={sortField === "category_name"}
+                      direction={sortField === "category_name" ? sortOrder : "asc"}
+                      onClick={() => {
+                        setData((prevState) => ({
+                          ...prevState,
+                          sortField: "category_name",
+                          sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
+                        }));
+                      }}
+                    >
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                        Category Information
+                      </Typography>
+                    </TableSortLabel>
+                  </Tooltip>
+                </TableCell>
+                <TableCell align="right" sx={{ px: 1 }}>
+                  <Tooltip title="Sort by Create Date" arrow>
+                    <TableSortLabel
+                      active={sortField === "created_at"}
+                      direction={sortField === "created_at" ? sortOrder : "asc"}
+                      onClick={() => {
+                        setData((prevState) => ({
+                          ...prevState,
+                          sortField: "created_at",
+                          sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
+                        }));
+                      }}
+                    >
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                        Created At
+                      </Typography>
+                    </TableSortLabel>
+                  </Tooltip>
+                </TableCell>
+                <TableCell align="right" sx={{ px: 1 }}>
+                  <Tooltip title="Sort by Update Date" arrow>
+                    <TableSortLabel
+                      active={sortField === "updated_at"}
+                      direction={sortField === "updated_at" ? sortOrder : "asc"}
+                      onClick={() => {
+                        setData((prevState) => ({
+                          ...prevState,
+                          sortField: "updated_at",
+                          sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
+                        }));
+                      }}
+                    >
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                        Last Updated
+                      </Typography>
+                    </TableSortLabel>
+                  </Tooltip>
+                </TableCell>
+                <TableCell align="center" >
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                    Actions
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {loading ? (
+                Array([1, 2, 3, 4, 5])
+                  .map((_, index) => <CategoryRowSkeleton key={`skeleton-${index}`} />)
+              ) : categoriesData?.length > 0 ? (
+                categoriesData?.map((category, index) => (
+                  <CategoryRow
+                    key={category._id}
+                    category={category}
+                    onDelete={(category_id: string) => {
+                      dispatch(
+                        deleteCategory(category_id)
+                      )
+                        .unwrap()
+                        .then(() => {
+                          setRefreshKey((prev) => prev + 1);
+                          setLoading(false);
+                          toast.success('Product deleted successfully')
+                        });
+                    }}
+                    onEdit={(category: GetCategory) => {
+                      setOpenCategoryModal(true);
+                      setSelectedCategory(category);
+                    }}
+                    onView={(category: GetCategory) => {
+                      setOpenCategoryModal(true);
+                      setSelectedCategory(category);
+                    }}
+                    index={index}
+                  />
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={4} sx={{ textAlign: "center", py: 8 }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                      <InventoryIcon sx={{ fontSize: '4rem', color: theme.palette.text.disabled }} />
+                      <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 600 }}>
+                        No categories found
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Try adjusting your search or filter criteria, or add your first category
+                      </Typography>
+                      <Button
+                        variant="contained"
+                        onClick={() => {
+                          setOpenCategoryModal(true);
+                          setSelectedCategory(null);
+                        }}
+                        startIcon={<AddCircleIcon />}
+                        sx={{
+                          mt: 2,
+                          borderRadius: 2,
+                          textTransform: 'none',
+                          fontWeight: 600,
+                        }}
+                      >
+                        Add Your First Category
+                      </Button>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </TabPanel>
+
+      <TabPanel value={selectedTab} index={2}>
+        <TableContainer
+          component={Paper}
+          elevation={0}
+          sx={{
+            width: '100%',
+            borderRadius: 3,
+            border: `1px solid ${alpha(theme.palette.divider, 1)}`,
+            boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
+          }}
+        >
+          <Table sx={{ width: '100%' }}>
+            <TableHead>
+              <TableRow
+                sx={{
+                  bgcolor: alpha(theme.palette.grey[50], 0.8),
+                  width: '100%',
+                  '& .MuiTableCell-head': {
+                    borderBottom: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                  }
+                }}
+              >
+                <TableCell sx={{ pl: 3, pr: 1 }}>
+                  <Tooltip title="Sort by Product Name" arrow>
+                    <TableSortLabel
+                      active={sortBy === "product_name"}
+                      direction={sortBy === "product_name" ? sortOrder : "asc"}
+                      onClick={() => {
+                        setData((prevState) => ({
+                          ...prevState,
+                          sortBy: "product_name",
+                          sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
+                        }));
+                      }}
+                    >
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                        Product Information
+                      </Typography>
+                    </TableSortLabel>
+                  </Tooltip>
+                </TableCell>
+                <TableCell align="right" sx={{ px: 1 }}>
+                  <Tooltip title="Sort by Bar-Code" arrow>
+                    <TableSortLabel
+                      active={sortBy === "barcode"}
+                      direction={sortBy === "barcode" ? sortOrder : "asc"}
+                      onClick={() => {
+                        setData((prevState) => ({
+                          ...prevState,
+                          sortBy: "barcode",
+                          sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
+                        }));
+                      }}
+                    >
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                        Bar-Code
+                      </Typography>
+                    </TableSortLabel>
+                  </Tooltip>
+                </TableCell>
+                <TableCell align="right" sx={{ px: 1 }}>
+                  <Tooltip title="Sort by Selling Price" arrow>
+                    <TableSortLabel
+                      active={sortBy === "selling_price"}
+                      direction={sortBy === "selling_price" ? sortOrder : "asc"}
+                      onClick={() => {
+                        setData((prevState) => ({
+                          ...prevState,
+                          sortBy: "selling_price",
+                          sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
+                        }));
+                      }}
+                    >
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                        Selling Price
+                      </Typography>
+                    </TableSortLabel>
+                  </Tooltip>
+                </TableCell>
+                <TableCell align="right" sx={{ px: 1 }}>
+                  <Tooltip title="Sort by Purchase Price" arrow>
+                    <TableSortLabel
+                      active={sortBy === "purchase_price"}
+                      direction={sortBy === "purchase_price" ? sortOrder : "asc"}
+                      onClick={() => {
+                        setData((prevState) => ({
+                          ...prevState,
+                          sortBy: "purchase_price",
+                          sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
+                        }));
+                      }}
+                    >
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                        Purchase Price
+                      </Typography>
+                    </TableSortLabel>
+                  </Tooltip>
+                </TableCell>
+                <TableCell align="center" >
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                    Actions
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {loading ? (
+                Array([1, 2, 3, 4, 5])
+                  .map((_, index) => <DeletedProductRowSkeleton key={`skeleton-${index}`} />)
+              ) : products.length > 0 ? (
+                products.map((product, index) => (
+                  <DeletedProductRow
+                    key={product._id}
+                    product={product}
+                    onDelete={handleDelete}
+                    onView={handleView}
+                    index={index}
+                  />
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} sx={{ textAlign: "center", py: 8 }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                      <InventoryIcon sx={{ fontSize: '4rem', color: theme.palette.text.disabled }} />
+                      <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 600 }}>
+                        No products found
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Try adjusting your search or filter criteria, or add your first product
+                      </Typography>
+                      <Button
+                        variant="contained"
+                        startIcon={<AddCircleIcon />}
+                        sx={{
+                          mt: 2,
+                          borderRadius: 2,
+                          textTransform: 'none',
+                          fontWeight: 600,
+                        }}
+                      >
+                        Add Your First Product
+                      </Button>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </TabPanel>
+
 
       {/* Enhanced Pagination Section */}
       <Paper
@@ -1026,13 +1007,20 @@ const ProductsListing: React.FC = () => {
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-            Showing {Math.min((page - 1) * rowsPerPage + 1, products.length)} - {Math.min(page * rowsPerPage, products.length)} of {products.length} products
-          </Typography>
+
+          {selectedTab !== 1 ?
+            (<Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+              Showing {Math.min((page - 1) * rowsPerPage + 1, products.length)} - {Math.min(page * rowsPerPage, products.length)} of {products.length} products
+            </Typography>) : (
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                Showing {Math.min((page - 1) * rowsPerPage + 1, categoriesData?.length)} - {Math.min(page * rowsPerPage, categoriesData?.length)} of {categoriesData?.length} categories
+              </Typography>
+            )
+          }
 
           <Divider orientation="vertical" flexItem />
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {selectedTab === 0 && (<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Badge badgeContent={lowStockCount} color="warning" showZero={false}>
               <Chip
                 icon={<TrendingDownIcon />}
@@ -1052,10 +1040,10 @@ const ProductsListing: React.FC = () => {
                 color="error"
               />
             </Badge>
-          </Box>
+          </Box>)}
         </Box>
 
-        {products.length > rowsPerPage && (
+        {products.length > rowsPerPage && selectedTab !== 1 && (
           <Pagination
             count={Math.ceil(products.length / rowsPerPage)}
             page={page}
@@ -1081,8 +1069,43 @@ const ProductsListing: React.FC = () => {
             }}
           />
         )}
+        {categoriesData?.length > rowsPerPage && selectedTab === 1 && (
+          <Pagination
+            count={Math.ceil(categoriesData?.length / rowsPerPage)}
+            page={page}
+            onChange={handlePageChange}
+            color="primary"
+            size={isMobile ? "small" : "medium"}
+            showFirstButton
+            showLastButton
+            sx={{
+              "& .MuiPaginationItem-root": {
+                mx: { xs: 0.25, sm: 0.5 },
+                borderRadius: 2,
+                fontWeight: 600,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`,
+                },
+                '&.Mui-selected': {
+                  boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`,
+                },
+              },
+            }}
+          />
+        )}
+
       </Paper>
-      <ProductsSideModal drawer={drawer} setDrawer={setDrawer} setRefreshKey={setRefreshKey} productToEdit={selectedProduct} />
+      <ProductsSideModal drawer={drawer} setDrawer={setDrawer} setRefreshKey={setRefreshKey} selectedProduct={selectedProduct} setSelectedProduct={setSelectedProduct} />
+      <CategoryCreateModal
+        open={openCategoryModal}
+        onClose={() => {
+          setOpenCategoryModal(false);
+        }}
+        onUpdated={() => fetchCategory()}
+        category={selectedCategory}
+        onCreated={function (category: { name: string; _id: string; }): void { }} />
     </Box>
   );
 };

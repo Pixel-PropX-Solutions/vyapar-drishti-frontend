@@ -5,7 +5,6 @@ import {
   sellProduct,
   updateProduct,
   createProduct,
-  viewAllCategories,
   viewAllProducts,
   viewProduct,
   viewProductsWithId,
@@ -15,8 +14,8 @@ import { PageMeta, GetProduct, ProductCreate, ProductListing, UploadData } from 
 interface ProductState {
   authState: AuthStates;
   productData: ProductCreate | null;
+  product: GetProduct | null;
   uploadData: UploadData | null;
-  categories: Array<string> | null;
   productsListing: Array<ProductListing> | null;
   productsData: Array<GetProduct> | null;
   loading: boolean;
@@ -31,8 +30,8 @@ const initialState: ProductState = {
   authState: AuthStates.INITIALIZING,
   productsData: [],
   productsListing: [],
-  categories: null,
   productData: null,
+  product: null,
   uploadData: null,
   loading: false,
   deletionModal: false,
@@ -114,7 +113,7 @@ const productSlice = createSlice({
         state.loading = true;
       })
       .addCase(viewProduct.fulfilled, (state, action: PayloadAction<any>) => {
-        state.productData = action.payload.productData;
+        state.product = action.payload.product;
         state.loading = false;
       })
       .addCase(viewProduct.rejected, (state, action) => {
@@ -149,22 +148,6 @@ const productSlice = createSlice({
         }
       )
       .addCase(viewAllProducts.rejected, (state, action) => {
-        state.error = action.payload as string;
-        state.loading = false;
-      })
-
-      .addCase(viewAllCategories.pending, (state) => {
-        state.error = null;
-        state.loading = true;
-      })
-      .addCase(
-        viewAllCategories.fulfilled,
-        (state, action: PayloadAction<any>) => {
-          state.categories = action.payload.categories;
-          state.loading = false;
-        }
-      )
-      .addCase(viewAllCategories.rejected, (state, action) => {
         state.error = action.payload as string;
         state.loading = false;
       })

@@ -25,6 +25,12 @@ export type ProductSortField =
   | 'unit'
   | "hsn_code";
 
+export type CategorySortField =
+  | "category_name"
+  | 'description'
+  | 'created_at'
+  | "updated_at";
+
 
 export enum OrderStatus {
   PENDING = "Pending",
@@ -211,6 +217,7 @@ export interface GetProduct {
   purchase_price?: number;
   barcode?: string;
   category?: string;
+  category_desc?: string;
   image?: string;
   description?: string;
   opening_quantity?: number;
@@ -228,14 +235,34 @@ export interface GetProduct {
 export interface CategoryCreate {
   category_name: string;
   user_id: string;
-  image: string;
-  description: string;
+  image?: File | string;
+  description?: string;
   is_deleted: boolean;
 }
 
 export interface CategoryLists {
   _id: string;
   category_name: string;
+}
+
+export interface GetCategory {
+  category_name: string;
+  created_at: string;
+  description: string;
+  image: string;
+  is_deleted: boolean;
+  updated_at: string;
+  user_id: string;
+  _id: string;
+}
+
+export interface UpdateCategory {
+  _id: string;
+  user_id: string;
+  is_deleted: boolean;
+  category_name: string;
+  description: string;
+  image?: File | string;
 }
 
 export interface Product {

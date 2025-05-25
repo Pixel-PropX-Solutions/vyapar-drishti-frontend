@@ -43,19 +43,12 @@ export default function SideMenu() {
   const theme = useTheme();
   const [isHovered, setIsHovered] = useState(false);
 
-  // useEffect(() => {
-  //   // Removed redundant dispatch(getCurrentUser()) call
-  // }, []);
-
   const getUserInitials = () => {
     if (!user?.UserData?.name) return 'TD';
     const { first_name, last_name } = user.UserData.name;
     return `${first_name?.[0] ?? ''}${last_name?.[0] ?? ''}`.toUpperCase();
   };
 
-  // const handleProfileClick = () => {
-  //   navigate("/profile");
-  // };
 
   const handleLogout = (e: React.MouseEvent) => {
     e.stopPropagation();
