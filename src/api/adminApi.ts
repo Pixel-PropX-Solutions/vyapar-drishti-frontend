@@ -6,7 +6,9 @@ interface Token {
 }
 
 const adminApi = axios.create({
-    baseURL: import.meta.env.VITE_LOCAL_BACKEND_ADMIN_URL,
+    baseURL: import.meta.env.VITE_BACKEND_ADMIN_URL,
+    // baseURL: import.meta.env.VITE_LOCAL_BACKEND_ADMIN_URL
+    // baseURL: import.meta.env.VITE_LOCAL_BACKEND_ADMIN_URL,
     withCredentials: true,
 });
 
