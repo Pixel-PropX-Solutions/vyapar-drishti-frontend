@@ -17,6 +17,7 @@ import { AppDispatch } from "@/store/store";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { getCompany } from "@/services/company";
 
 const RegistrationForm: React.FC = () => {
   const navigate = useNavigate();
@@ -63,6 +64,7 @@ const RegistrationForm: React.FC = () => {
         .unwrap()
         .then(() => {
           dispatch(getCurrentUser());
+          dispatch(getCompany());
           navigate("/");
         }),
       {

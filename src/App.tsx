@@ -14,11 +14,8 @@ import {
   datePickersCustomizations,
   treeViewCustomizations,
 } from "./theme/customizations";
-import MyProfile from "./pages/Profile";
 import Products from "./pages/Products";
 import UploadDocuments from "./pages/UploadDocuments";
-import Settings from "./pages/Settings";
-import Stockist from "./pages/Stockist";
 import CreateChemistProfile from "./features/profile/chemist/CreateChemistProfile";
 import CreateStockistProfile from "./features/profile/stockist/CreateStockistProfile";
 import CreateUserProfile from "./features/profile/createUser";
@@ -48,6 +45,8 @@ import TermsOfServicePage from "./components/Legal/TermsOfServicePage";
 import PricingPage from "./components/Pricing/PricingPage";
 import SignUpPage from "./pages/SignUp";
 import ProfilePage from "./pages/Profile";
+import { getCompany } from "./services/company";
+import Creditors from "./pages/Creditors";
 // import PromptModal from "./common/PromptModal";
 
 const xThemeComponents = {
@@ -82,6 +81,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
       if (!isUserFetched && accessToken) {
         try {
           await dispatch(getCurrentUser());
+          await dispatch(getCompany());
           dispatch(setUser({ authState: AuthStates.AUTHENTICATED }));
         } catch {
           localStorage.removeItem("accessToken");
@@ -146,7 +146,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 {/* <Route path="/settings" element={<Settings />} /> */}
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/create/user" element={<CreateUserProfile />} />
-                <Route path="/stockists" element={<Stockist />} />
+                <Route path="/creditors" element={<Creditors />} />
                 <Route path="/stockists/:stockistId" element={<StockistProfile />} />
                 <Route
                   path="/create/user/stockist/:id"
@@ -174,16 +174,18 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/products" element={<Products />} />
                 <Route path="/inventory" element={<Warehouse />} />
                 <Route path="/timeline" element={<Timeline />} />
-                <Route path="/orders" element={<OrdersPage />} />
+                <Route path="/sales" element={<OrdersPage />} />
+                <Route path="/purchases" element={<OrdersPage />} />
+                {/* <Route path="/orders" element={<OrdersPage />} />
                 <Route path="/orders/create" element={<CreateOrder />} />
                 <Route path="/orders/:orderId" element={<ViewOrder />} />
-                <Route path="/orders/:orderId/product" element={<UpdateOrderProduct />} />
+                <Route path="/orders/:orderId/product" element={<UpdateOrderProduct />} /> */}
                 <Route path="/invoice" element={<InvoiceEditor />} />
                 <Route path="/upload" element={<UploadDocuments />} />
                 {/* <Route path="/settings" element={<Settings />} /> */}
                 <Route path="/about" element={<AboutPage />} />
-                <Route path="/stockists" element={<Stockist />} />
-                <Route path="/chemists/:chemistId" element={<ChemistProfile />} />
+                <Route path="/creditors" element={<Creditors />} />
+                <Route path="/debitors" element={<ChemistProfile />} />
                 <Route path="/sell" element={<ProductBilling />} />
                 <Route path="/*" element={<Navigate to="/" replace />} />
               </Route>

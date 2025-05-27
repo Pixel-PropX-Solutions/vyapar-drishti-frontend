@@ -13,6 +13,13 @@ import {
     FormControl,
     Stack,
     Fade,
+    Avatar,
+    FormHelperText,
+    InputLabel,
+    ListItemIcon,
+    ListItemText,
+    MenuItem,
+    Select,
 } from "@mui/material";
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import {
@@ -26,6 +33,8 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/store/store";
 import { GetUser } from "@/utils/types";
 import { updateUser } from "@/services/user";
+import CountryCodes from '../../internals/data/CountryCodes.json';
+
 
 interface EditUserModalProps {
     open: boolean;
@@ -223,7 +232,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
             sanitizedData.code = data.phone.code.trim();
         }
         if (data.phone && data.phone.number) {
-            sanitizedData.number = data.phone.number.trim();
+            sanitizedData.phone = data.phone.number.trim();
         }
         if (data.image && typeof data.image !== 'string') sanitizedData.image = data.image;
 
@@ -539,6 +548,69 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                                     <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
                                         Country Code
                                     </Typography>
+                                    <FormControl fullWidth >
+                                        {/* <InputLabel id="alter-country-code-label">Country Code</InputLabel> */}
+                                        <Select
+                                            labelId="alter-country-code-label"
+                                            value={data.phone.code || ''}
+                                            size="small"
+                                            // label="Country Code"
+                                            onChange={(e) => handleInputChange('phone.code', e.target.value)}
+                                            renderValue={(selected) => {
+                                                const country = CountryCodes.find(c => c.dial_code === selected);
+                                                return country ? (
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                        <Avatar
+                                                            src={`/src/assets/flags/${country.code.toLowerCase()}.png`}
+                                                            alt={country.code}
+                                                            sx={{ width: 24, height: 24 }}
+                                                            imgProps={{
+                                                                onError: (e) => {
+                                                                    const target = e.target as HTMLImageElement;
+                                                                    target.onerror = null;
+                                                                    target.src = `https://flagcdn.com/24x18/${country.code.toLowerCase()}.png`;
+                                                                }
+                                                            }}
+                                                        />
+                                                        <span>{country.dial_code}</span>
+                                                    </Box>
+                                                ) : selected;
+                                            }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    borderRadius: 2,
+                                                    transition: 'all 0.3s ease',
+                                                    '&:hover': {
+                                                        transform: 'translateY(-1px)',
+                                                    }
+                                                }
+                                            }}
+                                        >
+                                            {CountryCodes.map((country) => (
+                                                <MenuItem key={country.code} value={country.dial_code}>
+                                                    <ListItemIcon>
+                                                        <Avatar
+                                                            src={`/src/assets/flags/${country.code.toLowerCase()}.png`}
+                                                            alt={country.code}
+                                                            sx={{ width: 24, height: 24 }}
+                                                            imgProps={{
+                                                                onError: (e) => {
+                                                                    const target = e.target as HTMLImageElement;
+                                                                    target.onerror = null;
+                                                                    target.src = `https://flagcdn.com/24x18/${country.code.toLowerCase()}.png`;
+                                                                }
+                                                            }}
+                                                        />
+                                                    </ListItemIcon>
+                                                    <ListItemText primary={`${country.name} (${country.dial_code})`} />
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                        {/* <FormHelperText>{'Select country code'}</FormHelperText> */}
+                                    </FormControl>
+                                    {/* <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+                                        Country Code
+                                    </Typography>
                                     <TextField
                                         fullWidth
                                         size="small"
@@ -550,7 +622,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                                                 borderRadius: 1,
                                             }
                                         }}
-                                    />
+                                    /> */}
                                 </Box>
                                 <Box sx={{ width: '70%' }}>
                                     <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>

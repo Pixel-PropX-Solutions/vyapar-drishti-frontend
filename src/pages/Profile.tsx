@@ -6,9 +6,9 @@ import {
   Button,
   Box,
   Divider,
-  IconButton,
+  // IconButton,
   useTheme,
-  Tooltip,
+  // Tooltip,
   alpha,
   Grid,
   Stack,
@@ -28,10 +28,9 @@ import {
   Phone as PhoneIcon,
   Language as WebsiteIcon,
   SecurityOutlined,
-  Check,
+  // Check,
   Settings,
   Person,
-  Shield,
   AccessTime,
   Share,
   Download,
@@ -48,6 +47,12 @@ import {
   Brightness4,
   Brightness7,
   NotificationsActive,
+  Print,
+  ShoppingBagOutlined,
+  SellOutlined,
+  Summarize,
+  NotificationAdd,
+  Colorize,
 } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
@@ -59,6 +64,8 @@ import CompanyEditingModal from "@/common/CompanyEditingModal";
 import { InfoRow } from "@/common/InfoRow";
 import { SettingsCard } from "@/common/SettingsCard";
 import { ProfileHeader } from "@/common/ProfileHeader";
+import BillingEditingModal from "@/common/BillingEditingModal";
+import ShippingEditingModal from "@/common/ShippingEditingModal";
 
 // Main Enhanced Component
 const ProfilePage: React.FC = () => {
@@ -71,12 +78,14 @@ const ProfilePage: React.FC = () => {
 
   const [isUserEditing, setIsUserEditing] = useState(false);
   const [isCompanyEditing, setIsCompanyEditing] = useState(false);
+  const [isBillingEditing, setIsBillingEditing] = useState(false);
+  const [isShippingEditing, setIsShippingEditing] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
-  const [notifications, setNotifications] = useState({
-    email: true,
-    push: false,
-    sms: true,
-  });
+  // const [notifications, setNotifications] = useState({
+  //   email: true,
+  //   push: false,
+  //   sms: true,
+  // });
   const [tabValue, setTabValue] = useState(0);
   const [speedDialOpen, setSpeedDialOpen] = useState(false);
 
@@ -88,9 +97,9 @@ const ProfilePage: React.FC = () => {
   ];
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    if (newValue === 1) {
-      dispatch(getCompany());
-    }
+    // if (newValue === 1) {
+    //   // dispatch(getCompany());
+    // }
     setTabValue(newValue);
   };
 
@@ -156,7 +165,7 @@ const ProfilePage: React.FC = () => {
             >
               <Tab label="Personal Info" icon={<Person />} iconPosition="start" />
               <Tab label="Company Info" icon={<BusinessSharp />} iconPosition="start" />
-              <Tab label="Security" icon={<Shield />} iconPosition="start" />
+              <Tab label="Templates" icon={<Print />} iconPosition="start" />
               <Tab label="Preferences" icon={<Settings />} iconPosition="start" />
             </Tabs>
           </Paper>
@@ -176,13 +185,14 @@ const ProfilePage: React.FC = () => {
                           {user?.email}
                         </Box>
                       }
-                      badge={1}
+                      // badge={1}
                     />
                     <InfoRow
                       icon={<PhoneIcon />}
                       label="Phone Number"
                       value={
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          {user?.phone?.code || ''} {" "}
                           {user?.phone?.number || 'Not provided'}
                         </Box>
                       }
@@ -200,7 +210,7 @@ const ProfilePage: React.FC = () => {
                 </SettingsCard>
               </Grid>
 
-              {/* Account Statistics */}
+              {/* Password & Security */}
               <Grid item xs={12} lg={7} >
                 <SettingsCard title="Password & Security" icon={<SecurityOutlined />}>
                   <Stack spacing={3} sx={{ p: 1 }}>
@@ -496,7 +506,7 @@ const ProfilePage: React.FC = () => {
                               <Button
                                 variant="contained"
                                 color="success"
-                                // onClick={onEditToggle}
+                                onClick={() => setIsBillingEditing(true)}
                                 startIcon={<AddBusiness />}
                                 sx={{
                                   background: mode === 'light' ? alpha(theme.palette.success.main, 0.5) : alpha(theme.palette.success.light, 0.5),
@@ -589,7 +599,7 @@ const ProfilePage: React.FC = () => {
                               <Button
                                 variant="contained"
                                 color="secondary"
-                                // onClick={onEditToggle}
+                                onClick={() => setIsShippingEditing(true)}
                                 startIcon={<AddBusiness />}
                                 sx={{
                                   background: mode === 'light' ? alpha(theme.palette.secondary.main, 0.5) : alpha(theme.palette.secondary.light, 0.5),
@@ -614,104 +624,77 @@ const ProfilePage: React.FC = () => {
             ))}
 
           {tabValue === 2 && (
-            <Grid container spacing={4}>
-              {/* Notification Preferences */}
-              <Grid item xs={12} lg={6}>
-                <SettingsCard title="Notification Preferences" icon={<NotificationsActive />}>
-                  <Stack spacing={3}>
-                    {Object.entries(notifications).map(([key, value]) => (
-                      <Box key={key}>
-                        <FormControlLabel
-                          control={
-                            <Switch
-                              checked={value}
-                              onChange={(e) => setNotifications({ ...notifications, [key]: e.target.checked })}
-                              color="primary"
-                            />
-                          }
-                          label={
-                            <Box>
-                              <Typography variant="subtitle1" sx={{ fontWeight: 600, textTransform: 'capitalize' }}>
-                                {key} Notifications
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                Receive notifications via {key}
-                              </Typography>
-                            </Box>
-                          }
-                          sx={{ width: '100%', margin: 0 }}
-                        />
-                        <Divider sx={{ mt: 2 }} />
-                      </Box>
-                    ))}
+            <Grid container justifyContent={'space-between'} >
+              {/* Sales Template */}
+              <Grid item xs={12} lg={5.8}>
+                <SettingsCard title="Sales Template Information" icon={<SellOutlined />}>
+                  <Stack spacing={2}>
+                    <InfoRow
+                      icon={<Summarize />}
+                      label="Comming Soon"
+                      value={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          Template features will be available soon.
+                        </Box>
+                      }
+                    // badge={1}
+                    />
+                    {/* <InfoRow
+                      icon={<PhoneIcon />}
+                      label="Phone Number"
+                      value={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          {user?.phone?.code || ''} {" "}
+                          {user?.phone?.number || 'Not provided'}
+                        </Box>
+                      }
+                    />
+                    <InfoRow
+                      icon={<AccessTime />}
+                      label="Member Since"
+                      value={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          {formatDatewithTime(user?.created_at ?? '')}
+                        </Box>
+                      }
+                    /> */}
                   </Stack>
                 </SettingsCard>
               </Grid>
 
-              {/* Theme Preferences */}
-              <Grid item xs={12} lg={6}>
-                <SettingsCard title="Appearance" icon={<Palette />}>
-                  <Stack spacing={3}>
-                    <Box>
-                      <FormControlLabel
-                        control={
-                          <Switch
-                            checked={darkMode}
-                            onChange={(e) => setDarkMode(e.target.checked)}
-                            color="primary"
-                          />
-                        }
-                        label={
-                          <Box display="flex" alignItems="center" gap={1}>
-                            {darkMode ? <Brightness4 /> : <Brightness7 />}
-                            <Box>
-                              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                                Dark Mode
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                Switch between light and dark themes
-                              </Typography>
-                            </Box>
-                          </Box>
-                        }
-                        sx={{ width: '100%', margin: 0 }}
-                      />
-                    </Box>
-
-                    <Divider />
-
-                    <Box>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-                        Color Themes
-                      </Typography>
-                      <Grid container spacing={2}>
-                        {[
-                          { name: 'Blue', color: '#1976d2' },
-                          { name: 'Green', color: '#388e3c' },
-                          { name: 'Purple', color: '#7b1fa2' },
-                          { name: 'Orange', color: '#f57c00' },
-                        ].map((themeColor, index) => (
-                          <Grid item xs={3} key={index}>
-                            <Tooltip title={themeColor.name}>
-                              <IconButton
-                                sx={{
-                                  width: 48,
-                                  height: 48,
-                                  bgcolor: themeColor.color,
-                                  border: index === 0 ? `3px solid ${theme.palette.primary.main}` : 'none',
-                                  "&:hover": {
-                                    bgcolor: themeColor.color,
-                                    transform: 'scale(1.1)',
-                                  }
-                                }}
-                              >
-                                {index === 0 && <Check sx={{ color: 'white' }} />}
-                              </IconButton>
-                            </Tooltip>
-                          </Grid>
-                        ))}
-                      </Grid>
-                    </Box>
+              {/* Purchase Template */}
+              <Grid item xs={12} lg={5.8}>
+                <SettingsCard title="Purchase Template Information" icon={<ShoppingBagOutlined />}>
+                  <Stack spacing={2}>
+                    <InfoRow
+                      icon={<Summarize />}
+                      label="Comming Soon"
+                      value={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          Template features will be available soon.
+                        </Box>
+                      }
+                    // badge={1}
+                    />
+                    {/* <InfoRow
+                      icon={<PhoneIcon />}
+                      label="Phone Number"
+                      value={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          {user?.phone?.code || ''} {" "}
+                          {user?.phone?.number || 'Not provided'}
+                        </Box>
+                      }
+                    />
+                    <InfoRow
+                      icon={<AccessTime />}
+                      label="Member Since"
+                      value={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          {formatDatewithTime(user?.created_at ?? '')}
+                        </Box>
+                      }
+                    /> */}
                   </Stack>
                 </SettingsCard>
               </Grid>
@@ -719,12 +702,22 @@ const ProfilePage: React.FC = () => {
           )}
 
           {tabValue === 3 && (
-            <Grid container spacing={4}>
+            <Grid container justifyContent={'space-between'}>
               {/* Notification Preferences */}
-              <Grid item xs={12} lg={6}>
+              <Grid item xs={12} lg={5.8}>
                 <SettingsCard title="Notification Preferences" icon={<NotificationsActive />}>
                   <Stack spacing={3}>
-                    {Object.entries(notifications).map(([key, value]) => (
+                    <InfoRow
+                      icon={<NotificationAdd />}
+                      label="Comming Soon"
+                      value={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          Notification features will be available soon.
+                        </Box>
+                      }
+                    // badge={1}
+                    />
+                    {/* {Object.entries(notifications).map(([key, value]) => (
                       <Box key={key}>
                         <FormControlLabel
                           control={
@@ -748,13 +741,13 @@ const ProfilePage: React.FC = () => {
                         />
                         <Divider sx={{ mt: 2 }} />
                       </Box>
-                    ))}
+                    ))} */}
                   </Stack>
                 </SettingsCard>
               </Grid>
 
               {/* Theme Preferences */}
-              <Grid item xs={12} lg={6}>
+              <Grid item xs={12} lg={5.8}>
                 <SettingsCard title="Appearance" icon={<Palette />}>
                   <Stack spacing={3}>
                     <Box>
@@ -793,7 +786,17 @@ const ProfilePage: React.FC = () => {
 
                     <Divider />
 
-                    <Box>
+                    <InfoRow
+                      icon={<Colorize />}
+                      label="Comming Soon"
+                      value={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          Color Themes features will be available soon.
+                        </Box>
+                      }
+                    // badge={1}
+                    />
+                    {/* <Box>
                       <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
                         Color Themes
                       </Typography>
@@ -824,7 +827,7 @@ const ProfilePage: React.FC = () => {
                           </Grid>
                         ))}
                       </Grid>
-                    </Box>
+                    </Box> */}
                   </Stack>
                 </SettingsCard>
               </Grid>
@@ -876,632 +879,28 @@ const ProfilePage: React.FC = () => {
           fetchCompleteData();
         }}
       />
+      <BillingEditingModal
+        open={isBillingEditing}
+        onClose={() => {
+          setIsBillingEditing(false);
+        }}
+        company={company}
+        onUpdated={async () => {
+          fetchCompleteData();
+        }}
+      />
+      <ShippingEditingModal
+        open={isShippingEditing}
+        onClose={() => {
+          setIsShippingEditing(false);
+        }}
+        company={company}
+        onUpdated={async () => {
+          fetchCompleteData();
+        }}
+      />
     </Box>
   );
 };
 
 export default ProfilePage;
-
-// import React, { useEffect, useState } from "react";
-// import {
-//   Card,
-//   CardContent,
-//   Typography,
-//   Avatar,
-//   Grid,
-//   Box,
-//   useTheme,
-//   Paper,
-//   Chip,
-//   IconButton,
-//   Button,
-//   Tooltip,
-//   alpha,
-//   Theme,
-// } from "@mui/material";
-// // const MAX_FILE_SIZE_MB = 5;
-// // const ALLOWED_FILE_TYPES = [
-// //   "image/jpeg",
-// //   "image/png",
-// //   "image/jpg",
-// //   "image/gif",
-// // ];
-// import {
-//   Email as EmailIcon,
-//   Assignment as LicenseIcon,
-//   Home as HomeIcon,
-//   Phone as PhoneIcon,
-//   LocationOn as LocationIcon,
-//   LinkedIn as LinkedInIcon,
-//   Language as WebsiteIcon,
-//   Facebook as FacebookIcon,
-//   Schedule as ScheduleIcon,
-//   // Edit as EditIcon,
-//   VerifiedUser as VerifiedIcon,
-//   // Star as StarIcon,
-// } from "@mui/icons-material";
-// import { useDispatch, useSelector, } from "react-redux";
-// import { getCurrentUser } from "@/services/auth";
-// import { AppDispatch, RootState } from "@/store/store";
-
-// const InfoRow: React.FC<{
-//   theme: Theme;
-//   icon: React.ReactNode;
-//   label: string;
-//   value: React.ReactNode;
-// }> = ({ theme, icon, label, value }) => (
-//   <Paper
-//     elevation={0}
-//     sx={{
-//       p: 2,
-//       mb: 1,
-//       boxShadow:
-//         theme.palette.mode === "light"
-//           ? "0 4px 20px rgba(0,0,0,0.1)"
-//           : "0 4px 20px rgba(255,255,255,0.1)",
-//       backgroundColor: alpha(theme.palette.background.default, 0.6),
-//       "&:hover": {
-//         backgroundColor: alpha(theme.palette.background.default, 1),
-//         transform: "translateX(5px)",
-//         transition: "all 0.3s ease-in-out",
-//       },
-//     }}
-//   >
-//     <Box display="flex" alignItems="center">
-//       <Box mr={2} color="primary.light">
-//         {icon}
-//       </Box>
-//       <Box flexGrow={1}>
-//         <Typography variant="caption" color="textSecondary" fontWeight={500}>
-//           {label}
-//         </Typography>
-//         <Typography variant="body1" fontWeight={600}>
-//           {value}
-//         </Typography>
-//       </Box>
-//     </Box>
-//   </Paper>
-// );
-
-// const UserProfile: React.FC = () => {
-//   const website = "www.healthcarepharmacy.com";
-//   const businessHours = "Mon-Sat: 9:00 AM - 8:00 PM";
-//   const specialization = [
-//     "General Medicine",
-//     "Prescription Drugs",
-//     "Healthcare Consultation",
-//   ];
-//   const theme = useTheme();
-//   const dispatch = useDispatch<AppDispatch>();
-//   const { user } = useSelector((state: RootState) => state.auth);
-//   const getFullName = () => {
-//     if (!user) return "No Name";
-//     return `${user?.name.first ?? " "} ${user?.name.last ?? ""}`;
-//   };
-
-//   const getFullAddress = () => {
-//     if (user) {
-//       // return `${user?.UserData.address.street_address ?? ""}, ${user?.UserData.address.street_address_line_2 ? user?.UserData.address.street_address_line_2 + ', ' : ""} ${user?.UserData.address.city ?? ""}, ${user?.UserData.address.state ?? ""}, ${user?.UserData.address.zip_code ?? ""}`;
-//       return "No Address";
-//     } else {
-//       return "No Address";
-//     }
-//   };
-
-//   const [editableData, setEditableData] = useState({
-//     userName: getFullName(),
-//     email: user?.email ?? "No Email",
-//     role: user?.user_type ?? "No Role",
-//     shopName: "No Shop Name",
-//     licenseNumber: "License",
-//     streetAddress:  "No Address",
-//     fullAddress: getFullAddress(),
-//     phoneNumber: user?.phone.number ?? "No Phone Number",
-//     website,
-//     businessHours,
-//   });
-
-
-//   const [isEditing, setIsEditing] = useState(false); // New state for edit mode
-//   const [selectedFile, _setSelectedFile] = useState<File | null>(null);
-//   const [imageUrl, _setImageUrl] = useState<string | null>(null);
-//   const [error, _setError] = useState("");
-
-
-
-//   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     const { name, value } = e.target;
-//     setEditableData((prev) => ({ ...prev, [name]: value }));
-//   };
-
-//   // useEffect(() => {
-//   //   dispatch(getCurrentUser());
-//   // }, [dispatch])
-
-
-
-//   const handleSave = async () => {
-//     try {
-//       // toast.promise(dispatch(updateStockist(updatedStockistData)), {
-//       //   loading: "Updating Stockist data ...",
-//       //   success: <b>Stockist Data Updated!</b>,
-//       //   error: <b>Could not update.</b>,
-//       // });
-
-//       const response = await fetch("/api/updateUserProfile", {
-//         method: "POST",
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         body: JSON.stringify(editableData),
-//       });
-//       if (!response.ok) throw new Error("Failed to update profile");
-//       setIsEditing(false); // Exit edit mode after saving
-//     } catch (error) {
-//       console.error(error);
-//     }
-//   };
-
-//   const handleUpload = () => {
-//     if (selectedFile) {
-//       const formData = new FormData();
-//       formData.append("image", selectedFile);
-
-//       console.log("Uploading file...", formData);
-//     } else {
-//       console.error("No file selected");
-//     }
-//   };
-
-//   return (
-//     <Box sx={{ p: 3, bgcolor: '#f8fafc', minHeight: '100vh', width: '100%' }}>
-//       <Card
-//         elevation={8}
-//         sx={{
-//           background: `linear-gradient(135deg, ${theme.palette.background.default} 0%, alpha(${theme.palette.background.default}, 0.6) 100%)`,
-//           borderRadius: 1,
-//           overflow: "hidden",
-//           width: "100%",
-//           margin: 0,
-//           marginTop: "2rem",
-//         }}
-//       >
-//         <Box
-//           sx={{
-//             position: "relative",
-//             height: "150px",
-//             borderRadius: 1,
-//             backgroundColor: theme.palette.primary.main,
-//             backgroundImage: `linear-gradient(135deg,${theme.palette.info.dark} 0%, ${theme.palette.info.light} 100%)`,
-//             "&::after": {
-//               content: '""',
-//               position: "absolute",
-//               bottom: 0,
-//               left: 0,
-//               right: 0,
-//               height: "40px",
-//               background:
-//                 "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.1) 100%)",
-//             },
-//           }}
-//         />
-
-//         <CardContent sx={{ mt: -10, position: "relative" }}>
-//           <Box
-//             sx={{
-//               position: "absolute",
-//               top: -30,
-//               left: "50%",
-//               transform: "translate(-50%, 0)",
-//               zIndex: "100",
-//             }}
-//           >
-//             <Typography
-//               variant="h4"
-//               sx={{
-//                 fontWeight: 700,
-//                 color:
-//                   theme.palette.mode === "light"
-//                     ? theme.palette.primary.dark
-//                     : theme.palette.primary.main,
-//               }}
-//             >
-//               My Profile
-//             </Typography>
-//           </Box>
-//           <Grid container spacing={4}>
-//             {/* Profile Section */}
-//             <Grid item xs={12} md={4}>
-//               <Box
-//                 display="flex"
-//                 flexDirection="column"
-//                 alignItems="center"
-//                 sx={{
-//                   backgroundColor: alpha(theme.palette.background.default, 0.7),
-//                   borderRadius: 2,
-//                   p: 3,
-//                   boxShadow:
-//                     theme.palette.mode === "light"
-//                       ? "0 4px 20px rgba(0,0,0,0.1)"
-//                       : "0 4px 20px rgba(255,255,255,0.1)",
-//                   height: "100%",
-//                 }}
-//               >
-//                 <Box position="relative">
-//                   <Avatar
-//                     src={
-//                       imageUrl ||
-//                       `https://api.dicebear.com/5.x/initials/svg?seed=${editableData.userName}`
-//                     }
-//                     alt={editableData.userName}
-//                     sx={{
-//                       width: 150,
-//                       height: 150,
-//                       border: "5px solid white",
-//                       boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-//                     }}
-//                   />
-//                   {error && (
-//                     <Typography variant="body2" color="error" mt={2}>
-//                       {error}
-//                     </Typography>
-//                   )}
-//                   {selectedFile && (
-//                     <Button
-//                       variant="contained"
-//                       onClick={handleUpload}
-//                       component="span"
-//                     >
-//                       Upload Image
-//                     </Button>
-//                   )}
-
-//                   <Tooltip title="Verified Professional">
-//                     <VerifiedIcon
-//                       sx={{
-//                         position: "absolute",
-//                         bottom: 5,
-//                         right: 5,
-//                         color: theme.palette.primary.main,
-//                         backgroundColor: "white",
-//                         borderRadius: "50%",
-//                       }}
-//                     />
-//                   </Tooltip>
-//                 </Box>
-
-//                 <Typography
-//                   variant="h4"
-//                   gutterBottom
-//                   sx={{ mt: 2, fontWeight: 700 }}
-//                 >
-//                   {isEditing ? (
-//                     <input
-//                       type="text"
-//                       name="email"
-//                       style={{
-//                         width: "100%",
-//                         margin: "auto",
-//                         border: "none",
-//                         textAlign: "center",
-//                         fontWeight: "bold",
-//                         fontSize: "1.5rem",
-//                         borderBottom: `2px solid ${theme.palette.primary.main} `,
-//                       }}
-//                       value={editableData.userName}
-//                       onChange={handleChange}
-//                     />
-//                   ) : (
-//                     editableData.userName
-//                   )}
-//                 </Typography>
-
-//                 <Box display="flex" alignItems="center" gap={1} mb={2}>
-//                   <Chip
-//                     label={editableData.role}
-//                     color="primary"
-//                     sx={{
-//                       fontSize: "1rem",
-//                       fontWeight: 600,
-//                       backgroundColor: (theme) => theme.palette.primary.main,
-//                       py: 2,
-//                       px: 1,
-//                     }}
-//                   />
-
-//                 </Box>
-
-
-//                 <Box mt={2} width="100%">
-//                   <Typography
-//                     variant="subtitle1"
-//                     fontWeight={600}
-//                     color="primary.light"
-//                   >
-//                     Shop Details
-//                   </Typography>
-//                   <Typography variant="h6" gutterBottom fontWeight={700}>
-//                     {isEditing ? (
-//                       <input
-//                         type="text"
-//                         name="email"
-//                         style={{
-//                           width: "100%",
-//                           border: "none",
-//                           fontWeight: "bold",
-//                           fontSize: "1.15rem",
-//                           borderBottom: `2px solid ${theme.palette.primary.main} `,
-//                         }}
-//                         value={editableData.shopName}
-//                         onChange={handleChange}
-//                       />
-//                     ) : (
-//                       editableData.shopName
-//                     )}
-//                   </Typography>
-//                   <Typography
-//                     variant="body2"
-//                     color="textSecondary"
-//                     sx={{
-//                       display: "flex",
-//                       alignItems: "center",
-//                       gap: 1,
-//                       mb: 2,
-//                     }}
-//                   >
-//                     <LocationIcon fontSize="small" />
-//                     {isEditing ? (
-//                       <input
-//                         type="text"
-//                         name="email"
-//                         style={{
-//                           width: "100%",
-//                           border: "none",
-//                           borderBottom: `2px solid ${theme.palette.primary.main} `,
-//                         }}
-//                         value={editableData.streetAddress}
-//                         onChange={handleChange}
-//                       />
-//                     ) : (
-//                       editableData.streetAddress
-//                     )}
-//                   </Typography>
-
-//                   {/* <Typography
-//                   variant="body2"
-//                   sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}
-//                 >
-//                   <ScheduleIcon fontSize="small" color="primary" />
-//                   {businessHours}
-//                 </Typography> */}
-
-//                   <Box mt={2}>
-//                     <Typography variant="subtitle2" fontWeight={600} gutterBottom>
-//                       Specializations
-//                     </Typography>
-//                     <Box display="flex" flexWrap="wrap" gap={1}>
-//                       {specialization.map((spec, index) => (
-//                         <Chip
-//                           key={index}
-//                           label={spec}
-//                           size="small"
-//                           variant="outlined"
-//                           sx={{ backgroundColor: "rgba(255,255,255,0.6)" }}
-//                         />
-//                       ))}
-//                     </Box>
-//                   </Box>
-//                 </Box>
-
-//                 <Box mt={3} display="flex" gap={1} justifyContent="center">
-//                   <IconButton color="primary" size="small">
-//                     <LinkedInIcon />
-//                   </IconButton>
-//                   <IconButton color="primary" size="small">
-//                     <FacebookIcon />
-//                   </IconButton>
-//                   <IconButton color="primary" size="small">
-//                     <WebsiteIcon />
-//                   </IconButton>
-//                 </Box>
-//               </Box>
-//             </Grid>
-
-//             {/* Contact and Business Information */}
-//             <Grid item xs={12} md={8}>
-//               <Box
-//                 sx={{
-//                   backgroundColor: alpha(theme.palette.background.default, 0.6),
-//                   borderRadius: 2,
-//                   p: 3,
-//                   boxShadow:
-//                     theme.palette.mode === "light"
-//                       ? "0 4px 20px rgba(0,0,0,0.1)"
-//                       : "0 4px 20px rgba(255,255,255,0.1)",
-//                 }}
-//               >
-//                 <Box
-//                   display="flex"
-//                   justifyContent="space-between"
-//                   alignItems="center"
-//                   mb={3}
-//                 >
-//                   <Typography
-//                     variant="h5"
-//                     sx={{
-//                       fontWeight: 700,
-//                       color: theme.palette.primary.main,
-//                     }}
-//                   >
-//                     Contact Information
-//                   </Typography>
-//                   <Box>
-//                     <Button
-//                       onClick={isEditing ? handleSave : () => setIsEditing(true)}
-//                       variant="outlined"
-//                       size="small"
-//                       sx={{ borderRadius: 2, marginRight: "10px" }}
-//                     >
-//                       {isEditing ? "Save Changes" : "Edit Profile"}
-//                     </Button>
-//                     {isEditing && (
-//                       <Button
-//                         onClick={() => setIsEditing(false)}
-//                         variant="outlined"
-//                         size="small"
-//                         sx={{ borderRadius: 2 }}
-//                       >
-//                         Cancel
-//                       </Button>
-//                     )}
-//                   </Box>
-//                 </Box>
-
-//                 <InfoRow
-//                   theme={theme}
-//                   icon={<EmailIcon />}
-//                   label="Email Address"
-//                   value={
-//                     isEditing ? (
-//                       <input
-//                         type="text"
-//                         name="email"
-//                         style={{
-//                           width: "100%",
-//                           border: "none",
-//                           fontWeight: "bold",
-//                           borderBottom: `2px solid ${theme.palette.primary.main} `,
-//                         }}
-//                         value={editableData.email}
-//                         onChange={handleChange}
-//                       />
-//                     ) : (
-//                       editableData.email
-//                     )
-//                   }
-//                 />
-//                 {editableData.licenseNumber && (<InfoRow
-//                   theme={theme}
-//                   icon={<LicenseIcon />}
-//                   label="License Number"
-//                   value={
-//                     isEditing ? (
-//                       <input
-//                         type="text"
-//                         name="licenseNumber"
-//                         style={{
-//                           width: "100%",
-//                           border: "none",
-//                           fontWeight: "bold",
-//                           borderBottom: `2px solid ${theme.palette.primary.main} `,
-//                         }}
-//                         value={editableData.licenseNumber}
-//                         onChange={handleChange}
-//                       />
-//                     ) : (
-//                       editableData.licenseNumber
-//                     )
-//                   }
-//                 />)}
-//                 <InfoRow
-//                   theme={theme}
-//                   icon={<HomeIcon />}
-//                   label="Full Address"
-//                   value={
-//                     isEditing ? (
-//                       <input
-//                         type="text"
-//                         name="fullAddress"
-//                         style={{
-//                           width: "100%",
-//                           border: "none",
-//                           fontWeight: "bold",
-//                           borderBottom: `2px solid ${theme.palette.primary.main} `,
-//                         }}
-//                         value={editableData.fullAddress}
-//                         onChange={handleChange}
-//                       />
-//                     ) : (
-//                       editableData.fullAddress
-//                     )
-//                   }
-//                 />
-//                 <InfoRow
-//                   theme={theme}
-//                   icon={<PhoneIcon />}
-//                   label="Contact Number"
-//                   value={
-//                     isEditing ? (
-//                       <input
-//                         type="text"
-//                         name="phoneNumber"
-//                         style={{
-//                           width: "100%",
-//                           border: "none",
-//                           fontWeight: "bold",
-//                           borderBottom: `2px solid ${theme.palette.primary.main} `,
-//                         }}
-//                         value={editableData.phoneNumber}
-//                         onChange={handleChange}
-//                       />
-//                     ) : (
-//                       editableData.phoneNumber
-//                     )
-//                   }
-//                 />
-//                 <InfoRow
-//                   theme={theme}
-//                   icon={<WebsiteIcon />}
-//                   label="Website"
-//                   value={
-//                     isEditing ? (
-//                       <input
-//                         type="text"
-//                         name="website"
-//                         style={{
-//                           width: "100%",
-//                           border: "none",
-//                           fontWeight: "bold",
-//                           borderBottom: `2px solid ${theme.palette.primary.main} `,
-//                         }}
-//                         value={editableData.website}
-//                         onChange={handleChange}
-//                       />
-//                     ) : (
-//                       editableData.website
-//                     )
-//                   }
-//                 />
-//                 <InfoRow
-//                   theme={theme}
-//                   icon={<ScheduleIcon />}
-//                   label="Business Hours"
-//                   value={
-//                     isEditing ? (
-//                       <input
-//                         type="text"
-//                         name="businessHours"
-//                         style={{
-//                           width: "100%",
-//                           border: "none",
-//                           fontWeight: "bold",
-//                           borderBottom: `2px solid ${theme.palette.primary.main} `,
-//                         }}
-//                         value={editableData.businessHours}
-//                         onChange={handleChange}
-//                       />
-//                     ) : (
-//                       editableData.businessHours
-//                     )
-//                   }
-//                 />
-//               </Box>
-//             </Grid>
-//           </Grid>
-//         </CardContent>
-//       </Card>
-//     </Box>
-//   );
-// };
-
-// export default UserProfile;

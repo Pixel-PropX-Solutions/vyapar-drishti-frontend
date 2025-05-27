@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Box,
     TextField,
@@ -12,369 +12,304 @@ import {
     Grow,
     FormControl,
     Stack,
-    Fade,
+    Divider,
+    Chip,
+    InputAdornment,
+    CircularProgress,
 } from "@mui/material";
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import {
     Close as CloseIcon,
-    Delete,
     PhotoCamera,
-    Timeline,
+    Business,
+    Language,
+    CheckCircle,
+    Warning,
+    Close,
+    Save,
 } from "@mui/icons-material";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/store/store";
-import { GetUser } from "@/utils/types";
+import { GetCompany, ShippingAddress } from "@/utils/types";
+import { createCompanyShipping, updateCompanyShipping } from "@/services/company";
+import CountryCodes from '../internals/data/CountryCodes.json';
+import { MenuItem, Select, ListItemIcon, ListItemText, Avatar, InputLabel, FormHelperText } from '@mui/material';
 
-interface EditUserModalProps {
+interface EditShippingModalProps {
     open: boolean;
     onClose: () => void;
-    // onCreated: (user: { name: string; _id: string }) => void;
-    onUpdated?: () => Promise<void>;
-    user: GetUser | null;
+    onUpdated: () => Promise<void>;
+    company: GetCompany | null;
 }
 
-interface UserFormData {
-    name: {
-        first: string;
-        last?: string;
-    };
-    email: string;
-    phone: {
-        code: string;
-        number: string;
-    };
-    image?: File | string;
-}
-
-const ShippingEditingModal: React.FC<EditUserModalProps> = ({
+const ShippingEditingModal: React.FC<EditShippingModalProps> = ({
     open,
     onClose,
-    // onCreated,
     onUpdated,
-    user,
+    company,
 }) => {
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
     const [isLoading, setIsLoading] = useState(false);
-    const imageInputRef = useRef<HTMLInputElement | null>(null);
-    const [isDragActive, setIsDragActive] = useState(false);
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
-    const [data, setData] = useState<UserFormData>({
-        name: {
-            first: '',
-            last: ''
-        },
-        email: '',
-        phone: {
-            code: '',
-            number: ''
-        },
-        image: ''
+    const [showValidation, setShowValidation] = useState(false);
+    const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+    const [data, setData] = useState<ShippingAddress>({
+        _id: '',
+        user_id: '',
+        company_id: '',
+        is_deleted: false,
+        address_1: '',
+        address_2: '',
+        pinCode: '',
+        city: '',
+        state: '',
+        country: '',
+        notes: '',
+        title: '',
     });
 
+    // Validation function
+    const validateForm = (formData = data) => {
+        const errors: Record<string, string> = {};
+
+        if (!formData.address_1.trim()) {
+            errors.address_1 = 'Street Address line 1 is required';
+        }
+        if (!formData.state.trim()) {
+            errors.state = 'State is required';
+        }
+
+        if (formData.pinCode && !/^\d{6}$/.test(formData.pinCode)) {
+            errors.pinCode = 'Pin Code number should be 6 digits long';
+        }
+
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+
     const handleInputChange = (
-        field:
-            | keyof UserFormData
-            | 'name.first'
-            | 'name.last'
-            | 'email'
-            | 'phone.code'
-            | 'phone.number',
+        field: keyof ShippingAddress,
         value: string
     ) => {
         setData(prev => {
-            if (field === 'name.first' || field === 'name.last') {
-                const nameField = field.split('.')[1] as 'first' | 'last';
-                return {
-                    ...prev,
-                    name: {
-                        ...prev.name,
-                        [nameField]: value
-                    }
-                };
-            }
-            if (field === 'phone.code' || field === 'phone.number') {
-                const phoneField = field.split('.')[1] as 'code' | 'number';
-                return {
-                    ...prev,
-                    phone: {
-                        ...prev.phone,
-                        [phoneField]: value
-                    }
-                };
-            }
-            return {
-                ...prev,
-                [field]: value
-            };
+            const newData = { ...prev, [field]: value };
+            validateForm(newData);
+            return newData;
         });
     };
 
-    const handleImageChange = useCallback((file: File) => {
-        if (!file) return;
-
-        if (!['image/png', 'image/jpeg', 'image/jpg', 'image/webp'].includes(file.type)) {
-            toast.error('Only PNG, JPEG, JPG, or WebP images are allowed.');
-            return;
-        }
-
-        if (file.size > 5 * 1024 * 1024) { // 5MB limit
-            toast.error('Image size should be less than 5MB.');
-            return;
-        }
-
-        setData(prev => ({
-            ...prev,
-            image: file
-        }));
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const result = e.target?.result as string;
-            setImagePreview(result);
-        };
-        reader.readAsDataURL(file);
-    }, []);
-
-    const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragActive(false);
-
-        const file = e.dataTransfer.files?.[0];
-        if (file) {
-            handleImageChange(file);
-            setData(prev => ({
-                ...prev,
-                image: file
-            }));
-        };
-    }, [handleImageChange]);
-
-    const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragActive(true);
-    }, []);
-
-    const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragActive(false);
-    }, []);
-
-    const handleBoxClick = () => {
-        imageInputRef.current?.click();
+    const resetForm = () => {
+        setData({
+            _id: '',
+            user_id: '',
+            company_id: '',
+            is_deleted: false,
+            address_1: '',
+            address_2: '',
+            pinCode: '',
+            city: '',
+            state: '',
+            country: '',
+            notes: '',
+            title: '',
+        });
+        setFormErrors({});
+        setShowValidation(false);
     };
 
-    const removeImage = useCallback((e: React.MouseEvent) => {
-        e.stopPropagation();
-        setImagePreview(null);
-        if (imageInputRef.current) {
-            imageInputRef.current.value = '';
-        }
-    }, []);
-
     useEffect(() => {
-        if (open && user) {
+        if (open && company?.shipping) {
             setData({
-                name: {
-                    first: user.name.first || '',
-                    last: user.name.last || ''
-                },
-                email: user.email || '',
-                phone: {
-                    code: user.phone?.code || '',
-                    number: user.phone?.number || ''
-                },
-                // If user.image is a string, it means it's already a URL or base64 string
-                image: typeof user.image === 'string' ? user.image : '',
+                _id: company?.shipping._id || '',
+                company_id: company?._id || '',
+                state: company?.shipping?.state || '',
+                address_1: company.shipping.address_1 || '',
+                user_id: company.shipping?.user_id || '',
+                address_2: company.shipping.address_2 || '',
+                city: company.shipping?.city || '',
+                country: company.shipping?.country || '',
+                pinCode: company.shipping?.pinCode || '',
+                is_deleted: company.shipping?.is_deleted || false,
+                notes: company.shipping?.notes || '',
+                title: company.shipping?.title || '',
             });
-
-            setImagePreview(
-                typeof user?.image === "string" ? user.image : null
-            );
-        } else if (open && !user) {
+            setFormErrors({});
+        } else if (open && !company?.shipping) {
             setData({
-                name: {
-                    first: '',
-                    last: ''
-                },
-                email: '',
-                phone: {
-                    code: '',
-                    number: ''
-                },
-                image: ''
+                _id: '',
+                user_id: company?.user_id || '',
+                company_id: company?._id || '',
+                is_deleted: false,
+                address_1: '',
+                address_2: '',
+                pinCode: '',
+                city: '',
+                state: '',
+                country: '',
+                notes: '',
+                title: '',
             });
-            setImagePreview(null);
+            resetForm();
         }
-    }, [open, user]);
+    }, [open, company?.shipping, company?._id, company?.user_id]);
 
     const handleSubmit = async () => {
-        setIsLoading(true);
-        const sanitizedData: any = {
-            name: {
-                first: data.name.first.trim(),
-                last: (data?.name?.last || '').trim() || '',
-            },
-        };
-        if (data.email && data.email !== '') sanitizedData.email = data.email.trim();
-        if (data.phone && data.phone.code && data.phone.number) {
-            sanitizedData.phone = {
-                code: data.phone.code.trim(),
-                number: data.phone.number.trim()
-            };
-        }
-        if (data.image && typeof data.image !== 'string') sanitizedData.image = data.image;
+        setShowValidation(true);
 
+        if (!validateForm()) {
+            toast.error('Please fix the form errors before submitting');
+            return;
+        }
+
+        setIsLoading(true);
+        const sanitizedData: Partial<ShippingAddress> = {
+            company_id: company?._id,
+            state: data.state.trim(),
+            address_1: data.address_1.trim(),
+            user_id: company?.user_id,
+        };
+
+        if (data.address_2 && data.address_2 !== '') sanitizedData.address_2 = data.address_2.trim();
+        if (data.city && data.city !== '') sanitizedData.city = data.city.trim();
+        if (data.country && data.country !== '') sanitizedData.country = data.country.trim();
+        if (data.pinCode && data.pinCode !== '') sanitizedData.pinCode = data.pinCode.trim();
+        if (data.notes && data.notes !== '') sanitizedData.notes = data.notes.trim();
+        if (data.title && data.title !== '') sanitizedData.title = data.title.trim();
+        console.log('Sanitized Data:', sanitizedData);
         const formData = new FormData();
         Object.entries(sanitizedData).forEach(([key, value]) => {
             if (typeof value === 'boolean') {
                 formData.append(key, value ? 'true' : 'false');
-            } else if (value !== undefined && value !== null) {
+            } else if (typeof value === 'string') {
                 formData.append(key, value);
             }
         });
 
-        // if (user && user._id) {
-        //     // Edit mode
-        //     await toast.promise(
-        //         dispatch(updateCategory({
-        //             id: user._id,
-        //             data: formData
-        //         }))
-        //             .unwrap()
-        //             .then(() => {
-        //                 setIsLoading(false);
-        //                 onClose();
-        //                 onUpdated();
-        //             })
-        //             .catch(() => {
-        //                 setIsLoading(false);
-        //             }),
-        //         {
-        //             loading: "Updating your user...",
-        //             success: <b>Category successfully updated! 🎉</b>,
-        //             error: <b>Failed to update user. Please try again.</b>,
-        //         }
-        //     );
-        // } else {
-        //     // Create mode
-        //     await toast.promise(
-        //         dispatch(createCategory({ categoryData: formData }))
-        //             .unwrap()
-        //             .then((response) => {
+        if (!company?.shipping) {
+            await toast.promise(
+                dispatch(createCompanyShipping({
+                    data: formData,
+                }))
+                    .unwrap()
+                    .then(() => {
+                        setIsLoading(false);
+                        onClose();
+                        onUpdated();
+                    })
+                    .catch(() => {
+                        setIsLoading(false);
+                    }),
+                {
+                    loading: <b>Creating your shipping Address... ⏳</b>,
+                    success: <b>Shipping Details successfully created! 🎉</b>,
+                    error: <b>Failed to create shipping. 🚫</b>,
+                }
+            );
+        } else {
+            await toast.promise(
+                dispatch(updateCompanyShipping({
+                    data: formData,
+                    id: company?.shipping?._id ?? '',
+                }))
+                    .unwrap()
+                    .then(() => {
+                        setIsLoading(false);
+                        onClose();
+                        onUpdated();
+                    })
+                    .catch(() => {
+                        setIsLoading(false);
+                    }),
+                {
+                    loading: <b>Updating your shipping... ⏳</b>,
+                    success: <b>Company Details successfully updated! 🎉</b>,
+                    error: <b>Failed to update shipping. 🚫</b>,
+                }
+            );
+        }
 
-        //                 // onCreated(newCategory);
-        //                 setData({
-        //                     name: {
-        //                         first: '',
-        //                         last: ''
-        //                     },
-        //                     email: '',
-        //                     phone: {
-        //                         code: '',
-        //                         number: ''
-        //                     },
-        //                     image: ''
-        //                 });
-        //                 setIsLoading(false);
-        //                 onClose();
-        //             })
-        //             .catch(() => {
-        //                 setIsLoading(false);
-        //             }),
-        //         {
-        //             loading: "Creating your user...",
-        //             success: <b>Category successfully created! 🎉</b>,
-        //             error: <b>Failed to create user. Please try again.</b>,
-        //         }
-        //     );
-        // }
     };
+
+    const isFormValid = data.state.trim() && data.address_1.trim();
 
     return (
         <Drawer
             anchor="right"
             PaperProps={{
                 sx: {
-                    width: { xs: '100%', sm: 600, md: 700 },
+                    width: { xs: '100%', sm: 650, md: 750 },
                     backgroundColor: theme.palette.background.default,
                     backgroundImage: `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 100%)`,
                 }
             }}
             sx={{
                 '& .MuiBackdrop-root': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                    backdropFilter: 'blur(4px)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    backdropFilter: 'blur(8px)',
                 }
             }}
             open={open}
             onClose={onClose}
         >
+            {/* Header */}
             <Box sx={{
                 p: 3,
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 borderBottom: `1px solid ${theme.palette.divider}`,
-                background: `linear-gradient(135deg, ${theme.palette.primary.main}15 0%, ${theme.palette.primary.light}10 100%)`,
-                backdropFilter: 'blur(10px)',
+                background: `linear-gradient(135deg, ${theme.palette.primary.main}20 0%, ${theme.palette.primary.light}15 100%)`,
+                backdropFilter: 'blur(20px)',
+                position: 'sticky',
+                top: 0,
+                zIndex: 1,
             }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Tooltip title="Close">
+                    <Tooltip title="Close" arrow>
                         <IconButton
                             onClick={onClose}
                             sx={{
                                 backgroundColor: theme.palette.background.paper,
+                                boxShadow: theme.shadows[2],
                                 '&:hover': {
                                     backgroundColor: theme.palette.action.hover,
-                                    transform: 'scale(1.1)'
+                                    transform: 'scale(1.05) rotate(90deg)'
                                 },
-                                transition: 'all 0.2s ease'
+                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                             }}
                         >
                             <CloseIcon />
                         </IconButton>
                     </Tooltip>
                     <Box>
-                        <Typography variant="inherit" fontWeight={600}>
-                            Edit Basic Details
+                        <Typography variant="h5" fontWeight={700} sx={{
+                            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                        }}>
+                            {!company?.shipping ? 'Create Shipping Address' : 'Edit Shipping Address'}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                            Update the basic details about you
+                            {!company?.shipping ? "Create Shipping details below" : "Update your shipping details below"}
                         </Typography>
                     </Box>
                 </Box>
 
-                <Button
-                    variant="contained"
-                    startIcon={<AddCircleOutlineIcon />}
-                    onClick={handleSubmit}
+                <Chip
+                    icon={isFormValid ? <CheckCircle /> : <Warning />}
+                    label={isFormValid ? "Ready to Save" : "Fill Required Fields"}
+                    color={isFormValid ? "success" : "warning"}
+                    variant="outlined"
                     sx={{
-                        textTransform: 'none',
-                        px: 3,
-                        py: 1.5,
-                        fontSize: '1rem',
                         fontWeight: 600,
-                        borderRadius: 2,
-                        background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                        boxShadow: theme.shadows[4],
-                        '&:hover': {
-                            transform: 'translateY(-2px)',
-                            boxShadow: theme.shadows[8],
-                        },
-                        '&:disabled': {
-                            background: theme.palette.action.disabledBackground,
-                            color: theme.palette.action.disabled,
-                        },
-                        transition: 'all 0.3s ease'
+                        '& .MuiChip-icon': {
+                            fontSize: '1rem'
+                        }
                     }}
-                >
-                    {isLoading ? ('Updating...') : ('Update Details')}
-                </Button>
+                />
             </Box>
+
+            {/* Content */}
             <Box sx={{
                 flex: 1,
                 overflow: 'auto',
@@ -386,279 +321,360 @@ const ShippingEditingModal: React.FC<EditUserModalProps> = ({
                     backgroundColor: theme.palette.background.default,
                 },
                 '&::-webkit-scrollbar-thumb': {
-                    backgroundColor: theme.palette.divider,
+                    backgroundColor: theme.palette.primary.main,
                     borderRadius: 4,
                     '&:hover': {
-                        backgroundColor: theme.palette.action.hover,
+                        backgroundColor: theme.palette.primary.dark,
                     }
                 }
             }}>
-                <Box sx={{ mb: 1, p: 3 }}>
-                    <Grow in timeout={400}>
+                <Box sx={{ p: 3 }}>
+
+                    {/* Main Form */}
+                    <Grow in timeout={600}>
                         <Paper
-                            elevation={2}
+                            elevation={8}
                             sx={{
-                                p: 3,
-                                mb: 2,
-                                borderRadius: 2,
-                                background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
+                                p: 4,
+                                borderRadius: 3,
+                                background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover}30 100%)`,
                                 border: `1px solid ${theme.palette.divider}`,
+                                position: 'relative',
+                                overflow: 'hidden',
+                                '&::before': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    height: 4,
+                                    background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+                                },
                                 transition: 'all 0.3s ease',
                                 '&:hover': {
-                                    transform: 'translateY(-2px)',
-                                    boxShadow: theme.shadows[4]
+                                    transform: 'translateY(-4px)',
+                                    boxShadow: theme.shadows[12]
                                 }
                             }}
                         >
-                            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2, alignItems: 'center', gap: 2 }}>
-
-                                <FormControl sx={{ width: '45%' }}>
-                                    <Typography variant="h6" align="center" gutterBottom >
-                                        Profile Image
-                                    </Typography>
-                                    <input
-                                        type="file"
-                                        accept="image/png, image/jpeg, image/jpg, image/webp"
-                                        style={{ display: 'none' }}
-                                        ref={imageInputRef}
-                                        onChange={e => {
-                                            const file = e.target.files?.[0];
-                                            if (file) handleImageChange(file);
-                                        }}
-                                    />
-                                    <Box
-                                        onClick={handleBoxClick}
-                                        onDrop={handleDrop}
-                                        onDragOver={e => e.preventDefault()}
-                                        onDragEnter={handleDragEnter}
-                                        onDragLeave={handleDragLeave}
-                                        sx={{
-                                            border: `2px dashed ${isDragActive ? theme.palette.primary.main : theme.palette.divider}`,
-                                            borderRadius: 2,
-                                            p: 2,
-                                            position: 'relative',
-                                            textAlign: 'center',
-                                            cursor: 'pointer',
-                                            transition: 'all 0.3s ease',
-                                            backgroundColor: isDragActive ? theme.palette.action.hover : 'transparent',
-                                            '&:hover': {
-                                                borderColor: theme.palette.primary.main,
-                                                backgroundColor: theme.palette.action.hover,
-                                                transform: 'scale(1.02)'
-                                            },
-                                        }}
-                                    >
-                                        {imagePreview ? (
-                                            <Fade in timeout={300}>
-                                                <Box sx={{ position: 'relative', display: 'inline-block' }}>
-                                                    <img
-                                                        src={imagePreview}
-                                                        alt="Image Preview"
-                                                        style={{
-                                                            maxWidth: 150,
-                                                            maxHeight: 150,
-                                                            borderRadius: 8,
-                                                            boxShadow: theme.shadows[2]
-                                                        }}
-                                                    />
-                                                    <Tooltip title="Remove image">
-                                                        <IconButton
-                                                            onClick={removeImage}
-                                                            sx={{
-                                                                position: 'absolute',
-                                                                top: -8,
-                                                                right: -8,
-                                                                backgroundColor: theme.palette.error.main,
-                                                                color: 'white',
-                                                                '&:hover': {
-                                                                    backgroundColor: theme.palette.error.dark,
-                                                                },
-                                                                width: 24,
-                                                                height: 24
-                                                            }}
-                                                        >
-                                                            <Delete fontSize="small" />
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                </Box>
-                                            </Fade>
-                                        ) : (
-                                            <Fade in timeout={300}>
-                                                <Box>
-                                                    <PhotoCamera
-                                                        sx={{
-                                                            fontSize: 32,
-                                                            color: theme.palette.primary.main,
-                                                        }}
-                                                    />
-                                                    <Typography variant="body2" sx={{ fontWeight: 600, }}>
-                                                        Upload Profile Image
-                                                    </Typography>
-                                                    <Typography variant="caption" color="text.secondary" >
-                                                        Drag & drop or click to browse.
-                                                    </Typography>
-                                                    <br />
-                                                    <Typography variant="caption" color="text.secondary">
-                                                        Supports PNG, JPEG, JPG, WebP <br /> Max 5MB • Recommended 1:1 ratio
-                                                    </Typography>
-                                                </Box>
-                                            </Fade>
-                                        )}
-                                    </Box>
-                                </FormControl>
-                            </Box>
-
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center', gap: 2 }}>
-
-                                <Box sx={{ width: '45%' }}>
-                                    <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-                                        First Name <Typography variant="caption" color="text.secondary">(Required)</Typography>
-                                    </Typography>
-                                    <TextField
-                                        fullWidth
-                                        size="small"
-                                        placeholder="First Name"
-                                        value={data.name.first}
-                                        onChange={(e) => handleInputChange('name.first', e.target.value)}
-                                        sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                borderRadius: 1,
-                                            }
-                                        }}
-                                    />
-                                </Box>
-                                <Box sx={{ width: '45%' }}>
-                                    <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-                                        Last Name
-                                    </Typography>
-                                    <TextField
-                                        fullWidth
-                                        size="small"
-                                        placeholder="Last Name"
-                                        value={data.name.last}
-                                        onChange={(e) => handleInputChange('name.last', e.target.value)}
-                                        sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                borderRadius: 1,
-                                            }
-                                        }}
-                                    />
-                                </Box>
-                            </Box>
-
-                            <Box sx={{ mb: 2 }}>
-                                <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-                                    E-mail <Typography variant="caption" color="text.secondary">(Required)</Typography>
+                            {/* Company Logo Section */}
+                            <Box sx={{ mb: 4 }}>
+                                <Typography variant="h6" gutterBottom sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1,
+                                    fontWeight: 600,
+                                    color: theme.palette.primary.main
+                                }}>
+                                    <PhotoCamera />
+                                    Company Branding
                                 </Typography>
-                                <TextField
-                                    fullWidth
-                                    required
-                                    size="small"
-                                    placeholder="Enter your email"
-                                    value={data.email}
-                                    onChange={(e) => handleInputChange('email', e.target.value)}
+                                <Divider sx={{ mb: 3 }} />
+
+                                <Box sx={{ display: 'flex', gap: 4, alignItems: 'start', flexWrap: 'wrap' }}>
+                                    <Box sx={{ flex: 1, width: '45%' }}>
+                                        <Typography variant="h6" gutterBottom sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1,
+                                            mb: 2,
+                                            fontWeight: 600,
+                                            color: theme.palette.primary.main
+                                        }}>
+                                            <Business />
+                                            Address Details
+                                        </Typography>
+                                        <Stack spacing={3}>
+                                            <TextField
+                                                fullWidth
+                                                label="Street Address 1"
+                                                placeholder="Enter your street address"
+                                                value={data.address_1}
+                                                onChange={(e) => handleInputChange('address_1', e.target.value)}
+                                                error={!!formErrors.address_1}
+                                                helperText={formErrors.address_1}
+                                                required
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <Business color={formErrors.address_1 ? 'error' : 'primary'} />
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: 2,
+                                                        transition: 'all 0.3s ease',
+                                                        '&:hover': {
+                                                            transform: 'translateY(-1px)',
+                                                        }
+                                                    }
+                                                }}
+                                            />
+
+                                            <TextField
+                                                fullWidth
+                                                label="Street Address 2"
+                                                placeholder="Enter your street address line 2"
+                                                value={data.address_2}
+                                                onChange={(e) => handleInputChange('address_2', e.target.value)}
+                                                error={!!formErrors.address_2}
+                                                helperText={formErrors.address_2}
+                                                required
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <Business color={formErrors.address_2 ? 'error' : 'primary'} />
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: 2,
+                                                        transition: 'all 0.3s ease',
+                                                        '&:hover': {
+                                                            transform: 'translateY(-1px)',
+                                                        }
+                                                    }
+                                                }}
+                                            />
+
+                                            <TextField
+                                                fullWidth
+                                                label="City"
+                                                placeholder="Enter your city"
+                                                value={data.city}
+                                                onChange={(e) => handleInputChange('city', e.target.value)}
+                                                error={!!formErrors.city}
+                                                helperText={formErrors.city}
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <Language color={formErrors.city ? 'error' : 'primary'} />
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: 2,
+                                                        transition: 'all 0.3s ease',
+                                                        '&:hover': {
+                                                            transform: 'translateY(-1px)',
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                            <TextField
+                                                fullWidth
+                                                label="State"
+                                                placeholder="Enter your state"
+                                                value={data.state}
+                                                onChange={(e) => handleInputChange('state', e.target.value)}
+                                                error={!!formErrors.state}
+                                                helperText={formErrors.state}
+                                                required
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <Business color={formErrors.state ? 'error' : 'primary'} />
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: 2,
+                                                        transition: 'all 0.3s ease',
+                                                        '&:hover': {
+                                                            transform: 'translateY(-1px)',
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                            <TextField
+                                                fullWidth
+                                                label="Pin Code"
+                                                placeholder="Enter your pin code"
+                                                value={data.pinCode}
+                                                onChange={(e) => handleInputChange('pinCode', e.target.value)}
+                                                error={!!formErrors.pinCode}
+                                                helperText={formErrors.pinCode}
+                                                required
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <Business color={formErrors.pinCode ? 'error' : 'primary'} />
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: 2,
+                                                        transition: 'all 0.3s ease',
+                                                        '&:hover': {
+                                                            transform: 'translateY(-1px)',
+                                                        }
+                                                    }
+                                                }}
+                                            />
+
+                                             <TextField
+                                                fullWidth
+                                                label="Shipping Title"
+                                                placeholder="Enter a title for this shipping address"
+                                                value={data.title}
+                                                onChange={(e) => handleInputChange('title', e.target.value)}
+                                                error={!!formErrors.title}
+                                                helperText={formErrors.title}
+                                                required
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <Business color={formErrors.title ? 'error' : 'primary'} />
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: 2,
+                                                        transition: 'all 0.3s ease',
+                                                        '&:hover': {
+                                                            transform: 'translateY(-1px)',
+                                                        }
+                                                    }
+                                                }}
+                                            />
+
+                                             <TextField
+                                                fullWidth
+                                                label="Notes"
+                                                placeholder="Enter any additional notes"
+                                                value={data.notes}
+                                                onChange={(e) => handleInputChange('notes', e.target.value)}
+                                                error={!!formErrors.notes}
+                                                helperText={formErrors.notes}
+                                                required
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <Business color={formErrors.notes ? 'error' : 'primary'} />
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: 2,
+                                                        transition: 'all 0.3s ease',
+                                                        '&:hover': {
+                                                            transform: 'translateY(-1px)',
+                                                        }
+                                                    }
+                                                }}
+                                            />
+
+                                            <FormControl fullWidth error={!!formErrors.country}>
+                                                <InputLabel id="alter-country-label">Country</InputLabel>
+                                                <Select
+                                                    labelId="alter-country-label"
+                                                    value={data.country || ''}
+                                                    label="Country"
+                                                    onChange={(e) => handleInputChange('country', e.target.value)}
+                                                    renderValue={(selected) => {
+                                                        const country = CountryCodes.find(c => c.name === selected);
+                                                        return country ? (
+                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                <Avatar
+                                                                    src={`/src/assets/flags/${country.code.toLowerCase()}.png`}
+                                                                    alt={country.code}
+                                                                    sx={{ width: 24, height: 24 }}
+                                                                    imgProps={{
+                                                                        onError: (e) => {
+                                                                            const target = e.target as HTMLImageElement;
+                                                                            target.onerror = null;
+                                                                            target.src = `https://flagcdn.com/24x18/${country.code.toLowerCase()}.png`;
+                                                                        }
+                                                                    }}
+                                                                />
+                                                                <span>{country.name}</span>
+                                                            </Box>
+                                                        ) : selected;
+                                                    }}
+                                                    sx={{
+                                                        '& .MuiOutlinedInput-root': {
+                                                            borderRadius: 2,
+                                                            transition: 'all 0.3s ease',
+                                                            '&:hover': {
+                                                                transform: 'translateY(-1px)',
+                                                            }
+                                                        }
+                                                    }}
+                                                >
+                                                    {CountryCodes.map((country) => (
+                                                        <MenuItem key={country.code} value={country.name}>
+                                                            <ListItemIcon>
+                                                                <Avatar
+                                                                    src={`/src/assets/flags/${country.code.toLowerCase()}.png`}
+                                                                    alt={country.code}
+                                                                    sx={{ width: 24, height: 24 }}
+                                                                    imgProps={{
+                                                                        onError: (e) => {
+                                                                            const target = e.target as HTMLImageElement;
+                                                                            target.onerror = null;
+                                                                            target.src = `https://flagcdn.com/24x18/${country.code.toLowerCase()}.png`;
+                                                                        }
+                                                                    }}
+                                                                />
+                                                            </ListItemIcon>
+                                                            <ListItemText primary={`${country.name}`} />
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                                <FormHelperText>{formErrors.country || 'Select country'}</FormHelperText>
+                                            </FormControl>
+                                        </Stack>
+                                    </Box>
+                                </Box>
+                            </Box>
+
+                            {/* Action Buttons */}
+                            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+                                <Button
+                                    variant="outlined"
+                                    color="secondary"
+                                    onClick={onClose}
+                                    startIcon={<Close />}
                                     sx={{
-                                        '& .MuiOutlinedInput-root': {
-                                            borderRadius: 1,
+                                        textTransform: 'none',
+                                        fontWeight: 600,
+                                        '&:hover': {
+                                            backgroundColor: theme.palette.action.hover,
                                         }
                                     }}
-                                />
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={handleSubmit}
+                                    disabled={Object.keys(formErrors).length > 0}
+                                    startIcon={isLoading ? <CircularProgress size={20} /> : <Save />}
+                                    sx={{
+                                        textTransform: 'none',
+                                        fontWeight: 600,
+                                        '&:hover': {
+                                            backgroundColor: theme.palette.primary.dark,
+                                        }
+                                    }}
+                                >
+                                    {isLoading ? 'Saving...' : !company?.shipping ? "Create Shipping Address" : 'Save Address'}
+                                </Button>
                             </Box>
-
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center', gap: 2 }}>
-
-                                <Box sx={{ width: '20%' }}>
-                                    <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-                                        Country Code
-                                    </Typography>
-                                    <TextField
-                                        fullWidth
-                                        size="small"
-                                        placeholder="Enter country code"
-                                        value={data.phone.code}
-                                        onChange={(e) => handleInputChange('phone.code', e.target.value)}
-                                        sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                borderRadius: 1,
-                                            }
-                                        }}
-                                    />
-                                </Box>
-                                <Box sx={{ width: '70%' }}>
-                                    <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-                                        Phone Number
-                                    </Typography>
-                                    <TextField
-                                        fullWidth
-                                        size="small"
-                                        placeholder="Enter your phone number"
-                                        value={data.phone.number}
-                                        onChange={(e) => handleInputChange('phone.number', e.target.value)}
-                                        sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                borderRadius: 1,
-                                            }
-                                        }}
-                                    />
-                                </Box>
-                            </Box>
-
                         </Paper>
                     </Grow>
                 </Box>
             </Box>
-
-            <Box sx={{
-                p: 3,
-                borderTop: `1px solid ${theme.palette.divider}`,
-                backgroundColor: theme.palette.background.paper,
-                background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
-            }}>
-                <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="center">
-                    <Stack direction="row" spacing={2}>
-                        <Button
-                            variant="outlined"
-                            // onClick={resetForm}
-                            // disabled={isLoading}
-                            sx={{
-                                textTransform: 'none',
-                                borderRadius: 2,
-                                px: 3
-                            }}
-                        >
-                            Reset Form
-                        </Button>
-                        <Button
-                            variant="contained"
-                            startIcon={isLoading ? <Timeline className="animate-spin" /> : <AddCircleOutlineIcon />}
-                            onClick={handleSubmit}
-                            sx={{
-                                textTransform: 'none',
-                                px: 4,
-                                py: 1.5,
-                                fontSize: '1rem',
-                                fontWeight: 600,
-                                borderRadius: 2,
-                                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                                boxShadow: theme.shadows[4],
-                                '&:hover': {
-                                    transform: 'translateY(-2px)',
-                                    boxShadow: theme.shadows[8],
-                                },
-                                '&:disabled': {
-                                    background: theme.palette.action.disabledBackground,
-                                    color: theme.palette.action.disabled,
-                                },
-                                transition: 'all 0.3s ease'
-                            }}
-                        >
-                            {isLoading ? 'Updating Details...' : 'Update Details'}
-                        </Button>
-                    </Stack>
-                </Stack>
-            </Box>
         </Drawer>
     );
-};
+}
 
 export default ShippingEditingModal;

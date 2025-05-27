@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Box,
     TextField,
@@ -12,369 +12,414 @@ import {
     Grow,
     FormControl,
     Stack,
+    Divider,
+    Chip,
+    InputAdornment,
+    CircularProgress,
     Fade,
+    Zoom,
+    Slide,
+    Card,
+    CardContent,
+    alpha,
+    useMediaQuery,
 } from "@mui/material";
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import {
     Close as CloseIcon,
-    Delete,
     PhotoCamera,
-    Timeline,
+    Business,
+    Language,
+    CheckCircle,
+    Warning,
+    Close,
+    Save,
+    LocationOn,
+    Home,
+    Public,
+    Flag,
+    Edit,
+    Add,
+    KeyboardArrowRight,
+    LocationCity,
+    MarkunreadMailbox,
 } from "@mui/icons-material";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/store/store";
-import { GetUser } from "@/utils/types";
+import { GetCompany, GetBillingAddress } from "@/utils/types";
+import { createCompanyBilling, updateCompanyBilling } from "@/services/company";
+import CountryCodes from '../internals/data/CountryCodes.json';
+import { MenuItem, Select, ListItemIcon, ListItemText, Avatar, InputLabel, FormHelperText } from '@mui/material';
 
-interface EditUserModalProps {
+interface EditBillingModalProps {
     open: boolean;
     onClose: () => void;
-    // onCreated: (user: { name: string; _id: string }) => void;
     onUpdated: () => Promise<void>;
-    user: GetUser | null;
+    company: GetCompany | null;
 }
 
-interface UserFormData {
-    name: {
-        first: string;
-        last?: string;
-    };
-    email: string;
-    phone: {
-        code: string;
-        number: string;
-    };
-    image?: File | string;
-}
-
-const BillingEditingModal: React.FC<EditUserModalProps> = ({
+const BillingEditingModal: React.FC<EditBillingModalProps> = ({
     open,
     onClose,
-    // onCreated,
     onUpdated,
-    user,
+    company,
 }) => {
     const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const dispatch = useDispatch<AppDispatch>();
     const [isLoading, setIsLoading] = useState(false);
-    const imageInputRef = useRef<HTMLInputElement | null>(null);
-    const [isDragActive, setIsDragActive] = useState(false);
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
-    const [data, setData] = useState<UserFormData>({
-        name: {
-            first: '',
-            last: ''
-        },
-        email: '',
-        phone: {
-            code: '',
-            number: ''
-        },
-        image: ''
+    const [showValidation, setShowValidation] = useState(false);
+    const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+    const [focusedField, setFocusedField] = useState<string>('');
+
+    const [data, setData] = useState<GetBillingAddress>({
+        _id: '',
+        user_id: '',
+        company_id: '',
+        is_deleted: false,
+        address_1: '',
+        address_2: '',
+        pinCode: '',
+        city: '',
+        state: '',
+        country: '',
     });
 
+    // Validation function
+    const validateForm = (formData = data) => {
+        const errors: Record<string, string> = {};
+
+        if (!formData.address_1.trim()) {
+            errors.address_1 = 'Street Address line 1 is required';
+        }
+        if (!formData.state.trim()) {
+            errors.state = 'State is required';
+        }
+
+        if (formData.pinCode && !/^\d{6}$/.test(formData.pinCode)) {
+            errors.pinCode = 'Pin Code number should be 6 digits long';
+        }
+
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+
     const handleInputChange = (
-        field:
-            | keyof UserFormData
-            | 'name.first'
-            | 'name.last'
-            | 'email'
-            | 'phone.code'
-            | 'phone.number',
+        field: keyof GetBillingAddress,
         value: string
     ) => {
         setData(prev => {
-            if (field === 'name.first' || field === 'name.last') {
-                const nameField = field.split('.')[1] as 'first' | 'last';
-                return {
-                    ...prev,
-                    name: {
-                        ...prev.name,
-                        [nameField]: value
-                    }
-                };
-            }
-            if (field === 'phone.code' || field === 'phone.number') {
-                const phoneField = field.split('.')[1] as 'code' | 'number';
-                return {
-                    ...prev,
-                    phone: {
-                        ...prev.phone,
-                        [phoneField]: value
-                    }
-                };
-            }
-            return {
-                ...prev,
-                [field]: value
-            };
+            const newData = { ...prev, [field]: value };
+            validateForm(newData);
+            return newData;
         });
     };
 
-    const handleImageChange = useCallback((file: File) => {
-        if (!file) return;
-
-        if (!['image/png', 'image/jpeg', 'image/jpg', 'image/webp'].includes(file.type)) {
-            toast.error('Only PNG, JPEG, JPG, or WebP images are allowed.');
-            return;
-        }
-
-        if (file.size > 5 * 1024 * 1024) { // 5MB limit
-            toast.error('Image size should be less than 5MB.');
-            return;
-        }
-
-        setData(prev => ({
-            ...prev,
-            image: file
-        }));
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const result = e.target?.result as string;
-            setImagePreview(result);
-        };
-        reader.readAsDataURL(file);
-    }, []);
-
-    const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragActive(false);
-
-        const file = e.dataTransfer.files?.[0];
-        if (file) {
-            handleImageChange(file);
-            setData(prev => ({
-                ...prev,
-                image: file
-            }));
-        };
-    }, [handleImageChange]);
-
-    const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragActive(true);
-    }, []);
-
-    const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragActive(false);
-    }, []);
-
-    const handleBoxClick = () => {
-        imageInputRef.current?.click();
+    const resetForm = () => {
+        setData({
+            _id: '',
+            user_id: '',
+            company_id: '',
+            is_deleted: false,
+            address_1: '',
+            address_2: '',
+            pinCode: '',
+            city: '',
+            state: '',
+            country: '',
+        });
+        setFormErrors({});
+        setShowValidation(false);
     };
 
-    const removeImage = useCallback((e: React.MouseEvent) => {
-        e.stopPropagation();
-        setImagePreview(null);
-        if (imageInputRef.current) {
-            imageInputRef.current.value = '';
-        }
-    }, []);
-
     useEffect(() => {
-        if (open && user) {
+        if (open && company?.billing) {
             setData({
-                name: {
-                    first: user.name.first || '',
-                    last: user.name.last || ''
-                },
-                email: user.email || '',
-                phone: {
-                    code: user.phone?.code || '',
-                    number: user.phone?.number || ''
-                },
-                // If user.image is a string, it means it's already a URL or base64 string
-                image: typeof user.image === 'string' ? user.image : '',
+                _id: company?.billing._id || '',
+                company_id: company?._id || '',
+                state: company?.billing?.state || '',
+                address_1: company.billing.address_1 || '',
+                user_id: company.billing?.user_id || '',
+                address_2: company.billing.address_2 || '',
+                city: company.billing?.city || '',
+                country: company.billing?.country || '',
+                pinCode: company.billing?.pinCode || '',
+                is_deleted: company.billing?.is_deleted || false,
             });
-
-            setImagePreview(
-                typeof user?.image === "string" ? user.image : null
-            );
-        } else if (open && !user) {
+            setFormErrors({});
+        } else if (open && !company?.billing) {
             setData({
-                name: {
-                    first: '',
-                    last: ''
-                },
-                email: '',
-                phone: {
-                    code: '',
-                    number: ''
-                },
-                image: ''
+                _id: '',
+                user_id: company?.user_id || '',
+                company_id: company?._id || '',
+                is_deleted: false,
+                address_1: '',
+                address_2: '',
+                pinCode: '',
+                city: '',
+                state: '',
+                country: '',
             });
-            setImagePreview(null);
+            resetForm();
         }
-    }, [open, user]);
+    }, [open, company?.billing, company?._id, company?.user_id]);
 
     const handleSubmit = async () => {
-        setIsLoading(true);
-        const sanitizedData: any = {
-            name: {
-                first: data.name.first.trim(),
-                last: (data?.name?.last || '').trim() || '',
-            },
-        };
-        if (data.email && data.email !== '') sanitizedData.email = data.email.trim();
-        if (data.phone && data.phone.code && data.phone.number) {
-            sanitizedData.phone = {
-                code: data.phone.code.trim(),
-                number: data.phone.number.trim()
-            };
+        setShowValidation(true);
+
+        if (!validateForm()) {
+            toast.error('Please fix the form errors before submitting');
+            return;
         }
-        if (data.image && typeof data.image !== 'string') sanitizedData.image = data.image;
+
+        setIsLoading(true);
+        const sanitizedData: Partial<GetBillingAddress> = {
+            company_id: company?._id,
+            state: data.state.trim(),
+            address_1: data.address_1.trim(),
+            user_id: company?.user_id,
+        };
+
+        if (data.address_2 && data.address_2 !== '') sanitizedData.address_2 = data.address_2.trim();
+        if (data.city && data.city !== '') sanitizedData.city = data.city.trim();
+        if (data.country && data.country !== '') sanitizedData.country = data.country.trim();
+        if (data.pinCode && data.pinCode !== '') sanitizedData.pinCode = data.pinCode.trim();
 
         const formData = new FormData();
         Object.entries(sanitizedData).forEach(([key, value]) => {
             if (typeof value === 'boolean') {
                 formData.append(key, value ? 'true' : 'false');
-            } else if (value !== undefined && value !== null) {
+            } else if (typeof value === 'string') {
                 formData.append(key, value);
             }
         });
 
-        // if (user && user._id) {
-        //     // Edit mode
-        //     await toast.promise(
-        //         dispatch(updateCategory({
-        //             id: user._id,
-        //             data: formData
-        //         }))
-        //             .unwrap()
-        //             .then(() => {
-        //                 setIsLoading(false);
-        //                 onClose();
-        //                 onUpdated();
-        //             })
-        //             .catch(() => {
-        //                 setIsLoading(false);
-        //             }),
-        //         {
-        //             loading: "Updating your user...",
-        //             success: <b>Category successfully updated! 🎉</b>,
-        //             error: <b>Failed to update user. Please try again.</b>,
-        //         }
-        //     );
-        // } else {
-        //     // Create mode
-        //     await toast.promise(
-        //         dispatch(createCategory({ categoryData: formData }))
-        //             .unwrap()
-        //             .then((response) => {
-
-        //                 // onCreated(newCategory);
-        //                 setData({
-        //                     name: {
-        //                         first: '',
-        //                         last: ''
-        //                     },
-        //                     email: '',
-        //                     phone: {
-        //                         code: '',
-        //                         number: ''
-        //                     },
-        //                     image: ''
-        //                 });
-        //                 setIsLoading(false);
-        //                 onClose();
-        //             })
-        //             .catch(() => {
-        //                 setIsLoading(false);
-        //             }),
-        //         {
-        //             loading: "Creating your user...",
-        //             success: <b>Category successfully created! 🎉</b>,
-        //             error: <b>Failed to create user. Please try again.</b>,
-        //         }
-        //     );
-        // }
+        if (company?.billing === null) {
+            await toast.promise(
+                dispatch(createCompanyBilling({
+                    data: formData,
+                }))
+                    .unwrap()
+                    .then(() => {
+                        setIsLoading(false);
+                        onClose();
+                        onUpdated();
+                    })
+                    .catch(() => {
+                        setIsLoading(false);
+                    }),
+                {
+                    loading: <b>Creating your billing Address... ⏳</b>,
+                    success: <b>Billing Details successfully created! 🎉</b>,
+                    error: <b>Failed to create billing. 🚫</b>,
+                }
+            );
+        } else {
+            await toast.promise(
+                dispatch(updateCompanyBilling({
+                    data: formData,
+                    id: company?.billing?._id ?? '',
+                }))
+                    .unwrap()
+                    .then(() => {
+                        setIsLoading(false);
+                        onClose();
+                        onUpdated();
+                    })
+                    .catch(() => {
+                        setIsLoading(false);
+                    }),
+                {
+                    loading: <b>Updating your billing... ⏳</b>,
+                    success: <b>Company Details successfully updated! 🎉</b>,
+                    error: <b>Failed to update billing. 🚫</b>,
+                }
+            );
+        }
     };
+
+    const isFormValid = data.state.trim() && data.address_1.trim();
+
+
+    const requiredFields = ['address_1', 'state'];
+    const optionalFields = ['address_2', 'city', 'pinCode', 'country'];
+    const totalFields = requiredFields.length + optionalFields.length;
+
+    const filledFields = [
+        ...requiredFields.filter(field => !!data[field as keyof GetBillingAddress]?.toString().trim()),
+        ...optionalFields.filter(field => !!data[field as keyof GetBillingAddress]?.toString().trim())
+    ].length;
+
+    const completionPercentage = Math.round((filledFields / totalFields) * 100);
+
+    const formFields = [
+        {
+            key: 'address_1',
+            label: 'Street Address 1',
+            placeholder: 'Enter your street address',
+            icon: Home,
+            required: true,
+            description: 'Primary street address for billing'
+        },
+        {
+            key: 'address_2',
+            label: 'Street Address 2',
+            placeholder: 'Apartment, suite, unit, etc. (optional)',
+            icon: Business,
+            required: false,
+            description: 'Additional address information'
+        },
+        {
+            key: 'city',
+            label: 'City',
+            placeholder: 'Enter your city',
+            icon: LocationCity,
+            required: false,
+            description: 'City or town name'
+        },
+        {
+            key: 'state',
+            label: 'State/Province',
+            placeholder: 'Enter your state or province',
+            icon: LocationOn,
+            required: true,
+            description: 'State, province, or region'
+        },
+        {
+            key: 'pinCode',
+            label: 'Postal Code',
+            placeholder: 'Enter 6-digit postal code',
+            icon: MarkunreadMailbox,
+            required: false,
+            description: 'ZIP or postal code (6 digits)'
+        }
+    ];
 
     return (
         <Drawer
             anchor="right"
             PaperProps={{
                 sx: {
-                    width: { xs: '100%', sm: 600, md: 700 },
+                    width: { xs: '100%', sm: 650, md: 800 },
                     backgroundColor: theme.palette.background.default,
-                    backgroundImage: `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 100%)`,
+                    backgroundImage: `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${alpha(theme.palette.primary.main, 0.02)} 100%)`,
+                    overflow: 'hidden',
                 }
             }}
             sx={{
                 '& .MuiBackdrop-root': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                    backdropFilter: 'blur(4px)',
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    backdropFilter: 'blur(12px)',
                 }
             }}
             open={open}
             onClose={onClose}
         >
-            <Box sx={{
-                p: 3,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                borderBottom: `1px solid ${theme.palette.divider}`,
-                background: `linear-gradient(135deg, ${theme.palette.primary.main}15 0%, ${theme.palette.primary.light}10 100%)`,
-                backdropFilter: 'blur(10px)',
-            }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Tooltip title="Close">
-                        <IconButton
-                            onClick={onClose}
-                            sx={{
-                                backgroundColor: theme.palette.background.paper,
-                                '&:hover': {
-                                    backgroundColor: theme.palette.action.hover,
-                                    transform: 'scale(1.1)'
-                                },
-                                transition: 'all 0.2s ease'
-                            }}
-                        >
-                            <CloseIcon />
-                        </IconButton>
-                    </Tooltip>
-                    <Box>
-                        <Typography variant="inherit" fontWeight={600}>
-                            Edit Basic Details
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            Update the basic details about you
-                        </Typography>
-                    </Box>
-                </Box>
+            {/* Enhanced Header */}
+            <Slide direction="down" in={open} timeout={500}>
+                <Box sx={{
+                    p: { xs: 2, sm: 3 },
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                    background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.08)} 0%, ${alpha(theme.palette.secondary.main, 0.05)} 100%)`,
+                    backdropFilter: 'blur(20px)',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 1200,
+                    boxShadow: `0 8px 32px ${alpha(theme.palette.primary.main, 0.1)}`,
+                }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Zoom in={open} timeout={600}>
+                            <Tooltip title="Close" arrow placement="bottom">
+                                <IconButton
+                                    onClick={onClose}
+                                    sx={{
+                                        backgroundColor: alpha(theme.palette.background.paper, 0.9),
+                                        boxShadow: `0 4px 20px ${alpha(theme.palette.primary.main, 0.2)}`,
+                                        border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                                        '&:hover': {
+                                            backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                                            transform: 'scale(1.1) rotate(90deg)',
+                                            boxShadow: `0 6px 25px ${alpha(theme.palette.primary.main, 0.3)}`,
+                                        },
+                                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                                    }}
+                                >
+                                    <CloseIcon />
+                                </IconButton>
+                            </Tooltip>
+                        </Zoom>
 
-                <Button
-                    variant="contained"
-                    startIcon={<AddCircleOutlineIcon />}
-                    onClick={handleSubmit}
-                    sx={{
-                        textTransform: 'none',
-                        px: 3,
-                        py: 1.5,
-                        fontSize: '1rem',
-                        fontWeight: 600,
-                        borderRadius: 2,
-                        background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                        boxShadow: theme.shadows[4],
-                        '&:hover': {
-                            transform: 'translateY(-2px)',
-                            boxShadow: theme.shadows[8],
-                        },
-                        '&:disabled': {
-                            background: theme.palette.action.disabledBackground,
-                            color: theme.palette.action.disabled,
-                        },
-                        transition: 'all 0.3s ease'
-                    }}
-                >
-                    {isLoading ? ('Updating...') : ('Update Details')}
-                </Button>
-            </Box>
+                        <Fade in={open} timeout={800}>
+                            <Box>
+                                <Typography variant={isMobile ? "h6" : "h5"} fontWeight={700} sx={{
+                                    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1,
+                                }}>
+                                    {company?.billing === null ? <Add sx={{ color: theme.palette.primary.main }} /> : <Edit sx={{ color: theme.palette.primary.main }} />}
+                                    {company?.billing === null ? 'Create Billing Address' : 'Edit Billing Address'}
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                                    {company?.billing === null ? "Set up your billing details" : "Update your billing information"}
+                                </Typography>
+                            </Box>
+                        </Fade>
+                    </Box>
+
+                    <Fade in={open} timeout={1000}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            {/* Progress Indicator */}
+                            <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 1 }}>
+                                <Typography variant="caption" color="text.secondary">
+                                    {completionPercentage}% Complete
+                                </Typography>
+                                <Box sx={{
+                                    width: 60,
+                                    height: 4,
+                                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                                    borderRadius: 2,
+                                    overflow: 'hidden'
+                                }}>
+                                    <Box sx={{
+                                        width: `${completionPercentage}%`,
+                                        height: '100%',
+                                        backgroundColor: theme.palette.primary.main,
+                                        borderRadius: 2,
+                                        transition: 'width 0.3s ease'
+                                    }} />
+                                </Box>
+                            </Box>
+
+                            <Chip
+                                icon={isFormValid ? <CheckCircle /> : <Warning />}
+                                label={isFormValid ? "Ready to Save" : "Fill Required Fields"}
+                                color={isFormValid ? "success" : "warning"}
+                                variant="outlined"
+                                sx={{
+                                    fontWeight: 600,
+                                    backgroundColor: alpha(isFormValid ? theme.palette.success.main : theme.palette.warning.main, 0.1),
+                                    borderColor: alpha(isFormValid ? theme.palette.success.main : theme.palette.warning.main, 0.3),
+                                    '& .MuiChip-icon': {
+                                        fontSize: '1rem'
+                                    },
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': {
+                                        transform: 'scale(1.05)',
+                                    }
+                                }}
+                            />
+                        </Box>
+                    </Fade>
+                </Box>
+            </Slide>
+
+            {/* Enhanced Content */}
             <Box sx={{
                 flex: 1,
                 overflow: 'auto',
@@ -383,282 +428,423 @@ const BillingEditingModal: React.FC<EditUserModalProps> = ({
                     width: 8,
                 },
                 '&::-webkit-scrollbar-track': {
-                    backgroundColor: theme.palette.background.default,
+                    backgroundColor: alpha(theme.palette.background.default, 0.1),
                 },
                 '&::-webkit-scrollbar-thumb': {
-                    backgroundColor: theme.palette.divider,
+                    backgroundColor: alpha(theme.palette.primary.main, 0.3),
                     borderRadius: 4,
                     '&:hover': {
-                        backgroundColor: theme.palette.action.hover,
+                        backgroundColor: alpha(theme.palette.primary.main, 0.5),
                     }
                 }
             }}>
-                <Box sx={{ mb: 1, p: 3 }}>
+                <Box sx={{ p: { xs: 2, sm: 3 }, pb: 6 }}>
+                    {/* Header Card */}
                     <Grow in timeout={400}>
+                        <Card sx={{
+                            mb: 3,
+                            background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.secondary.main, 0.03)} 100%)`,
+                            border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                            borderRadius: 3,
+                            overflow: 'hidden',
+                            position: 'relative',
+                            '&::before': {
+                                content: '""',
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                height: 4,
+                                background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+                            }
+                        }}>
+                            <CardContent sx={{ p: 3 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                                    <Box sx={{
+                                        p: 1.5,
+                                        borderRadius: 2,
+                                        backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}>
+                                        <LocationOn sx={{ color: theme.palette.primary.main, fontSize: 24 }} />
+                                    </Box>
+                                    <Box>
+                                        <Typography variant="h6" fontWeight={600} color="primary">
+                                            Billing Address Information
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            This address will be used for all billing and invoicing purposes
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                            </CardContent>
+                        </Card>
+                    </Grow>
+
+                    {/* Main Form */}
+                    <Grow in timeout={600}>
                         <Paper
-                            elevation={2}
+                            elevation={0}
                             sx={{
-                                p: 3,
-                                mb: 2,
-                                borderRadius: 2,
-                                background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
-                                border: `1px solid ${theme.palette.divider}`,
+                                p: { xs: 3, sm: 4 },
+                                borderRadius: 3,
+                                background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)} 0%, ${alpha(theme.palette.background.paper, 0.7)} 100%)`,
+                                border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                                position: 'relative',
+                                overflow: 'hidden',
+                                backdropFilter: 'blur(20px)',
+                                boxShadow: `0 20px 60px ${alpha(theme.palette.primary.main, 0.08)}`,
                                 transition: 'all 0.3s ease',
                                 '&:hover': {
                                     transform: 'translateY(-2px)',
-                                    boxShadow: theme.shadows[4]
+                                    boxShadow: `0 25px 70px ${alpha(theme.palette.primary.main, 0.12)}`
                                 }
                             }}
                         >
-                            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2, alignItems: 'center', gap: 2 }}>
+                            {/* Form Fields */}
+                            <Stack spacing={4}>
+                                {formFields.map((field, index) => (
+                                    <Slide key={field.key} direction="up" in timeout={800 + index * 100}>
+                                        <Box>
+                                            <TextField
+                                                fullWidth
+                                                label={field.label}
+                                                placeholder={field.placeholder}
+                                                value={data[field.key as keyof GetBillingAddress] || ''}
+                                                onChange={(e) => handleInputChange(field.key as keyof GetBillingAddress, e.target.value)}
+                                                error={!!formErrors[field.key]}
+                                                helperText={formErrors[field.key] || field.description}
+                                                required={field.required}
+                                                onFocus={() => setFocusedField(field.key)}
+                                                onBlur={() => setFocusedField('')}
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <Box sx={{
+                                                                p: 0.5,
+                                                                borderRadius: 1,
+                                                                backgroundColor: focusedField === field.key
+                                                                    ? alpha(theme.palette.primary.main, 0.1)
+                                                                    : 'transparent',
+                                                                transition: 'all 0.3s ease',
+                                                                display: 'flex',
+                                                                alignItems: 'center'
+                                                            }}>
+                                                                <field.icon
+                                                                    color={formErrors[field.key] ? 'error' :
+                                                                        focusedField === field.key ? 'primary' : 'action'}
+                                                                    sx={{ fontSize: 20 }}
+                                                                />
+                                                            </Box>
+                                                        </InputAdornment>
+                                                    ),
+                                                    endAdornment: field.required && (
+                                                        <InputAdornment position="end">
+                                                            <Chip
+                                                                label="Required"
+                                                                size="small"
+                                                                color="primary"
+                                                                variant="outlined"
+                                                                sx={{
+                                                                    fontSize: '0.7rem',
+                                                                    height: 20,
+                                                                    opacity: focusedField === field.key ? 1 : 0.6,
+                                                                    transition: 'opacity 0.3s ease'
+                                                                }}
+                                                            />
+                                                        </InputAdornment>
+                                                    )
+                                                }}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: 2,
+                                                        backgroundColor: focusedField === field.key
+                                                            ? alpha(theme.palette.primary.main, 0.02)
+                                                            : alpha(theme.palette.background.paper, 0.5),
+                                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                                        '&:hover': {
+                                                            transform: 'translateY(-1px)',
+                                                            boxShadow: `0 4px 20px ${alpha(theme.palette.primary.main, 0.1)}`,
+                                                        },
+                                                        '&.Mui-focused': {
+                                                            transform: 'translateY(-2px)',
+                                                            boxShadow: `0 8px 30px ${alpha(theme.palette.primary.main, 0.15)}`,
+                                                        }
+                                                    },
+                                                    '& .MuiFormHelperText-root': {
+                                                        marginLeft: 0,
+                                                        marginTop: 1,
+                                                        fontSize: '0.75rem',
+                                                        color: formErrors[field.key]
+                                                            ? theme.palette.error.main
+                                                            : alpha(theme.palette.text.secondary, 0.7)
+                                                    }
+                                                }}
+                                            />
+                                        </Box>
+                                    </Slide>
+                                ))}
 
-                                <FormControl sx={{ width: '45%' }}>
-                                    <Typography variant="h6" align="center" gutterBottom >
-                                        Profile Image
-                                    </Typography>
-                                    <input
-                                        type="file"
-                                        accept="image/png, image/jpeg, image/jpg, image/webp"
-                                        style={{ display: 'none' }}
-                                        ref={imageInputRef}
-                                        onChange={e => {
-                                            const file = e.target.files?.[0];
-                                            if (file) handleImageChange(file);
-                                        }}
-                                    />
-                                    <Box
-                                        onClick={handleBoxClick}
-                                        onDrop={handleDrop}
-                                        onDragOver={e => e.preventDefault()}
-                                        onDragEnter={handleDragEnter}
-                                        onDragLeave={handleDragLeave}
+                                {/* Enhanced Country Select */}
+                                <Slide direction="up" in timeout={1300}>
+                                    <FormControl fullWidth error={!!formErrors.country}>
+                                        <InputLabel id="country-select-label" sx={{
+                                            color: focusedField === 'country' ? theme.palette.primary.main : undefined,
+                                            '&.Mui-focused': {
+                                                color: theme.palette.primary.main
+                                            }
+                                        }}>
+                                            Country
+                                        </InputLabel>
+                                        <Select
+                                            labelId="country-select-label"
+                                            value={data.country || ''}
+                                            label="Country"
+                                            onChange={(e) => handleInputChange('country', e.target.value)}
+                                            onFocus={() => setFocusedField('country')}
+                                            onBlur={() => setFocusedField('')}
+                                            startAdornment={
+                                                <InputAdornment position="start">
+                                                    <Box sx={{
+                                                        p: 0.5,
+                                                        borderRadius: 1,
+                                                        backgroundColor: focusedField === 'country'
+                                                            ? alpha(theme.palette.primary.main, 0.1)
+                                                            : 'transparent',
+                                                        transition: 'all 0.3s ease',
+                                                        display: 'flex',
+                                                        alignItems: 'center'
+                                                    }}>
+                                                        <Public color={focusedField === 'country' ? 'primary' : 'action'} sx={{ fontSize: 20 }} />
+                                                    </Box>
+                                                </InputAdornment>
+                                            }
+                                            renderValue={(selected) => {
+                                                const country = CountryCodes.find(c => c.name === selected);
+                                                return country ? (
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, ml: 1 }}>
+                                                        <Avatar
+                                                            src={`/src/assets/flags/${country.code.toLowerCase()}.png`}
+                                                            alt={country.code}
+                                                            sx={{
+                                                                width: 24,
+                                                                height: 24,
+                                                                boxShadow: `0 2px 8px ${alpha(theme.palette.common.black, 0.1)}`
+                                                            }}
+                                                            imgProps={{
+                                                                onError: (e) => {
+                                                                    const target = e.target as HTMLImageElement;
+                                                                    target.onerror = null;
+                                                                    target.src = `https://flagcdn.com/24x18/${country.code.toLowerCase()}.png`;
+                                                                }
+                                                            }}
+                                                        />
+                                                        <span>{country.name}</span>
+                                                    </Box>
+                                                ) : (
+                                                    <Box sx={{ ml: 1 }}>{selected}</Box>
+                                                );
+                                            }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    borderRadius: 2,
+                                                    backgroundColor: focusedField === 'country'
+                                                        ? alpha(theme.palette.primary.main, 0.02)
+                                                        : alpha(theme.palette.background.paper, 0.5),
+                                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                                    '&:hover': {
+                                                        transform: 'translateY(-1px)',
+                                                        boxShadow: `0 4px 20px ${alpha(theme.palette.primary.main, 0.1)}`,
+                                                    },
+                                                    '&.Mui-focused': {
+                                                        transform: 'translateY(-2px)',
+                                                        boxShadow: `0 8px 30px ${alpha(theme.palette.primary.main, 0.15)}`,
+                                                    }
+                                                }
+                                            }}
+                                            MenuProps={{
+                                                PaperProps: {
+                                                    sx: {
+                                                        maxHeight: 300,
+                                                        borderRadius: 2,
+                                                        boxShadow: `0 20px 60px ${alpha(theme.palette.common.black, 0.15)}`,
+                                                        backdropFilter: 'blur(20px)',
+                                                        border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                                                        '& .MuiMenuItem-root': {
+                                                            borderRadius: 1,
+                                                            margin: '2px 8px',
+                                                            transition: 'all 0.2s ease',
+                                                            '&:hover': {
+                                                                backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                                                                transform: 'translateX(4px)',
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }}
+                                        >
+                                            {CountryCodes.map((country) => (
+                                                <MenuItem key={country.code} value={country.name}>
+                                                    <ListItemIcon>
+                                                        <Avatar
+                                                            src={`/src/assets/flags/${country.code.toLowerCase()}.png`}
+                                                            alt={country.code}
+                                                            sx={{
+                                                                width: 24,
+                                                                height: 24,
+                                                                boxShadow: `0 2px 8px ${alpha(theme.palette.common.black, 0.1)}`
+                                                            }}
+                                                            imgProps={{
+                                                                onError: (e) => {
+                                                                    const target = e.target as HTMLImageElement;
+                                                                    target.onerror = null;
+                                                                    target.src = `https://flagcdn.com/24x18/${country.code.toLowerCase()}.png`;
+                                                                }
+                                                            }}
+                                                        />
+                                                    </ListItemIcon>
+                                                    <ListItemText
+                                                        primary={country.name}
+                                                        sx={{
+                                                            '& .MuiListItemText-primary': {
+                                                                fontWeight: 500
+                                                            }
+                                                        }}
+                                                    />
+                                                    <KeyboardArrowRight sx={{
+                                                        opacity: 0.5,
+                                                        transition: 'opacity 0.2s ease',
+                                                        '.MuiMenuItem-root:hover &': {
+                                                            opacity: 1
+                                                        }
+                                                    }} />
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                        <FormHelperText sx={{
+                                            marginLeft: 0,
+                                            marginTop: 1,
+                                            fontSize: '0.75rem',
+                                            color: formErrors.country
+                                                ? theme.palette.error.main
+                                                : alpha(theme.palette.text.secondary, 0.7)
+                                        }}>
+                                            {formErrors.country || 'Select your country for billing purposes'}
+                                        </FormHelperText>
+                                    </FormControl>
+                                </Slide>
+                            </Stack>
+
+                            {/* Enhanced Action Buttons */}
+                            <Fade in timeout={1500}>
+                                <Box sx={{
+                                    display: 'flex',
+                                    justifyContent: 'flex-end',
+                                    gap: 2,
+                                    mt: 5,
+                                    pt: 3,
+                                    borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`
+                                }}>
+                                    <Button
+                                        variant="outlined"
+                                        color="secondary"
+                                        onClick={onClose}
+                                        startIcon={<Close />}
                                         sx={{
-                                            border: `2px dashed ${isDragActive ? theme.palette.primary.main : theme.palette.divider}`,
+                                            textTransform: 'none',
+                                            fontWeight: 600,
                                             borderRadius: 2,
-                                            p: 2,
-                                            position: 'relative',
-                                            textAlign: 'center',
-                                            cursor: 'pointer',
-                                            transition: 'all 0.3s ease',
-                                            backgroundColor: isDragActive ? theme.palette.action.hover : 'transparent',
+                                            px: 3,
+                                            py: 1.5,
+                                            borderColor: alpha(theme.palette.secondary.main, 0.3),
+                                            backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                                            backdropFilter: 'blur(10px)',
+                                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                                             '&:hover': {
-                                                borderColor: theme.palette.primary.main,
-                                                backgroundColor: theme.palette.action.hover,
-                                                transform: 'scale(1.02)'
-                                            },
+                                                backgroundColor: alpha(theme.palette.secondary.main, 0.08),
+                                                borderColor: theme.palette.secondary.main,
+                                                transform: 'translateY(-2px)',
+                                                boxShadow: `0 8px 25px ${alpha(theme.palette.secondary.main, 0.2)}`,
+                                            }
                                         }}
                                     >
-                                        {imagePreview ? (
-                                            <Fade in timeout={300}>
-                                                <Box sx={{ position: 'relative', display: 'inline-block' }}>
-                                                    <img
-                                                        src={imagePreview}
-                                                        alt="Image Preview"
-                                                        style={{
-                                                            maxWidth: 150,
-                                                            maxHeight: 150,
-                                                            borderRadius: 8,
-                                                            boxShadow: theme.shadows[2]
-                                                        }}
-                                                    />
-                                                    <Tooltip title="Remove image">
-                                                        <IconButton
-                                                            onClick={removeImage}
-                                                            sx={{
-                                                                position: 'absolute',
-                                                                top: -8,
-                                                                right: -8,
-                                                                backgroundColor: theme.palette.error.main,
-                                                                color: 'white',
-                                                                '&:hover': {
-                                                                    backgroundColor: theme.palette.error.dark,
-                                                                },
-                                                                width: 24,
-                                                                height: 24
-                                                            }}
-                                                        >
-                                                            <Delete fontSize="small" />
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                </Box>
-                                            </Fade>
-                                        ) : (
-                                            <Fade in timeout={300}>
-                                                <Box>
-                                                    <PhotoCamera
-                                                        sx={{
-                                                            fontSize: 32,
-                                                            color: theme.palette.primary.main,
-                                                        }}
-                                                    />
-                                                    <Typography variant="body2" sx={{ fontWeight: 600, }}>
-                                                        Upload Profile Image
-                                                    </Typography>
-                                                    <Typography variant="caption" color="text.secondary" >
-                                                        Drag & drop or click to browse.
-                                                    </Typography>
-                                                    <br />
-                                                    <Typography variant="caption" color="text.secondary">
-                                                        Supports PNG, JPEG, JPG, WebP <br /> Max 5MB • Recommended 1:1 ratio
-                                                    </Typography>
-                                                </Box>
-                                            </Fade>
-                                        )}
-                                    </Box>
-                                </FormControl>
-                            </Box>
-
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center', gap: 2 }}>
-
-                                <Box sx={{ width: '45%' }}>
-                                    <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-                                        First Name <Typography variant="caption" color="text.secondary">(Required)</Typography>
-                                    </Typography>
-                                    <TextField
-                                        fullWidth
-                                        size="small"
-                                        placeholder="First Name"
-                                        value={data.name.first}
-                                        onChange={(e) => handleInputChange('name.first', e.target.value)}
-                                        sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                borderRadius: 1,
-                                            }
-                                        }}
-                                    />
-                                </Box>
-                                <Box sx={{ width: '45%' }}>
-                                    <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-                                        Last Name
-                                    </Typography>
-                                    <TextField
-                                        fullWidth
-                                        size="small"
-                                        placeholder="Last Name"
-                                        value={data.name.last}
-                                        onChange={(e) => handleInputChange('name.last', e.target.value)}
-                                        sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                borderRadius: 1,
-                                            }
-                                        }}
-                                    />
-                                </Box>
-                            </Box>
-
-                            <Box sx={{ mb: 2 }}>
-                                <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-                                    E-mail <Typography variant="caption" color="text.secondary">(Required)</Typography>
-                                </Typography>
-                                <TextField
-                                    fullWidth
-                                    required
-                                    size="small"
-                                    placeholder="Enter your email"
-                                    value={data.email}
-                                    onChange={(e) => handleInputChange('email', e.target.value)}
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': {
-                                            borderRadius: 1,
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        onClick={handleSubmit}
+                                        disabled={Object.keys(formErrors).length > 0 || isLoading}
+                                        startIcon={isLoading ?
+                                            <CircularProgress size={20} color="inherit" /> :
+                                            <Save />
                                         }
-                                    }}
-                                />
-                            </Box>
-
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, alignItems: 'center', gap: 2 }}>
-
-                                <Box sx={{ width: '20%' }}>
-                                    <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-                                        Country Code
-                                    </Typography>
-                                    <TextField
-                                        fullWidth
-                                        size="small"
-                                        placeholder="Enter country code"
-                                        value={data.phone.code}
-                                        onChange={(e) => handleInputChange('phone.code', e.target.value)}
                                         sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                borderRadius: 1,
+                                            textTransform: 'none',
+                                            fontWeight: 600,
+                                            borderRadius: 2,
+                                            px: 4,
+                                            py: 1.5,
+                                            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                                            boxShadow: `0 4px 20px ${alpha(theme.palette.primary.main, 0.3)}`,
+                                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                            '&:hover': {
+                                                background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                                                transform: 'translateY(-3px)',
+                                                boxShadow: `0 12px 35px ${alpha(theme.palette.primary.main, 0.4)}`,
+                                            },
+                                            '&:disabled': {
+                                                background: alpha(theme.palette.action.disabled, 0.12),
+                                                color: theme.palette.action.disabled,
+                                                boxShadow: 'none',
+                                                transform: 'none',
                                             }
                                         }}
-                                    />
+                                    >
+                                        {isLoading ? 'Saving...' :
+                                            company?.billing === null ? "Create Billing Address" : 'Update Address'}
+                                    </Button>
                                 </Box>
-                                <Box sx={{ width: '70%' }}>
-                                    <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-                                        Phone Number
-                                    </Typography>
-                                    <TextField
-                                        fullWidth
-                                        size="small"
-                                        placeholder="Enter your phone number"
-                                        value={data.phone.number}
-                                        onChange={(e) => handleInputChange('phone.number', e.target.value)}
-                                        sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                borderRadius: 1,
-                                            }
-                                        }}
-                                    />
-                                </Box>
-                            </Box>
-
+                            </Fade>
                         </Paper>
+                    </Grow>
+
+                    {/* Help Section */}
+                    <Grow in timeout={1000}>
+                        <Card sx={{
+                            mt: 3,
+                            background: `linear-gradient(135deg, ${alpha(theme.palette.info.main, 0.05)} 0%, ${alpha(theme.palette.info.light, 0.03)} 100%)`,
+                            border: `1px solid ${alpha(theme.palette.info.main, 0.1)}`,
+                            borderRadius: 2,
+                        }}>
+                            <CardContent sx={{ p: 2 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                                    <Box sx={{
+                                        p: 1,
+                                        borderRadius: 1,
+                                        backgroundColor: alpha(theme.palette.info.main, 0.1),
+                                    }}>
+                                        <Warning sx={{ color: theme.palette.info.main, fontSize: 20 }} />
+                                    </Box>
+                                    <Box sx={{ flex: 1 }}>
+                                        <Typography variant="body2" fontWeight={600} color="info.main" gutterBottom>
+                                            Important Information
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+                                            This billing address will be used for all invoices and tax calculations.
+                                            Please ensure the information is accurate and matches your business registration details.
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                            </CardContent>
+                        </Card>
                     </Grow>
                 </Box>
             </Box>
-
-            <Box sx={{
-                p: 3,
-                borderTop: `1px solid ${theme.palette.divider}`,
-                backgroundColor: theme.palette.background.paper,
-                background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
-            }}>
-                <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="center">
-                    <Stack direction="row" spacing={2}>
-                        <Button
-                            variant="outlined"
-                            // onClick={resetForm}
-                            // disabled={isLoading}
-                            sx={{
-                                textTransform: 'none',
-                                borderRadius: 2,
-                                px: 3
-                            }}
-                        >
-                            Reset Form
-                        </Button>
-                        <Button
-                            variant="contained"
-                            startIcon={isLoading ? <Timeline className="animate-spin" /> : <AddCircleOutlineIcon />}
-                            onClick={handleSubmit}
-                            sx={{
-                                textTransform: 'none',
-                                px: 4,
-                                py: 1.5,
-                                fontSize: '1rem',
-                                fontWeight: 600,
-                                borderRadius: 2,
-                                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                                boxShadow: theme.shadows[4],
-                                '&:hover': {
-                                    transform: 'translateY(-2px)',
-                                    boxShadow: theme.shadows[8],
-                                },
-                                '&:disabled': {
-                                    background: theme.palette.action.disabledBackground,
-                                    color: theme.palette.action.disabled,
-                                },
-                                transition: 'all 0.3s ease'
-                            }}
-                        >
-                            {isLoading ? 'Updating Details...' : 'Update Details'}
-                        </Button>
-                    </Stack>
-                </Stack>
-            </Box>
         </Drawer>
     );
-};
+}
 
 export default BillingEditingModal;

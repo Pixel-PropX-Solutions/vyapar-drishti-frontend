@@ -91,8 +91,11 @@ export interface Address {
   zip_code: string;
 }
 
-export interface BillingAddress {
-  _id: string,
+export interface GetBillingAddress {
+  _id?: string,
+  user_id: string,
+  company_id: string,
+  is_deleted?: boolean,
   address_1: string,
   address_2?: string,
   pinCode?: string,
@@ -102,7 +105,10 @@ export interface BillingAddress {
 }
 
 export interface ShippingAddress {
-  _id: string,
+  _id?: string,
+  user_id: string,
+  company_id: string,
+  is_deleted?: boolean,
   title?: string,
   address_1: string,
   address_2?: string,
@@ -210,7 +216,7 @@ export interface GetCompany {
   business_type?: string,
   website?: string,
   alter_phone?: PhoneNumber,
-  billing?: BillingAddress,
+  billing?: GetBillingAddress,
   shipping?: ShippingAddress,
   created_at?: string,
   updated_at?: string,

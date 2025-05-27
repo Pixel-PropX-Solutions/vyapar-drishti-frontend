@@ -20,6 +20,7 @@ import { AppDispatch, RootState } from "@/store/store";
 import { AuthStates } from "@/utils/enums";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { getCompany } from "@/services/company";
 // import { getCompany } from "@/services/user";
 
 const LoginForm: React.FC = () => {
@@ -57,6 +58,8 @@ const LoginForm: React.FC = () => {
         .unwrap()
         .then(() => {
           dispatch(getCurrentUser());
+          dispatch(getCompany());
+
           navigate("/");
         }),
       {

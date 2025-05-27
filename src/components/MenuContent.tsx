@@ -49,10 +49,12 @@ const createMainListItems = (role: string): MenuItem[] => {
     { text: "Inventory", path: "/inventory", icon: <InventoryIcon />, requiredRole: 'user' },
     { text: "Timeline", path: "/timeline", icon: <ViewTimelineIcon />, requiredRole: 'user' },
     { text: "Products", path: "/products", icon: <ProductIcon />, requiredRole: 'user' },
-    { text: "Sell Products", path: "/sell", icon: <ProductIcon />, requiredRole: 'user' },
+    // { text: "Sell Products", path: "/sell", icon: <ProductIcon />, requiredRole: 'user' },
     { text: "Upload Bills", path: "/upload", icon: <UploadBillIcon />, requiredRole: 'user' },
-    { text: "Stockists", path: "/stockists", icon: <StockistIcon />, requiredRole: 'user' },
-    { text: "Orders", path: "/orders", icon: <LocalShippingIcon />, requiredRole: 'user' },
+    { text: "Creditors", path: "/creditors", icon: <StockistIcon />, requiredRole: 'user' },
+    { text: "Debitors", path: "/debitors", icon: <StockistIcon />, requiredRole: 'user' },
+    { text: "Sales", path: "/sales", icon: <LocalShippingIcon />, requiredRole: 'user' },
+    { text: "Purchases", path: "/purchases", icon: <LocalShippingIcon />, requiredRole: 'user' },
   ];
 
   if (role === ROLE_ENUM.USER)

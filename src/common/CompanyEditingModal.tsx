@@ -85,39 +85,27 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
     });
 
     // Validation function
-    const validateForm = () => {
+    const validateForm = (formData = data) => {
         const errors: Record<string, string> = {};
 
-        if (!data.company_name.trim()) {
+        if (!formData.company_name.trim()) {
             errors.company_name = 'Company name is required';
         }
 
-        if (!data.brand_name.trim()) {
+        if (!formData.brand_name.trim()) {
             errors.brand_name = 'Brand name is required';
         }
 
-        if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+        if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
             errors.email = 'Please enter a valid email address';
         }
 
-        if (data.website && !/^https?:\/\/.+/.test(data.website)) {
+        if (formData.website && !/^https?:\/\/.+/.test(formData.website)) {
             errors.website = 'Please enter a valid URL (starting with http:// or https://)';
         }
 
-        if (data.gstin && data.gstin.length !== 15) {
-            errors.gstin = 'GSTIN should be 15 characters long';
-        }
-
-        if (data.pan_number && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(data.pan_number)) {
-            errors.pan_number = 'Please enter a valid PAN number';
-        }
-
-        if (data.number && !/^\d{10}$/.test(data.number)) {
+        if (formData.number && !/^\d{10}$/.test(formData.number)) {
             errors.number = 'Phone number should be 10 digits long';
-        }
-
-        if (data.code && !/^\+\d{1,4}$/.test(data.code)) {
-            errors.code = 'Please enter a valid country code (e.g., +91)';
         }
 
         setFormErrors(errors);
@@ -128,18 +116,12 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
         field: keyof SetCompany,
         value: string
     ) => {
-        setData(prev => ({
-            ...prev,
-            [field]: value
-        }));
-
-        // Clear error for this field
-        if (formErrors[field]) {
-            setFormErrors(prev => ({
-                ...prev,
-                [field]: ''
-            }));
-        }
+        setData(prev => {
+            const newData = { ...prev, [field]: value };
+            const errors = validateForm(newData);
+            setFormErrors(errors);
+            return newData;
+        });
     };
 
     const handleImageChange = useCallback((file: File) => {
@@ -315,7 +297,7 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
         );
     };
 
-    const isFormValid = data.company_name.trim() && data.brand_name.trim() && Object.keys(formErrors).length === 0;
+    const isFormValid = data.company_name.trim() && data.brand_name.trim();
 
     return (
         <Drawer
@@ -414,23 +396,6 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                 }
             }}>
                 <Box sx={{ p: 3 }}>
-                    {/* Validation Alert */}
-                    <Collapse in={showValidation && Object.keys(formErrors).length > 0}>
-                        <Alert
-                            severity="error"
-                            sx={{ mb: 3, borderRadius: 2 }}
-                            icon={<Warning />}
-                        >
-                            <Typography variant="body2" fontWeight={600}>
-                                Please fix the following errors:
-                            </Typography>
-                            {Object.values(formErrors).map((error, index) => (
-                                <Typography key={index} variant="caption" display="block">
-                                    • {error}
-                                </Typography>
-                            ))}
-                        </Alert>
-                    </Collapse>
 
                     {/* Main Form */}
                     <Grow in timeout={600}>
@@ -1044,7 +1009,7 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                                     variant="contained"
                                     color="primary"
                                     onClick={handleSubmit}
-                                    disabled={isLoading || Object.keys(formErrors).length > 0}
+                                    disabled={Object.keys(formErrors).length > 0}
                                     startIcon={isLoading ? <CircularProgress size={20} /> : <Save />}
                                     sx={{
                                         textTransform: 'none',
