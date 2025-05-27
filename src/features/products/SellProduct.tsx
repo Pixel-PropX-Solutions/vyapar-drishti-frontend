@@ -33,7 +33,7 @@ const ProductBilling: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const theme = useTheme();
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
-  const [billItems, setBillItems] = useState<BillItem[]>([]);
+  const [billItems, setBillItems] = useState<Array<BillItem>>([]);
   const [selectedProduct, setSelectedProduct] = useState<BillItem | null>(null);
 
   const handleAddToBill = (data: BillItem) => {

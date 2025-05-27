@@ -26,7 +26,7 @@ import toast from "react-hot-toast";
 import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import { createProduct } from "@/services/products";
+// import { createProduct } from "@/services/products";
 import { SingleProduct } from "@/utils/types";
 
 export default function CreateProduct() {
@@ -74,18 +74,18 @@ export default function CreateProduct() {
       return;
     }
 
-    toast.promise(
-      dispatch(createProduct({ data: productData }))
-        .unwrap()
-        .then(() => {
-          navigate(`/products`);
-        }),
-      {
-        loading: "Creating product...",
-        success: <b>Product successfully added!</b>,
-        error: <b>Failed to create product. Please try again.</b>,
-      }
-    );
+    // toast.promise(
+    //   dispatch(createProduct({ data: productData }))
+    //     .unwrap()
+    //     .then(() => {
+    //       navigate(`/products`);
+    //     }),
+    //   {
+    //     loading: "Creating product...",
+    //     success: <b>Product successfully added!</b>,
+    //     error: <b>Failed to create product. Please try again.</b>,
+    //   }
+    // );
   };
 
   const steps = [
@@ -171,7 +171,7 @@ export default function CreateProduct() {
                 </Grid>
 
                 <Grid item xs={12} md={6}>
-                  <TextField
+                  {/*<TextField
                     required
                     fullWidth
                     select
@@ -187,11 +187,22 @@ export default function CreateProduct() {
                     <MenuItem value="Antiseptics">Antiseptics</MenuItem>
                     <MenuItem value="Vitamins">Vitamins</MenuItem>
                     <MenuItem value="Others">Others</MenuItem>
-                  </TextField>
+                  </TextField>*/}
+                  <TextField
+                    required
+                    fullWidth
+                    label="Category"
+                    name="category"
+                    value={productData.category}
+                    onChange={handleInputChange}
+                    placeholder="Enter Product Category"
+                    variant="outlined"
+                    helperText="Enter the product category"
+                  />
                 </Grid>
 
                 <Grid item xs={12} md={6}>
-                  <TextField
+                  {/* <TextField
                     required
                     fullWidth
                     select
@@ -206,7 +217,18 @@ export default function CreateProduct() {
                     <MenuItem value="Solid">Solid</MenuItem>
                     <MenuItem value="Semi-Solid">Semi-Solid</MenuItem>
                     <MenuItem value="Semi-Liquid">Semi-Liquid</MenuItem>
-                  </TextField>
+                  </TextField> */}
+                  <TextField
+                    required
+                    fullWidth
+                    label="Physical State"
+                    name="state"
+                    value={productData.state}
+                    onChange={handleInputChange}
+                    placeholder="Enter Physical State"
+                    variant="outlined"
+                    helperText="Enter the physical state of the product"
+                  />
                 </Grid>
 
                 <Grid item xs={12} md={6}>
@@ -247,7 +269,7 @@ export default function CreateProduct() {
                 </Grid>
 
                 <Grid item xs={12} md={6}>
-                  <TextField
+                  {/* <TextField
                     required
                     fullWidth
                     type="number"
@@ -265,7 +287,7 @@ export default function CreateProduct() {
                       ),
                     }}
                     variant="outlined"
-                  />
+                  /> */}
                 </Grid>
 
                 <Grid item xs={12} md={6}>
@@ -276,9 +298,9 @@ export default function CreateProduct() {
                     name="measure_of_unit"
                     value={productData.measure_of_unit}
                     onChange={handleInputChange}
-                    placeholder="e.g., mg, ml, g"
+                    placeholder="e.g., mg, ml, g, sft, etc."
                     variant="outlined"
-                    helperText="Specify the unit of measurement (mg, ml, etc.)"
+                    helperText="Specify the unit of measurement (mg, ml, nos, pieces, etc.)"
                   />
                 </Grid>
 
@@ -297,7 +319,7 @@ export default function CreateProduct() {
                         nextIconButton: { size: "small" },
                         previousIconButton: { size: "small" },
                         textField: {
-                          required: true,
+                          // required: true,
                           fullWidth: true,
                           helperText: "Select the product expiry date",
                         },
@@ -308,7 +330,7 @@ export default function CreateProduct() {
 
                 <Grid item xs={12} md={6}>
                   <TextField
-                    required
+                    // required
                     fullWidth
                     label="Storage Requirement"
                     name="storage_requirement"

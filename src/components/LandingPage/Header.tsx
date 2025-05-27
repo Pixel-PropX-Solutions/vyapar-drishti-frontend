@@ -76,7 +76,7 @@ const Header: React.FC = () => {
                                 <img
                                     src={logoText}
                                     alt="Logo Text"
-                                    style={{ marginBottom: "5px", height: "50px" }}
+                                    style={{ marginBottom: "-10px", height: "40px" }}
                                 />
                             </Box>
                         </Box>

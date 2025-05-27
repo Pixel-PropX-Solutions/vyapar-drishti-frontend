@@ -167,8 +167,8 @@ const StockistProfile: React.FC = () => {
                             fontSize="small"
                             sx={{ mr: 1, color: theme.palette.primary.main }}
                           />
-                          {stockist.StockistData.phone_number.country_code}{" "}
-                          {stockist.StockistData.phone_number.phone_number}
+                          {'stockist.StockistData.phone_number.country_code'}{" "}
+                          {'stockist.StockistData.phone_number.phone_number'}
                         </Typography>
                       </Box>
                     </Box>

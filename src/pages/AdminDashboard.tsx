@@ -26,7 +26,7 @@ export default function AdminDashboard() {
     <Container maxWidth={false}>
       <Box sx={{ my: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          Dashboard {user?.role === ROLE_ENUM.ADMIN ? '(Global View)' : '(User View)'}
+          Dashboard {user?.user_type === ROLE_ENUM.ADMIN ? '(Global View)' : '(User View)'}
         </Typography>
 
         <Tabs value={selectedTab} onChange={handleTabChange} aria-label="dashboard tabs" sx={{ mb: 3 }}>
@@ -37,20 +37,20 @@ export default function AdminDashboard() {
 
         {/* 1.1 Overview Panel */}
         {selectedTab === 0 && (
-          user?.role === ROLE_ENUM.ADMIN ? (
+          user?.user_type === ROLE_ENUM.ADMIN ? (
             <OverviewPanel />
           ) : (<UserOverviewPanel />)
         )}
 
         {/* 1.2 Pharmacy Management */}
         {selectedTab === 1 && (
-          user?.role === ROLE_ENUM.ADMIN ? (
+          user?.user_type === ROLE_ENUM.ADMIN ? (
             <PharmacyManagement />) : (<UserPharmacyManagement />)
         )}
 
         {/* 1.3 Reports & Insights */}
         {selectedTab === 2 && (
-          user?.role === ROLE_ENUM.ADMIN ? (
+          user?.user_type === ROLE_ENUM.ADMIN ? (
             <ReportsAndInsights />
           ) : (
             <UserReportsAndInsights />

@@ -171,19 +171,19 @@ export default function CreateChemistProfile() {
 
     dispatch(setId());
 
-    toast.promise(
-      dispatch(createChemist(chemistData))
-        .unwrap()
-        .then(() => {
-          setTimeout(() => navigate("/chemists"), 1500);
-        })
-        .finally(() => setLoading(false)),
-      {
-        loading: "Creating Chemist profile...",
-        success: <b>Chemist profile created successfully!</b>,
-        error: <b>Could not create profile. Please try again.</b>,
-      }
-    );
+    // toast.promise(
+    //   dispatch(createChemist(chemistData))
+    //     .unwrap()
+    //     .then(() => {
+    //       setTimeout(() => navigate("/chemists"), 1500);
+    //     })
+    //     .finally(() => setLoading(false)),
+    //   {
+    //     loading: "Creating Chemist profile...",
+    //     success: <b>Chemist profile created successfully!</b>,
+    //     error: <b>Could not create profile. Please try again.</b>,
+    //   }
+    // );
   };
 
   return (

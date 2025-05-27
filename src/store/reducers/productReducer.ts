@@ -1,23 +1,23 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AuthStates } from "@/utils/enums";
 import {
-  createProduct,
   deleteProduct,
   sellProduct,
   updateProduct,
-  viewAllCategories,
+  createProduct,
   viewAllProducts,
   viewProduct,
   viewProductsWithId,
 } from "@/services/products";
-import { PageMeta, Product, ProductListing } from "@/utils/types";
+import { PageMeta, GetProduct, ProductCreate, ProductListing, UploadData } from "@/utils/types";
 
 interface ProductState {
   authState: AuthStates;
-  productData: Product | null;
-  categories: Array<string> | null;
+  productData: ProductCreate | null;
+  product: GetProduct | null;
+  uploadData: UploadData | null;
   productsListing: Array<ProductListing> | null;
-  productsData: Array<Product> | null;
+  productsData: Array<GetProduct> | null;
   loading: boolean;
   deletionModal: boolean;
   productId: string;
@@ -30,8 +30,9 @@ const initialState: ProductState = {
   authState: AuthStates.INITIALIZING,
   productsData: [],
   productsListing: [],
-  categories: null,
   productData: null,
+  product: null,
+  uploadData: null,
   loading: false,
   deletionModal: false,
   productId: "",
@@ -53,12 +54,36 @@ const productSlice = createSlice({
       state.productId = action.payload.productId;
       state.deletionModal = !state.deletionModal;
     },
-    setProductDataNull(state){
+    setProductDataNull(state) {
       state.productData = null
     }
   },
   extraReducers: (builder) => {
     builder
+      // .addCase(createProduct.pending, (state) => {
+      //   state.error = null;
+      //   state.loading = true;
+      // })
+      // .addCase(createProduct.fulfilled, (state) => {
+      //   state.loading = false;
+      // })
+      // .addCase(createProduct.rejected, (state, action) => {
+      //   state.error = action.payload as string;
+      //   state.loading = false;
+      // })
+
+      // .addCase(uploadImage.pending, (state) => {
+      //   state.error = null;
+      //   state.loading = true;
+      // })
+      // .addCase(uploadImage.fulfilled, (state) => {
+      //   state.loading = false;
+      // })
+      // .addCase(uploadImage.rejected, (state, action) => {
+      //   state.error = action.payload as string;
+      //   state.loading = false;
+      // })
+
       .addCase(createProduct.pending, (state) => {
         state.error = null;
         state.loading = true;
@@ -88,7 +113,7 @@ const productSlice = createSlice({
         state.loading = true;
       })
       .addCase(viewProduct.fulfilled, (state, action: PayloadAction<any>) => {
-        state.productData = action.payload.productData;
+        state.product = action.payload.product;
         state.loading = false;
       })
       .addCase(viewProduct.rejected, (state, action) => {
@@ -123,22 +148,6 @@ const productSlice = createSlice({
         }
       )
       .addCase(viewAllProducts.rejected, (state, action) => {
-        state.error = action.payload as string;
-        state.loading = false;
-      })
-     
-      .addCase(viewAllCategories.pending, (state) => {
-        state.error = null;
-        state.loading = true;
-      })
-      .addCase(
-        viewAllCategories.fulfilled,
-        (state, action: PayloadAction<any>) => {
-          state.categories = action.payload.categories;
-          state.loading = false;
-        }
-      )
-      .addCase(viewAllCategories.rejected, (state, action) => {
         state.error = action.payload as string;
         state.loading = false;
       })

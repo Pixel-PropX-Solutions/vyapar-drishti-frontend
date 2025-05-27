@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AuthStates } from "@/utils/enums";
 import { getCurrentUser, login, logout, register } from "@/services/auth";
-import { User } from "@/utils/types";
+import { GetUser } from "@/utils/types";
 
 interface SignupData {
   firstName: string;
@@ -18,7 +18,7 @@ interface AuthState {
   signupData: SignupData;
   userId: string | null;
   email: string;
-  user: User | null;
+  user: GetUser | null;
   isUserFetched: boolean;
   authState: AuthStates;
   accessToken: string | null;
@@ -80,20 +80,20 @@ const authSlice = createSlice({
 
       .addCase(getCurrentUser.pending, (state) => {
         state.error = null;
-        state.authState = AuthStates.INITIALIZING;
+        // state.authState = AuthStates.INITIALIZING;
         state.loading = true;
       })
       .addCase(getCurrentUser.fulfilled, (state, action: PayloadAction<any>) => {
-        state.user = action.payload.user || null;
-        state.authState = AuthStates.AUTHENTICATED;
+        state.user = action.payload.user;
+        // state.authState = AuthStates.AUTHENTICATED;
         state.isUserFetched = true;
 
         state.loading = false;
       })
       .addCase(getCurrentUser.rejected, (state, action) => {
         state.error = action.payload as string;
-        state.authState = AuthStates.IDLE
-        state.isUserFetched = true; 
+        // state.authState = AuthStates.IDLE
+        state.isUserFetched = true;
         state.loading = false;
       })
 
@@ -104,7 +104,7 @@ const authSlice = createSlice({
       })
       .addCase(register.fulfilled, (state, action: PayloadAction<any>) => {
         state.authState = AuthStates.AUTHENTICATED;
-        state.email = action.payload.user.email;
+        // state.email = action.payload.user.email;
         state.accessToken = action.payload.accessToken;
         state.loading = false;
       })

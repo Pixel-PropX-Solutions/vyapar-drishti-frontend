@@ -200,8 +200,8 @@ const ChemistProfile: React.FC = () => {
                             fontSize="small"
                             sx={{ mr: 1, color: theme.palette.primary.main }}
                           />
-                          {chemist.ChemistData.phone_number.country_code}{" "}
-                          {chemist.ChemistData.phone_number.phone_number}
+                          {'chemist.ChemistData.phone_number.country_code'}{" "}
+                          {'chemist.ChemistData.phone_number.phone_number'}
                         </Typography>
                       </Box>
                     </Box>

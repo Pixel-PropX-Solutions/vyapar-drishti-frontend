@@ -119,8 +119,8 @@ const StockistEdit: React.FC<StockistEditProps> = ({
     }
 
     if (
-      !formData.StockistData.phone_number.phone_number ||
-      !formData.StockistData.phone_number.phone_number.trim()
+      // "formData.StockistData.phone_number.phone_number" ||
+      !'formData.StockistData.phone_number.phone_number'.trim()
     ) {
       newErrors["StockistData.phone_number.phone_number"] =
         "Phone number is required";
@@ -283,7 +283,7 @@ const StockistEdit: React.FC<StockistEditProps> = ({
                   label="Country Code"
                   name="StockistData.phone_number.country_code"
                   value={
-                    formData.StockistData?.phone_number?.country_code || ""
+                    ""
                   }
                   onChange={handleChange}
                   margin="normal"
@@ -296,7 +296,7 @@ const StockistEdit: React.FC<StockistEditProps> = ({
                   label="Phone Number"
                   name="StockistData.phone_number.phone_number"
                   value={
-                    formData.StockistData?.phone_number?.phone_number || ""
+                     ""
                   }
                   onChange={handleChange}
                   error={!!errors["StockistData.phone_number.phone_number"]}

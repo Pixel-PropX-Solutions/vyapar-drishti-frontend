@@ -296,8 +296,9 @@ const SignUpPage: React.FC = () => {
         </style>
       </Grid>
 
-       {/* Sign Up Form */}
-       <Grid
+      {/* Sign Up Form */}
+      <Grid
+        item
         sm={12}
         md={6}
         sx={{
@@ -323,4 +324,4 @@ const SignUpPage: React.FC = () => {
 };
 
 export default SignUpPage;
-     
+

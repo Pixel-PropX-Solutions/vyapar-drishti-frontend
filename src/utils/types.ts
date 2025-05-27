@@ -11,6 +11,27 @@ export type SortField =
   | "available_product_price"
   | "company_name";
 
+export type ProductSortField =
+  | "product_name"
+  | 'selling_price'
+  | 'purchase_price'
+  | "category"
+  | "created_at"
+  | "updated_at"
+  | "opening_quantity"
+  | "opening_purchase_price"
+  | "show_active_stock"
+  | "barcode"
+  | 'unit'
+  | "hsn_code";
+
+export type CategorySortField =
+  | "category_name"
+  | 'description'
+  | 'created_at'
+  | "updated_at";
+
+
 export enum OrderStatus {
   PENDING = "Pending",
   SHIPPED = "Shipped",
@@ -18,6 +39,19 @@ export enum OrderStatus {
 }
 export type SortOrder = "asc" | "desc";
 
+export interface Units {
+  label: string;
+  value: string;
+}
+
+export interface UserSignUp {
+  name: {
+    first: string,
+    last: string,
+  }
+  email: string,
+  phone: PhoneNumber
+}
 export interface PageMeta {
   page: number;
   limit: number;
@@ -27,7 +61,15 @@ export interface PageMeta {
   sale_value?: number;
   positive_stock?: number;
   low_stock?: number;
+}
 
+export interface UploadData {
+  filename: string;
+  format: string;
+  height: number;
+  public_id: string;
+  url: string;
+  width: number;
 }
 
 export interface Name {
@@ -37,8 +79,8 @@ export interface Name {
 }
 
 export interface PhoneNumber {
-  country_code: string;
-  phone_number: string;
+  code: string;
+  number: string;
 }
 
 export interface Address {
@@ -48,6 +90,38 @@ export interface Address {
   state: string;
   zip_code: string;
 }
+
+export interface BillingAddress {
+  _id: string,
+  address_1: string,
+  address_2?: string,
+  pinCode?: string,
+  city?: string,
+  state: string,
+  country?: string,
+}
+
+export interface ShippingAddress {
+  _id: string,
+  title?: string,
+  address_1: string,
+  address_2?: string,
+  pinCode?: string,
+  city?: string,
+  state: string,
+  country?: string,
+  notes?: string,
+}
+
+export interface CreateBasicUser {
+  name: {
+    first: string,
+    last: string
+  },
+  email: string,
+  phone: PhoneNumber
+}
+
 
 export interface UserData {
   _id: string;
@@ -102,17 +176,62 @@ export interface CreateChemist {
   }
 }
 
-export interface User {
+export interface GetUser {
   _id: string;
+  name: {
+    first: string,
+    last?: string,
+  },
   email: string;
-  role: string;
-  UserData: UserData;
+  user_type: string;
+  phone: {
+    code: string,
+    number: string,
+  },
+  image: File | string | null;
+  created_at: string;
 }
 
 export interface CreateUser {
   email: string;
   role: string;
 }
+
+export interface GetCompany {
+  _id: string,
+  user_id: string,
+  brand_name: string,
+  company_name: string,
+  phone?: PhoneNumber,
+  email?: string,
+  image?: File | string | null,
+  gstin?: string,
+  pan_number?: string,
+  business_type?: string,
+  website?: string,
+  alter_phone?: PhoneNumber,
+  billing?: BillingAddress,
+  shipping?: ShippingAddress,
+  created_at?: string,
+  updated_at?: string,
+}
+
+export interface SetCompany {
+  user_id: string,
+  brand_name: string,
+  company_name: string,
+  number?: string;
+  code?: string;
+  alter_number?: string;
+  alter_code?: string;
+  email?: string,
+  image?: File | string | null,
+  gstin?: string,
+  pan_number?: string,
+  business_type?: string,
+  website?: string,
+}
+
 
 export interface SingleProduct {
   product_name: string;
@@ -124,6 +243,111 @@ export interface SingleProduct {
   storage_requirement: string;
   description: string;
   expiry_date: string;
+}
+
+export interface ProductCreate {
+  // Required fields
+  product_name: string
+  selling_price: number
+  user_id: string
+  is_deleted: boolean;
+
+  // Optional fields
+  unit?: string;
+  hsn_code?: string;
+  purchase_price?: number;
+  barcode?: string;
+  category?: string;
+  image?: string;
+  description?: string;
+  opening_quantity?: number;
+  opening_purchase_price?: number;
+  opening_stock_value?: number;
+
+  // Additonal Optional fields
+  low_stock_alert?: number;
+  show_active_stock?: boolean;
+}
+
+export interface FormCreateProduct {
+  product_name: string;
+  selling_price: number;
+  unit?: string;
+  is_deleted?: boolean;
+  hsn_code?: string;
+  purchase_price?: number;
+  barcode?: string;
+  category?: string;
+  description?: string;
+  opening_quantity?: number;
+  opening_purchase_price?: number;
+  opening_stock_value?: number;
+  low_stock_alert?: number;
+  show_active_stock?: boolean;
+  image?: File | string;
+}
+
+
+export interface GetProduct {
+  // Required fields
+  _id: string
+  product_name: string
+  selling_price: number
+  user_id: string
+  is_deleted: boolean;
+
+  // Optional fields
+  unit?: string;
+  hsn_code?: string;
+  purchase_price?: number;
+  barcode?: string;
+  category?: string;
+  category_desc?: string;
+  image?: string;
+  description?: string;
+  opening_quantity?: number;
+  opening_purchase_price?: number;
+  opening_stock_value?: number;
+
+  // Additonal Optional fields
+  low_stock_alert?: number;
+  show_active_stock?: boolean;
+
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CategoryCreate {
+  category_name: string;
+  user_id: string;
+  image?: File | string;
+  description?: string;
+  is_deleted: boolean;
+}
+
+export interface CategoryLists {
+  _id: string;
+  category_name: string;
+}
+
+export interface GetCategory {
+  category_name: string;
+  created_at: string;
+  description: string;
+  image: string;
+  is_deleted: boolean;
+  updated_at: string;
+  user_id: string;
+  _id: string;
+}
+
+export interface UpdateCategory {
+  _id: string;
+  user_id: string;
+  is_deleted: boolean;
+  category_name: string;
+  description: string;
+  image?: File | string;
 }
 
 export interface Product {
@@ -187,7 +411,8 @@ export interface OrderCreate {
 export interface StockOutState {
   product_id: string,
   quantity: number,
-  unit_price: number
+  unit_price: number,
+  unit: string // added for unit selection
 }
 
 export interface OrderDetailsCreate {

@@ -415,9 +415,8 @@ const ChemistList: React.FC = () => {
                             fontSize="small"
                             sx={{ verticalAlign: "middle", mr: 1 }}
                           />
-                          {chemist.ChemistData.phone_number.country_code || ""}{" "}
-                          {chemist.ChemistData.phone_number.phone_number ||
-                            "N/A"}
+                          {'chemist.ChemistData.phone_number.country_code'}{" "}
+                          {'chemist.ChemistData.phone_number.phone_number'}
                         </Typography>
                       </TableCell>
                       <TableCell>

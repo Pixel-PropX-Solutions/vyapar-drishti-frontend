@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -12,14 +12,67 @@ import {
 import { Email, Lock, Visibility, VisibilityOff } from "@mui/icons-material";
 import Logo from "../../../assets/Logo.png";
 import logoText from "../../../assets/Logo_Text.png";
+import { login, getCurrentUser, register } from "@/services/auth";
+import { AppDispatch } from "@/store/store";
+import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const RegistrationForm: React.FC = () => {
-  // const navigate = useNavigate();
-  const [showPassword, setShowPassword] = React.useState(false);
+  const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+  // const [showPassword, setShowPassword] = React.useState(false);
+  const [data, setData] = useState({
+    first: "",
+    last: "",
+    email: '',
+    code: '',
+    number: '',
+    company_name: "",
+    brand_name: "",
+  });
 
-  const handleTogglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
+  // const handleTogglePasswordVisibility = () => {
+  //   setShowPassword(!showPassword);
+  // };
+
+  function changeHandler(event: React.ChangeEvent<HTMLInputElement>) {
+    setData((prevData) => ({
+      ...prevData,
+      [event.target.name]: event.target.value,
+    }));
+  }
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    // console.log("Form submitted with data:", data);
+    const userData = {
+      name: {
+        first: data.first,
+        last: data.last,
+      },
+      email: data.email,
+      phone: {
+        code: data.code,
+        number: data.number
+      }
+    }
+
+    toast.promise(
+      dispatch(register({ userData: userData, company_name: data.company_name, brand_name: data.brand_name }))
+        .unwrap()
+        .then(() => {
+          dispatch(getCurrentUser());
+          navigate("/");
+        }),
+      {
+        loading: "Creating account and logging in with the credentials ...",
+        success: <b>Login Successfully!</b>,
+        error: <b>Could not Login.</b>,
+      }
+    );
   };
+
 
   return (
     <Grid
@@ -67,7 +120,7 @@ const RegistrationForm: React.FC = () => {
             <img
               src={logoText}
               alt="Logo Text"
-              style={{ marginBottom: "20px", height: "50px" }}
+              style={{ marginBottom: "10px", height: "40px" }}
             />
           </Box>
 
@@ -79,39 +132,45 @@ const RegistrationForm: React.FC = () => {
           </Typography>
 
           {/* Form */}
-          <Box component="form" noValidate sx={{ mt: 1 }}>
-            <TextField
-              required
-              margin="normal"
-              fullWidth
-              id="name"
-              label="Full Name"
-              name="name"
-              autoComplete="name"
-              autoFocus
-              placeholder="John Doe"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start"></InputAdornment>
-                ),
-              }}
-            />
-            <TextField
-              required
-              margin="normal"
-              fullWidth
-              id="organisation"
-              label="Organisation Name"
-              name="organisation"
-              autoComplete="organisation"
-              placeholder="Doe Pvt. Ltd."
-              autoFocus
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start"></InputAdornment>
-                ),
-              }}
-            />
+          <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <TextField
+                required
+                margin="normal"
+                fullWidth
+                id="first"
+                label="First Name"
+                name="first"
+                autoComplete="first"
+                autoFocus
+                placeholder="Tohid"
+                onChange={changeHandler}
+                value={data.first}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start"></InputAdornment>
+                  ),
+                }}
+              />
+              <TextField
+                required
+                margin="normal"
+                fullWidth
+                id="last"
+                label="Last Name"
+                name="last"
+                autoComplete="last"
+                autoFocus
+                onChange={changeHandler}
+                value={data.last}
+                placeholder="Khan"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start"></InputAdornment>
+                  ),
+                }}
+              />
+            </Box>
             <TextField
               required
               margin="normal"
@@ -120,6 +179,8 @@ const RegistrationForm: React.FC = () => {
               label="Email"
               name="email"
               autoComplete="email"
+              onChange={changeHandler}
+              value={data.email}
               autoFocus
               placeholder="johndoe@gmail.com"
               InputProps={{
@@ -130,7 +191,82 @@ const RegistrationForm: React.FC = () => {
                 ),
               }}
             />
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <TextField
+                required
+                margin="normal"
+                fullWidth
+                id="code"
+                label="Code"
+                name="code"
+                autoComplete="code"
+                autoFocus
+                onChange={changeHandler}
+                value={data.code}
+                placeholder="+91 "
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start"></InputAdornment>
+                  ),
+                }}
+              />
+              <TextField
+                required
+                margin="normal"
+                fullWidth
+                id="number"
+                label="Phone Number"
+                name="number"
+                autoComplete="number"
+                onChange={changeHandler}
+                value={data.number}
+                autoFocus
+                placeholder="******7548"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start"></InputAdornment>
+                  ),
+                }}
+              />
+            </Box>
             <TextField
+              required
+              margin="normal"
+              fullWidth
+              id="company_name"
+              label="Company Name"
+              name="company_name"
+              onChange={changeHandler}
+              value={data.company_name}
+              autoComplete="company_name"
+              placeholder="Quality Auto Parts"
+              autoFocus
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start"></InputAdornment>
+                ),
+              }}
+            />
+            <TextField
+              required
+              margin="normal"
+              fullWidth
+              id="brand_name"
+              label="Brand Name"
+              name="brand_name"
+              autoComplete="brand_name"
+              onChange={changeHandler}
+              value={data.brand_name}
+              placeholder="Quality Auto Parts"
+              autoFocus
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start"></InputAdornment>
+                ),
+              }}
+            />
+
+            {/* <TextField
               required
               margin="normal"
               fullWidth
@@ -162,7 +298,7 @@ const RegistrationForm: React.FC = () => {
                   </InputAdornment>
                 ),
               }}
-            />
+            /> */}
             <Button
               type="submit"
               fullWidth
@@ -172,7 +308,7 @@ const RegistrationForm: React.FC = () => {
                 mb: 2,
               }}
             >
-              Sign Up
+              Create Account
             </Button>
             {/* <Button
               type="submit"

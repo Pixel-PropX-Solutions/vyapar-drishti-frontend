@@ -1,4 +1,5 @@
 import userApi from "@/api/api";
+import { UserSignUp } from "@/utils/types";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 export const login = createAsyncThunk(
@@ -33,7 +34,7 @@ export const getCurrentUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await userApi.get('/auth/current/user',);
-
+      console.log("Current user response", response.data);
       const user = response.data.data[0];
 
       if (user) {
@@ -53,32 +54,27 @@ export const register = createAsyncThunk(
   "user/register",
   async (
     {
-      email,
-      firstName,
-      lastName,
-      contactNumber,
+      userData,
+      company_name,
+      brand_name
     }: {
-      email: string;
-      firstName: string;
-      lastName: string;
-      contactNumber: string;
+      userData: UserSignUp;
+      company_name: string;
+      brand_name: string;
     },
     { rejectWithValue }
   ) => {
     try {
-      const response = await userApi.post("/auth/register", {
-        email,
-        firstName,
-        lastName,
-        contactNumber,
-      });
-      const { user } = response.data;
-      console.log("response", response.data, user.userId);
+      const response = await userApi.post(`/auth/register?company_name=${company_name}&brand_name=${brand_name}`, userData);
+      console.log("register response", response.data);
 
-      if (user && user.userID) {
-        localStorage.setItem("userId ", user.userID);
-        return user?.userId ?? null;
-      } else {
+      const accessToken = response.data.accessToken;
+
+      if (accessToken) {
+        localStorage.setItem("accessToken", accessToken);
+        return { accessToken };
+      }
+      else {
         return rejectWithValue(
           "Registration failed: No access token received."
         );

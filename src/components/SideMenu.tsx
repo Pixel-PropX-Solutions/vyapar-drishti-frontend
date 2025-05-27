@@ -10,12 +10,10 @@ import SelectContent from "./SelectContent";
 import MenuContent from "./MenuContent";
 import { IconButton, Tooltip } from "@mui/material";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
-// import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { logout } from "@/services/auth";
-import { useState } from "react";
 
 const drawerWidth = 280; // Slightly wider for more breathing room
 
@@ -41,21 +39,12 @@ export default function SideMenu() {
   const { user } = useSelector((state: RootState) => state.auth);
   const navigate = useNavigate();
   const theme = useTheme();
-  const [isHovered, setIsHovered] = useState(false);
-
-  // useEffect(() => {
-  //   // Removed redundant dispatch(getCurrentUser()) call
-  // }, []);
 
   const getUserInitials = () => {
-    if (!user?.UserData?.name) return 'TD';
-    const { first_name, last_name } = user.UserData.name;
-    return `${first_name?.[0] ?? ''}${last_name?.[0] ?? ''}`.toUpperCase();
+    if (!user?.name) return 'TD';
+    const { first, last } = user.name;
+    return `${first?.[0] ?? ''}${last?.[0] ?? ''}`.toUpperCase();
   };
-
-  // const handleProfileClick = () => {
-  //   navigate("/profile");
-  // };
 
   const handleLogout = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -72,8 +61,6 @@ export default function SideMenu() {
           backgroundColor: "background.paper",
         },
       }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
       <Box
         sx={{
@@ -103,17 +90,9 @@ export default function SideMenu() {
           gap: 1,
           alignItems: "center",
           borderTop: `1px solid ${theme.palette.divider}`,
-          cursor: "pointer",
           transition: 'background-color 0.2s ease',
-          ":hover": {
-            backgroundColor: theme.palette.action.hover,
-          },
         }}
-        onClick={(e) => {
-          e.stopPropagation();
-          navigate("/profile");
-          // handleProfileClick();
-        }}
+
       >
         <Avatar
           sx={{
@@ -132,8 +111,7 @@ export default function SideMenu() {
         <Box
           sx={{
             mr: "auto",
-            cursor: "pointer",
-            opacity: isHovered ? 1 : 0.8,
+            opacity: 0.8,
             transition: 'opacity 0.2s ease',
           }}
         >
@@ -145,8 +123,8 @@ export default function SideMenu() {
               color: theme.palette.text.primary,
             }}
           >
-            {user?.UserData ?
-              `${user.UserData.name.first_name ?? ''} ${user.UserData.name.last_name ?? ''}`.trim()
+            {user ?
+              `${user.name.first ?? ''} ${user.name.last ?? ''}`.trim()
               : "DristiDocs Team"
             }
           </Typography>
@@ -173,10 +151,6 @@ export default function SideMenu() {
             sx={{
               color: theme.palette.text.secondary,
               transition: 'color 0.2s ease',
-              // ':hover': {
-              //   color: theme.palette.error.main,
-              //   backgroundColor: 'transparent',
-              // },
             }}
           >
             <LogoutRoundedIcon fontSize="small" />

@@ -39,7 +39,7 @@ import { SortField, SortOrder, WareHouseProduct } from '@/utils/types';
 import TabPanel from '../upload-documents/components/TabPanel';
 import SideModal from '@/common/WareHouseSideModal';
 import { useNavigate } from 'react-router-dom';
-import { viewAllCategories } from '@/services/products';
+// import { viewAllCategories } from '@/services/products';
 import WareHouseTable from './WareHouseTable';
 
 // Styled Components with enhanced visuals
@@ -96,7 +96,7 @@ const Warehouse: React.FC = () => {
         sortField: "created_at" as SortField,
         sortOrder: "asc" as SortOrder,
     });
-    const { categories } = useSelector((state: RootState) => state.product);
+    // const { categories } = useSelector((state: RootState) => state.product);
     const { search, category, qtyFilter, state, page_no, limit, sortField, sortOrder } = data;
     const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
@@ -193,7 +193,7 @@ const Warehouse: React.FC = () => {
     }, [category, dispatch, limit, page_no, search, sortField, sortOrder, state]);
 
     useEffect(() => {
-        dispatch(viewAllCategories());
+        // dispatch(viewAllCategories());
     }, [dispatch]);
 
     // State to store summary stats that only change on initial load
@@ -469,11 +469,11 @@ const Warehouse: React.FC = () => {
                             onChange={(e) => handleStateChange('category', e.target.value)}
                         >
                             <MenuItem value="all">All Categories</MenuItem>
-                            {categories?.map((cat, index) => (
+                            {/* {categories?.map((cat, index) => (
                                 <MenuItem key={index} value={cat}>
                                     {cat}
                                 </MenuItem>
-                            ))}
+                            ))} */}
                         </TextField>
                     </Grid>
 

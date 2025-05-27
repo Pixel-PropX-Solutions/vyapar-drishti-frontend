@@ -8,5 +8,7 @@ export enum AuthStates {
 export enum ROLE_ENUM{
     ADMIN="admin",
     CHEMIST="Chemist",
+    USER = 'user',
     NULL="null"
 }
+
