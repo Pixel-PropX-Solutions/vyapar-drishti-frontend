@@ -28,10 +28,7 @@ const xThemeComponents = {
 export default function Dashboard(props: {
   disableCustomTheme?: boolean;
 }) {
-  // if (props.customData) {
-  //   console.log("customData", props.customData);
-  // }
-  
+   
   return (
     <AppTheme {...props} themeComponents={xThemeComponents}>
       <CssBaseline enableColorScheme />

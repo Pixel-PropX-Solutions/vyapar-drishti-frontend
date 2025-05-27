@@ -44,6 +44,14 @@ export interface Units {
   value: string;
 }
 
+export interface UserSignUp {
+  name: {
+    first: string,
+    last: string,
+  }
+  email: string,
+  phone: PhoneNumber
+}
 export interface PageMeta {
   page: number;
   limit: number;
@@ -71,8 +79,8 @@ export interface Name {
 }
 
 export interface PhoneNumber {
-  country_code: string;
-  phone_number: string;
+  code: string;
+  number: string;
 }
 
 export interface Address {
@@ -82,6 +90,38 @@ export interface Address {
   state: string;
   zip_code: string;
 }
+
+export interface BillingAddress {
+  _id: string,
+  address_1: string,
+  address_2?: string,
+  pinCode?: string,
+  city?: string,
+  state: string,
+  country?: string,
+}
+
+export interface ShippingAddress {
+  _id: string,
+  title?: string,
+  address_1: string,
+  address_2?: string,
+  pinCode?: string,
+  city?: string,
+  state: string,
+  country?: string,
+  notes?: string,
+}
+
+export interface CreateBasicUser {
+  name: {
+    first: string,
+    last: string
+  },
+  email: string,
+  phone: PhoneNumber
+}
+
 
 export interface UserData {
   _id: string;
@@ -136,17 +176,62 @@ export interface CreateChemist {
   }
 }
 
-export interface User {
+export interface GetUser {
   _id: string;
+  name: {
+    first: string,
+    last?: string,
+  },
   email: string;
-  role: string;
-  UserData: UserData;
+  user_type: string;
+  phone: {
+    code: string,
+    number: string,
+  },
+  image: File | string | null;
+  created_at: string;
 }
 
 export interface CreateUser {
   email: string;
   role: string;
 }
+
+export interface GetCompany {
+  _id: string,
+  user_id: string,
+  brand_name: string,
+  company_name: string,
+  phone?: PhoneNumber,
+  email?: string,
+  image?: File | string | null,
+  gstin?: string,
+  pan_number?: string,
+  business_type?: string,
+  website?: string,
+  alter_phone?: PhoneNumber,
+  billing?: BillingAddress,
+  shipping?: ShippingAddress,
+  created_at?: string,
+  updated_at?: string,
+}
+
+export interface SetCompany {
+  user_id: string,
+  brand_name: string,
+  company_name: string,
+  number?: string;
+  code?: string;
+  alter_number?: string;
+  alter_code?: string;
+  email?: string,
+  image?: File | string | null,
+  gstin?: string,
+  pan_number?: string,
+  business_type?: string,
+  website?: string,
+}
+
 
 export interface SingleProduct {
   product_name: string;

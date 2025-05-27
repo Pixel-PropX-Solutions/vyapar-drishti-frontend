@@ -1,5 +1,4 @@
 import userApi from "@/api/api";
-import { CategoryCreate } from "@/utils/types";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 export const createCategory = createAsyncThunk(

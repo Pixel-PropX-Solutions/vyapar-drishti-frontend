@@ -11,7 +11,6 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import VideoFileIcon from '@mui/icons-material/VideoFile';
 import AttachFileIcon from "@mui/icons-material/AttachFile";
-import userApi from "@/api/api";
 
 type ProductSortState = {
   search: string;

@@ -48,7 +48,7 @@ export default function SelectContent() {
   const navigate = useNavigate();
   return (
     <Tooltip 
-      title={`${user?.UserData?.name?.first_name || 'User'} - ${user?.role || 'No Role'}`} 
+      title={`${user?.name?.first || 'User'} - ${user?.user_type.toUpperCase() || 'No Role'}`} 
       placement="right"
       onClick={() => navigate('/')}
     >
@@ -75,7 +75,7 @@ export default function SelectContent() {
               color="text.secondary"
               sx={{ display: 'block' }}
             >
-              {user?.role || 'NO ROLE'}
+              {user?.user_type.toUpperCase() || 'NO ROLE'}
             </Typography>
           </Box>
         </Box>
@@ -87,7 +87,7 @@ export default function SelectContent() {
         />
         
         <Typography variant="body2">
-            {user?.UserData?.name?.first_name +" "+user?.UserData?.name?.last_name || 'User'}
+            {user?.name?.first +" "+user?.name?.last || 'User'}
           </Typography>
       </StyledListItem>
     </Tooltip>

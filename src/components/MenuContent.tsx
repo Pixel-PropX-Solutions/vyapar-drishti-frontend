@@ -25,13 +25,14 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { ROLE_ENUM } from '@/utils/enums';
+import { Security } from '@mui/icons-material';
 
 // Define menu item type
 interface MenuItem {
   text: string;
   path: string;
   icon: React.ReactNode;
-  requiredRole?: 'admin' | 'chemist';
+  requiredRole?: 'admin' | 'user';
 }
 
 const createMainListItems = (role: string): MenuItem[] => {
@@ -44,17 +45,17 @@ const createMainListItems = (role: string): MenuItem[] => {
   ];
 
   const chemistItems: MenuItem[] = [
-    { text: "Dashboard", path: "/dashboard", icon: <DashboardIcon />, requiredRole: 'chemist' },
-    { text: "Inventory", path: "/inventory", icon: <InventoryIcon />, requiredRole: 'chemist' },
-    { text: "Timeline", path: "/timeline", icon: <ViewTimelineIcon />, requiredRole: 'chemist' },
-    { text: "Products", path: "/products", icon: <ProductIcon />, requiredRole: 'chemist' },
-    { text: "Sell Products", path: "/sell", icon: <ProductIcon />, requiredRole: 'chemist' },
-    { text: "Upload Bills", path: "/upload", icon: <UploadBillIcon />, requiredRole: 'chemist' },
-    { text: "Stockists", path: "/stockists", icon: <StockistIcon />, requiredRole: 'chemist' },
-    { text: "Orders", path: "/orders", icon: <LocalShippingIcon />, requiredRole: 'chemist' },
+    { text: "Dashboard", path: "/dashboard", icon: <DashboardIcon />, requiredRole: 'user' },
+    { text: "Inventory", path: "/inventory", icon: <InventoryIcon />, requiredRole: 'user' },
+    { text: "Timeline", path: "/timeline", icon: <ViewTimelineIcon />, requiredRole: 'user' },
+    { text: "Products", path: "/products", icon: <ProductIcon />, requiredRole: 'user' },
+    { text: "Sell Products", path: "/sell", icon: <ProductIcon />, requiredRole: 'user' },
+    { text: "Upload Bills", path: "/upload", icon: <UploadBillIcon />, requiredRole: 'user' },
+    { text: "Stockists", path: "/stockists", icon: <StockistIcon />, requiredRole: 'user' },
+    { text: "Orders", path: "/orders", icon: <LocalShippingIcon />, requiredRole: 'user' },
   ];
 
-  if (role === ROLE_ENUM.CHEMIST)
+  if (role === ROLE_ENUM.USER)
     return chemistItems;
   else if (role === ROLE_ENUM.ADMIN)
     return adminItems;
@@ -64,7 +65,8 @@ const createMainListItems = (role: string): MenuItem[] => {
 };
 
 const secondaryListItems: MenuItem[] = [
-  { text: "Settings", path: "/settings", icon: <SettingsRoundedIcon /> },
+  // { text: "Settings", path: "/settings", icon: <SettingsRoundedIcon /> },
+  { text: "Account", path: "/account", icon: <Security /> },
   { text: "About", path: "/about", icon: <InfoRoundedIcon /> },
 ];
 
@@ -76,7 +78,7 @@ export default function MenuContent() {
   const { user } = useSelector((state: RootState) => state.auth);
 
 
-  const mainListItems = createMainListItems(user?.role ?? ROLE_ENUM.NULL);
+  const mainListItems = createMainListItems(user?.user_type ?? ROLE_ENUM.NULL);
 
   const handleNavigation = (path: string) => {
     navigate(path);

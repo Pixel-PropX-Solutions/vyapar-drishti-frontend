@@ -772,8 +772,8 @@ const ProductsSideModal = (props: SideModalProps) => {
                                         open={openCategoryModal}
                                         onClose={() => {
                                             setOpenCategoryModal(false);
-                                        }}
-                                        onCreated={async newCategory => {
+                                        } }
+                                        onCreated={async (newCategory) => {
                                             // Set Autocomplete to new category and update data.category to newCategory._id
                                             setSelectedCategoryOption({ label: newCategory.name, value: newCategory._id });
                                             setData(prev => ({
@@ -789,7 +789,7 @@ const ProductsSideModal = (props: SideModalProps) => {
                                                 console.error('Failed to refresh categories:', error);
                                                 toast.error('Failed to refresh categories after creating new category.');
                                             }
-                                        }}
+                                        } } 
                                     />
                                 </FormControl>
                             </Box>

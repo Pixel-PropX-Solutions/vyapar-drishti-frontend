@@ -269,7 +269,7 @@ export default function ViewInventory() {
             </IconButton>
           </Tooltip>
           {
-            user?.role === 'Chemist' && (
+            user?.user_type === 'Chemist' && (
               <Tooltip title="Order More">
                 <IconButton
                   size="small"
@@ -289,7 +289,7 @@ export default function ViewInventory() {
   ];
 
   useEffect(() => {
-    dispatch(viewInventrory({ chemistId: user?.role === 'Chemist' ? user?.UserData?._id ?? "" : "", productId: "" })).then(() => { });
+    dispatch(viewInventrory({ chemistId: user?.user_type === 'Chemist' ? user?._id ?? "" : "", productId: "" })).then(() => { });
   }, [dispatch, user]);
 
   useEffect(() => {

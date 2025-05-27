@@ -113,8 +113,8 @@ const ChemistEdit: React.FC<ChemistEditProps> = ({
     }
 
     if (
-      !formData.ChemistData.phone_number.phone_number ||
-      !formData.ChemistData.phone_number.phone_number.trim()
+      // !formData.ChemistData.phone_number.phone_number ||
+      '!formData.ChemistData.phone_number.phone_number'.trim()
     ) {
       newErrors["ChemistData.phone_number.phone_number"] =
         "Phone number is required";
@@ -285,7 +285,7 @@ const ChemistEdit: React.FC<ChemistEditProps> = ({
                   fullWidth
                   label="Country Code"
                   name="ChemistData.phone_number.country_code"
-                  value={formData.ChemistData?.phone_number?.country_code || ""}
+                  value={ ""}
                   onChange={handleChange}
                   margin="normal"
                   size="small"
@@ -296,7 +296,7 @@ const ChemistEdit: React.FC<ChemistEditProps> = ({
                   fullWidth
                   label="Phone Number"
                   name="ChemistData.phone_number.phone_number"
-                  value={formData.ChemistData?.phone_number?.phone_number || ""}
+                  value={ ""}
                   onChange={handleChange}
                   error={!!errors["ChemistData.phone_number.phone_number"]}
                   helperText={errors["ChemistData.phone_number.phone_number"]}

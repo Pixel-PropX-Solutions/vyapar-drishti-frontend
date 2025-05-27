@@ -31,7 +31,7 @@ interface CategoryCreateModalProps {
     open: boolean;
     onClose: () => void;
     onCreated: (category: { name: string; _id: string }) => void;
-    onUpdated: () => Promise<void>;
+    onUpdated?: () => Promise<void>;
     category?: UpdateCategory | null;
 }
 

@@ -27,8 +27,8 @@ import {
   LinearProgress,
   Badge,
   Container,
-  Breadcrumbs,
-  Link,
+  // Breadcrumbs,
+  // Link,
   Collapse,
   List,
   ListItem,
@@ -46,8 +46,8 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
 import HistoryIcon from "@mui/icons-material/History";
 import InfoIcon from "@mui/icons-material/Info";
-import HomeIcon from "@mui/icons-material/Home";
-import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+// import HomeIcon from "@mui/icons-material/Home";
+// import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import ShareIcon from "@mui/icons-material/Share";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
@@ -64,7 +64,7 @@ import { AppDispatch, RootState } from "@/store/store";
 import { deleteProduct, viewProduct } from "@/services/products";
 import { GetProduct } from "@/utils/types";
 import toast from "react-hot-toast";
-import UpdateProduct from "./UpdateProduct";
+// import UpdateProduct from "./UpdateProduct";
 import ProductsSideModal from "./ProductsSideModal";
 
 interface HistoryEntry {
@@ -82,8 +82,8 @@ export default function ViewItem() {
   const dispatch = useDispatch<AppDispatch>();
   // const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const [openEditProductModal, setOpenEditProductModal] =
-    useState<boolean>(false);
+  // const [_openEditProductModal, setOpenEditProductModal] =
+  //   useState<boolean>(false);
   const { product } = useSelector((state: RootState) => state.product);
   const [activeTab, setActiveTab] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -215,7 +215,7 @@ export default function ViewItem() {
   const handleEdit = () => {
     setDrawer(true);
     setSelectedProduct(product);
-    setOpenEditProductModal(true);
+    // setOpenEditProductModal(true);
   };
 
   const handleDelete = () => {

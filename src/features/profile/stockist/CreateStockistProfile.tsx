@@ -161,19 +161,19 @@ export default function CreateStockistProfile() {
 
     dispatch(setId());
 
-    toast.promise(
-      dispatch(createStockist(stockistData))
-        .unwrap()
-        .then(() => {
-          setTimeout(() => navigate("/stockists"), 1500);
-        })
-        .finally(() => setLoading(false)),
-      {
-        loading: "Creating Stockist profile...",
-        success: <b>Stockist profile created successfully!</b>,
-        error: <b>Could not create profile. Please try again.</b>,
-      }
-    );
+    // toast.promise(
+    //   dispatch(createStockist(stockistData))
+    //     .unwrap()
+    //     .then(() => {
+    //       setTimeout(() => navigate("/stockists"), 1500);
+    //     })
+    //     .finally(() => setLoading(false)),
+    //   {
+    //     loading: "Creating Stockist profile...",
+    //     success: <b>Stockist profile created successfully!</b>,
+    //     error: <b>Could not create profile. Please try again.</b>,
+    //   }
+    // );
   };
 
   return (

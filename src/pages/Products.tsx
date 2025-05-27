@@ -59,7 +59,7 @@ const ProductsListing: React.FC = () => {
   const { productsData, pageMeta } = useSelector((state: RootState) => state.product);
   const { categoryLists, categories } = useSelector((state: RootState) => state.category);
   const [categoriesData, setCategoriesData] = useState<GetCategory[]>([]);
-  
+
   const [products, setProducts] = useState<GetProduct[]>([]);
   const [data, setData] = useState({
     searchTerm: '',
@@ -965,12 +965,19 @@ const ProductsListing: React.FC = () => {
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                       <InventoryIcon sx={{ fontSize: '4rem', color: theme.palette.text.disabled }} />
                       <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 600 }}>
-                        No products found
+                        No products deleted
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Try adjusting your search or filter criteria, or add your first product
+                        Try adjusting your search or filter criteria, or deleting your first product
                       </Typography>
                       <Button
+                        onClick={() => {
+                          setSelectedTab(0);
+                          setData((prevState) => ({
+                            ...prevState,
+                            is_deleted: false,
+                          }));
+                        }}
                         variant="contained"
                         startIcon={<AddCircleIcon />}
                         sx={{
@@ -980,7 +987,7 @@ const ProductsListing: React.FC = () => {
                           fontWeight: 600,
                         }}
                       >
-                        Add Your First Product
+                        Delete Your First Product
                       </Button>
                     </Box>
                   </TableCell>
@@ -1102,10 +1109,11 @@ const ProductsListing: React.FC = () => {
         open={openCategoryModal}
         onClose={() => {
           setOpenCategoryModal(false);
+          fetchCategory()
         }}
         onUpdated={() => fetchCategory()}
         category={selectedCategory}
-        onCreated={function (category: { name: string; _id: string; }): void { }} />
+        onCreated={function (category: { name: string; _id: string; }): void { console.log("category", category)}} />
     </Box>
   );
 };

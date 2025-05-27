@@ -176,7 +176,7 @@ const StockistList: React.FC = () => {
               </Typography>
             </Grid>
 
-            {user?.role === ROLE_ENUM.ADMIN && <Grid
+            {user?.user_type === ROLE_ENUM.ADMIN && <Grid
               sx={{
                 display: "flex",
                 justifyContent: "space-between",
@@ -341,7 +341,7 @@ const StockistList: React.FC = () => {
                   </Tooltip>
                 </TableCell>
                 <TableCell>Contact</TableCell>
-                {user?.role === ROLE_ENUM.ADMIN && <TableCell>Actions</TableCell>}
+                {user?.user_type === ROLE_ENUM.ADMIN && <TableCell>Actions</TableCell>}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -423,13 +423,13 @@ const StockistList: React.FC = () => {
                             fontSize="small"
                             sx={{ verticalAlign: "middle", mr: 1 }}
                           />
-                          {stockist.StockistData?.phone_number?.country_code ||
-                            ""}{" "}
-                          {stockist.StockistData?.phone_number?.phone_number ||
-                            "N/A"}
+                          {"stockist.StockistData?.phone_number?.country_code" 
+                            }{" "}
+                          {"stockist.StockistData?.phone_number?.phone_number" 
+                            }
                         </Typography>
                       </TableCell>
-                      {user?.role === ROLE_ENUM.ADMIN && <TableCell>
+                      {user?.user_type === ROLE_ENUM.ADMIN && <TableCell>
                         <Box sx={{ display: 'flex', gap: 1 }}>
                           <Tooltip title="View Details">
                             <IconButton

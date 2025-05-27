@@ -61,7 +61,7 @@ const OrdersPage: React.FC = () => {
     });
 
     const navigate = useNavigate();
-    const userId = user?.UserData?._id ?? "";
+    const userId = user?._id ?? "";
 
     // Fetch orders data
     useEffect(() => {
@@ -168,11 +168,11 @@ const OrdersPage: React.FC = () => {
 
     // Get full name helper function
     const getFullName = useCallback((nameObj: {
-        first_name: string,
-        middle_name?: string,
-        last_name?: string
+        first: string,
+        // middle_name?: string,
+        last?: string
     }) => {
-        return `${nameObj.first_name} ${nameObj.middle_name || ''} ${nameObj.last_name || ''}`.trim();
+        return `${nameObj.first} ${nameObj.last || ''}`.trim();
     }, []);
 
     return (
@@ -358,10 +358,10 @@ const OrdersPage: React.FC = () => {
                                                             </Typography>
                                                         </TableCell>
                                                         <TableCell>
-                                                            {getFullName(order?.Stockist?.name)}
+                                                            {'getFullName(order?.Stockist?.name)'}
                                                         </TableCell>
                                                         <TableCell>
-                                                            {user?.UserData ? getFullName(user.UserData.name) : 'N/A'}
+                                                            {user ? getFullName(user.name) : 'N/A'}
                                                         </TableCell>
                                                         <TableCell>{formatDate(order.order_date)}</TableCell>
                                                         <TableCell>

@@ -46,6 +46,9 @@ import PrivacyPolicyPage from "./components/Legal/PrivacyPolicyPage";
 import SecurityPolicyPage from "./components/Legal/SecurityPolicyPage";
 import TermsOfServicePage from "./components/Legal/TermsOfServicePage";
 import PricingPage from "./components/Pricing/PricingPage";
+import SignUpPage from "./pages/SignUp";
+import ProfilePage from "./pages/Profile";
+// import PromptModal from "./common/PromptModal";
 
 const xThemeComponents = {
   ...chartsCustomizations,
@@ -55,6 +58,8 @@ const xThemeComponents = {
 };
 
 const App: React.FC<{ themeComponents?: object }> = (props) => {
+  // const [showProfileModal, setShowProfileModal] = React.useState(false);
+
   const { authState, user, isUserFetched } = useSelector(
     (state: RootState) => state.auth
   );
@@ -94,6 +99,18 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
     window.scrollTo(0, 0);
   }, [location]);
 
+  // useEffect(() => {
+  //   if (authState === AuthStates.AUTHENTICATED && user) {
+  //     const isProfileComplete = false;
+  //     const modalDismissed = localStorage.getItem("company");
+
+  //     if (!isProfileComplete && !modalDismissed) {
+  //       setShowProfileModal(true);
+  //     }
+  //   }
+  // }, [authState, user]);
+
+
   if (!isInitialized.current)
     return (
       <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
@@ -116,17 +133,17 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
         {/* if authenticed */}
         {authState === AuthStates.AUTHENTICATED ? (
           <>
-            {user?.role === ROLE_ENUM.ADMIN && (
+            {user?.user_type === ROLE_ENUM.ADMIN && (
               <Route element={<Dashboard />}>
                 <Route path="/dashboard" element={<AdminDashboard />} />
                 <Route path="/" element={<AdminDashboard />} />
-                <Route path="/profile" element={<MyProfile />} />
+                <Route path="/account" element={<ProfilePage />} />
                 <Route path="/add/product" element={<CreateProduct />} />
                 <Route path="/products/:id" element={<ViewItem />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/inventory" element={<ViewInventory />} />
                 <Route path="/upload" element={<UploadDocuments />} />
-                <Route path="/settings" element={<Settings />} />
+                {/* <Route path="/settings" element={<Settings />} /> */}
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/create/user" element={<CreateUserProfile />} />
                 <Route path="/stockists" element={<Stockist />} />
@@ -147,11 +164,11 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
               </Route>
             )}
 
-            {user?.role === ROLE_ENUM.CHEMIST && (
+            {user?.user_type === ROLE_ENUM.USER && (
               <Route element={<Dashboard />}>
                 <Route path="/dashboard" element={<AdminDashboard />} />
                 <Route path="/" element={<AdminDashboard />} />
-                <Route path="/profile" element={<MyProfile />} />
+                <Route path="/account" element={<ProfilePage />} />
                 <Route path="/add/product" element={<CreateProduct />} />
                 <Route path="/products/:id" element={<ViewItem />} />
                 <Route path="/products" element={<Products />} />
@@ -163,7 +180,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/orders/:orderId/product" element={<UpdateOrderProduct />} />
                 <Route path="/invoice" element={<InvoiceEditor />} />
                 <Route path="/upload" element={<UploadDocuments />} />
-                <Route path="/settings" element={<Settings />} />
+                {/* <Route path="/settings" element={<Settings />} /> */}
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/stockists" element={<Stockist />} />
                 <Route path="/chemists/:chemistId" element={<ChemistProfile />} />
@@ -188,13 +205,25 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/admin" element={<LoginPage />} />
 
-            {/* <Route path="/signup" element={<SignUpPage />} /> */}
+            <Route path="/signup" element={<SignUpPage />} />
             <Route path="/*" element={<Navigate to="/" replace />} />
           </>
         )
         }
 
       </Routes>
+      {/* <PromptModal
+        open={showProfileModal}
+        onClose={() => {
+          localStorage.setItem("profilePromptDismissed", "true");
+          setShowProfileModal(false);
+        }}
+        onSubmit={(data) => {
+          console.log("Submitted:", data);
+          localStorage.setItem("profilePromptDismissed", "true");
+          setShowProfileModal(false);
+        }}
+      /> */}
     </AppTheme >
   );
 };

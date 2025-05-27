@@ -20,6 +20,7 @@ import { AppDispatch, RootState } from "@/store/store";
 import { AuthStates } from "@/utils/enums";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+// import { getCompany } from "@/services/user";
 
 const LoginForm: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -112,7 +113,7 @@ const LoginForm: React.FC = () => {
             <img
               src={logoText}
               alt="Logo Text"
-              style={{ marginBottom: "20px", height: "50px" }}
+              style={{ marginBottom: "10px", height: "40px" }}
             />
           </Box>
 
