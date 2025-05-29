@@ -15,26 +15,26 @@ import {
   treeViewCustomizations,
 } from "./theme/customizations";
 import Products from "./pages/Products";
-import UploadDocuments from "./pages/UploadDocuments";
-import CreateChemistProfile from "./features/profile/creditors/CreateChemistProfile";
-import CreateStockistProfile from "./features/profile/stockist/CreateStockistProfile";
+// import UploadDocuments from "./pages/UploadDocuments";
+// import CreateChemistProfile from "./features/profile/creditors/CreateChemistProfile";
+// import CreateStockistProfile from "./features/profile/stockist/CreateStockistProfile";
 import CreateUserProfile from "./features/profile/createUser";
 import CreateProduct from "./features/products/createProduct";
 // import Chemists from "./pages/Chemist";
 // import ChemistProfile from "./features/profile/chemist/Chemistprofile";
 // import StockistProfile from "./features/profile/stockist/StockistProfile";
-import AdminDashboard from "./pages/AdminDashboard";
+// import AdminDashboard from "./pages/AdminDashboard";
 import { getCurrentUser } from "./services/auth";
-import OrdersPage from "./pages/Order";
-import CreateOrder from "./features/order/createOrder";
-import ViewOrder from "./features/order/viewOrder";
-import UpdateOrderProduct from "./features/order/updateOrder";
+// import OrdersPage from "./pages/Order";
+// import CreateOrder from "./features/order/createOrder";
+// import ViewOrder from "./features/order/viewOrder";
+// import UpdateOrderProduct from "./features/order/updateOrder";
 import LandingPage from "./components/LandingPage/LandingPage";
 import AboutPage from "./components/About/AboutPage";
 import Timeline from "./features/inventory/timeline";
 import Warehouse from "./features/inventory/warehouse";
 import InvoiceEditor from "./features/upload-documents/InvoiceEditor";
-import ProductBilling from "./features/products/SellProduct";
+// import ProductBilling from "./features/products/SellProduct";
 import ViewInventory from "./pages/Inventory";
 import ViewItem from "./features/products/ViewItem";
 import { ContactPage } from "@mui/icons-material";
@@ -135,30 +135,31 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
           <>
             {user?.user_type === ROLE_ENUM.ADMIN && (
               <Route element={<Dashboard />}>
-                <Route path="/dashboard" element={<AdminDashboard />} />
-                <Route path="/" element={<AdminDashboard />} />
+                {/* <Route path="/dashboard" element={<AdminDashboard />} /> */}
+                {/* <Route path="/" element={<AdminDashboard />} /> */}
                 <Route path="/account" element={<ProfilePage />} />
+                <Route path="/" element={<ProfilePage />} />
                 <Route path="/add/product" element={<CreateProduct />} />
                 <Route path="/products/:id" element={<ViewItem />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/inventory" element={<ViewInventory />} />
-                <Route path="/upload" element={<UploadDocuments />} />
+                {/* <Route path="/upload" element={<UploadDocuments />} /> */}
                 {/* <Route path="/settings" element={<Settings />} /> */}
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/create/user" element={<CreateUserProfile />} />
                 <Route path="/creditors" element={<Creditors />} />
                 {/* <Route path="/stockists/:stockistId" element={<StockistProfile />} /> */}
-                <Route
+                {/* <Route
                   path="/create/user/stockist/:id"
                   element={<CreateStockistProfile />}
-                />
+                /> */}
                 {/* <Route path="/chemists" element={<Chemists />} /> */}
                 {/* <Route path="/chemists/:chemistId" element={<ChemistProfile />} /> */}
-                <Route
+                {/* <Route
                   path="/create/user/chemist/:id"
                   element={<CreateChemistProfile />}
-                />
-                <Route path="/sell" element={<ProductBilling />} />
+                /> */}
+                {/* <Route path="/sell" element={<ProductBilling />} /> */}
                 <Route path="/*" element={<Navigate to="/" replace />} />
 
               </Route>
@@ -166,27 +167,28 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
 
             {user?.user_type === ROLE_ENUM.USER && (
               <Route element={<Dashboard />}>
-                <Route path="/dashboard" element={<AdminDashboard />} />
-                <Route path="/" element={<AdminDashboard />} />
+                {/* <Route path="/dashboard" element={<AdminDashboard />} /> */}
+                {/* <Route path="/" element={<AdminDashboard />} /> */}
                 <Route path="/account" element={<ProfilePage />} />
+                <Route path="/" element={<ProfilePage />} />
                 <Route path="/add/product" element={<CreateProduct />} />
                 <Route path="/products/:id" element={<ViewItem />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/inventory" element={<Warehouse />} />
                 <Route path="/timeline" element={<Timeline />} />
-                <Route path="/sales" element={<OrdersPage />} />
-                <Route path="/purchases" element={<OrdersPage />} />
+                {/* <Route path="/sales" element={<OrdersPage />} /> */}
+                {/* <Route path="/purchases" element={<OrdersPage />} /> */}
                 {/* <Route path="/orders" element={<OrdersPage />} />
                 <Route path="/orders/create" element={<CreateOrder />} />
                 <Route path="/orders/:orderId" element={<ViewOrder />} />
                 <Route path="/orders/:orderId/product" element={<UpdateOrderProduct />} /> */}
                 <Route path="/invoice" element={<InvoiceEditor />} />
-                <Route path="/upload" element={<UploadDocuments />} />
+                {/* <Route path="/upload" element={<UploadDocuments />} /> */}
                 {/* <Route path="/settings" element={<Settings />} /> */}
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/creditors" element={<Creditors />} />
                 {/* <Route path="/debitors" element={<ChemistProfile />} /> */}
-                <Route path="/sell" element={<ProductBilling />} />
+                {/* <Route path="/sell" element={<ProductBilling />} /> */}
                 <Route path="/*" element={<Navigate to="/" replace />} />
               </Route>
             )}

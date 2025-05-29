@@ -230,9 +230,12 @@ const ProductsSideModal = (props: SideModalProps) => {
             Object.entries(sanitizedData).forEach(([key, value]) => {
                 if (typeof value === 'boolean') {
                     formData.append(key, value ? 'true' : 'false');
-                } else if (value !== undefined && value !== null) {
+                } else if (value instanceof Blob) {
                     formData.append(key, value);
+                } else if (typeof value === 'string' || typeof value === 'number') {
+                    formData.append(key, value.toString());
                 }
+                // Skip objects or other types to avoid FormData errors
             });
 
             if (selectedProduct && selectedProduct._id) {

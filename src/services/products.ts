@@ -5,7 +5,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 export const createProduct = createAsyncThunk(
   "product/uploadAndCreate",
   async (
-    {  productData }: {  productData: FormData },
+    { productData }: { productData: FormData },
     { rejectWithValue }
   ) => {
     try {
@@ -28,7 +28,7 @@ export const createProduct = createAsyncThunk(
 
 export const sellProduct = createAsyncThunk(
   "sell/product",
-  async ({ data }: { data: Array<StockOutState> }, { rejectWithValue }) => {
+  async (data: Array<StockOutState>, { rejectWithValue }) => {
     try {
       const response = await userApi.post(`/sales/create/mulitple_sales`, data);
       // console.log("sellProduct response", response);

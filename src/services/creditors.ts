@@ -29,7 +29,7 @@ export const viewAllCreditors = createAsyncThunk(
                 }`
             );
 
-            console.log("viewAllCreditors response", response);
+            // console.log("viewAllCreditors response", response);
 
             if (response.data.success === true) {
                 const creditors = response.data.data.docs;
@@ -113,7 +113,7 @@ export const createCreditor = createAsyncThunk(
                 `/creditor/create`,
                 data
             );
-            console.log("createCreditor response", response);
+            // console.log("createCreditor response", response);
 
             if (response.data.success === true) {
                 return;
@@ -138,7 +138,7 @@ export const updateCreditor = createAsyncThunk(
                 data
             );
 
-            console.log("updateCreditor response", response);
+            // console.log("updateCreditor response", response);
 
             if (response.data.success === true) {
                 return;

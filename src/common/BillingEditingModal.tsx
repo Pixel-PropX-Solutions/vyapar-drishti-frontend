@@ -10,7 +10,6 @@ import {
     useTheme,
     Tooltip,
     Grow,
-    FormControl,
     Stack,
     Chip,
     InputAdornment,
@@ -32,10 +31,8 @@ import {
     Save,
     LocationOn,
     Home,
-    Public,
     Edit,
     Add,
-    KeyboardArrowRight,
     LocationCity,
     MarkunreadMailbox,
 } from "@mui/icons-material";
@@ -72,7 +69,7 @@ const BillingEditingModal: React.FC<EditBillingModalProps> = ({
     const { user } = useSelector((state: RootState) => state.auth);
     const dispatch = useDispatch<AppDispatch>();
     const [isLoading, setIsLoading] = useState(false);
-    const [showValidation, setShowValidation] = useState(false);
+    const [_showValidation, setShowValidation] = useState(false);
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
     const [focusedField, setFocusedField] = useState<string>('');
 

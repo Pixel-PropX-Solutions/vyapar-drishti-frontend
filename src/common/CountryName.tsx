@@ -9,11 +9,12 @@ interface CountryNameProps {
     formErrors: Record<string, string>,
     isHelperText?: boolean,
     focusedField: string,
+    helperText?: string;
     setFocusedField: React.Dispatch<React.SetStateAction<string>>;
 }
 
 
-const CountryName: React.FC<CountryNameProps> = ({ handleInputChange, value, setFocusedField, focusedField, formErrors, isHelperText }) => {
+const CountryName: React.FC<CountryNameProps> = ({ handleInputChange, value, helperText, setFocusedField, focusedField, formErrors, isHelperText }) => {
     return (
         <Slide direction="up" in timeout={1300}>
             <FormControl fullWidth error={!!formErrors.country}>
@@ -158,7 +159,7 @@ const CountryName: React.FC<CountryNameProps> = ({ handleInputChange, value, set
                         ? theme.palette.error.main
                         : alpha(theme.palette.text.secondary, 0.7)
                 }}>
-                    {formErrors.country || 'Select your country for billing purposes'}
+                    {formErrors.country || helperText || 'Select your country for billing purposes'}
                 </FormHelperText>}
             </FormControl>
         </Slide>

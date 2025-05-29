@@ -21,10 +21,10 @@ import toast from "react-hot-toast";
 import { setProductId } from "@/store/reducers/productReducer";
 import {
   Close as CloseIcon,
-  Warehouse as WarehouseIcon,
+  // Warehouse as WarehouseIcon,
   Description as DescriptionIcon,
-  WaterDrop as StateIcon,
-  Today as TodayIcon,
+  // WaterDrop as StateIcon,
+  // Today as TodayIcon,
   CurrencyRupee as CurrencyIcon,
   ProductionQuantityLimits as QuantityIcon,
 } from "@mui/icons-material";
@@ -339,27 +339,27 @@ export default function DeletionModal({ id }: { id: string }) {
                     icon={<QuantityIcon />}
                     label="No of tablets per Pack"
                     value={
-                      productData?.no_of_tablets_per_pack.toString() || "N/A"
+                      (productData?.opening_quantity ?? '').toString() || "N/A"
                     }
                   />
                   <InfoRow
                     theme={theme}
                     icon={<CurrencyIcon />}
                     label="Price"
-                    value={productData?.price.toString() || "N/A"}
+                    value={productData?.selling_price.toString() || "N/A"}
                   />
-                  <InfoRow
+                  {/* <InfoRow
                     theme={theme}
                     icon={<TodayIcon />}
                     label="Expiry Date"
                     value={productData?.expiry_date || "N/A"}
-                  />
-                  <InfoRow
+                  /> */}
+                  {/* <InfoRow
                     theme={theme}
                     icon={<StateIcon />}
                     label="State of Product"
                     value={productData?.state || "N/A"}
-                  />
+                  /> */}
 
                   <InfoRow
                     theme={theme}
@@ -367,12 +367,12 @@ export default function DeletionModal({ id }: { id: string }) {
                     label="Description"
                     value={productData?.description ?? ""}
                   />
-                  <InfoRow
+                  {/* <InfoRow
                     theme={theme}
                     icon={<WarehouseIcon />}
                     label="Storage Requirement"
                     value={productData?.storage_requirement || "N/A"}
-                  />
+                  /> */}
                 </Box>
               </Grid>
             </Grid>

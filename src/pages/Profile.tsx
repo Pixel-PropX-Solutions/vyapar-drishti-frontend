@@ -897,7 +897,9 @@ const ProfilePage: React.FC = () => {
         onClose={() => {
           setIsShippingEditing(false);
         }}
-        company={company}
+        entity_type={ENUM_ENTITY.COMPANY}
+        shipping={company?.shipping ?? null}
+        entity_id={company?._id || ''}
         onUpdated={async () => {
           fetchCompleteData();
         }}

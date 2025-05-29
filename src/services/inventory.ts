@@ -65,7 +65,7 @@ export const getStockMovement = createAsyncThunk(
       const response = await userApi.get(
         `stock_movement/?search=${search}&category=${category === 'All-Categories' ? '' : category}&state=${state}&startDate=${startDate}&endDate=${endDate}&movement_type=${movement_type}&page_no=${page_no}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"}`
       );
-      console.log("getStockMovement response", response.data);
+      // console.log("getStockMovement response", response.data);
 
       if (response.data.success === true) {
         const stockMovement = response.data.data.docs;

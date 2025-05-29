@@ -37,7 +37,7 @@ import { AppDispatch, RootState } from '@/store/store';
 import { getProductStock } from '@/services/inventory';
 import { SortField, SortOrder, WareHouseProduct } from '@/utils/types';
 import TabPanel from '../upload-documents/components/TabPanel';
-import SideModal from '@/common/WareHouseSideModal';
+// import SideModal from '@/common/WareHouseSideModal';
 import { useNavigate } from 'react-router-dom';
 // import { viewAllCategories } from '@/services/products';
 import WareHouseTable from './WareHouseTable';
@@ -71,7 +71,7 @@ const Warehouse: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
-    const [drawer, setDrawer] = useState<{
+    const [_drawer, setDrawer] = useState<{
         isOpen: boolean;
         type: 'stockIn' | 'stockOut' | null;
         product: WareHouseProduct | null;
@@ -617,7 +617,7 @@ const Warehouse: React.FC = () => {
             )}
 
             {/* Side Modal for Stock In/Out actions */}
-            <SideModal drawer={drawer} setDrawer={setDrawer} />
+            {/* <SideModal drawer={drawer} setDrawer={setDrawer} /> */}
         </Container>
     );
 };

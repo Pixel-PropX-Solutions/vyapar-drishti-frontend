@@ -9,7 +9,8 @@ import invoiceReducer from "./reducers/invoiceReducer";
 import stockistReducer from "./reducers/stockistReducer";
 import creditorReducer from "./reducers/creditorsReducer";
 import billingReducer from "./reducers/billingReducer";
-import orderReducer from "./reducers/orderReducer";
+import shippingReducer from "./reducers/shippingReducer";
+// import orderReducer from "./reducers/orderReducer";
 import analyticsReducer from "./reducers/analyticsReducer";
 
 const store = configureStore({
@@ -20,13 +21,14 @@ const store = configureStore({
 
     creditor: creditorReducer,
     billing: billingReducer,
+    shipping: shippingReducer,
 
     auth: authReducer,
     user: userReducer,
     inventory: inventoryReducer,
     invoice: invoiceReducer,
     stockist: stockistReducer,
-    order: orderReducer,
+    // order: orderReducer,
     analytics: analyticsReducer,
   },
 });

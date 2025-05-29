@@ -1,4 +1,4 @@
-import { Avatar, Box, FormControl, FormHelperText, ListItemIcon, ListItemText, MenuItem, Select } from "@mui/material";
+import { Avatar, Box, FormControl, FormHelperText, ListItemIcon, ListItemText, MenuItem, Select, useTheme } from "@mui/material";
 import CountryCodes from '../internals/data/CountryCodes.json';
 
 interface CountryCodeProps {
@@ -9,8 +9,8 @@ interface CountryCodeProps {
     isHelperText?: boolean;
 }
 
-const CountryCode: React.FC<CountryCodeProps> = ({ handleInputChange, value, isLabelled,fieldName, isHelperText }) => {
-
+const CountryCode: React.FC<CountryCodeProps> = ({ handleInputChange, value, isLabelled, fieldName, isHelperText }) => {
+    const theme = useTheme();
     return (
         <FormControl fullWidth >
             {/* <InputLabel id="alter-country-code-label">Country Code</InputLabel> */}
@@ -44,9 +44,16 @@ const CountryCode: React.FC<CountryCodeProps> = ({ handleInputChange, value, isL
                     '& .MuiOutlinedInput-root': {
                         borderRadius: 2,
                         transition: 'all 0.3s ease',
-                        // '&:hover': {
-                        //     transform: 'translateY(-1px)',
-                        // }
+                        '&:hover': {
+                            '& > fieldset': {
+                                borderColor: theme.palette.primary.main,
+                            }
+                        },
+                        '&.Mui-focused': {
+                            '& > fieldset': {
+                                borderWidth: 2,
+                            }
+                        }
                     }
                 }}
             >

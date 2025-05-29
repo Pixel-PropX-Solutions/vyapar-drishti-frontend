@@ -163,9 +163,12 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
         Object.entries(sanitizedData).forEach(([key, value]) => {
             if (typeof value === 'boolean') {
                 formData.append(key, value ? 'true' : 'false');
-            } else if (value !== undefined && value !== null) {
+            } else if (value instanceof File) {
+                formData.append(key, value);
+            } else if (typeof value === 'string') {
                 formData.append(key, value);
             }
+            // Ignore other types to prevent errors
         });
 
         if (category && category._id) {
@@ -179,7 +182,8 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
                     .then(() => {
                         setIsLoading(false);
                         onClose();
-                        onUpdated();
+                        if (onUpdated)
+                            onUpdated();
                     })
                     .catch(() => {
                         setIsLoading(false);

@@ -17,8 +17,8 @@ import {
     Chip,
     InputAdornment,
     CircularProgress,
-    Alert,
-    Collapse,
+    // Alert,
+    // Collapse,
 } from "@mui/material";
 import {
     Close as CloseIcon,
@@ -61,7 +61,7 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
     const [isLoading, setIsLoading] = useState(false);
-    const [showValidation, setShowValidation] = useState(false);
+    const [_showValidation, setShowValidation] = useState(false);
     const companyImageInputRef = useRef<HTMLInputElement | null>(null);
     const [isDragActive, setIsDragActive] = useState(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -118,8 +118,7 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
     ) => {
         setData(prev => {
             const newData = { ...prev, [field]: value };
-            const errors = validateForm(newData);
-            setFormErrors(errors);
+            validateForm(newData);
             return newData;
         });
     };

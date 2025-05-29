@@ -9,7 +9,6 @@ import {
     useTheme,
     Tooltip,
     FormControl,
-    Fade,
     Chip,
     InputAdornment,
     Alert,
@@ -18,6 +17,7 @@ import {
     Avatar,
     Card,
     CardContent,
+    Autocomplete,
 } from "@mui/material";
 import {
     Close as CloseIcon,
@@ -34,7 +34,6 @@ import {
     CloudUpload,
     Save,
     Label,
-    Info,
 } from "@mui/icons-material";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
@@ -45,6 +44,8 @@ import { updateCreditor } from "@/services/creditors";
 import { viewAllBillings } from "@/services/billing";
 import BillingEditingModal from "@/common/BillingEditingModal";
 import { ENUM_ENTITY } from "@/utils/enums";
+import ShippingEditingModal from "@/common/ShippingEditingModal";
+import { viewAllShippings } from "@/services/shipping";
 
 interface EditUserModalProps {
     open: boolean;
@@ -80,7 +81,7 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
     const [isLoading, setIsLoading] = useState(false);
-    const [currentStep, setCurrentStep] = useState(0);
+    // const [currentStep, setCurrentStep] = useState(0);
     const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
     const [isFormValid, setIsFormValid] = useState(false);
     const creditorImageRef = useRef<HTMLInputElement | null>(null);
@@ -88,8 +89,14 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [showSuccessAlert, setShowSuccessAlert] = useState(false);
     const { billings } = useSelector((state: RootState) => state.billing);
+    const { shippings } = useSelector((state: RootState) => state.shipping);
     const [openBillingModal, setOpenBillingModal] = useState(false);
+    const [openShippingModal, setOpenShippingModal] = useState(false);
     const [selectedBillingOption, setSelectedBillingOption] = useState<{
+        label: string;
+        value: string;
+    } | null>(null);
+    const [selectedShippingOption, setSelectedShippingOption] = useState<{
         label: string;
         value: string;
     } | null>(null);
@@ -135,7 +142,7 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
         }
     };
 
-    const validateForm = (): boolean => {
+    const validateForm = useCallback((): boolean => {
         const errors: ValidationErrors = {};
         Object.keys(data).forEach(key => {
             const field = key as keyof CreditorFormData;
@@ -145,7 +152,7 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
 
         setValidationErrors(errors);
         return Object.keys(errors).length === 0;
-    };
+    }, [data]);
 
     const handleInputChange = (
         field: keyof CreditorFormData,
@@ -198,7 +205,6 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
         reader.onload = (e) => {
             const result = e.target?.result as string;
             setImagePreview(result);
-            toast.success('Image uploaded successfully!');
         };
         reader.readAsDataURL(file);
     }, []);
@@ -240,7 +246,6 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
         if (creditorImageRef.current) {
             creditorImageRef.current.value = '';
         }
-        toast.success('Image removed successfully!');
     }, []);
 
     const resetForm = () => {
@@ -259,7 +264,7 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
         });
         setImagePreview(null);
         setValidationErrors({});
-        setCurrentStep(0);
+        // setCurrentStep(0);
         if (creditorImageRef.current) {
             creditorImageRef.current.value = '';
         }
@@ -268,7 +273,7 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
     // Form completion percentage
     const getFormCompletionPercentage = (): number => {
         const requiredFields = ['name', 'billing'];
-        const optionalFields = ['email', 'company_name', 'gstin', 'pan_number', 'code', 'number', 'tags'];
+        const optionalFields = ['email', 'shipping', 'company_name', 'gstin', 'pan_number', 'code', 'number', 'tags'];
 
         const requiredCompleted = requiredFields.filter(field =>
             data[field as keyof CreditorFormData] && String(data[field as keyof CreditorFormData]).trim()
@@ -311,6 +316,12 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
                     value: cred.billing._id
                 });
             }
+            if (cred.shipping) {
+                setSelectedShippingOption({
+                    label: `${cred.shipping.address_1}, ${cred.shipping.city}, ${cred.shipping.state} - ${cred.shipping.pinCode} (${cred.shipping.country})`,
+                    value: cred.shipping._id ?? '',
+                });
+            }
         } else if (open && !cred) {
             resetForm();
         }
@@ -318,11 +329,12 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
 
     useEffect(() => {
         dispatch(viewAllBillings());
-    }, [dispatch]);
+        dispatch(viewAllShippings());
+    }, []);
 
     useEffect(() => {
         setIsFormValid(validateForm());
-    }, [data]);
+    }, [data, validateForm]);
 
     const handleSubmit = async () => {
         if (!validateForm()) {
@@ -383,78 +395,6 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
             }
         );
     };
-    // Enhanced Input Component with validation
-    const EnhancedTextField = ({
-        field,
-        label,
-        placeholder,
-        required = false,
-        icon,
-        multiline = false,
-        select = false,
-        SelectProps,
-        ...props
-    }: {
-        field: keyof CreditorFormData;
-        label: string;
-        placeholder: string;
-        required?: boolean;
-        icon?: React.ReactNode;
-        multiline?: boolean;
-        select?: boolean;
-        SelectProps?: Record<string, unknown>;
-        [key: string]: unknown;
-    }) => (
-        <FormControl fullWidth sx={{ mb: 2 }}>
-            <Typography variant="body2" sx={{ mb: 1, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 1 }}>
-                {icon}
-                {label}
-                {required && <Chip label="Required" size="small" color="primary" variant="outlined" />}
-                {!required && <Chip label="Optional" size="small" color="default" variant="outlined" />}
-            </Typography>
-            <TextField
-                fullWidth
-                size="small"
-                placeholder={placeholder}
-                value={data[field] || ''}
-                onChange={(e) => handleInputChange(field, e.target.value)}
-                error={!!validationErrors[field]}
-                helperText={validationErrors[field]}
-                multiline={multiline}
-                rows={multiline ? 3 : 1}
-                InputProps={{
-                    startAdornment: icon && (
-                        <InputAdornment position="start">
-                            {icon}
-                        </InputAdornment>
-                    ),
-                    endAdornment: data[field] && !validationErrors[field] && (
-                        <InputAdornment position="end">
-                            <CheckCircle color="success" fontSize="small" />
-                        </InputAdornment>
-                    )
-                }}
-                sx={{
-                    '& .MuiOutlinedInput-root': {
-                        borderRadius: 1,
-                        transition: 'all 0.3s ease',
-                        '&:hover': {
-                            '& > fieldset': {
-                                borderColor: theme.palette.primary.main,
-                            }
-                        },
-                        '&.Mui-focused': {
-                            '& > fieldset': {
-                                borderWidth: 2,
-                            }
-                        }
-                    }
-                }}
-                {...(select ? { select: true, SelectProps } : {})}
-                {...props}
-            />
-        </FormControl>
-    );
 
     // Enhanced Image Upload Component
     const ImageUploadSection = () => (
@@ -513,67 +453,63 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
                     }}
                 >
                     {imagePreview ? (
-                        <Fade in timeout={300}>
-                            <Box sx={{ position: 'relative', display: 'inline-block' }}>
-                                <Avatar
-                                    src={imagePreview}
-                                    alt="Profile Preview"
+                        <Box sx={{ position: 'relative', display: 'inline-block' }}>
+                            <Avatar
+                                src={imagePreview}
+                                alt="Profile Preview"
+                                sx={{
+                                    width: 120,
+                                    height: 120,
+                                    border: `3px solid ${theme.palette.primary.main}`,
+                                    boxShadow: theme.shadows[4],
+                                    transition: 'all 0.3s ease',
+                                    objectFit: 'contiain',
+                                }}
+                            />
+                            <Tooltip title="Remove image">
+                                <IconButton
+                                    onClick={removeImage}
                                     sx={{
-                                        width: 120,
-                                        height: 120,
-                                        border: `3px solid ${theme.palette.primary.main}`,
-                                        boxShadow: theme.shadows[4],
-                                        transition: 'all 0.3s ease',
-                                        objectFit: 'contiain',
+                                        position: 'absolute',
+                                        top: -8,
+                                        right: -8,
+                                        backgroundColor: theme.palette.error.main,
+                                        color: 'white',
+                                        '&:hover': {
+                                            backgroundColor: theme.palette.error.dark,
+                                            transform: 'scale(1.1)'
+                                        },
+                                        width: 32,
+                                        height: 32,
+                                        transition: 'all 0.2s ease'
                                     }}
-                                />
-                                <Tooltip title="Remove image">
-                                    <IconButton
-                                        onClick={removeImage}
-                                        sx={{
-                                            position: 'absolute',
-                                            top: -8,
-                                            right: -8,
-                                            backgroundColor: theme.palette.error.main,
-                                            color: 'white',
-                                            '&:hover': {
-                                                backgroundColor: theme.palette.error.dark,
-                                                transform: 'scale(1.1)'
-                                            },
-                                            width: 32,
-                                            height: 32,
-                                            transition: 'all 0.2s ease'
-                                        }}
-                                    >
-                                        <Delete fontSize="small" />
-                                    </IconButton>
-                                </Tooltip>
-                                <Typography variant="body2" sx={{ mt: 2, fontWeight: 600 }}>
-                                    Click to change image
-                                </Typography>
-                            </Box>
-                        </Fade>
+                                >
+                                    <Delete fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                            <Typography variant="body2" sx={{ mt: 2, fontWeight: 600 }}>
+                                Click to change image
+                            </Typography>
+                        </Box>
                     ) : (
-                        <Fade in timeout={300}>
-                            <Box>
-                                <CloudUpload
-                                    sx={{
-                                        fontSize: 48,
-                                        color: theme.palette.primary.main,
-                                        mb: 2
-                                    }}
-                                />
-                                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                                    Upload Profile Image
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                                    Drag & drop your image here, or click to browse
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                    Supports PNG, JPEG, JPG, WebP • Max 5MB • Recommended 1:1 ratio
-                                </Typography>
-                            </Box>
-                        </Fade>
+                        <Box>
+                            <CloudUpload
+                                sx={{
+                                    fontSize: 48,
+                                    color: theme.palette.primary.main,
+                                    mb: 2
+                                }}
+                            />
+                            <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                                Upload Profile Image
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                Drag & drop your image here, or click to browse
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                                Supports PNG, JPEG, JPG, WebP • Max 5MB • Recommended 1:1 ratio
+                            </Typography>
+                        </Box>
                     )}
                 </Box>
             </CardContent>
@@ -784,6 +720,7 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
                                 />
                             </FormControl>
 
+
                             <FormControl fullWidth sx={{ mb: 2 }}>
                                 <Typography variant="body2" sx={{ mb: 1, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 1 }}>
                                     <Email fontSize="small" />
@@ -826,29 +763,58 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
                                     }}
                                 />
                             </FormControl>
-                            {/* <EnhancedTextField
-                                field="email"
-                                label="Email Address"
-                                placeholder="Enter email address"
-                                icon={<Email fontSize="small" />}
-                                type="email"
-                            /> */}
 
-                            <EnhancedTextField
-                                field="company_name"
-                                label="Company Name"
-                                placeholder="Enter company name"
-                                icon={<Business fontSize="small" />}
-                            />
+                            <FormControl fullWidth sx={{ mb: 2 }}>
+                                <Typography variant="body2" sx={{ mb: 1, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Business fontSize="small" />
+                                    Company Name
+                                    <Chip label="Optional" size="small" color="default" variant="outlined" />
+                                </Typography>
+                                <TextField
+                                    fullWidth
+                                    size="small"
+                                    placeholder="Enter company name"
+                                    value={data.company_name || ''}
+                                    onChange={(e) => handleInputChange('company_name', e.target.value)}
+                                    error={!!validationErrors.company_name}
+                                    helperText={validationErrors.company_name}
+                                    InputProps={{
+                                        startAdornment: (<InputAdornment position="start">
+                                            <Business fontSize="small" />
+                                        </InputAdornment>),
+                                        endAdornment: !validationErrors.company_name && (
+                                            <InputAdornment position="end">
+                                                <CheckCircle color="success" fontSize="small" />
+                                            </InputAdornment>
+                                        )
+                                    }}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            borderRadius: 1,
+                                            transition: 'all 0.3s ease',
+                                            '&:hover': {
+                                                '& > fieldset': {
+                                                    borderColor: theme.palette.primary.main,
+                                                }
+                                            },
+                                            '&.Mui-focused': {
+                                                '& > fieldset': {
+                                                    borderWidth: 2,
+                                                }
+                                            }
+                                        }
+                                    }}
+                                />
+                            </FormControl>
 
                             {/* Phone Number Section */}
                             <Box sx={{ mb: 2 }}>
-                                <Typography variant="body2" sx={{ mb: 1, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Typography variant="body2" sx={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: 1 }}>
                                     <Phone fontSize="small" />
                                     Phone Number
                                     <Chip label="Optional" size="small" color="default" variant="outlined" />
                                 </Typography>
-                                <Box sx={{ display: 'flex', gap: 2, itemAlign: 'flex-end' }}>
+                                <Box sx={{ display: 'flex', columnGap: 2, mt: 2, itemAlign: 'flex-end' }}>
                                     <Box sx={{ width: '30%' }}>
                                         <CountryCode
                                             fieldName="code"
@@ -876,9 +842,19 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
                                             }}
                                             sx={{
                                                 '& .MuiOutlinedInput-root': {
-                                                    // mt: .5,
-                                                    padding: '3px 0',
                                                     borderRadius: 1,
+                                                    padding: '3px 0',
+                                                    transition: 'all 0.3s ease',
+                                                    '&:hover': {
+                                                        '& > fieldset': {
+                                                            borderColor: theme.palette.primary.main,
+                                                        }
+                                                    },
+                                                    '&.Mui-focused': {
+                                                        '& > fieldset': {
+                                                            borderWidth: 2,
+                                                        }
+                                                    }
                                                 }
                                             }}
                                         />
@@ -898,100 +874,311 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
 
                             <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
                                 <Box sx={{ width: '50%' }}>
-                                    <EnhancedTextField
-                                        field="gstin"
-                                        label="GSTIN"
-                                        placeholder="Enter GSTIN"
-                                        icon={<CreditCard fontSize="small" />}
-                                    />
+                                    <FormControl fullWidth sx={{ mb: 2 }}>
+                                        <Typography variant="body2" sx={{ mb: 1, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <CreditCard fontSize="small" />
+                                            GSTIN
+                                            <Chip label="Optional" size="small" color="default" variant="outlined" />
+                                        </Typography>
+                                        <TextField
+                                            fullWidth
+                                            size="small"
+                                            placeholder="Enter GSTIN"
+                                            value={data.gstin || ''}
+                                            onChange={(e) => handleInputChange('gstin', e.target.value)}
+                                            error={!!validationErrors.pan_number}
+                                            helperText={validationErrors.gstin}
+                                            InputProps={{
+                                                startAdornment: (<InputAdornment position="start">
+                                                    <CreditCard fontSize="small" />
+                                                </InputAdornment>),
+                                                endAdornment: !validationErrors.gstin && (
+                                                    <InputAdornment position="end">
+                                                        <CheckCircle color="success" fontSize="small" />
+                                                    </InputAdornment>
+                                                )
+                                            }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    borderRadius: 1,
+                                                    transition: 'all 0.3s ease',
+                                                    '&:hover': {
+                                                        '& > fieldset': {
+                                                            borderColor: theme.palette.primary.main,
+                                                        }
+                                                    },
+                                                    '&.Mui-focused': {
+                                                        '& > fieldset': {
+                                                            borderWidth: 2,
+                                                        }
+                                                    }
+                                                }
+                                            }}
+                                        />
+                                    </FormControl>
                                 </Box>
                                 <Box sx={{ width: '50%' }}>
-                                    <EnhancedTextField
-                                        field="pan_number"
-                                        label="PAN Number"
-                                        placeholder="Enter PAN Number"
-                                        icon={<CreditCard fontSize="small" />}
-                                    />
+                                    <FormControl fullWidth sx={{ mb: 2 }}>
+                                        <Typography variant="body2" sx={{ mb: 1, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <CreditCard fontSize="small" />
+                                            PAN Number
+                                            <Chip label="Optional" size="small" color="default" variant="outlined" />
+                                        </Typography>
+                                        <TextField
+                                            fullWidth
+                                            size="small"
+                                            placeholder="Enter PAN Number"
+                                            value={data.pan_number || ''}
+                                            onChange={(e) => handleInputChange('pan_number', e.target.value)}
+                                            error={!!validationErrors.pan_number}
+                                            helperText={validationErrors.pan_number}
+                                            InputProps={{
+                                                startAdornment: (<InputAdornment position="start">
+                                                    <CreditCard fontSize="small" />
+                                                </InputAdornment>),
+                                                endAdornment: !validationErrors.pan_number && (
+                                                    <InputAdornment position="end">
+                                                        <CheckCircle color="success" fontSize="small" />
+                                                    </InputAdornment>
+                                                )
+                                            }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    borderRadius: 1,
+                                                    transition: 'all 0.3s ease',
+                                                    '&:hover': {
+                                                        '& > fieldset': {
+                                                            borderColor: theme.palette.primary.main,
+                                                        }
+                                                    },
+                                                    '&.Mui-focused': {
+                                                        '& > fieldset': {
+                                                            borderWidth: 2,
+                                                        }
+                                                    }
+                                                }
+                                            }}
+                                        />
+                                    </FormControl>
                                 </Box>
                             </Box>
-                            <EnhancedTextField
-                                field="billing"
-                                label="Billing Address"
-                                placeholder="Select billing address"
-                                required
-                                icon={<LocationOn fontSize="small" />}
-                                select
-                                SelectProps={{
-                                    native: true,
-                                    value: selectedBillingOption?.value || '',
-                                    onChange: (e) => {
-                                        const selectedId = e.target.value;
-                                        const selectedBilling = billings.find(b => b._id === selectedId);
-                                        if (selectedBilling) {
-                                            setSelectedBillingOption({
-                                                label: `${selectedBilling.address_1}, ${selectedBilling.city}, ${selectedBilling.state} - ${selectedBilling.pinCode} (${selectedBilling.country})`,
-                                                value: selectedId
-                                            });
-                                            handleInputChange('billing', selectedId);
-                                        }
+                            <FormControl fullWidth sx={{ mb: 2 }}>
+                                <Typography variant="body2" sx={{ mb: 1, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <LocationOn fontSize="small" />
+                                    Billing Address
+                                    <Chip label="Required" size="small" color="primary" variant="outlined" />
+                                </Typography>
+                                <Autocomplete
+                                    fullWidth
+                                    size="small"
+                                    options={[
+                                        ...(billings?.map(cat => ({
+                                            label: `${cat.address_1}, ${cat.city}, ${cat.state} - ${cat.pinCode} (${cat.country})`,
+                                            value: cat._id
+                                        })) ?? []),
+                                        { label: '+ Add a new Billing Address', value: '__add_new__' }
+                                    ]}
+                                    getOptionLabel={(option) =>
+                                        typeof option === 'string'
+                                            ? option
+                                            : option.label || ''
                                     }
-                                }}
-                            >
-                                <option value="" disabled>Select billing address</option>
-                                {billings.map(billing => (
-                                    <option key={billing._id} value={billing._id}>
-                                        {`${billing.address_1}, ${billing.city}, ${billing.state} - ${billing.pinCode} (${billing.country})`}
-                                    </option>
-                                ))}
-                            </EnhancedTextField>
+                                    freeSolo
+                                    renderOption={(props, option) => (
+                                        <li
+                                            {...props}
+                                            style={{
+                                                fontWeight:
+                                                    option.value === '__add_new__'
+                                                        ? 700
+                                                        : 400,
+                                                color:
+                                                    option.value === '__add_new__'
+                                                        ? theme.palette.primary.main
+                                                        : 'inherit',
+                                                ...(props.style || {}),
+                                            }}
+                                        >
+                                            {option.label}
+                                        </li>
+                                    )}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            placeholder="Select or create category"
+                                            size="small"
+                                        />
+                                    )}
+                                    value={selectedBillingOption}
+                                    onChange={(_, newValue) => {
+                                        if (
+                                            newValue &&
+                                            typeof newValue === 'object' &&
+                                            'value' in newValue &&
+                                            newValue.value === '__add_new__'
+                                        ) {
+                                            setOpenBillingModal(true);
+                                        } else {
+                                            setSelectedBillingOption(newValue && typeof newValue === 'object' && 'value' in newValue
+                                                ? { label: newValue.label, value: newValue.value }
+                                                : typeof newValue === 'string'
+                                                    ? { label: newValue, value: newValue }
+                                                    : null);
+                                            handleInputChange(
+                                                'billing',
+                                                newValue && typeof newValue === 'object' && 'value' in newValue
+                                                    ? String(newValue.value)
+                                                    : typeof newValue === 'string'
+                                                        ? newValue
+                                                        : ''
+                                            );
+                                        }
+                                    }}
+                                    sx={{
+                                        '& .MuiAutocomplete-endAdornment': { display: 'none' },
+                                        '& .MuiOutlinedInput-root': {
+                                            transition: 'all 0.3s ease',
+                                            '&:hover': {
+                                                '& > fieldset': {
+                                                    borderColor: theme.palette.primary.main,
+                                                }
+                                            }
+                                        }
+                                    }}
 
-                            <EnhancedTextField
-                                field="shipping"
-                                label="Shipping Address"
-                                placeholder="Select shipping address"
-                                icon={<LocationOn fontSize="small" />}
-                                select
-                                SelectProps={{
-                                    native: true,
-                                    value: data.shipping || '',
-                                    onChange: (e) => handleInputChange('shipping', e.target.value)
-                                }}
-                            >
-                                <option value="">Select shipping address</option>
-                                {billings.map(billing => (
-                                    <option key={billing._id} value={billing._id}>
-                                        {`${billing.address_1}, ${billing.city}, ${billing.state} - ${billing.pinCode} (${billing.country})`}
-                                    </option>
-                                ))}
-                            </EnhancedTextField>
-                            <EnhancedTextField
-                                field="tags"
-                                label="Tags"
-                                placeholder="Enter tags (comma separated)"
-                                icon={<Label fontSize="small" />}
-                                onChange={(e) => handleInputChange('tags', e.target.value)}
-                                helperText="Use commas to separate multiple tags"
-                            // multiline
-                            // rows={2}
-                            />
-                        </CardContent>
-                    </Card>
-                    {/* Additional Information Section */}
-                    <Card elevation={0} sx={{ mb: 3, border: `1px solid ${theme.palette.divider}`, borderRadius: 2 }}>
-                        <CardContent sx={{ p: 3 }}>
-                            <Typography variant="h6" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Info color="primary" />
-                                Additional Information
-                            </Typography>
+                                />
+                            </FormControl>
 
-                            {/* <EnhancedTextField
-                                field="notes"
-                                label="Notes"
-                                placeholder="Enter any additional notes"
-                                icon={<Note fontSize="small" />}
-                                multiline
-                                rows={4}
-                            /> */}
+                            <FormControl fullWidth sx={{ mb: 2 }}>
+                                <Typography variant="body2" sx={{ mb: 1, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <LocationOn fontSize="small" />
+                                    Shipping Address
+                                    <Chip label="Optional" size="small" color="default" variant="outlined" />
+                                </Typography>
+                                <Autocomplete
+                                    fullWidth
+                                    size="small"
+                                    options={[
+                                        ...(shippings?.map(cat => ({
+                                            label: `${cat.address_1}, ${cat.city}, ${cat.state} - ${cat.pinCode} (${cat.country})`,
+                                            value: cat._id
+                                        })) ?? []),
+                                        { label: '+ Add a new Shipping Address', value: '__add_new__' }
+                                    ]}
+                                    getOptionLabel={(option) =>
+                                        typeof option === 'string'
+                                            ? option
+                                            : option.label || ''
+                                    }
+                                    freeSolo
+                                    renderOption={(props, option) => (
+                                        <li
+                                            {...props}
+                                            style={{
+                                                fontWeight:
+                                                    option.value === '__add_new__'
+                                                        ? 700
+                                                        : 400,
+                                                color:
+                                                    option.value === '__add_new__'
+                                                        ? theme.palette.primary.main
+                                                        : 'inherit',
+                                                ...(props.style || {}),
+                                            }}
+                                        >
+                                            {option.label}
+                                        </li>
+                                    )}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            placeholder="Select or create category"
+                                            size="small"
+                                        />
+                                    )}
+                                    value={selectedShippingOption}
+                                    onChange={(_, newValue) => {
+                                        if (
+                                            newValue &&
+                                            typeof newValue === 'object' &&
+                                            'value' in newValue &&
+                                            newValue.value === '__add_new__'
+                                        ) {
+                                            setOpenShippingModal(true);
+                                        } else {
+                                            setSelectedShippingOption(newValue && typeof newValue === 'object' && 'value' in newValue
+                                                ? { label: newValue.label, value: newValue.value }
+                                                : typeof newValue === 'string'
+                                                    ? { label: newValue, value: newValue }
+                                                    : null);
+                                            handleInputChange(
+                                                'shipping',
+                                                newValue && typeof newValue === 'object' && 'value' in newValue
+                                                    ? String(newValue.value)
+                                                    : typeof newValue === 'string'
+                                                        ? newValue
+                                                        : ''
+                                            );
+                                        }
+                                    }}
+                                    sx={{
+                                        '& .MuiAutocomplete-endAdornment': { display: 'none' },
+                                        '& .MuiOutlinedInput-root': {
+                                            transition: 'all 0.3s ease',
+                                            '&:hover': {
+                                                '& > fieldset': {
+                                                    borderColor: theme.palette.primary.main,
+                                                }
+                                            }
+                                        }
+                                    }}
+
+                                />
+                            </FormControl>
+
+                            <FormControl fullWidth sx={{ mb: 2 }}>
+                                <Typography variant="body2" sx={{ mb: 1, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Label fontSize="small" />
+                                    Tags
+                                    <Chip label="Optional" size="small" color="default" variant="outlined" />
+                                </Typography>
+                                <TextField
+                                    fullWidth
+                                    size="small"
+                                    placeholder="Enter tags (comma separated)"
+                                    value={data.tags || ''}
+                                    onChange={(e) => handleInputChange('tags', e.target.value)}
+                                    error={!!validationErrors.tags}
+                                    helperText={'Use commas to separate multiple tags'}
+                                    InputProps={{
+                                        startAdornment: (<InputAdornment position="start">
+                                            <Label fontSize="small" />
+                                        </InputAdornment>),
+                                        endAdornment: !validationErrors.tags && (
+                                            <InputAdornment position="end">
+                                                <CheckCircle color="success" fontSize="small" />
+                                            </InputAdornment>
+                                        )
+                                    }}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            borderRadius: 1,
+                                            transition: 'all 0.3s ease',
+                                            '&:hover': {
+                                                '& > fieldset': {
+                                                    borderColor: theme.palette.primary.main,
+                                                }
+                                            },
+                                            '&.Mui-focused': {
+                                                '& > fieldset': {
+                                                    borderWidth: 2,
+                                                }
+                                            }
+                                        }
+                                    }}
+                                />
+                            </FormControl>
+
                         </CardContent>
                     </Card>
 
@@ -1021,14 +1208,31 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
                             }
                         }}
                     />
-                    {/* <BillingEditingModal
-                        open={openBillingModal}
-                        onClose={() => setOpenBillingModal(false)}
-                        onUpdated={async () => {
-                            await dispatch(viewAllBillings()).unwrap();
-                            setSelectedBillingOption(null);
+                    <ShippingEditingModal
+                        open={openShippingModal}
+                        onClose={() => {
+                            setOpenShippingModal(false);
                         }}
-                    /> */}
+                        shipping={null}
+                        entity_type={ENUM_ENTITY.CREDITOR}
+                        entity_id={cred?._id ?? ''}
+                        onCreated={async (nBill) => {
+                            setSelectedShippingOption({
+                                label: nBill.name, value: nBill._id
+                            });
+                            setData(prev => ({
+                                ...prev,
+                                category: nBill._id,
+                            }));
+                            setOpenShippingModal(false);
+                            try {
+                                await dispatch(viewAllBillings()).unwrap();
+                            } catch (error) {
+                                console.error('Failed to refresh categories:', error);
+                                toast.error('Failed to refresh categories after creating new category.');
+                            }
+                        }}
+                    />
                 </Box>
             </Box>
             {/* Footer with Action Buttons */}

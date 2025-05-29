@@ -9,10 +9,10 @@ import {
   Grid,
   InputAdornment,
 } from "@mui/material";
-import { Email, Lock, Visibility, VisibilityOff } from "@mui/icons-material";
+import { Email } from "@mui/icons-material";
 import Logo from "../../../assets/Logo.png";
 import logoText from "../../../assets/Logo_Text.png";
-import { login, getCurrentUser, register } from "@/services/auth";
+import { getCurrentUser, register } from "@/services/auth";
 import { AppDispatch } from "@/store/store";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";

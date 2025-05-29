@@ -129,6 +129,20 @@ export interface GetAllBilling {
   country?: string,
 }
 
+export interface GetAllShipping {
+  _id: string,
+  user_id: string,
+  is_deleted: boolean,
+  address_1: string,
+  title?: string,
+  notes?: string,
+  address_2?: string,
+  pinCode?: string,
+  city?: string,
+  state: string,
+  country?: string,
+}
+
 export interface ShippingAddress {
   _id?: string,
   user_id?: string,

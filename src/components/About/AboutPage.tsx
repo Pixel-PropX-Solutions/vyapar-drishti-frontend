@@ -5,41 +5,41 @@ import {
   Container,
   Typography,
   Grid,
-  Card,
-  CardContent,
-  CardMedia,
+  // Card,
+  // CardContent,
+  // CardMedia,
   Button,
   Fade,
-  Zoom,
+  // Zoom,
   Paper,
-  IconButton,
-  Chip
+  // IconButton,
+  // Chip
 } from '@mui/material';
 import {
   Code as CodeIcon,
   BubbleChart as ProductIcon,
   Insights as InsightsIcon,
   Security as SecurityIcon,
-  LinkedIn as LinkedInIcon,
-  GitHub as GitHubIcon,
-  Twitter as TwitterIcon
+  // LinkedIn as LinkedInIcon,
+  // GitHub as GitHubIcon,
+  // Twitter as TwitterIcon
 } from '@mui/icons-material';
 
 // Team member interface
-interface TeamMember {
-  id: number;
-  name: string;
-  role: string;
-  bio: string;
-  avatar: string;
-  gender: 'male' | 'female';
-  socialLinks: {
-    linkedin?: string;
-    github?: string;
-    twitter?: string;
-  };
-  skills: string[];
-}
+// interface TeamMember {
+//   id: number;
+//   name: string;
+//   role: string;
+//   bio: string;
+//   avatar: string;
+//   gender: 'male' | 'female';
+//   socialLinks: {
+//     linkedin?: string;
+//     github?: string;
+//     twitter?: string;
+//   };
+//   skills: string[];
+// }
 
 // Company values interface
 interface CompanyValue {
@@ -51,77 +51,77 @@ interface CompanyValue {
 
 const AboutPage: React.FC = () => {
   const [activeSection, setActiveSection] = useState<string>('company');
-  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+  // const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   const [isScrolling, setIsScrolling] = useState<boolean>(false);
 
   // Team members data
-  const teamMembers: TeamMember[] = [
-    {
-      id: 1,
-      name: 'Jinesh Prajapat',
-      role: 'CEO & Co-Founder',
-      bio: 'Jinesh has over 2 years of experience in SaaS product development and previously founded two successful startups in the analytics space.',
-      avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-      gender: 'male',
-      socialLinks: {
-        linkedin: 'https://www.linkedin.com/in/jinesh-prajapat',
-        github: 'https://github.com/JineshPrajapat',
-      },
-      skills: ['Strategy', 'Leadership', 'Product Vision']
-    },
-    {
-      id: 2,
-      name: 'Yatin Badeja',
-      role: 'CTO & Co-Founder',
-      bio: 'With a Ph.D. in Computer Science, Sarah leads our technical innovation and ensures our platform remains cutting-edge and scalable.',
-      avatar: 'https://randomuser.me/api/portraits/men/67.jpg',
-      gender: 'female',
-      socialLinks: {
-        linkedin: 'https://linkedin.com/yatin-badeja',
-        github: 'https://github.com/yatinbadeja'
-      },
-      skills: ['Architecture', 'AI/ML', 'Cloud Infrastructure']
-    },
-    {
-      id: 3,
-      name: 'Tohid Khan',
-      role: 'Lead Developer',
-      bio: 'Tohid brings 8+ years of experience in full-stack development and leads our engineering team in creating robust, scalable solutions.',
-      avatar: 'https://randomuser.me/api/portraits/men/9.jpg',
-      gender: 'male',
-      socialLinks: {
-        linkedin: 'https://www.linkedin.com/in/tohid-khan/',
-        github: 'https://github.com/tohidkhan2464'
-      },
-      skills: ['Full-Stack Development', 'TypeScript', 'DevOps']
-    },
-    {
-      id: 4,
-      name: 'Anjali Choudhary',
-      role: 'Head of Product',
-      bio: 'Michael transforms complex customer needs into elegant product solutions, focusing on intuitive UX and powerful functionality.',
-      avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
-      gender: 'male',
-      socialLinks: {
-        linkedin: 'https://linkedin.com/',
-        twitter: 'https://twitter.com/'
-      },
-      skills: ['UX/UI', 'Product Management', 'Customer Research']
-    },
-    {
-      id: 5,
-      name: 'Tisha Chatrola',
-      role: 'Head of Customer Success',
-      bio: 'Tisha ensures our customers achieve maximum value from our platform through strategic onboarding and continuous support.',
-      avatar: 'https://randomuser.me/api/portraits/women/63.jpg',
-      gender: 'female',
-      socialLinks: {
-        linkedin: 'https://linkedin.com/'
-      },
-      skills: ['Customer Support', 'Training', 'Relationship Management']
-    },
+  // const teamMembers: TeamMember[] = [
+  //   {
+  //     id: 1,
+  //     name: 'Jinesh Prajapat',
+  //     role: 'CEO & Co-Founder',
+  //     bio: 'Jinesh has over 2 years of experience in SaaS product development and previously founded two successful startups in the analytics space.',
+  //     avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+  //     gender: 'male',
+  //     socialLinks: {
+  //       linkedin: 'https://www.linkedin.com/in/jinesh-prajapat',
+  //       github: 'https://github.com/JineshPrajapat',
+  //     },
+  //     skills: ['Strategy', 'Leadership', 'Product Vision']
+  //   },
+  //   {
+  //     id: 2,
+  //     name: 'Yatin Badeja',
+  //     role: 'CTO & Co-Founder',
+  //     bio: 'With a Ph.D. in Computer Science, Sarah leads our technical innovation and ensures our platform remains cutting-edge and scalable.',
+  //     avatar: 'https://randomuser.me/api/portraits/men/67.jpg',
+  //     gender: 'female',
+  //     socialLinks: {
+  //       linkedin: 'https://linkedin.com/yatin-badeja',
+  //       github: 'https://github.com/yatinbadeja'
+  //     },
+  //     skills: ['Architecture', 'AI/ML', 'Cloud Infrastructure']
+  //   },
+  //   {
+  //     id: 3,
+  //     name: 'Tohid Khan',
+  //     role: 'Lead Developer',
+  //     bio: 'Tohid brings 8+ years of experience in full-stack development and leads our engineering team in creating robust, scalable solutions.',
+  //     avatar: 'https://randomuser.me/api/portraits/men/9.jpg',
+  //     gender: 'male',
+  //     socialLinks: {
+  //       linkedin: 'https://www.linkedin.com/in/tohid-khan/',
+  //       github: 'https://github.com/tohidkhan2464'
+  //     },
+  //     skills: ['Full-Stack Development', 'TypeScript', 'DevOps']
+  //   },
+  //   {
+  //     id: 4,
+  //     name: 'Anjali Choudhary',
+  //     role: 'Head of Product',
+  //     bio: 'Michael transforms complex customer needs into elegant product solutions, focusing on intuitive UX and powerful functionality.',
+  //     avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
+  //     gender: 'male',
+  //     socialLinks: {
+  //       linkedin: 'https://linkedin.com/',
+  //       twitter: 'https://twitter.com/'
+  //     },
+  //     skills: ['UX/UI', 'Product Management', 'Customer Research']
+  //   },
+  //   {
+  //     id: 5,
+  //     name: 'Tisha Chatrola',
+  //     role: 'Head of Customer Success',
+  //     bio: 'Tisha ensures our customers achieve maximum value from our platform through strategic onboarding and continuous support.',
+  //     avatar: 'https://randomuser.me/api/portraits/women/63.jpg',
+  //     gender: 'female',
+  //     socialLinks: {
+  //       linkedin: 'https://linkedin.com/'
+  //     },
+  //     skills: ['Customer Support', 'Training', 'Relationship Management']
+  //   },
 
-  ];
+  // ];
 
   // Company values data
   const companyValues: CompanyValue[] = [
@@ -162,9 +162,9 @@ const AboutPage: React.FC = () => {
   }, []);
 
   // Handle team member click
-  const handleMemberClick = (member: TeamMember) => {
-    setSelectedMember(member);
-  };
+  // const handleMemberClick = (member: TeamMember) => {
+  //   setSelectedMember(member);
+  // };
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>

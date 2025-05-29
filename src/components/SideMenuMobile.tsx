@@ -27,9 +27,9 @@ export default function SideMenuMobile({ open, toggleDrawer }: SideMenuMobilePro
   const theme = useTheme();
 
   const getUserInitials = () => {
-    if (!user?.UserData?.name) return 'TD';
-    const { first_name, last_name } = user.UserData.name;
-    return `${first_name?.[0] ?? ''}${last_name?.[0] ?? ''}`.toUpperCase();
+    if (!user?.name) return 'TD';
+    const { first, last } = user.name;
+    return `${first?.[0] ?? ''}${last?.[0] ?? ''}`.toUpperCase();
   };
 
   const handleProfileClick = () => {
@@ -83,8 +83,8 @@ export default function SideMenuMobile({ open, toggleDrawer }: SideMenuMobilePro
               {getUserInitials()}
             </Avatar>
             <Typography component="p" variant="h6">
-              {user?.UserData ?
-                `${user.UserData.name.first_name ?? ''} ${user.UserData.name.last_name ?? ''}`.trim()
+              {user?.name ?
+                `${user.name.first ?? ''} ${user.name.last ?? ''}`.trim()
                 : "DristiDocs Team"
               }
             </Typography>

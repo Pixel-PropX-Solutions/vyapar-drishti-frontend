@@ -4,7 +4,7 @@ import {
   Button,
   Box,
   Typography,
-  MenuItem,
+  // MenuItem,
   InputAdornment,
   Card,
   CardContent,
@@ -15,22 +15,22 @@ import {
   Step,
   StepLabel,
   IconButton,
-  Tooltip,
+  // Tooltip,
 } from "@mui/material";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
-import { AppDispatch } from "@/store/store";
-import { useDispatch } from "react-redux";
+// import { AppDispatch } from "@/store/store";
+// import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+// import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 // import { createProduct } from "@/services/products";
 import { SingleProduct } from "@/utils/types";
 
 export default function CreateProduct() {
-  const dispatch = useDispatch<AppDispatch>();
+  // const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
   const [productData, setProductData] = useState<SingleProduct>({
