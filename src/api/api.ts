@@ -6,8 +6,8 @@ interface Token {
 }
 
 const userApi = axios.create({
-    // baseURL: import.meta.env.VITE_BACKEND_BASE_URL,
-    baseURL: import.meta.env.VITE_LOCAL_BACKEND_BASE_URL,
+    baseURL: import.meta.env.VITE_BACKEND_BASE_URL,
+    // baseURL: import.meta.env.VITE_LOCAL_BACKEND_BASE_URL,
     withCredentials: true,
 });
 
