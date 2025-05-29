@@ -25,7 +25,7 @@ import {
 } from "@mui/icons-material";
 import { useDispatch} from "react-redux";
 import { AppDispatch } from "@/store/store";
-import { createChemist } from "@/services/chemist";
+import { createChemist } from "@/services/creditors";
 import { useParams, useNavigate } from "react-router-dom";
 import { setId } from "@/store/reducers/userReducer";
 import toast from "react-hot-toast";

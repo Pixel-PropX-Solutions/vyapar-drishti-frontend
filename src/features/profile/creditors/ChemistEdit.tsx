@@ -15,7 +15,7 @@ import { Chemist } from "@/utils/types";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/store/store";
 import toast from "react-hot-toast";
-import { updateChemist } from "@/services/chemist";
+import { updateChemist } from "@/services/creditors";
 
 interface ChemistEditProps {
   chemist: Chemist;

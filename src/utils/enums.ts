@@ -5,10 +5,15 @@ export enum AuthStates {
     ERROR = "ERROR",
 }
 
-export enum ROLE_ENUM{
-    ADMIN="admin",
-    CHEMIST="Chemist",
+export enum ROLE_ENUM {
+    ADMIN = "admin",
+    CHEMIST = "Chemist",
     USER = 'user',
-    NULL="null"
+    NULL = "null"
 }
 
+export enum ENUM_ENTITY {
+    COMPANY = "company",
+    CREDITOR = "creditor",
+    DEBITOR = 'debitor',
+};

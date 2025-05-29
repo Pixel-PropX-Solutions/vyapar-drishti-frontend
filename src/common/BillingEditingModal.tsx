@@ -12,7 +12,6 @@ import {
     Grow,
     FormControl,
     Stack,
-    Divider,
     Chip,
     InputAdornment,
     CircularProgress,
@@ -26,9 +25,7 @@ import {
 } from "@mui/material";
 import {
     Close as CloseIcon,
-    PhotoCamera,
     Business,
-    Language,
     CheckCircle,
     Warning,
     Close,
@@ -36,7 +33,6 @@ import {
     LocationOn,
     Home,
     Public,
-    Flag,
     Edit,
     Add,
     KeyboardArrowRight,
@@ -44,38 +40,46 @@ import {
     MarkunreadMailbox,
 } from "@mui/icons-material";
 import toast from "react-hot-toast";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/store/store";
-import { GetCompany, GetBillingAddress } from "@/utils/types";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
+import { GetBilling } from "@/utils/types";
+import { ENUM_ENTITY } from "@/utils/enums";
 import { createCompanyBilling, updateCompanyBilling } from "@/services/company";
-import CountryCodes from '../internals/data/CountryCodes.json';
-import { MenuItem, Select, ListItemIcon, ListItemText, Avatar, InputLabel, FormHelperText } from '@mui/material';
+import CountryName from "./CountryName";
+import { createBilling } from "@/services/billing";
 
 interface EditBillingModalProps {
     open: boolean;
     onClose: () => void;
-    onUpdated: () => Promise<void>;
-    company: GetCompany | null;
+    onCreated?: (billing: { name: string; _id: string }) => void;
+    onUpdated?: () => Promise<void>;
+    entity_id: string;
+    entity_type: ENUM_ENTITY;
+    billing: GetBilling | null;
 }
 
 const BillingEditingModal: React.FC<EditBillingModalProps> = ({
     open,
     onClose,
     onUpdated,
-    company,
+    onCreated,
+    billing,
+    entity_id,
+    entity_type,
 }) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const { user } = useSelector((state: RootState) => state.auth);
     const dispatch = useDispatch<AppDispatch>();
     const [isLoading, setIsLoading] = useState(false);
     const [showValidation, setShowValidation] = useState(false);
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
     const [focusedField, setFocusedField] = useState<string>('');
 
-    const [data, setData] = useState<GetBillingAddress>({
+    const [data, setData] = useState<Partial<GetBilling>>({
         _id: '',
         user_id: '',
-        company_id: '',
+        // company_id: '',
         is_deleted: false,
         address_1: '',
         address_2: '',
@@ -89,10 +93,10 @@ const BillingEditingModal: React.FC<EditBillingModalProps> = ({
     const validateForm = (formData = data) => {
         const errors: Record<string, string> = {};
 
-        if (!formData.address_1.trim()) {
+        if (!(formData?.address_1 ?? '').trim()) {
             errors.address_1 = 'Street Address line 1 is required';
         }
-        if (!formData.state.trim()) {
+        if (!(formData.state ?? '').trim()) {
             errors.state = 'State is required';
         }
 
@@ -105,9 +109,10 @@ const BillingEditingModal: React.FC<EditBillingModalProps> = ({
     };
 
     const handleInputChange = (
-        field: keyof GetBillingAddress,
+        field: keyof GetBilling,
         value: string
     ) => {
+        console.log(`Field changed: ${field}, Value: ${value}`);
         setData(prev => {
             const newData = { ...prev, [field]: value };
             validateForm(newData);
@@ -115,11 +120,12 @@ const BillingEditingModal: React.FC<EditBillingModalProps> = ({
         });
     };
 
+
     const resetForm = () => {
         setData({
             _id: '',
             user_id: '',
-            company_id: '',
+            // company_id: '',
             is_deleted: false,
             address_1: '',
             address_2: '',
@@ -133,25 +139,25 @@ const BillingEditingModal: React.FC<EditBillingModalProps> = ({
     };
 
     useEffect(() => {
-        if (open && company?.billing) {
+        if (open && billing) {
             setData({
-                _id: company?.billing._id || '',
-                company_id: company?._id || '',
-                state: company?.billing?.state || '',
-                address_1: company.billing.address_1 || '',
-                user_id: company.billing?.user_id || '',
-                address_2: company.billing.address_2 || '',
-                city: company.billing?.city || '',
-                country: company.billing?.country || '',
-                pinCode: company.billing?.pinCode || '',
-                is_deleted: company.billing?.is_deleted || false,
+                _id: billing._id || '',
+                // company_id: company?._id || '',
+                state: billing?.state || '',
+                address_1: billing.address_1 || '',
+                user_id: user?._id || '',
+                address_2: billing.address_2 || '',
+                city: billing?.city || '',
+                country: billing?.country || '',
+                pinCode: billing?.pinCode || '',
+                is_deleted: billing?.is_deleted || false,
             });
             setFormErrors({});
-        } else if (open && !company?.billing) {
+        } else if (open && !billing) {
             setData({
                 _id: '',
-                user_id: company?.user_id || '',
-                company_id: company?._id || '',
+                user_id: user?._id,
+                // company_id: company?._id || '',
                 is_deleted: false,
                 address_1: '',
                 address_2: '',
@@ -162,7 +168,7 @@ const BillingEditingModal: React.FC<EditBillingModalProps> = ({
             });
             resetForm();
         }
-    }, [open, company?.billing, company?._id, company?.user_id]);
+    }, [open, billing, user?._id]);
 
     const handleSubmit = async () => {
         setShowValidation(true);
@@ -173,11 +179,10 @@ const BillingEditingModal: React.FC<EditBillingModalProps> = ({
         }
 
         setIsLoading(true);
-        const sanitizedData: Partial<GetBillingAddress> = {
-            company_id: company?._id,
-            state: data.state.trim(),
-            address_1: data.address_1.trim(),
-            user_id: company?.user_id,
+        const sanitizedData: any = {
+            state: (data?.state ?? '').trim(),
+            address_1: (data?.address_1 ?? '').trim(),
+            user_id: user?._id,
         };
 
         if (data.address_2 && data.address_2 !== '') sanitizedData.address_2 = data.address_2.trim();
@@ -193,52 +198,102 @@ const BillingEditingModal: React.FC<EditBillingModalProps> = ({
                 formData.append(key, value);
             }
         });
-
-        if (company?.billing === null) {
-            await toast.promise(
-                dispatch(createCompanyBilling({
-                    data: formData,
-                }))
-                    .unwrap()
-                    .then(() => {
-                        setIsLoading(false);
-                        onClose();
-                        onUpdated();
-                    })
-                    .catch(() => {
-                        setIsLoading(false);
-                    }),
-                {
-                    loading: <b>Creating your billing Address... ⏳</b>,
-                    success: <b>Billing Details successfully created! 🎉</b>,
-                    error: <b>Failed to create billing. 🚫</b>,
-                }
-            );
-        } else {
-            await toast.promise(
-                dispatch(updateCompanyBilling({
-                    data: formData,
-                    id: company?.billing?._id ?? '',
-                }))
-                    .unwrap()
-                    .then(() => {
-                        setIsLoading(false);
-                        onClose();
-                        onUpdated();
-                    })
-                    .catch(() => {
-                        setIsLoading(false);
-                    }),
-                {
-                    loading: <b>Updating your billing... ⏳</b>,
-                    success: <b>Company Details successfully updated! 🎉</b>,
-                    error: <b>Failed to update billing. 🚫</b>,
-                }
-            );
+        if (entity_type === ENUM_ENTITY.COMPANY) {
+            formData.append('company_id', entity_id);
+            if (billing === null) {
+                await toast.promise(
+                    dispatch(createCompanyBilling({
+                        data: formData,
+                    }))
+                        .unwrap()
+                        .then(() => {
+                            setIsLoading(false);
+                            onClose();
+                            if (onUpdated) onUpdated();
+                        })
+                        .catch(() => {
+                            setIsLoading(false);
+                        }),
+                    {
+                        loading: <b>Creating your billing Address... ⏳</b>,
+                        success: <b>Billing Details successfully created! 🎉</b>,
+                        error: <b>Failed to create billing. 🚫</b>,
+                    }
+                );
+            } else {
+                await toast.promise(
+                    dispatch(updateCompanyBilling({
+                        data: formData,
+                        id: billing?._id ?? '',
+                    }))
+                        .unwrap()
+                        .then(() => {
+                            setIsLoading(false);
+                            onClose();
+                            if (onUpdated) onUpdated();
+                        })
+                        .catch(() => {
+                            setIsLoading(false);
+                        }),
+                    {
+                        loading: <b>Updating your billing... ⏳</b>,
+                        success: <b>Company Details successfully updated! 🎉</b>,
+                        error: <b>Failed to update billing. 🚫</b>,
+                    }
+                );
+            }
         }
+        if (entity_type === ENUM_ENTITY.CREDITOR) {
+            if (billing === null) {
+                await toast.promise(
+                    dispatch(createBilling(formData))
+                        .unwrap()
+                        .then((res) => {
+                            setIsLoading(false);
+                            onClose();
+                            const nBill = {
+                                name: `${res.address_1}, ${res.city}, ${res.state} - ${res.pinCode} (${res.country})`,
+                                _id: res._id
+                            };
+                            if (onCreated) onCreated(nBill);
+                            if (onUpdated) onUpdated();
+                        })
+                        .catch(() => {
+                            setIsLoading(false);
+                        }),
+                    {
+                        loading: <b>Creating your billing Address... ⏳</b>,
+                        success: <b>Billing Details successfully created! 🎉</b>,
+                        error: <b>Failed to create billing. 🚫</b>,
+                    }
+                );
+            } else {
+                await toast.promise(
+                    dispatch(updateCompanyBilling({
+                        data: formData,
+                        id: billing?._id ?? '',
+                    }))
+                        .unwrap()
+                        .then(() => {
+                            setIsLoading(false);
+                            onClose();
+                            if (onUpdated) onUpdated();
+                        })
+                        .catch(() => {
+                            setIsLoading(false);
+                        }),
+                    {
+                        loading: <b>Updating your billing... ⏳</b>,
+                        success: <b>Company Details successfully updated! 🎉</b>,
+                        error: <b>Failed to update billing. 🚫</b>,
+                    }
+                );
+            }
+        }
+
     };
 
-    const isFormValid = data.state.trim() && data.address_1.trim();
+    const isFormValid = (data.state ?? '').trim() && (data.address_1 ?? '').trim();
 
 
     const requiredFields = ['address_1', 'state'];
@@ -246,8 +301,8 @@ const BillingEditingModal: React.FC<EditBillingModalProps> = ({
     const totalFields = requiredFields.length + optionalFields.length;
 
     const filledFields = [
-        ...requiredFields.filter(field => !!data[field as keyof GetBillingAddress]?.toString().trim()),
-        ...optionalFields.filter(field => !!data[field as keyof GetBillingAddress]?.toString().trim())
+        ...requiredFields.filter(field => !!data[field as keyof GetBilling]?.toString().trim()),
+        ...optionalFields.filter(field => !!data[field as keyof GetBilling]?.toString().trim())
     ].length;
 
     const completionPercentage = Math.round((filledFields / totalFields) * 100);
@@ -362,11 +417,11 @@ const BillingEditingModal: React.FC<EditBillingModalProps> = ({
                                     alignItems: 'center',
                                     gap: 1,
                                 }}>
-                                    {company?.billing === null ? <Add sx={{ color: theme.palette.primary.main }} /> : <Edit sx={{ color: theme.palette.primary.main }} />}
-                                    {company?.billing === null ? 'Create Billing Address' : 'Edit Billing Address'}
+                                    {billing === null ? <Add sx={{ color: theme.palette.primary.main }} /> : <Edit sx={{ color: theme.palette.primary.main }} />}
+                                    {billing === null ? 'Create Billing Address' : 'Edit Billing Address'}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                                    {company?.billing === null ? "Set up your billing details" : "Update your billing information"}
+                                    {billing === null ? "Set up your billing details" : "Update your billing information"}
                                 </Typography>
                             </Box>
                         </Fade>
@@ -512,8 +567,8 @@ const BillingEditingModal: React.FC<EditBillingModalProps> = ({
                                                 fullWidth
                                                 label={field.label}
                                                 placeholder={field.placeholder}
-                                                value={data[field.key as keyof GetBillingAddress] || ''}
-                                                onChange={(e) => handleInputChange(field.key as keyof GetBillingAddress, e.target.value)}
+                                                value={data[field.key as keyof GetBilling] || ''}
+                                                onChange={(e) => handleInputChange(field.key as keyof GetBilling, e.target.value)}
                                                 error={!!formErrors[field.key]}
                                                 helperText={formErrors[field.key] || field.description}
                                                 required={field.required}
@@ -588,7 +643,15 @@ const BillingEditingModal: React.FC<EditBillingModalProps> = ({
                                 ))}
 
                                 {/* Enhanced Country Select */}
-                                <Slide direction="up" in timeout={1300}>
+                                <CountryName
+                                    handleInputChange={handleInputChange as (field: string, value: string) => void}
+                                    value={data?.country || ''}
+                                    focusedField={focusedField}
+                                    setFocusedField={setFocusedField}
+                                    formErrors={formErrors}
+                                    isHelperText={true}
+                                />
+                                {/* <Slide direction="up" in timeout={1300}>
                                     <FormControl fullWidth error={!!formErrors.country}>
                                         <InputLabel id="country-select-label" sx={{
                                             color: focusedField === 'country' ? theme.palette.primary.main : undefined,
@@ -734,7 +797,7 @@ const BillingEditingModal: React.FC<EditBillingModalProps> = ({
                                             {formErrors.country || 'Select your country for billing purposes'}
                                         </FormHelperText>
                                     </FormControl>
-                                </Slide>
+                                </Slide> */}
                             </Stack>
 
                             {/* Enhanced Action Buttons */}
@@ -804,7 +867,7 @@ const BillingEditingModal: React.FC<EditBillingModalProps> = ({
                                         }}
                                     >
                                         {isLoading ? 'Saving...' :
-                                            company?.billing === null ? "Create Billing Address" : 'Update Address'}
+                                            billing === null ? "Create Billing Address" : 'Update Address'}
                                     </Button>
                                 </Box>
                             </Fade>

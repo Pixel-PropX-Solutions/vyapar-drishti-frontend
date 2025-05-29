@@ -56,7 +56,7 @@ const ShippingEditingModal: React.FC<EditShippingModalProps> = ({
     const [data, setData] = useState<ShippingAddress>({
         _id: '',
         user_id: '',
-        company_id: '',
+        // company_id: '',
         is_deleted: false,
         address_1: '',
         address_2: '',
@@ -121,7 +121,7 @@ const ShippingEditingModal: React.FC<EditShippingModalProps> = ({
         if (open && company?.shipping) {
             setData({
                 _id: company?.shipping._id || '',
-                company_id: company?._id || '',
+                // company_id: company?._id || '',
                 state: company?.shipping?.state || '',
                 address_1: company.shipping.address_1 || '',
                 user_id: company.shipping?.user_id || '',
@@ -138,7 +138,7 @@ const ShippingEditingModal: React.FC<EditShippingModalProps> = ({
             setData({
                 _id: '',
                 user_id: company?.user_id || '',
-                company_id: company?._id || '',
+                // company_id: company?._id || '',
                 is_deleted: false,
                 address_1: '',
                 address_2: '',
@@ -162,7 +162,7 @@ const ShippingEditingModal: React.FC<EditShippingModalProps> = ({
         }
 
         setIsLoading(true);
-        const sanitizedData: Partial<ShippingAddress> = {
+        const sanitizedData: any = {
             company_id: company?._id,
             state: data.state.trim(),
             address_1: data.address_1.trim(),

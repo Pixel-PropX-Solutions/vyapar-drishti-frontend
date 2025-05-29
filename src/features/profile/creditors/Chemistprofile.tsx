@@ -31,7 +31,7 @@ import { Name, OrderStatus } from "@/utils/types";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import ChemistEdit from "./ChemistEdit";
-import { getChemistProfile } from "@/services/chemist";
+import { getChemistProfile } from "@/services/creditors";
 import { useParams } from "react-router-dom";
 import { viewOrders } from "@/services/order";
 import { formatDate, getStatusColor } from "@/utils/functions";

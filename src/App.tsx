@@ -16,13 +16,13 @@ import {
 } from "./theme/customizations";
 import Products from "./pages/Products";
 import UploadDocuments from "./pages/UploadDocuments";
-import CreateChemistProfile from "./features/profile/chemist/CreateChemistProfile";
+import CreateChemistProfile from "./features/profile/creditors/CreateChemistProfile";
 import CreateStockistProfile from "./features/profile/stockist/CreateStockistProfile";
 import CreateUserProfile from "./features/profile/createUser";
 import CreateProduct from "./features/products/createProduct";
-import Chemists from "./pages/Chemist";
-import ChemistProfile from "./features/profile/chemist/Chemistprofile";
-import StockistProfile from "./features/profile/stockist/StockistProfile";
+// import Chemists from "./pages/Chemist";
+// import ChemistProfile from "./features/profile/chemist/Chemistprofile";
+// import StockistProfile from "./features/profile/stockist/StockistProfile";
 import AdminDashboard from "./pages/AdminDashboard";
 import { getCurrentUser } from "./services/auth";
 import OrdersPage from "./pages/Order";
@@ -147,13 +147,13 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/create/user" element={<CreateUserProfile />} />
                 <Route path="/creditors" element={<Creditors />} />
-                <Route path="/stockists/:stockistId" element={<StockistProfile />} />
+                {/* <Route path="/stockists/:stockistId" element={<StockistProfile />} /> */}
                 <Route
                   path="/create/user/stockist/:id"
                   element={<CreateStockistProfile />}
                 />
-                <Route path="/chemists" element={<Chemists />} />
-                <Route path="/chemists/:chemistId" element={<ChemistProfile />} />
+                {/* <Route path="/chemists" element={<Chemists />} /> */}
+                {/* <Route path="/chemists/:chemistId" element={<ChemistProfile />} /> */}
                 <Route
                   path="/create/user/chemist/:id"
                   element={<CreateChemistProfile />}
@@ -185,7 +185,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 {/* <Route path="/settings" element={<Settings />} /> */}
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/creditors" element={<Creditors />} />
-                <Route path="/debitors" element={<ChemistProfile />} />
+                {/* <Route path="/debitors" element={<ChemistProfile />} /> */}
                 <Route path="/sell" element={<ProductBilling />} />
                 <Route path="/*" element={<Navigate to="/" replace />} />
               </Route>

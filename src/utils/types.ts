@@ -1,4 +1,6 @@
 // Sort type definitions
+
+
 export type SortField =
   | "name"
   | "shop_name"
@@ -30,6 +32,15 @@ export type CategorySortField =
   | 'description'
   | 'created_at'
   | "updated_at";
+
+export type CreditorSortField =
+  | "name"
+  | 'company_name'
+  // | 'credit_limit'
+  // | 'balance_type'
+  | 'city'
+  | 'state'
+  | "created_at";
 
 
 export enum OrderStatus {
@@ -91,11 +102,25 @@ export interface Address {
   zip_code: string;
 }
 
-export interface GetBillingAddress {
-  _id?: string,
-  user_id: string,
-  company_id: string,
+export interface GetBilling {
+  _id: string,
+  user_id?: string,
+  // company_id: string,
   is_deleted?: boolean,
+  address_1: string,
+  address_2?: string,
+  pinCode?: string,
+  city?: string,
+  state: string,
+  country?: string,
+  created_at?: string,
+  updated_at?: string,
+}
+
+export interface GetAllBilling {
+  _id: string,
+  user_id: string,
+  is_deleted: boolean,
   address_1: string,
   address_2?: string,
   pinCode?: string,
@@ -106,8 +131,8 @@ export interface GetBillingAddress {
 
 export interface ShippingAddress {
   _id?: string,
-  user_id: string,
-  company_id: string,
+  user_id?: string,
+  // company_id: string,
   is_deleted?: boolean,
   title?: string,
   address_1: string,
@@ -117,6 +142,8 @@ export interface ShippingAddress {
   state: string,
   country?: string,
   notes?: string,
+  created_at: string,
+  updated_at: string,
 }
 
 export interface CreateBasicUser {
@@ -126,6 +153,28 @@ export interface CreateBasicUser {
   },
   email: string,
   phone: PhoneNumber
+}
+
+export interface GetCreditors {
+  _id: string,
+  name: string,
+  user_id: string,
+  phone?: PhoneNumber,
+  email?: string,
+  gstin?: string,
+  company_name?: string,
+  billing: GetBilling,
+  shipping?: ShippingAddress,
+  // opening_balance?: number,
+  // balance_type?: string,
+  image?: string | File | null,
+  pan_number?: string,
+  // credit_limit?: number,
+  tags?: string,
+  // due_date?: number,
+  created_at: string,
+  updated_at: string,
+  is_deleted: boolean
 }
 
 
@@ -216,7 +265,7 @@ export interface GetCompany {
   business_type?: string,
   website?: string,
   alter_phone?: PhoneNumber,
-  billing?: GetBillingAddress,
+  billing?: GetBilling,
   shipping?: ShippingAddress,
   created_at?: string,
   updated_at?: string,

@@ -48,12 +48,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { useNavigate } from "react-router-dom";
 import { viewAllCreditors } from "@/services/creditors";
-import EditCreditorModal from "@/features/profile/creditors/EditCreditorModal";
 
 const Creditors: React.FC = () => {
   // const { mode } = useColorScheme();
-  const [isCreditorEditing, setIsCreditorEditing] = useState(false);
-  const [cred, setCred] = useState<GetCreditors | null>(null);
+
   const { creditors, pageMeta, loading } = useSelector((state: RootState) => state.creditor);
 
   const theme = useTheme();
@@ -71,28 +69,35 @@ const Creditors: React.FC = () => {
   });
 
   const { searchQuery, filterState, page, is_deleted, rowsPerPage, sortField, sortOrder } = state;
-  const fetchCreditors = useCallback(async () => {
-    dispatch(
-      viewAllCreditors({
-        searchQuery: searchQuery,
-        filterState: filterState,
-        is_deleted: is_deleted,
-        pageNumber: page,
-        limit: rowsPerPage,
-        sortField: sortField,
-        sortOrder: sortOrder,
-      })
-    )
-  }, [dispatch, searchQuery, filterState, is_deleted, page, rowsPerPage, sortField, sortOrder]);
+
 
   // Fetch stockists data from API
   useEffect(() => {
-    fetchCreditors();
-  }, [searchQuery, page, rowsPerPage, is_deleted, sortField, filterState, sortOrder, dispatch, fetchCreditors]);
+    const fetchCreditors = async () => {
+      dispatch(
+        viewAllCreditors({
+          searchQuery: searchQuery,
+          filterState: filterState,
+          is_deleted: is_deleted,
+          pageNumber: page,
+          limit: rowsPerPage,
+          sortField: sortField,
+          sortOrder: sortOrder,
+        })
+      )
+    };
 
-  const fetchCompleteData = () => {
     fetchCreditors();
-  }
+  }, [
+    searchQuery,
+    page,
+    rowsPerPage,
+    is_deleted,
+    sortField,
+    filterState,
+    sortOrder,
+    dispatch,
+  ]);
 
   // Handle sorting change
   const handleSortRequest = (field: CreditorSortField) => {
@@ -363,35 +368,18 @@ const Creditors: React.FC = () => {
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                          {cred?.image && cred.image !== "" && (
-                            <img
-                              loading="lazy"
-                              src={
-                                typeof cred.image === "string"
-                                  ? cred.image
-                                  : URL.createObjectURL(cred.image)
-                              }
-                              alt={cred.name}
-                              style={{
-                                borderRadius: "50%",
-                                width: 40,
-                                height: 40,
-                                objectFit: "contain",
-                              }}
-                            />
-                          )}
-                          {!cred?.image && (
-                            <Avatar
-                              sx={{ mr: 2, bgcolor: theme.palette.primary.main }}
-                            >
-                              {cred.name.split(" ").map((word) => word[0]).join("").toUpperCase()}
-                            </Avatar>
-                          )}
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          <Avatar
+                            sx={{ mr: 2, bgcolor: theme.palette.primary.main }}
+                          >
+                            {cred.name.split(" ").map((word) => word[0]).join("").toUpperCase()}
+                          </Avatar>
                           <Box>
+
                             <Typography variant="subtitle2">
                               {cred.company_name ? cred.name : ''}
                             </Typography>
+
                           </Box>
                         </Box>
                       </TableCell>
@@ -526,32 +514,29 @@ const Creditors: React.FC = () => {
                             </IconButton>
                           </Tooltip> */}
 
-                          <Tooltip title="View Creditor Profile">
+                          <Tooltip title="More Actions">
                             <IconButton
                               size="small"
                               color="info"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleViewCreditor(cred);
                               }}
                             >
                               <Visibility />
                             </IconButton>
                           </Tooltip>
-                          <Tooltip title="Edit Creditor">
+                          <Tooltip title="More Actions">
                             <IconButton
                               size="small"
                               color="info"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setCred(cred);
-                                setIsCreditorEditing(true);
                               }}
                             >
                               <Edit />
                             </IconButton>
                           </Tooltip>
-                          <Tooltip title="Delete Creditor">
+                          <Tooltip title="More Actions">
                             <IconButton
                               size="small"
                               color="info"
@@ -603,15 +588,6 @@ const Creditors: React.FC = () => {
           showLastButton
         />}
       </Box>
-      <EditCreditorModal
-        open={isCreditorEditing}
-        onClose={() => {
-          setIsCreditorEditing(false);
-        }}
-        cred={cred}
-        onUpdated={async () => {
-          fetchCompleteData();
-        }} />
     </Box >
   );
 };

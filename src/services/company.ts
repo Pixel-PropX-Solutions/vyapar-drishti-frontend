@@ -79,7 +79,7 @@ export const createCompanyBilling = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const createRes = await userApi.post(`/user/create/billing`, data);
+      const createRes = await userApi.post(`/user/create/company/billing`, data);
 
       console.log("createCompanyBilling response", createRes);
 

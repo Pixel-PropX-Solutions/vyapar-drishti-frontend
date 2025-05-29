@@ -66,6 +66,7 @@ import { SettingsCard } from "@/common/SettingsCard";
 import { ProfileHeader } from "@/common/ProfileHeader";
 import BillingEditingModal from "@/common/BillingEditingModal";
 import ShippingEditingModal from "@/common/ShippingEditingModal";
+import { ENUM_ENTITY } from "@/utils/enums";
 
 // Main Enhanced Component
 const ProfilePage: React.FC = () => {
@@ -185,7 +186,7 @@ const ProfilePage: React.FC = () => {
                           {user?.email}
                         </Box>
                       }
-                      // badge={1}
+                    // badge={1}
                     />
                     <InfoRow
                       icon={<PhoneIcon />}
@@ -880,11 +881,13 @@ const ProfilePage: React.FC = () => {
         }}
       />
       <BillingEditingModal
+        entity_id={company?._id || ''}
+        entity_type={ENUM_ENTITY.COMPANY}
         open={isBillingEditing}
         onClose={() => {
           setIsBillingEditing(false);
         }}
-        company={company}
+        billing={company?.billing ?? null}
         onUpdated={async () => {
           fetchCompleteData();
         }}
