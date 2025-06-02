@@ -107,10 +107,10 @@ const PasswordStrengthMeter: React.FC<{ password: string }> = ({
         value={(strength.value / 4) * 100}
         sx={{
           height: 6,
-          borderRadius: 3,
+          borderRadius: 1,
           bgcolor: alpha(theme.palette.divider, 0.3),
           "& .MuiLinearProgress-bar": {
-            borderRadius: 3,
+            borderRadius: 1,
             bgcolor: strength.color,
             transition: "all 0.4s ease",
           },
@@ -476,7 +476,7 @@ export default function Settings() {
                   startIcon={<SecurityOutlined />}
                   sx={{
                     py: 1.5,
-                    borderRadius: 2,
+                    borderRadius: 1,
                     textTransform: "none",
                     boxShadow: activeSection === "password" ? 2 : 0,
                     transition: "all 0.2s ease",
@@ -495,7 +495,7 @@ export default function Settings() {
                   startIcon={<AccountCircleOutlined />}
                   sx={{
                     py: 1.5,
-                    borderRadius: 2,
+                    borderRadius: 1,
                     textTransform: "none",
                     boxShadow: activeSection === "account" ? 2 : 0,
                     transition: "all 0.2s ease",
@@ -545,7 +545,7 @@ export default function Settings() {
                   startIcon={<SecurityOutlined />}
                   sx={{
                     py: 1.5,
-                    borderRadius: 2,
+                    borderRadius: 1,
                     textTransform: "none",
                     boxShadow: activeSection === "password" ? 2 : 0,
                     transition: "all 0.2s ease",
@@ -564,7 +564,7 @@ export default function Settings() {
                   startIcon={<AccountCircleOutlined />}
                   sx={{
                     py: 1.5,
-                    borderRadius: 2,
+                    borderRadius: 1,
                     textTransform: "none",
                     boxShadow: activeSection === "account" ? 2 : 0,
                     transition: "all 0.2s ease",
@@ -583,7 +583,7 @@ export default function Settings() {
                   startIcon={<LightModeOutlined />}
                   sx={{
                     py: 1.5,
-                    borderRadius: 2,
+                    borderRadius: 1,
                     textTransform: "none",
                     boxShadow: activeSection === "preferences" ? 2 : 0,
                     transition: "all 0.2s ease",
@@ -602,7 +602,7 @@ export default function Settings() {
                   startIcon={<PrivacyTipOutlined />}
                   sx={{
                     py: 1.5,
-                    borderRadius: 2,
+                    borderRadius: 1,
                     textTransform: "none",
                     boxShadow: activeSection === "privacy" ? 2 : 0,
                     transition: "all 0.2s ease",
@@ -624,7 +624,7 @@ export default function Settings() {
                 sx={{
                   p: { xs: 2, sm: 3 },
                   mb: 4,
-                  borderRadius: 2,
+                  borderRadius: 1,
                   bgcolor: alpha(theme.palette.background.paper, 0.8),
                   backdropFilter: "blur(8px)",
                   border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
@@ -652,7 +652,7 @@ export default function Settings() {
                     alignItems: "center",
                     p: 2,
                     mb: 3,
-                    borderRadius: 2,
+                    borderRadius: 1,
                     bgcolor: alpha(passwordAgeInfo.color, 0.05),
                     border: `1px solid ${alpha(passwordAgeInfo.color, 0.2)}`,
                   }}
@@ -736,7 +736,7 @@ export default function Settings() {
                         }}
                         sx={{
                           "& .MuiOutlinedInput-root": {
-                            borderRadius: 2,
+                            borderRadius: 1,
                             transition: "all 0.2s ease",
                             "&.Mui-focused": {
                               "& .MuiOutlinedInput-notchedOutline": {
@@ -796,7 +796,7 @@ export default function Settings() {
                       }}
                       sx={{
                         "& .MuiOutlinedInput-root": {
-                          borderRadius: 2,
+                          borderRadius: 1,
                           transition: "all 0.2s ease",
                           "&.Mui-focused": {
                             "& .MuiOutlinedInput-notchedOutline": {
@@ -819,7 +819,7 @@ export default function Settings() {
                       sx={{
                         px: 3,
                         py: 1.2,
-                        borderRadius: 2,
+                        borderRadius: 1,
                         textTransform: "none",
                         minWidth: 180,
                         boxShadow: activeSection === "password" ? 2 : 0,
@@ -863,7 +863,7 @@ export default function Settings() {
                 sx={{
                   p: { xs: 2, sm: 3 },
                   mb: 4,
-                  borderRadius: 2,
+                  borderRadius: 1,
                   bgcolor: alpha(theme.palette.background.paper, 0.8),
                   backdropFilter: "blur(8px)",
                   border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
@@ -931,7 +931,7 @@ export default function Settings() {
                   sx={{
                     mb: 3,
                     alignItems: "center",
-                    borderRadius: 2,
+                    borderRadius: 1,
                   }}
                 >
                   <Typography variant="body2">
@@ -949,7 +949,7 @@ export default function Settings() {
                     alignItems: { xs: "flex-start", sm: "center" },
                     bgcolor: alpha(theme.palette.error.main, 0.05),
                     border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
-                    borderRadius: 2,
+                    borderRadius: 1,
                     p: { xs: 2, sm: 3 },
                   }}
                 >
@@ -1227,7 +1227,7 @@ export default function Settings() {
 //         sx={{
 //           p: 3,
 //           mb: 4,
-//           borderRadius: 2,
+//           borderRadius: 1,
 //           bgcolor: alpha(theme.palette.background.paper, 0.8),
 //           backdropFilter: "blur(8px)",
 //         }}
@@ -1331,7 +1331,7 @@ export default function Settings() {
 //         sx={{
 //           p: 3,
 //           mb: 4,
-//           borderRadius: 2,
+//           borderRadius: 1,
 //           bgcolor: alpha(theme.palette.background.paper, 0.8),
 //           backdropFilter: "blur(8px)",
 //         }}
@@ -1508,7 +1508,7 @@ export default function Settings() {
 //           }}
 //         />
 //       </Box>
-//       <Box sx={{ display: 'flex', width: '100%', height: 4, borderRadius: 2, bgcolor: '#e0e0e0', overflow: 'hidden' }}>
+//       <Box sx={{ display: 'flex', width: '100%', height: 4, borderRadius: 1, bgcolor: '#e0e0e0', overflow: 'hidden' }}>
 //         <Box sx={{ width: `${(strength.value / 4) * 100}%`, bgcolor: strength.color, transition: 'width 0.3s ease' }} />
 //       </Box>
 //     </Box>
@@ -1747,7 +1747,7 @@ export default function Settings() {
 //                   startIcon={<SecurityOutlined />}
 //                   sx={{
 //                     py: 1.5,
-//                     borderRadius: 2,
+//                     borderRadius: 1,
 //                     textTransform: "none",
 //                     boxShadow: activeSection === 'password' ? 4 : 0
 //                   }}
@@ -1763,7 +1763,7 @@ export default function Settings() {
 //                   startIcon={<AccountCircleOutlined />}
 //                   sx={{
 //                     py: 1.5,
-//                     borderRadius: 2,
+//                     borderRadius: 1,
 //                     textTransform: "none",
 //                     boxShadow: activeSection === 'account' ? 4 : 0
 //                   }}
@@ -1782,7 +1782,7 @@ export default function Settings() {
 //                 sx={{
 //                   p: 3,
 //                   mb: 4,
-//                   borderRadius: 2,
+//                   borderRadius: 1,
 //                   bgcolor: alpha(theme.palette.background.paper, 0.8),
 //                   backdropFilter: "blur(8px)",
 //                   border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
@@ -1889,7 +1889,7 @@ export default function Settings() {
 //                       sx={{
 //                         px: 3,
 //                         py: 1.2,
-//                         borderRadius: 2,
+//                         borderRadius: 1,
 //                         textTransform: "none",
 //                         minWidth: 180
 //                       }}
@@ -1915,7 +1915,7 @@ export default function Settings() {
 //                 sx={{
 //                   p: 3,
 //                   mb: 4,
-//                   borderRadius: 2,
+//                   borderRadius: 1,
 //                   bgcolor: alpha(theme.palette.background.paper, 0.8),
 //                   backdropFilter: "blur(8px)",
 //                   border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
@@ -1952,7 +1952,7 @@ export default function Settings() {
 //                   alignItems: { xs: "flex-start", sm: "center" },
 //                   bgcolor: alpha(theme.palette.error.main, 0.05),
 //                   border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
-//                   borderRadius: 2,
+//                   borderRadius: 1,
 //                   p: 2
 //                 }}>
 //                   <Box sx={{ display: "flex", alignItems: "center", mb: { xs: 2, sm: 0 } }}>
@@ -1974,7 +1974,7 @@ export default function Settings() {
 //                     sx={{
 //                       px: 3,
 //                       py: 1,
-//                       borderRadius: 2,
+//                       borderRadius: 1,
 //                       textTransform: "none",
 //                       borderWidth: 2,
 //                       '&:hover': {
@@ -1998,7 +1998,7 @@ export default function Settings() {
 //             aria-describedby="delete-account-dialog-description"
 //             PaperProps={{
 //               sx: {
-//                 borderRadius: 3,
+//                 borderRadius: 1,
 //                 overflow: 'hidden'
 //               }
 //             }}

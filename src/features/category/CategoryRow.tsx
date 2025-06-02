@@ -25,7 +25,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CategoryIcon from "@mui/icons-material/Category";
 import { GetCategory } from "@/utils/types";
-import { formatDatewithTime } from "@/utils/functions";
+import { formatDate} from "@/utils/functions";
 
 interface ProductRowProps {
     category: GetCategory;
@@ -147,7 +147,24 @@ export const CategoryRow: React.FC<ProductRowProps> = ({ category, onDelete, onE
                                         color: theme.palette.success.main,
                                     }}
                                 >
-                                    {formatDatewithTime(category.created_at)}
+                                    {category.under || 'Primary Category'}
+                                </Typography>
+                            </Box>
+                        </Box>
+                    </TableCell>
+
+                    <TableCell align="right" sx={{ px: 1 }}>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <Typography
+                                    variant="h6"
+                                    sx={{
+                                        fontWeight: 700,
+                                        fontSize: '1.1rem',
+                                        color: theme.palette.success.main,
+                                    }}
+                                >
+                                    {formatDate(category.created_at)}
                                 </Typography>
                             </Box>
                         </Box>
@@ -164,7 +181,7 @@ export const CategoryRow: React.FC<ProductRowProps> = ({ category, onDelete, onE
                                     color: theme.palette.text.primary,
                                 }}
                             >
-                                {formatDatewithTime(category?.updated_at)}
+                                {formatDate(category?.updated_at)}
                             </Typography>
                         </Box>
                     </TableCell>
@@ -247,7 +264,7 @@ export const CategoryRow: React.FC<ProductRowProps> = ({ category, onDelete, onE
                 aria-labelledby="delete-dialog-title"
                 PaperProps={{
                     sx: {
-                        borderRadius: 3,
+                        borderRadius: 1,
                         boxShadow: `0 24px 50px ${alpha(theme.palette.error.main, 0.2)}`,
                     }
                 }}

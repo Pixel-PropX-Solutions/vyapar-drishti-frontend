@@ -100,7 +100,7 @@ const HeroSection: React.FC = () => {
                             sx={{
                                 width: '100%',
                                 height: 'auto',
-                                borderRadius: 3,
+                                borderRadius: 1,
                                 boxShadow: '0 8px 40px rgba(0, 0, 0, 0.12)'
                             }}
                         />

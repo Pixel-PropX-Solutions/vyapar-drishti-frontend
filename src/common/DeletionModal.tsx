@@ -158,7 +158,7 @@ export default function DeletionModal({ id }: { id: string }) {
         sx={{
           color: "#000",
           zIndex: 4,
-          borderRadius: 2,
+          borderRadius: 1,
           maxWidth: "900px",
           height: "600px",
           overflowY: "hidden",
@@ -256,7 +256,7 @@ export default function DeletionModal({ id }: { id: string }) {
                       theme.palette.background.default,
                       0.7
                     ),
-                    borderRadius: 2,
+                    borderRadius: 1,
                     p: 3,
                     boxShadow:
                       theme.palette.mode === "light"
@@ -309,7 +309,7 @@ export default function DeletionModal({ id }: { id: string }) {
                       theme.palette.background.default,
                       0.6
                     ),
-                    borderRadius: 2,
+                    borderRadius: 1,
                     p: 2,
                     boxShadow:
                       theme.palette.mode === "light"

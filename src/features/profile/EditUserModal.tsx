@@ -328,7 +328,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                         py: 1.5,
                         fontSize: '1rem',
                         fontWeight: 600,
-                        borderRadius: 2,
+                        borderRadius: 1,
                         background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
                         boxShadow: theme.shadows[4],
                         '&:hover': {
@@ -370,7 +370,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                             sx={{
                                 p: 3,
                                 mb: 2,
-                                borderRadius: 2,
+                                borderRadius: 1,
                                 background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover} 100%)`,
                                 border: `1px solid ${theme.palette.divider}`,
                                 transition: 'all 0.3s ease',
@@ -404,7 +404,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                                         onDragLeave={handleDragLeave}
                                         sx={{
                                             border: `2px dashed ${isDragActive ? theme.palette.primary.main : theme.palette.divider}`,
-                                            borderRadius: 2,
+                                            borderRadius: 1,
                                             p: 2,
                                             position: 'relative',
                                             textAlign: 'center',
@@ -587,7 +587,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                             // disabled={isLoading}
                             sx={{
                                 textTransform: 'none',
-                                borderRadius: 2,
+                                borderRadius: 1,
                                 px: 3
                             }}
                         >
@@ -603,7 +603,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                                 py: 1.5,
                                 fontSize: '1rem',
                                 fontWeight: 600,
-                                borderRadius: 2,
+                                borderRadius: 1,
                                 background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
                                 boxShadow: theme.shadows[4],
                                 '&:hover': {

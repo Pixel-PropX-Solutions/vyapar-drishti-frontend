@@ -48,12 +48,16 @@ export const viewAllCategory = createAsyncThunk(
     async (
         {
             searchQuery,
+            company_id,
+            parent,
             pageNumber,
             limit,
             sortField,
             sortOrder,
         }: {
             searchQuery: string;
+            company_id: string;
+            parent: string;
             sortField: string;
             pageNumber: number;
             limit: number;
@@ -63,10 +67,10 @@ export const viewAllCategory = createAsyncThunk(
     ) => {
         try {
             const response = await userApi.get(
-                `/category/view/all/category?search=${searchQuery}&is_deleted=False&page_no=${pageNumber}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"
+                `/category/view/all/category?company_id=${company_id}${searchQuery !== "" ? '&search=' + searchQuery : ''}${parent === "" || parent === "All" ? "" : '&parent=' + parent}&page_no=${pageNumber}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"
                 }`
             );
-            // console.log("viewAllCategory response", response);
+            console.log("viewAllCategory response", response);
 
             if (response.data.success === true) {
                 const categories = response.data.data.docs;
@@ -85,14 +89,15 @@ export const viewAllCategory = createAsyncThunk(
 export const viewAllCategories = createAsyncThunk(
     "view/categories",
     async (
-        _,
+        company_id: string,
         { rejectWithValue }
     ) => {
         try {
             const response = await userApi.get(
-                '/category/view/categories'
+                `/category/view/categories?company_id=${company_id}`
             );
-            // console.log("view/categories response", response.data);
+            
+            console.log("view/categories response", response);
 
             if (response.data.success === true) {
                 const categoryLists = response.data.data;

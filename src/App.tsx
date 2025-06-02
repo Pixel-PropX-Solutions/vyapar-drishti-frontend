@@ -16,7 +16,7 @@ import {
 } from "./theme/customizations";
 import Products from "./pages/Products";
 // import UploadDocuments from "./pages/UploadDocuments";
-// import CreateChemistProfile from "./features/profile/creditors/CreateChemistProfile";
+// import CreateChemistProfile from "./features/profile/customers/CreateChemistProfile";
 // import CreateStockistProfile from "./features/profile/stockist/CreateStockistProfile";
 import CreateUserProfile from "./features/profile/createUser";
 import CreateProduct from "./features/products/createProduct";
@@ -33,7 +33,7 @@ import LandingPage from "./components/LandingPage/LandingPage";
 import AboutPage from "./components/About/AboutPage";
 import Timeline from "./features/inventory/timeline";
 import Warehouse from "./features/inventory/warehouse";
-import InvoiceEditor from "./features/upload-documents/InvoiceEditor";
+// import InvoiceEditor from "./features/upload-documents/InvoiceEditor";
 // import ProductBilling from "./features/products/SellProduct";
 import ViewInventory from "./pages/Inventory";
 import ViewItem from "./features/products/ViewItem";
@@ -45,8 +45,13 @@ import TermsOfServicePage from "./components/Legal/TermsOfServicePage";
 import PricingPage from "./components/Pricing/PricingPage";
 import SignUpPage from "./pages/SignUp";
 import ProfilePage from "./pages/Profile";
-import { getCompany } from "./services/company";
-import Creditors from "./pages/Creditors";
+// import { getCompany } from "./services/company";
+import CustomerLedger from "./pages/CustomerLedger";
+import Invoices from "./pages/Invoices";
+import CreateInvoice from "./components/Invoice/createInvoice";
+import GroupAndTypes from "./pages/GroupAndTypes";
+import SalePurchaseInvoiceCreation from "./components/Invoice/SalePurchaseInvoiceCreation";
+import PaymentReceiptInvoice from "./components/Invoice/PaymentReceiptInvoice";
 // import PromptModal from "./common/PromptModal";
 
 const xThemeComponents = {
@@ -81,7 +86,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
       if (!isUserFetched && accessToken) {
         try {
           await dispatch(getCurrentUser());
-          await dispatch(getCompany());
+          // await dispatch(getCompany());
           dispatch(setUser({ authState: AuthStates.AUTHENTICATED }));
         } catch {
           localStorage.removeItem("accessToken");
@@ -147,7 +152,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 {/* <Route path="/settings" element={<Settings />} /> */}
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/create/user" element={<CreateUserProfile />} />
-                <Route path="/creditors" element={<Creditors />} />
+                <Route path="/customers" element={<CustomerLedger />} />
                 {/* <Route path="/stockists/:stockistId" element={<StockistProfile />} /> */}
                 {/* <Route
                   path="/create/user/stockist/:id"
@@ -174,6 +179,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/add/product" element={<CreateProduct />} />
                 <Route path="/products/:id" element={<ViewItem />} />
                 <Route path="/products" element={<Products />} />
+                <Route path="/groups" element={<GroupAndTypes />} />
                 <Route path="/inventory" element={<Warehouse />} />
                 <Route path="/timeline" element={<Timeline />} />
                 {/* <Route path="/sales" element={<OrdersPage />} /> */}
@@ -182,14 +188,18 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/orders/create" element={<CreateOrder />} />
                 <Route path="/orders/:orderId" element={<ViewOrder />} />
                 <Route path="/orders/:orderId/product" element={<UpdateOrderProduct />} /> */}
-                <Route path="/invoice" element={<InvoiceEditor />} />
+                {/* <Route path="/invoice" element={<InvoiceEditor />} /> */}
                 {/* <Route path="/upload" element={<UploadDocuments />} /> */}
                 {/* <Route path="/settings" element={<Settings />} /> */}
                 <Route path="/about" element={<AboutPage />} />
-                <Route path="/creditors" element={<Creditors />} />
+                <Route path="/customers" element={<CustomerLedger />} />
+                <Route path="/invoices" element={<Invoices />} />
+                <Route path="/invoices/create" element={<CreateInvoice />} />
+                <Route path="/invoices/payment" element={<PaymentReceiptInvoice />} />
+                <Route path="/invoices/create/:type" element={<SalePurchaseInvoiceCreation />} />
                 {/* <Route path="/debitors" element={<ChemistProfile />} /> */}
                 {/* <Route path="/sell" element={<ProductBilling />} /> */}
-                <Route path="/*" element={<Navigate to="/" replace />} />
+                {/* <Route path="/*" element={<Navigate to="/" replace />} /> */}
               </Route>
             )}
           </>
@@ -210,7 +220,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
             <Route path="/admin" element={<LoginPage />} />
 
             <Route path="/signup" element={<SignUpPage />} />
-            <Route path="/*" element={<Navigate to="/" replace />} />
+            {/* <Route path="/*" element={<Navigate to="/" replace />} /> */}
           </>
         )
         }

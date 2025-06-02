@@ -13,17 +13,12 @@ import {
   Tooltip,
   alpha,
   Button,
-  IconButton,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Chip,
-  Card,
-  CardContent,
-  Badge,
   Divider,
   TableSortLabel,
   Tab,
@@ -31,24 +26,21 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
-import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import { deleteProduct, viewAllProducts } from "@/services/products";
+import { deleteProduct, viewAllProducts, viewProduct } from "@/services/products";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import toast from "react-hot-toast";
-import { CategorySortField, GetCategory, GetProduct, ProductSortField, SortOrder, UpdateCategory } from "@/utils/types";
+import { CategorySortField, GetCategory, GetProduct, ProductSortField, ProductUpdate, SortOrder, UpdateCategory } from "@/utils/types";
 import ProductsSideModal from "@/features/products/ProductsSideModal";
 import { deleteCategory, viewAllCategories, viewAllCategory } from "@/services/category";
 import TabPanel from "@/features/upload-documents/components/TabPanel";
 import { ProductRow } from "@/features/products/ProductRow";
-import { DeletedProductRow } from "@/features/products/DeletedProductRow";
 import { CategoryRow } from "@/features/category/CategoryRow";
 import CategoryCreateModal from "@/features/category/CategoryCreateModal";
 import { CategoryRowSkeleton } from "@/features/category/CategoryRowSekeleton";
 import { ProductRowSkeleton } from "@/common/ProductRowSkeleton";
-import { DeletedProductRowSkeleton } from "@/common/DeletedProductRowSkeleton";
 import { useNavigate } from "react-router-dom";
 
 const ProductsListing: React.FC = () => {
@@ -58,36 +50,33 @@ const ProductsListing: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { productsData, pageMeta } = useSelector((state: RootState) => state.product);
   const { categoryLists, categories } = useSelector((state: RootState) => state.category);
-  const [categoriesData, setCategoriesData] = useState<GetCategory[]>([]);
-
   const [products, setProducts] = useState<GetProduct[]>([]);
   const [data, setData] = useState({
     searchTerm: '',
-    categoryFilter: '',
+    categoryFilter: 'All',
     page: 1,
     rowsPerPage: 10,
-    is_deleted: false,
+    // is_deleted: false,
     sortBy: "created_at" as ProductSortField,
     sortOrder: "asc" as SortOrder,
 
     // Category Filters
     searchQuery: '',
     pageNumber: 1,
+    parent: 'All',
     limit: 10,
     sortField: 'created_at' as CategorySortField,
     categorySortOrder: 'asc' as SortOrder,
   });
-  const { searchTerm, categoryFilter, is_deleted, page, rowsPerPage, sortBy, sortOrder, categorySortOrder, sortField, limit, pageNumber, searchQuery } = data;
+  const { searchTerm, categoryFilter, page, rowsPerPage, sortBy, sortOrder, parent, categorySortOrder, sortField, limit, pageNumber, searchQuery } = data;
   const [loading, setLoading] = useState<boolean>(false);
   const [refreshKey, setRefreshKey] = useState<number>(0);
   const [drawer, setDrawer] = useState<boolean>(false);
+  const { currentCompany } = useSelector((state: RootState) => state.auth);
   const [openCategoryModal, setOpenCategoryModal] = useState<boolean>(false);
-  const [selectedProduct, setSelectedProduct] = useState<GetProduct | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<ProductUpdate | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<UpdateCategory | null>(null);
   const [selectedTab, setSelectedTab] = useState(0);
-  const totalProducts = products.length;
-  const lowStockCount = products.filter(p => (p?.opening_quantity ?? 0) < 10).length;
-  const outOfStockCount = products.filter(p => p.opening_quantity === 0).length;
 
   const handlePageChange = (_: unknown, value: number) => {
     setData((prevState) => ({
@@ -99,7 +88,7 @@ const ProductsListing: React.FC = () => {
 
   const handleDelete = (productId: string) => {
     dispatch(
-      deleteProduct(productId)
+      deleteProduct({ id: productId, company_id: currentCompany?._id || '' })
     )
       .unwrap()
       .then(() => {
@@ -109,9 +98,18 @@ const ProductsListing: React.FC = () => {
       });
   };
 
-  const handleEdit = (product: GetProduct) => {
+  const handleEdit = async (product: GetProduct) => {
     setDrawer(true);
-    setSelectedProduct(product);
+    await dispatch(viewProduct({ product_id: product._id, company_id: currentCompany?._id || '' }))
+      .unwrap().then((res) => {
+        console.log("Product details fetched successfully", res);
+        setSelectedProduct(res.product);
+      }
+      ).catch((error) => {
+        setSelectedProduct(null);
+        console.error("Error fetching product details:", error);
+        toast.error("Failed to fetch product details");
+      });
   };
 
   const handleView = (product: GetProduct) => {
@@ -123,15 +121,35 @@ const ProductsListing: React.FC = () => {
     setRefreshKey((prev) => prev + 1);
   };
 
+  const handleResetFilters = () => {
+    setData({
+      searchTerm: '',
+      categoryFilter: 'All',
+      page: 1,
+      rowsPerPage: 10,
+      sortBy: "created_at" as ProductSortField,
+      sortOrder: "asc" as SortOrder,
+
+      // Category Filters
+      searchQuery: '',
+      pageNumber: 1,
+      parent: 'All',
+      limit: 10,
+      sortField: 'created_at' as CategorySortField,
+      categorySortOrder: 'asc' as SortOrder,
+    });
+    setRefreshKey((prev) => prev + 1);
+  };
+
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     if (newValue === 0) {
-      setData((prevState) => ({ ...prevState, is_deleted: false }));
+      handleResetFilters();
+      fetchProducts();
     } else if (newValue === 1) {
+      handleResetFilters();
       fetchCategory();
     }
-    else if (newValue === 2) {
-      setData((prevState) => ({ ...prevState, is_deleted: true }));
-    }
+
     setSelectedTab(newValue);
   };
 
@@ -139,20 +157,21 @@ const ProductsListing: React.FC = () => {
     setLoading(true);
     dispatch(
       viewAllProducts({
+        company_id: currentCompany?._id || '',
         searchQuery: searchTerm,
         category: categoryFilter,
         pageNumber: page,
         limit: rowsPerPage,
         sortField: sortBy,
         sortOrder: sortOrder,
-        is_deleted: is_deleted,
+        // is_deleted: is_deleted,
       })
     )
       .unwrap()
       .then(() => {
         setLoading(false);
       });
-  }, [page, searchTerm, rowsPerPage, sortOrder, categoryFilter, is_deleted, sortBy, dispatch]);
+  }, [dispatch, currentCompany?._id, searchTerm, categoryFilter, page, rowsPerPage, sortBy, sortOrder]);
 
 
   const fetchCategory = useCallback(async () => {
@@ -164,33 +183,33 @@ const ProductsListing: React.FC = () => {
         limit: limit,
         sortField: sortField,
         sortOrder: categorySortOrder,
+        company_id: currentCompany?._id || '',
+        parent: parent,
       })
     )
       .unwrap()
       .then(() => {
         setLoading(false);
       });
-  }, [categorySortOrder, dispatch, limit, pageNumber, refreshKey, searchQuery, sortField]);
+  }, [categorySortOrder, currentCompany?._id, parent, dispatch, limit, pageNumber, searchQuery, sortField]);
 
 
   useEffect(() => {
     fetchProducts();
     dispatch(
-      viewAllCategories()
+      viewAllCategories(currentCompany?._id || '')
     );
-  }, [page, searchTerm, rowsPerPage, sortOrder, categoryFilter, sortBy, refreshKey, dispatch, fetchProducts]);
+  }, [page, searchTerm, rowsPerPage, sortOrder, categoryFilter, sortBy, refreshKey, dispatch, fetchProducts, currentCompany?._id]);
+
+  useEffect(() => {
+    fetchCategory();
+  }, [fetchCategory, categorySortOrder, currentCompany?._id, parent, limit, pageNumber, searchQuery, sortField]);
 
   useEffect(() => {
     if (productsData && pageMeta) {
       setProducts(productsData);
     }
   }, [productsData, pageMeta]);
-
-  useEffect(() => {
-    if (categories && pageMeta) {
-      setCategoriesData(categories);
-    }
-  }, [categories, pageMeta]);
 
   return (
     <Box sx={{ p: 3, bgcolor: '#f8fafc', minHeight: '100vh', width: '100%' }}>
@@ -200,7 +219,7 @@ const ProductsListing: React.FC = () => {
           px: 4,
           py: 2,
           mb: 2,
-          borderRadius: 3,
+          borderRadius: 1,
           background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
           color: 'white',
           position: 'relative',
@@ -224,46 +243,6 @@ const ProductsListing: React.FC = () => {
                 Product Inventory
               </Typography>
             </Box>
-
-            <Grid container spacing={2} sx={{ mb: 3 }}>
-              <Grid item xs={6} sm={3}>
-                <Card sx={{ bgcolor: alpha('#fff', 0.15), backdropFilter: 'blur(10px)' }}>
-                  <CardContent sx={{ p: .5, '&:last-child': { pb: 1 } }}>
-                    <Typography variant="h4" sx={{ fontWeight: 700, color: 'white' }}>
-                      {totalProducts}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: alpha('#fff', 0.8) }}>
-                      Total Products
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={6} sm={3}>
-                <Card sx={{ bgcolor: alpha('#ff9800', 0.2), backdropFilter: 'blur(10px)' }}>
-                  <CardContent sx={{ p: .5, '&:last-child': { pb: 1 } }}>
-                    <Typography variant="h4" sx={{ fontWeight: 700, color: 'white' }}>
-                      {lowStockCount}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: alpha('#fff', 0.8) }}>
-                      Low Stock
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={6} sm={3}>
-                <Card sx={{ bgcolor: alpha('#f44336', 0.2), backdropFilter: 'blur(10px)' }}>
-                  <CardContent sx={{ p: .5, '&:last-child': { pb: 1 } }}>
-                    <Typography variant="h4" sx={{ fontWeight: 700, color: 'white' }}>
-                      {outOfStockCount}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: alpha('#fff', 0.8) }}>
-                      Out of Stock
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
-
             <Tabs
               value={selectedTab}
               onChange={handleTabChange}
@@ -307,21 +286,6 @@ const ProductsListing: React.FC = () => {
                   mx: 1
                 }}
               />
-              <Tab
-                label="Deleted"
-                sx={{
-                  ...(selectedTab === 2 && {
-                    bgcolor: 'white',
-                    color: theme.palette.primary.main,
-                    textTransform: 'none',
-                    fontWeight: 600,
-                    borderRadius: 1,
-                  }),
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  borderRadius: 1,
-                }}
-              />
             </Tabs>
           </Grid>
 
@@ -335,7 +299,6 @@ const ProductsListing: React.FC = () => {
                   setSelectedCategory(null);
                 } else {
                   setDrawer(true);
-                  setSelectedProduct(null);
                 }
 
               }}
@@ -344,7 +307,7 @@ const ProductsListing: React.FC = () => {
                 bgcolor: 'white',
                 color: theme.palette.primary.main,
                 textTransform: 'none',
-                borderRadius: 3,
+                borderRadius: 1,
                 px: 4,
                 py: 1.5,
                 fontSize: '1rem',
@@ -369,22 +332,32 @@ const ProductsListing: React.FC = () => {
         sx={{
           p: 3,
           mb: 3,
-          borderRadius: 3,
+          borderRadius: 1,
           border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
           boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
         }}
       >
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} sm={5}>
+          <Grid item xs={12} sm={7}>
             <TextField
               fullWidth
               size="small"
-              placeholder="Search products, category, description, barcode..."
-              value={searchTerm}
-              onChange={(e) => setData((prevState) => ({
-                ...prevState,
-                searchTerm: e.target.value,
-              }))}
+              placeholder={selectedTab === 0 ? "Search item name, category, description, barcode..." : "Search category name, description ..."}
+              value={selectedTab === 0 ? searchTerm : searchQuery}
+              onChange={(e) => {
+                if (selectedTab === 0) {
+                  setData((prevState) => ({
+                    ...prevState,
+                    searchTerm: e.target.value,
+                  }));
+                }
+                else {
+                  setData((prevState) => ({
+                    ...prevState,
+                    searchQuery: e.target.value,
+                  }));
+                }
+              }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -394,7 +367,7 @@ const ProductsListing: React.FC = () => {
               }}
               sx={{
                 '& .MuiOutlinedInput-root': {
-                  borderRadius: 3,
+                  borderRadius: 1,
                   bgcolor: alpha(theme.palette.primary.main, 0.02),
                   transition: 'all 0.3s ease',
                   '&:hover': {
@@ -422,43 +395,22 @@ const ProductsListing: React.FC = () => {
               }))}
               sx={{
                 '& .MuiOutlinedInput-root': {
-                  borderRadius: 3,
+                  borderRadius: 1,
                 },
               }}
             >
+              <MenuItem value={'All'}>
+                All Categories
+              </MenuItem>
               {categoryLists?.map((category) => (
-                <MenuItem key={category?._id} value={category?._id}>
+                <MenuItem key={category?._id} value={category?.category_name}>
                   {category?.category_name}
                 </MenuItem>
               ))}
             </TextField>
           </Grid>
 
-          <Grid item xs={12} sm={2}>
-            <TextField
-              fullWidth
-              select
-              size="small"
-              label="Sort By"
-              value={sortBy}
-              onChange={(e) => setData((prevState) => ({
-                ...prevState,
-                sortBy: e.target.value as ProductSortField,
-              }))}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 3,
-                },
-              }}
-            >
-              <MenuItem value="created_at">Date Created</MenuItem>
-              <MenuItem value="product_name">Name</MenuItem>
-              <MenuItem value="selling_price">Price</MenuItem>
-              <MenuItem value="opening_quantity">Quantity</MenuItem>
-            </TextField>
-          </Grid>
-
-          <Grid item xs={12} sm={2}>
+          <Grid item xs={12} sm={1}>
             <TextField
               fullWidth
               select
@@ -472,7 +424,7 @@ const ProductsListing: React.FC = () => {
               }))}
               sx={{
                 '& .MuiOutlinedInput-root': {
-                  borderRadius: 3,
+                  borderRadius: 1,
                 },
               }}
             >
@@ -484,22 +436,19 @@ const ProductsListing: React.FC = () => {
             </TextField>
           </Grid>
 
-          <Grid item xs={12} sm={1}>
+          <Grid item xs={12} sm={2}>
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Tooltip title="Refresh Data" arrow>
-                <IconButton
+                <Button
+                  variant="outlined"
                   onClick={handleRefresh}
+                  startIcon={<RefreshIcon />}
                   sx={{
-                    border: `1px solid ${alpha(theme.palette.divider, 0.12)}`,
-                    borderRadius: 2,
-                    bgcolor: alpha(theme.palette.primary.main, 0.02),
-                    '&:hover': {
-                      bgcolor: alpha(theme.palette.primary.main, 0.08),
-                    },
+                    whiteSpace: 'nowrap',
                   }}
                 >
-                  <RefreshIcon />
-                </IconButton>
+                  Refresh Items
+                </Button>
               </Tooltip>
             </Box>
           </Grid>
@@ -514,10 +463,9 @@ const ProductsListing: React.FC = () => {
           elevation={0}
           sx={{
             width: '100%',
-            borderRadius: 3,
+            borderRadius: 1,
             border: `1px solid ${alpha(theme.palette.divider, 1)}`,
             boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
-            // overflow: 'hidden',
           }}
         >
           <Table sx={{ width: '100%' }}>
@@ -534,12 +482,12 @@ const ProductsListing: React.FC = () => {
                 <TableCell sx={{ pl: 3, pr: 1 }}>
                   <Tooltip title="Sort by Product Name" arrow>
                     <TableSortLabel
-                      active={sortBy === "product_name"}
-                      direction={sortBy === "product_name" ? sortOrder : "asc"}
+                      active={sortBy === "stock_item_name"}
+                      direction={sortBy === "stock_item_name" ? sortOrder : "asc"}
                       onClick={() => {
                         setData((prevState) => ({
                           ...prevState,
-                          sortBy: "product_name",
+                          sortBy: "stock_item_name",
                           sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
                         }));
                       }}
@@ -553,20 +501,11 @@ const ProductsListing: React.FC = () => {
                 <TableCell align="center" sx={{ px: 1 }}>
                   <Tooltip title="Sort by Item Quantity" arrow>
                     <TableSortLabel
-                      active={sortBy === "opening_quantity"}
-                      direction={sortBy === "opening_quantity" ? sortOrder : "asc"}
-                      onClick={() => {
-                        setData((prevState) => ({
-                          ...prevState,
-                          sortBy: "opening_quantity",
-                          sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
-                        }));
-                      }}
                     >
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
                         <InventoryIcon fontSize="small" />
                         <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                          Opening Stock Status
+                          Stock Status
                         </Typography>
                       </Box>
                     </TableSortLabel>
@@ -575,59 +514,31 @@ const ProductsListing: React.FC = () => {
                 <TableCell align="right" sx={{ px: 1 }}>
                   <Tooltip title="Sort by Bar-Code" arrow>
                     <TableSortLabel
-                      active={sortBy === "barcode"}
-                      direction={sortBy === "barcode" ? sortOrder : "asc"}
+                      active={sortBy === "gst_hsn_code"}
+                      direction={sortBy === "gst_hsn_code" ? sortOrder : "asc"}
                       onClick={() => {
                         setData((prevState) => ({
                           ...prevState,
-                          sortBy: "barcode",
+                          sortBy: "gst_hsn_code",
                           sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
                         }));
                       }}
                     >
                       <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                        Bar-Code
+                        HSN/SAC Code
                       </Typography>
                     </TableSortLabel>
                   </Tooltip>
                 </TableCell>
                 <TableCell align="right" sx={{ px: 1 }}>
-                  <Tooltip title="Sort by Selling Price" arrow>
-                    <TableSortLabel
-                      active={sortBy === "selling_price"}
-                      direction={sortBy === "selling_price" ? sortOrder : "asc"}
-                      onClick={() => {
-                        setData((prevState) => ({
-                          ...prevState,
-                          sortBy: "selling_price",
-                          sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
-                        }));
-                      }}
-                    >
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                        Selling Price
-                      </Typography>
-                    </TableSortLabel>
-                  </Tooltip>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                    Selling Price
+                  </Typography>
                 </TableCell>
                 <TableCell align="right" sx={{ px: 1 }}>
-                  <Tooltip title="Sort by Purchase Price" arrow>
-                    <TableSortLabel
-                      active={sortBy === "purchase_price"}
-                      direction={sortBy === "purchase_price" ? sortOrder : "asc"}
-                      onClick={() => {
-                        setData((prevState) => ({
-                          ...prevState,
-                          sortBy: "purchase_price",
-                          sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
-                        }));
-                      }}
-                    >
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                        Purchase Price
-                      </Typography>
-                    </TableSortLabel>
-                  </Tooltip>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                    Purchase Price
+                  </Typography>
                 </TableCell>
                 <TableCell align="center" >
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
@@ -666,12 +577,11 @@ const ProductsListing: React.FC = () => {
                         variant="contained"
                         onClick={() => {
                           setDrawer(true);
-                          setSelectedProduct(null);
                         }}
                         startIcon={<AddCircleIcon />}
                         sx={{
                           mt: 2,
-                          borderRadius: 2,
+                          borderRadius: 1,
                           textTransform: 'none',
                           fontWeight: 600,
                         }}
@@ -693,7 +603,7 @@ const ProductsListing: React.FC = () => {
           elevation={0}
           sx={{
             width: '100%',
-            borderRadius: 3,
+            borderRadius: 1,
             border: `1px solid ${alpha(theme.palette.divider, 1)}`,
             boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
           }}
@@ -713,12 +623,12 @@ const ProductsListing: React.FC = () => {
                   <Tooltip title="Sort by Category Name" arrow>
                     <TableSortLabel
                       active={sortField === "category_name"}
-                      direction={sortField === "category_name" ? sortOrder : "asc"}
+                      direction={sortField === "category_name" ? categorySortOrder : "asc"}
                       onClick={() => {
                         setData((prevState) => ({
                           ...prevState,
                           sortField: "category_name",
-                          sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
+                          categorySortOrder: prevState.categorySortOrder === 'asc' ? 'desc' : 'asc'
                         }));
                       }}
                     >
@@ -729,15 +639,34 @@ const ProductsListing: React.FC = () => {
                   </Tooltip>
                 </TableCell>
                 <TableCell align="right" sx={{ px: 1 }}>
+                  <Tooltip title="Sort by Parent Category" arrow>
+                    <TableSortLabel
+                      active={sortField === "parent"}
+                      direction={sortField === "parent" ? categorySortOrder : "asc"}
+                      onClick={() => {
+                        setData((prevState) => ({
+                          ...prevState,
+                          sortField: "parent",
+                          categorySortOrder: prevState.categorySortOrder === 'asc' ? 'desc' : 'asc'
+                        }));
+                      }}
+                    >
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                        Parent Category
+                      </Typography>
+                    </TableSortLabel>
+                  </Tooltip>
+                </TableCell>
+                <TableCell align="right" sx={{ px: 1 }}>
                   <Tooltip title="Sort by Create Date" arrow>
                     <TableSortLabel
                       active={sortField === "created_at"}
-                      direction={sortField === "created_at" ? sortOrder : "asc"}
+                      direction={sortField === "created_at" ? categorySortOrder : "asc"}
                       onClick={() => {
                         setData((prevState) => ({
                           ...prevState,
                           sortField: "created_at",
-                          sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
+                          categorySortOrder: prevState.categorySortOrder === 'asc' ? 'desc' : 'asc'
                         }));
                       }}
                     >
@@ -751,12 +680,12 @@ const ProductsListing: React.FC = () => {
                   <Tooltip title="Sort by Update Date" arrow>
                     <TableSortLabel
                       active={sortField === "updated_at"}
-                      direction={sortField === "updated_at" ? sortOrder : "asc"}
+                      direction={sortField === "updated_at" ? categorySortOrder : "asc"}
                       onClick={() => {
                         setData((prevState) => ({
                           ...prevState,
                           sortField: "updated_at",
-                          sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
+                          categorySortOrder: prevState.categorySortOrder === 'asc' ? 'desc' : 'asc'
                         }));
                       }}
                     >
@@ -777,8 +706,8 @@ const ProductsListing: React.FC = () => {
               {loading ? (
                 Array([1, 2, 3, 4, 5])
                   .map((_, index) => <CategoryRowSkeleton key={`skeleton-${index}`} />)
-              ) : categoriesData?.length > 0 ? (
-                categoriesData?.map((category, index) => (
+              ) : categories?.length > 0 ? (
+                categories?.map((category, index) => (
                   <CategoryRow
                     key={category._id}
                     category={category}
@@ -794,11 +723,13 @@ const ProductsListing: React.FC = () => {
                         });
                     }}
                     onEdit={(category: GetCategory) => {
+                      console.log("Edit Category", category);
                       setOpenCategoryModal(true);
                       setSelectedCategory(category);
                     }}
                     onView={(category: GetCategory) => {
                       setOpenCategoryModal(true);
+                      console.log("Edit Category", category);
                       setSelectedCategory(category);
                     }}
                     index={index}
@@ -824,7 +755,7 @@ const ProductsListing: React.FC = () => {
                         startIcon={<AddCircleIcon />}
                         sx={{
                           mt: 2,
-                          borderRadius: 2,
+                          borderRadius: 1,
                           textTransform: 'none',
                           fontWeight: 600,
                         }}
@@ -840,165 +771,6 @@ const ProductsListing: React.FC = () => {
         </TableContainer>
       </TabPanel>
 
-      <TabPanel value={selectedTab} index={2}>
-        <TableContainer
-          component={Paper}
-          elevation={0}
-          sx={{
-            width: '100%',
-            borderRadius: 3,
-            border: `1px solid ${alpha(theme.palette.divider, 1)}`,
-            boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
-          }}
-        >
-          <Table sx={{ width: '100%' }}>
-            <TableHead>
-              <TableRow
-                sx={{
-                  bgcolor: alpha(theme.palette.grey[50], 0.8),
-                  width: '100%',
-                  '& .MuiTableCell-head': {
-                    borderBottom: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-                  }
-                }}
-              >
-                <TableCell sx={{ pl: 3, pr: 1 }}>
-                  <Tooltip title="Sort by Product Name" arrow>
-                    <TableSortLabel
-                      active={sortBy === "product_name"}
-                      direction={sortBy === "product_name" ? sortOrder : "asc"}
-                      onClick={() => {
-                        setData((prevState) => ({
-                          ...prevState,
-                          sortBy: "product_name",
-                          sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
-                        }));
-                      }}
-                    >
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                        Product Information
-                      </Typography>
-                    </TableSortLabel>
-                  </Tooltip>
-                </TableCell>
-                <TableCell align="right" sx={{ px: 1 }}>
-                  <Tooltip title="Sort by Bar-Code" arrow>
-                    <TableSortLabel
-                      active={sortBy === "barcode"}
-                      direction={sortBy === "barcode" ? sortOrder : "asc"}
-                      onClick={() => {
-                        setData((prevState) => ({
-                          ...prevState,
-                          sortBy: "barcode",
-                          sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
-                        }));
-                      }}
-                    >
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                        Bar-Code
-                      </Typography>
-                    </TableSortLabel>
-                  </Tooltip>
-                </TableCell>
-                <TableCell align="right" sx={{ px: 1 }}>
-                  <Tooltip title="Sort by Selling Price" arrow>
-                    <TableSortLabel
-                      active={sortBy === "selling_price"}
-                      direction={sortBy === "selling_price" ? sortOrder : "asc"}
-                      onClick={() => {
-                        setData((prevState) => ({
-                          ...prevState,
-                          sortBy: "selling_price",
-                          sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
-                        }));
-                      }}
-                    >
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                        Selling Price
-                      </Typography>
-                    </TableSortLabel>
-                  </Tooltip>
-                </TableCell>
-                <TableCell align="right" sx={{ px: 1 }}>
-                  <Tooltip title="Sort by Purchase Price" arrow>
-                    <TableSortLabel
-                      active={sortBy === "purchase_price"}
-                      direction={sortBy === "purchase_price" ? sortOrder : "asc"}
-                      onClick={() => {
-                        setData((prevState) => ({
-                          ...prevState,
-                          sortBy: "purchase_price",
-                          sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
-                        }));
-                      }}
-                    >
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                        Purchase Price
-                      </Typography>
-                    </TableSortLabel>
-                  </Tooltip>
-                </TableCell>
-                <TableCell align="center" >
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                    Actions
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {loading ? (
-                Array([1, 2, 3, 4, 5])
-                  .map((_, index) => <DeletedProductRowSkeleton key={`skeleton-${index}`} />)
-              ) : products.length > 0 ? (
-                products.map((product, index) => (
-                  <DeletedProductRow
-                    key={product._id}
-                    product={product}
-                    onDelete={handleDelete}
-                    onView={handleView}
-                    index={index}
-                  />
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={6} sx={{ textAlign: "center", py: 8 }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                      <InventoryIcon sx={{ fontSize: '4rem', color: theme.palette.text.disabled }} />
-                      <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 600 }}>
-                        No products deleted
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Try adjusting your search or filter criteria, or deleting your first product
-                      </Typography>
-                      <Button
-                        onClick={() => {
-                          setSelectedTab(0);
-                          setData((prevState) => ({
-                            ...prevState,
-                            is_deleted: false,
-                          }));
-                        }}
-                        variant="contained"
-                        startIcon={<AddCircleIcon />}
-                        sx={{
-                          mt: 2,
-                          borderRadius: 2,
-                          textTransform: 'none',
-                          fontWeight: 600,
-                        }}
-                      >
-                        Delete Your First Product
-                      </Button>
-                    </Box>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </TabPanel>
-
-
       {/* Enhanced Pagination Section */}
       <Paper
         elevation={0}
@@ -1008,7 +780,7 @@ const ProductsListing: React.FC = () => {
           alignItems: "center",
           p: 3,
           mt: 3,
-          borderRadius: 3,
+          borderRadius: 1,
           border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
           boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
         }}
@@ -1020,14 +792,14 @@ const ProductsListing: React.FC = () => {
               Showing {Math.min((page - 1) * rowsPerPage + 1, products.length)} - {Math.min(page * rowsPerPage, products.length)} of {products.length} products
             </Typography>) : (
               <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                Showing {Math.min((page - 1) * rowsPerPage + 1, categoriesData?.length)} - {Math.min(page * rowsPerPage, categoriesData?.length)} of {categoriesData?.length} categories
+                Showing {Math.min((page - 1) * rowsPerPage + 1, categories?.length)} - {Math.min(page * rowsPerPage, categories?.length)} of {categories?.length} categories
               </Typography>
             )
           }
 
           <Divider orientation="vertical" flexItem />
 
-          {selectedTab === 0 && (<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {/* {selectedTab === 0 && (<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Badge badgeContent={lowStockCount} color="warning" showZero={false}>
               <Chip
                 icon={<TrendingDownIcon />}
@@ -1047,7 +819,7 @@ const ProductsListing: React.FC = () => {
                 color="error"
               />
             </Badge>
-          </Box>)}
+          </Box>)} */}
         </Box>
 
         {products.length > rowsPerPage && selectedTab !== 1 && (
@@ -1062,7 +834,7 @@ const ProductsListing: React.FC = () => {
             sx={{
               "& .MuiPaginationItem-root": {
                 mx: { xs: 0.25, sm: 0.5 },
-                borderRadius: 2,
+                borderRadius: 1,
                 fontWeight: 600,
                 transition: 'all 0.3s ease',
                 '&:hover': {
@@ -1076,9 +848,10 @@ const ProductsListing: React.FC = () => {
             }}
           />
         )}
-        {categoriesData?.length > rowsPerPage && selectedTab === 1 && (
+
+        {categories?.length > rowsPerPage && selectedTab === 1 && (
           <Pagination
-            count={Math.ceil(categoriesData?.length / rowsPerPage)}
+            count={Math.ceil(categories?.length / rowsPerPage)}
             page={page}
             onChange={handlePageChange}
             color="primary"
@@ -1088,7 +861,7 @@ const ProductsListing: React.FC = () => {
             sx={{
               "& .MuiPaginationItem-root": {
                 mx: { xs: 0.25, sm: 0.5 },
-                borderRadius: 2,
+                borderRadius: 1,
                 fontWeight: 600,
                 transition: 'all 0.3s ease',
                 '&:hover': {
@@ -1104,7 +877,7 @@ const ProductsListing: React.FC = () => {
         )}
 
       </Paper>
-      <ProductsSideModal drawer={drawer} setDrawer={setDrawer} setRefreshKey={setRefreshKey} selectedProduct={selectedProduct} setSelectedProduct={setSelectedProduct} />
+      <ProductsSideModal drawer={drawer} setDrawer={setDrawer} setRefreshKey={setRefreshKey} product={selectedProduct} setSelectedProduct={setSelectedProduct} />
       <CategoryCreateModal
         open={openCategoryModal}
         onClose={() => {
@@ -1113,7 +886,7 @@ const ProductsListing: React.FC = () => {
         }}
         onUpdated={() => fetchCategory()}
         category={selectedCategory}
-        onCreated={function (category: { name: string; _id: string; }): void { console.log("category", category)}} />
+        onCreated={function (category: { name: string; _id: string; }): void { console.log("category", category) }} />
     </Box>
   );
 };

@@ -212,7 +212,7 @@ export const DocumentUploadLoader: React.FC<DocumentUploadLoaderProps> = ({
           width: '100%',
           maxWidth: 400,
           p: 3,
-          borderRadius: 2,
+          borderRadius: 1,
           background: theme.palette.background.paper,
           border: `1px solid ${theme.palette.divider}`,
           boxShadow: status === 'success' 

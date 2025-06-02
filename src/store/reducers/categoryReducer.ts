@@ -7,7 +7,7 @@ interface CategoryState {
     authState: AuthStates;
     productData: ProductCreate | null;
     uploadData: UploadData | null;
-    categories: Array<GetCategory> | null;
+    categories: Array<GetCategory> | [];
     categoryLists: Array<CategoryLists> | null;
     productsData: Array<GetProduct> | null;
     loading: boolean;

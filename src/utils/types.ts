@@ -14,7 +14,7 @@ export type SortField =
   | "company_name";
 
 export type ProductSortField =
-  | "product_name"
+  | "stock_item_name"
   | 'selling_price'
   | 'purchase_price'
   | "category"
@@ -23,7 +23,7 @@ export type ProductSortField =
   | "opening_quantity"
   | "opening_purchase_price"
   | "show_active_stock"
-  | "barcode"
+  | "gst_hsn_code"
   | 'unit'
   | "hsn_code";
 
@@ -31,9 +31,10 @@ export type CategorySortField =
   | "category_name"
   | 'description'
   | 'created_at'
+  | 'parent'
   | "updated_at";
 
-export type CreditorSortField =
+export type CustomerSortField =
   | "name"
   | 'company_name'
   // | 'credit_limit'
@@ -43,11 +44,6 @@ export type CreditorSortField =
   | "created_at";
 
 
-export enum OrderStatus {
-  PENDING = "Pending",
-  SHIPPED = "Shipped",
-  CANCELLED = "Cancelled"
-}
 export type SortOrder = "asc" | "desc";
 
 export interface Units {
@@ -63,6 +59,7 @@ export interface UserSignUp {
   email: string,
   phone: PhoneNumber
 }
+
 export interface PageMeta {
   page: number;
   limit: number;
@@ -100,6 +97,25 @@ export interface Address {
   city: string;
   state: string;
   zip_code: string;
+}
+
+export interface GetGroup {
+  _id: string,
+  name: string,
+  user_id: string,
+  company_id: string,
+  description: string,
+  image: string | File | null,
+  is_deleted: boolean,
+  parent?: string,
+  primary_group: string,
+  is_revenue: boolean,
+  is_deemedpositive: boolean,
+  is_reserved: boolean,
+  affects_gross_profit: boolean,
+  sort_position: number,
+  created_at: string,
+  updated_at: string,
 }
 
 export interface GetBilling {
@@ -169,28 +185,71 @@ export interface CreateBasicUser {
   phone: PhoneNumber
 }
 
-export interface GetCreditors {
+export interface GetUserLedgers {
   _id: string,
-  name: string,
+  ledger_name: string,
   user_id: string,
+  company_id: string,
   phone?: PhoneNumber,
+  qr_image: string,
   email?: string,
-  gstin?: string,
-  company_name?: string,
-  billing: GetBilling,
-  shipping?: ShippingAddress,
-  // opening_balance?: number,
-  // balance_type?: string,
+  parent: string,
+  mailing_name: string,
+  mailing_pincode: string,
+  mailing_country?: string,
+  opening_balance: number,
+  is_deemed_positive: boolean,
   image?: string | File | null,
-  pan_number?: string,
-  // credit_limit?: number,
-  tags?: string,
-  // due_date?: number,
+  mailing_state: string,
+  is_revenue: boolean,
+  mailing_address?: string,
+  alias?: string,
   created_at: string,
   updated_at: string,
   is_deleted: boolean
 }
 
+export interface CustomersList {
+  _id: string,
+  ledger_name: string,
+  parent: string,
+  alias: string,
+}
+
+export interface GetAllUserGroups {
+  _id: string,
+  name: string,
+  user_id: string,
+  company_id: string,
+  description: string,
+  parent: string,
+}
+
+export interface CreateInvoiceData {
+  company_id: string,
+  date: string,
+  voucher_type: string,
+  voucher_number: string,
+  party_name: string,
+  narration: string,
+  reference_number: string,
+  reference_date: string,
+  place_of_supply: string,
+  accounting: Array<{
+    vouchar_id: string,
+    ledger: string,
+    ledger_id: string,
+    amount: number
+  }>,
+  items: Array<{
+    vouchar_id: string;
+    item: string;
+    _item: string;
+    quantity: number;
+    rate: number;
+    amount: number;
+  }>
+}
 
 export interface UserData {
   _id: string;
@@ -259,6 +318,21 @@ export interface GetUser {
   },
   image: File | string | null;
   created_at: string;
+  company?: [{
+    company_id: string;
+    company_name: string;
+    image: string;
+    address_1: string;
+    address_2: string;
+    pinCode: string;
+    state: string;
+    country: string;
+    is_selected: boolean,
+    phone: PhoneNumber;
+    email: string;
+    financial_year_start: string;
+    books_begin_from: string;
+  }]
 }
 
 export interface CreateUser {
@@ -268,36 +342,45 @@ export interface CreateUser {
 
 export interface GetCompany {
   _id: string,
+  name: string,
   user_id: string,
-  brand_name: string,
-  company_name: string,
-  phone?: PhoneNumber,
-  email?: string,
-  image?: File | string | null,
-  gstin?: string,
-  pan_number?: string,
-  business_type?: string,
-  website?: string,
-  alter_phone?: PhoneNumber,
-  billing?: GetBilling,
-  shipping?: ShippingAddress,
-  created_at?: string,
-  updated_at?: string,
+  mailing_name: string,
+  address_1: string,
+  address_2: string,
+  pinCode: string,
+  state: string,
+  country: string,
+  phone: PhoneNumber,
+  email: string,
+  financial_year_start: string,
+  books_begin_from: string,
+  image: string,
+  gstin: string,
+  pan: string,
+  is_selected: boolean,
+  website: string,
+  created_at: string,
+  updated_at: string,
 }
 
 export interface SetCompany {
   user_id: string,
-  brand_name: string,
-  company_name: string,
+  name: string,
+  mailing_name?: string,
+  address_1?: string,
+  address_2?: string,
+  pinCode?: string,
+  state: string,
+  country: string,
+  financial_year_start: string, // Use string for date format
+  books_begin_from: string, // Use string for date format
+  is_deleted: boolean,
   number?: string;
   code?: string;
-  alter_number?: string;
-  alter_code?: string;
   email?: string,
   image?: File | string | null,
   gstin?: string,
   pan_number?: string,
-  business_type?: string,
   website?: string,
 }
 
@@ -339,55 +422,214 @@ export interface ProductCreate {
 }
 
 export interface FormCreateProduct {
-  product_name: string;
-  selling_price: number;
-  unit?: string;
-  is_deleted?: boolean;
-  hsn_code?: string;
-  purchase_price?: number;
-  barcode?: string;
+  stock_item_name: string;
+  company_id: string;
+  unit: string;
+  _unit: string;
+  is_deleted: boolean;
+  alias_name?: string;
   category?: string;
-  description?: string;
-  opening_quantity?: number;
-  opening_purchase_price?: number;
-  opening_stock_value?: number;
-  low_stock_alert?: number;
-  show_active_stock?: boolean;
+  _category?: string;
+  group?: string;
+  _group?: string;
   image?: File | string;
+  description?: string;
+
+  opening_balance?: number;
+  opening_rate?: number;
+  opening_value?: number;
+  gst_nature_of_goods?: string;
+  gst_hsn_code?: string;
+  gst_taxability?: string;
+  gst_percentage?: string;
+
+  low_stock_alert?: number;
+}
+
+export interface ProductUpdate {
+  _id: string;
+  user_id: string;
+  stock_item_name: string;
+  company_id: string;
+  unit: string;
+  _unit: string;
+  is_deleted: boolean;
+  alias_name?: string;
+  category?: string;
+  _category?: string;
+  group?: string;
+  _group?: string;
+  image?: File | string | null;
+  description?: string;
+
+  opening_balance?: number;
+  opening_rate?: number;
+  opening_value?: number;
+  gst_nature_of_goods?: string;
+  gst_hsn_code?: string;
+  gst_taxability?: string;
+
+  low_stock_alert?: number;
+}
+
+export interface GetProduct {
+  _id: string;
+  stock_item_name: string;
+  user_id: string;
+  company_id: string
+  unit: string;
+  alias_name: string
+  image?: string;
+  description?: string;
+  gst_hsn_code?: string;
+  low_stock_alert?: number;
+  category?: string;
+  group?: string;
+
+  current_stock: number;
+  avg_purchase_rate: number;
+  purchase_qty: number;
+  purchase_value: number;
+  sales_qty: number;
+  sales_value: number;
+  // Optional fields
+  opening_balance?: number;
+  opening_rate?: number;
+  opening_value?: number;
+  gst_nature_of_goods?: string;
+  gst_taxability?: string;
+  created_at?: string;
+  updated_at?: string;
+
+  // Additonal Optional fields
+  // selling_price: number
+  // show_active_stock?: boolean;
+
+}
+
+export interface GetItem {
+  _id: string;
+  stock_item_name: string;
+  company_id: string;
+  user_id: string;
+  unit: string;
+  _unit: string;
+  alias_name: string;
+  category: string;
+  _category: string;
+  group: string;
+  _group: string;
+  image: File | string | null;
+  description: string;
+  gst_nature_of_goods: string;
+  gst_hsn_code: string;
+  gst_taxability: string;
+  low_stock_alert: number;
+  created_at: string;
+  updated_at: string;
+  current_stock: number;
+  avg_purchase_rate: number;
+  purchase_qty: number;
+  purchase_value: number;
+  sales_qty: number;
+  sales_value: number;
+  opening_balance: number;
+  opening_rate: number;
+  opening_value: number;
+}
+
+export interface GetInventoryGroups {
+  _id: string;
+  inventory_group_name: string;
+  user_id: string;
+  company_id: string;
+  image: string;
+  description: string;
+  is_deleted: boolean;
+  parent: string;
+  gst_nature_of_goods: string;
+  gst_hsn_code: string;
+  gst_taxability: string;
+  created_at: string;
+  updated_at: string;
 }
 
 
-export interface GetProduct {
-  // Required fields
-  _id: string
-  product_name: string
-  selling_price: number
-  user_id: string
+export interface UpdateInventoryGroup {
+  _id: string;
+  user_id: string;
+  inventory_group_name: string;
+  parent: string;
+  description: string;
+  image?: File | string;
   is_deleted: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
-  // Optional fields
-  unit?: string;
-  hsn_code?: string;
-  purchase_price?: number;
-  barcode?: string;
-  category?: string;
-  category_desc?: string;
-  image?: string;
-  description?: string;
-  opening_quantity?: number;
-  opening_purchase_price?: number;
-  opening_stock_value?: number;
 
-  // Additonal Optional fields
-  low_stock_alert?: number;
-  show_active_stock?: boolean;
+export interface GetAllVouchars {
+  _id: string;
+  date: string;
+  voucher_number: string;
+  voucher_type: string;
+  narration: string;
+  party_name: string;
+  created_at: string;
+  amount: number,
+  is_deemed_positive: boolean
+}
 
-  created_at?: string;
-  updated_at?: string;
+export interface GetAllAccountingGroups {
+  _id: string;
+  accounting_group_name: string;
+  user_id: string;
+  company_id: string;
+  description: string;
+  image: string;
+  is_deleted: false,
+  parent: string;
+  // is_revenue: false,
+  // is_deemedpositive: false,
+  // is_reserved: true,
+  // affects_gross_profit: false,
+  // sort_position: null,
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DefaultAccountingGroup {
+  _id: string;
+  accounting_group_name: string;
+  description: string;
+  parent: string;
+}
+
+export interface UpdateAccountingGroup {
+  _id: string;
+  user_id: string;
+  accounting_group_name: string;
+  parent: string;
+  description: string;
+  image?: File | string;
+  is_deleted: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GetAllInvoiceGroups {
+  _id: string;
+  name: string;
+  user_id: string | null,
+  company_id: string | null;
+  parent: string;
+  numbering_method: string;
+  // is_deemedpositive: boolean;
+  // affects_stock: boolean;
 }
 
 export interface CategoryCreate {
-  category_name: string;
+  name: string;
   user_id: string;
   image?: File | string;
   description?: string;
@@ -396,27 +638,40 @@ export interface CategoryCreate {
 
 export interface CategoryLists {
   _id: string;
+  under: string;
+  description: string;
   category_name: string;
 }
 
+export interface InventoryGroupList {
+  _id: string;
+  parent: string;
+  description: string;
+  inventory_group_name: string;
+}
+
 export interface GetCategory {
+  _id: string;
+  user_id: string;
   category_name: string;
-  created_at: string;
   description: string;
   image: string;
+  under: string;
   is_deleted: boolean;
+  created_at: string;
   updated_at: string;
-  user_id: string;
-  _id: string;
 }
 
 export interface UpdateCategory {
   _id: string;
   user_id: string;
-  is_deleted: boolean;
   category_name: string;
+  under: string;
   description: string;
   image?: File | string;
+  is_deleted: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Product {

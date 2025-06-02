@@ -50,29 +50,31 @@ export const viewAllProducts = createAsyncThunk(
   async (
     {
       searchQuery,
+      company_id,
       category,
       pageNumber,
       limit,
       sortField,
       sortOrder,
-      is_deleted,
+      // is_deleted,
     }: {
       searchQuery: string;
+      company_id: string;
       category: string;
       sortField: string;
       pageNumber: number;
       limit: number;
       sortOrder: string;
-      is_deleted: boolean;
+      // is_deleted: boolean;
     },
     { rejectWithValue }
   ) => {
     try {
       const response = await userApi.get(
-        `/product/view/all/product?search=${searchQuery}&category=${category}&is_deleted=${is_deleted}&page_no=${pageNumber}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"
+        `/product/view/all/product?company_id=${company_id}&search=${searchQuery}${category === 'All' ? "" : "&category=" + category}&page_no=${pageNumber}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"
         }`
       );
-      // console.log("viewAllProduct response", response.data);
+      console.log("viewAllProduct response", response.data);
 
       if (response.data.success === true) {
         const productsData = response.data.data.docs;
@@ -90,10 +92,10 @@ export const viewAllProducts = createAsyncThunk(
 
 export const viewProduct = createAsyncThunk(
   "view/product",
-  async (product_id: string, { rejectWithValue }) => {
+  async ({ product_id, company_id }: { product_id: string, company_id: string }, { rejectWithValue }) => {
     try {
-      const response = await userApi.get(`/product/get/product/${product_id}`);
-      // console.log("view Product response", response.data);
+      const response = await userApi.get(`/product/get/product/${product_id}?company_id=${company_id}`);
+      console.log("view Product response", response.data);
 
       if (response.data.success === true) {
         const product = response.data.data[0];
@@ -108,16 +110,36 @@ export const viewProduct = createAsyncThunk(
   }
 );
 
+export const getProduct = createAsyncThunk(
+  "view/product/detail",
+  async ({ product_id, company_id }: { product_id: string, company_id: string }, { rejectWithValue }) => {
+    try {
+      const response = await userApi.get(`/product/get/product/details/${product_id}?company_id=${company_id}`);
+      console.log("view Product response", response.data);
+
+      if (response.data.success === true) {
+        const item = response.data.data[0];
+        return { item };
+      } else return rejectWithValue("Login Failed: No access token recieved.");
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+        "Login failed: Invalid credentials or server error."
+      );
+    }
+  }
+);
+
 export const viewProductsWithId = createAsyncThunk(
   "view/products/withId",
-  async (productName: string, { rejectWithValue }) => {
+  async (company_id: string, { rejectWithValue }) => {
     try {
-      const response = await userApi.get(`/product/view/products/with_id?search=${productName}`);
+      const response = await userApi.get(`product/view/products/with_id?company_id=${company_id}`);
       // console.log("view Product response", response.data);
 
       if (response.data.success === true) {
-        const productsListing = response.data.data;
-        return { productsListing };
+        const itemsList = response.data.data;
+        return itemsList;
       } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {
       return rejectWithValue(
@@ -153,9 +175,9 @@ export const updateProduct = createAsyncThunk(
 
 export const deleteProduct = createAsyncThunk(
   "delete/product",
-  async (id: string, { rejectWithValue }) => {
+  async ({ id, company_id }: { id: string, company_id: string }, { rejectWithValue }) => {
     try {
-      const response = await userApi.delete(`/product/delete/product/${id}`);
+      const response = await userApi.delete(`/product/delete/product/${id}?company_id=${company_id}`);
       // console.log("deleteProduct response", response);
 
       if (response.data.success === true) {

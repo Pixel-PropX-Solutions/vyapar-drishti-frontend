@@ -177,7 +177,7 @@ const AboutPage: React.FC = () => {
         backgroundColor: isScrolling ? 'rgba(255, 255, 255, 0.9)' : 'transparent',
         backdropFilter: isScrolling ? 'blur(10px)' : 'none',
         boxShadow: isScrolling ? '0 4px 12px rgba(0, 0, 0, 0.1)' : 'none',
-        borderRadius: 2,
+        borderRadius: 1,
         mb: 4
       }}>
         <Grid container spacing={2} justifyContent="center" sx={{ p: 2 }}>
@@ -285,7 +285,7 @@ const AboutPage: React.FC = () => {
                     p: 3,
                     textAlign: 'center',
                     borderTop: `4px solid ${stat.color}`,
-                    borderRadius: 2,
+                    borderRadius: 1,
                     transition: 'transform 0.3s ease',
                     '&:hover': {
                       transform: 'translateY(-5px)'
@@ -323,7 +323,7 @@ const AboutPage: React.FC = () => {
                   sx={{
                     p: 4,
                     height: '100%',
-                    borderRadius: 3,
+                    borderRadius: 1,
                     transition: 'all 0.3s ease',
                     ':hover': {
                       transform: 'scale(1.03)',

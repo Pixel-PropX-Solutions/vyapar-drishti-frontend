@@ -95,7 +95,7 @@ function ColorModeIconDropdown(props: IconButtonOwnProps) {
             elevation: 2,
             sx: {
               minWidth: '200px',
-              borderRadius: 2,
+              borderRadius: 1,
               boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
             },
           },

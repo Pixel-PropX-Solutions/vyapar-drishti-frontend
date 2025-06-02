@@ -63,7 +63,7 @@ const ContactInfoCard: React.FC<{
                 mb: 2,
                 border: '1px solid',
                 borderColor: 'divider',
-                borderRadius: 2,
+                borderRadius: 1,
                 transition: 'all 0.3s ease',
                 '&:hover': {
                     boxShadow: 3,
@@ -80,7 +80,7 @@ const ContactInfoCard: React.FC<{
                             justifyContent: 'center',
                             width: 48,
                             height: 48,
-                            borderRadius: 2,
+                            borderRadius: 1,
                             bgcolor: 'primary.light',
                             color: 'primary.contrastText',
                             mr: 2
@@ -128,7 +128,7 @@ const OfficeHoursCard: React.FC = () => {
                 p: 2,
                 border: '1px solid',
                 borderColor: 'divider',
-                borderRadius: 2,
+                borderRadius: 1,
                 mt: 4
             }}
         >
@@ -458,7 +458,7 @@ const ContactPage: React.FC = () => {
                             elevation={0}
                             sx={{
                                 p: { xs: 3, md: 4 },
-                                borderRadius: 3,
+                                borderRadius: 1,
                                 height: '100%',
                                 border: '1px solid',
                                 borderColor: 'divider',
@@ -661,7 +661,7 @@ const ContactPage: React.FC = () => {
                             elevation={0}
                             sx={{
                                 p: { xs: 3, md: 4 },
-                                borderRadius: 3,
+                                borderRadius: 1,
                                 height: '100%',
                                 border: '1px solid',
                                 borderColor: 'divider',
@@ -763,7 +763,7 @@ const ContactPage: React.FC = () => {
                                     sx={{
                                         p: 3,
                                         height: '100%',
-                                        borderRadius: 2,
+                                        borderRadius: 1,
                                         border: '1px solid',
                                         borderColor: 'divider'
                                     }}

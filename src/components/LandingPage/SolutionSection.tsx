@@ -214,7 +214,7 @@ const SolutionSection = () => {
                                         sx={{
                                             p: 0,
                                             height: '100%',
-                                            borderRadius: 3,
+                                            borderRadius: 1,
                                             overflow: 'hidden',
                                             border: '1px solid',
                                             borderColor: activeFeature === index ? feature.color : 'divider',

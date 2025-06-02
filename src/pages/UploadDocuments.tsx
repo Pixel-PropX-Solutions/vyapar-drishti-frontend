@@ -28,7 +28,7 @@ import InfoIcon from "@mui/icons-material/Info";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import { DocumentUploadLoader } from "@/common/Loader";
 import userApi from "@/api/api";
-import { setInvoiceData } from "@/store/reducers/invoiceReducer";
+// import { setInvoiceData } from "@/store/reducers/invoiceReducer";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/store/store";
 import { useNavigate } from "react-router-dom";
@@ -307,7 +307,7 @@ export default function UploadDocuments() {
       if (response.data.success === true) {
         setUploadComplete(true);
         setError("");
-        dispatch(setInvoiceData(response.data.data));
+        // dispatch(setInvoiceData(response.data.data));
 
         // Give time for the AI thinking indicator to show its completion message
         setTimeout(() => {
@@ -353,7 +353,7 @@ export default function UploadDocuments() {
           padding: 4,
           width: "100%",
           border: dragOver ? "2px dashed #1976d2" : "2px dashed #a0a0a0",
-          borderRadius: 2,
+          borderRadius: 1,
           transition: "all 0.3s ease",
           transform: dragOver ? "scale(1.02)" : "scale(1)",
           position: 'relative',

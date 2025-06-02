@@ -107,7 +107,7 @@ const BenefitsSection: React.FC = () => {
                                 display: 'flex',
                                 alignItems: 'flex-start',
                                 p: 2,
-                                borderRadius: 2,
+                                borderRadius: 1,
                                 '&:hover': {
                                     bgcolor: 'rgba(46, 125, 50, 0.05)'
                                 }

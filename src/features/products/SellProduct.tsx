@@ -156,7 +156,7 @@
 //       <Card
 //         elevation={2}
 //         sx={{
-//           borderRadius: 2,
+//           borderRadius: 1,
 //           background: theme.palette.mode === 'light' ?
 //             "linear-gradient(135deg, #ffffff 0%, #f9fdff 100%)" : "linear-gradient(135deg,rgb(30, 30, 30) 0%,rgb(40, 40, 40) 100%)",
 //           boxShadow: "0 8px 16px rgba(0,0,0,0.05)"
@@ -177,7 +177,7 @@
 //                   py: 8,
 //                   px: 3,
 //                   bgcolor: theme.palette.mode === "light" ? "#f8fbff" : '#000000',
-//                   borderRadius: 2,
+//                   borderRadius: 1,
 //                   border: "1px dashed #ccc"
 //                 }}
 //               >
@@ -193,7 +193,7 @@
 //                   startIcon={<AddCircleOutlineIcon />}
 //                   onClick={handleOpenModal}
 //                   sx={{
-//                     borderRadius: 2,
+//                     borderRadius: 1,
 //                     px: 3,
 //                     py: 1,
 //                   }}
@@ -209,7 +209,7 @@
 //                     bgcolor: "transparent",
 //                     boxShadow: "none",
 //                     border: "1px solid #e0e0e0",
-//                     borderRadius: 2,
+//                     borderRadius: 1,
 //                     overflow: "hidden"
 //                   }}
 //                 >

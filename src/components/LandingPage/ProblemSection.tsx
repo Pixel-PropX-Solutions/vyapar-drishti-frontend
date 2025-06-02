@@ -489,7 +489,7 @@ const ProblemSection: React.FC = () => {
               sx={{ 
                 px: 4, 
                 py: 1.5,
-                borderRadius: 2,
+                borderRadius: 1,
                 fontSize: '1rem',
                 fontWeight: 500,
                 boxShadow: '0 4px 14px rgba(46, 125, 50, 0.4)',

@@ -14,6 +14,6 @@ export enum ROLE_ENUM {
 
 export enum ENUM_ENTITY {
     COMPANY = "company",
-    CREDITOR = "creditor",
+    CREDITOR = "customer",
     DEBITOR = 'debitor',
 };

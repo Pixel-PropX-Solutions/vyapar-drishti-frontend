@@ -28,7 +28,7 @@ export const InfoRow: React.FC<{
                 py: 2,
                 px: 1,
                 mb: 1,
-                borderRadius: 2,
+                borderRadius: 1,
                 background: hovered
                     ? `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.primary.main, 0.02)} 100%)`
                     : `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.8)} 0%, ${alpha(theme.palette.background.paper, 0.4)} 100%)`,

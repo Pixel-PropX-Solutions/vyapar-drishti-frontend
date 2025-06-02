@@ -154,7 +154,7 @@ const ProblemSolutionTimeline = () => {
                             sx={{
                                 width: '100%',
                                 maxWidth: '500px',
-                                borderRadius: 2,
+                                borderRadius: 1,
                                 position: 'relative',
                                 overflow: 'hidden',
                                 cursor: 'pointer',

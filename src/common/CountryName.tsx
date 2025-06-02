@@ -77,7 +77,7 @@ const CountryName: React.FC<CountryNameProps> = ({ handleInputChange, value, hel
                     }}
                     sx={{
                         '& .MuiOutlinedInput-root': {
-                            borderRadius: 2,
+                            borderRadius: 1,
                             backgroundColor: focusedField === 'country'
                                 ? alpha(theme.palette.primary.main, 0.02)
                                 : alpha(theme.palette.background.paper, 0.5),
@@ -96,7 +96,7 @@ const CountryName: React.FC<CountryNameProps> = ({ handleInputChange, value, hel
                         PaperProps: {
                             sx: {
                                 maxHeight: 300,
-                                borderRadius: 2,
+                                borderRadius: 1,
                                 boxShadow: `0 20px 60px ${alpha(theme.palette.common.black, 0.15)}`,
                                 backdropFilter: 'blur(20px)',
                                 border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,

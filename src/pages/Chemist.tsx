@@ -40,7 +40,7 @@
 // } from "@mui/icons-material";
 // import { useDispatch, useSelector } from "react-redux";
 // import { AppDispatch, RootState } from "@/store/store";
-// import { viewAllChemist } from "@/services/creditors";
+// import { viewAllChemist } from "@/services/customers";
 // import { Chemist, Name, SortField, SortOrder } from "@/utils/types";
 // import { useNavigate } from "react-router-dom";
 

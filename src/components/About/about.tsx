@@ -177,7 +177,7 @@ const AboutPage: React.FC = () => {
         backgroundColor: isScrolling ? 'rgba(255, 255, 255, 0.9)' : 'transparent',
         backdropFilter: isScrolling ? 'blur(10px)' : 'none',
         boxShadow: isScrolling ? '0 4px 12px rgba(0, 0, 0, 0.1)' : 'none',
-        borderRadius: 2,
+        borderRadius: 1,
         mb: 4
       }}>
         <Grid container spacing={2} justifyContent="center" sx={{ p: 2 }}>
@@ -295,7 +295,7 @@ const AboutPage: React.FC = () => {
                     p: 3,
                     textAlign: 'center',
                     borderTop: `4px solid ${stat.color}`,
-                    borderRadius: 2,
+                    borderRadius: 1,
                     transition: 'transform 0.3s ease',
                     '&:hover': {
                       transform: 'translateY(-5px)'
@@ -334,7 +334,7 @@ const AboutPage: React.FC = () => {
                     height: '100%',
                     display: 'flex',
                     flexDirection: 'column',
-                    borderRadius: 3,
+                    borderRadius: 1,
                     transition: 'all 0.3s ease',
                     ':hover': {
                       transform: 'translateY(-8px)',
@@ -522,7 +522,7 @@ const AboutPage: React.FC = () => {
                   sx={{
                     p: 4,
                     height: '100%',
-                    borderRadius: 3,
+                    borderRadius: 1,
                     transition: 'all 0.3s ease',
                     ':hover': {
                       transform: 'scale(1.03)',
@@ -772,7 +772,7 @@ export default AboutPage;
 //             sx={{
 //               p: 2,
 //               bgcolor: alpha(theme.palette.background.default, 0.5),
-//               borderRadius: 2,
+//               borderRadius: 1,
 //               border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
 //             }}
 //           >
@@ -849,7 +849,7 @@ export default AboutPage;
 //         py: 2,
 //         px: 1,
 //         mb: 1,
-//         borderRadius: 2,
+//         borderRadius: 1,
 //         background: hovered
 //           ? `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.primary.main, 0.02)} 100%)`
 //           : `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.8)} 0%, ${alpha(theme.palette.background.paper, 0.4)} 100%)`,
@@ -1147,7 +1147,7 @@ export default AboutPage;
 //     <Card
 //       elevation={0}
 //       sx={{
-//         borderRadius: 2,
+//         borderRadius: 1,
 //         m: 0,
 //         p: 1,
 //         background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)} 0%, ${alpha(theme.palette.background.paper, 0.6)} 100%)`,
@@ -1254,7 +1254,7 @@ export default AboutPage;
 //           <Paper
 //             elevation={0}
 //             sx={{
-//               borderRadius: 3,
+//               borderRadius: 1,
 //               bgcolor: alpha(theme.palette.background.paper, 0.8),
 //               backdropFilter: "blur(20px)",
 //             }}
@@ -1763,7 +1763,7 @@ export default AboutPage;
 //                           sx={{
 //                             p: 2.5,
 //                             textAlign: 'center',
-//                             borderRadius: 3,
+//                             borderRadius: 1,
 //                             background: `linear-gradient(135deg, ${alpha(stat.color, 0.1)} 0%, ${alpha(stat.color, 0.05)} 100%)`,
 //                             border: `1px solid ${alpha(stat.color, 0.2)}`,
 //                             transition: "all 0.3s ease",
@@ -1816,7 +1816,7 @@ export default AboutPage;
 //                         sx={{
 //                           mb: 2,
 //                           "& .MuiOutlinedInput-root": {
-//                             borderRadius: 3,
+//                             borderRadius: 1,
 //                           }
 //                         }}
 //                       />
@@ -1833,7 +1833,7 @@ export default AboutPage;
 //                         elevation={0}
 //                         sx={{
 //                           p: 3,
-//                           borderRadius: 3,
+//                           borderRadius: 1,
 //                           bgcolor: alpha(theme.palette.success.main, 0.05),
 //                           border: `1px solid ${alpha(theme.palette.success.main, 0.2)}`,
 //                         }}
@@ -1843,7 +1843,7 @@ export default AboutPage;
 //                             <Box
 //                               sx={{
 //                                 p: 1.5,
-//                                 borderRadius: 2,
+//                                 borderRadius: 1,
 //                                 bgcolor: alpha(theme.palette.success.main, 0.1),
 //                                 color: theme.palette.success.main,
 //                                 mr: 2,
@@ -1878,7 +1878,7 @@ export default AboutPage;
 //                           <ListItem
 //                             key={index}
 //                             sx={{
-//                               borderRadius: 2,
+//                               borderRadius: 1,
 //                               mb: 1,
 //                               bgcolor: session.current ? alpha(theme.palette.primary.main, 0.05) : 'transparent',
 //                               border: session.current ? `1px solid ${alpha(theme.palette.primary.main, 0.2)}` : 'none',

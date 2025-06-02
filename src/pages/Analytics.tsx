@@ -126,7 +126,7 @@
 //           color: "#000",
 //           zIndex: 4,
 //           padding: "10px",
-//           borderRadius: 2,
+//           borderRadius: 1,
 //           width: "900px",
 //           height: "600px",
 //           overflowY: "scroll",
@@ -176,7 +176,7 @@
 //                 width: "100%",
 //                 height: "fit-content",
 //                 cursor: "pointer",
-//                 borderRadius: 2,
+//                 borderRadius: 1,
 //                 ":hover": {
 //                   background: "hsla(220, 20%, 88%, .3)",
 //                   border: `1px solid hsl(220, 20%, 80%)`,
@@ -217,7 +217,7 @@
 //                 width: "100%",
 //                 height: "fit-content",
 //                 cursor: "pointer",
-//                 borderRadius: 2,
+//                 borderRadius: 1,
 
 //                 border: `1px solid #fff`,
 //                 boxShadow:

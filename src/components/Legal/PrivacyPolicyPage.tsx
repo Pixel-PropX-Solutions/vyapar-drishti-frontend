@@ -139,7 +139,7 @@ const PrivacyPolicyPage: React.FC = () => {
               elevation={2} 
               sx={{ 
                 p: 2, 
-                borderRadius: 2,
+                borderRadius: 1,
                 position: 'sticky',
                 top: 80
               }}
@@ -270,7 +270,7 @@ const PrivacyPolicyPage: React.FC = () => {
                     { title: 'Legal compliance', description: 'To comply with applicable laws, regulations, and legal processes' }
                   ].map((item, index) => (
                     <Grid item xs={12} sm={6} key={index}>
-                      <Box sx={{ p: 2, border: 1, borderColor: 'divider', borderRadius: 2, height: '100%' }}>
+                      <Box sx={{ p: 2, border: 1, borderColor: 'divider', borderRadius: 1, height: '100%' }}>
                         <Typography variant="subtitle1" fontWeight="medium" gutterBottom>
                           {item.title}
                         </Typography>
@@ -421,7 +421,7 @@ const PrivacyPolicyPage: React.FC = () => {
                   { right: 'Objection', description: 'Object to processing of your data' }
                 ].map((item, index) => (
                   <Grid item xs={12} sm={6} md={4} key={index}>
-                    <Box sx={{ p: 2, border: 1, borderColor: 'primary.light', borderRadius: 2, bgcolor: 'background.paper', height: '100%' }}>
+                    <Box sx={{ p: 2, border: 1, borderColor: 'primary.light', borderRadius: 1, bgcolor: 'background.paper', height: '100%' }}>
                       <Typography variant="subtitle1" fontWeight="medium" gutterBottom color="primary">
                         {item.right}
                       </Typography>
@@ -491,7 +491,7 @@ const PrivacyPolicyPage: React.FC = () => {
                 If you have any questions, concerns, or requests regarding this privacy policy or our privacy practices, please contact us at:
               </Typography>
               
-              <Box sx={{ p: 3, border: 1, borderColor: 'divider', borderRadius: 2, mb: 3, bgcolor: 'background.paper' }}>
+              <Box sx={{ p: 3, border: 1, borderColor: 'divider', borderRadius: 1, mb: 3, bgcolor: 'background.paper' }}>
                 <Typography variant="subtitle1" fontWeight="medium" gutterBottom>
                   Our Data Protection Officer
                 </Typography>

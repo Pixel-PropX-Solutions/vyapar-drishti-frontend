@@ -24,6 +24,7 @@ import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CategoryIcon from "@mui/icons-material/Category";
 import { GetProduct } from "@/utils/types";
+import { RestartAlt } from "@mui/icons-material";
 
 interface DeletedProductRowProps {
     product: GetProduct;
@@ -61,8 +62,8 @@ export const DeletedProductRow: React.FC<DeletedProductRowProps> = ({ product, o
         return colors[index];
     };
 
-    const profit = (product.selling_price - (product.purchase_price || 0));
-    const profitMargin = product.purchase_price ? ((profit / product.selling_price) * 100) : 0;
+    // const profit = (product.selling_price - (product.purchase_price || 0));
+    // const profitMargin = product.purchase_price ? ((profit / product.selling_price) * 100) : 0;
 
     return (
         <>
@@ -91,16 +92,16 @@ export const DeletedProductRow: React.FC<DeletedProductRowProps> = ({ product, o
                                     width: 48,
                                     height: 48,
                                     mr: 2,
-                                    bgcolor: getAvatarColor(product.product_name),
+                                    bgcolor: getAvatarColor(product.name),
                                     fontSize: '1rem',
                                     fontWeight: 700,
-                                    boxShadow: `0 4px 12px ${alpha(getAvatarColor(product.product_name), 0.3)}`,
+                                    boxShadow: `0 4px 12px ${alpha(getAvatarColor(product.name), 0.3)}`,
                                     transition: 'all 0.3s ease',
                                     transform: isHovered ? 'scale(1.1)' : 'scale(1)',
                                 }}
                                 src={product?.image ? product.image : ''}
                             >
-                                {(getInitials(product.product_name))}
+                                {(getInitials(product.name))}
                             </Avatar>
                             <Box sx={{ flex: 1 }}>
                                 <Typography
@@ -113,7 +114,7 @@ export const DeletedProductRow: React.FC<DeletedProductRowProps> = ({ product, o
                                         transition: 'color 0.3s ease',
                                     }}
                                 >
-                                    {product.product_name}
+                                    {product.name}
                                 </Typography>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                     <Chip
@@ -147,7 +148,7 @@ export const DeletedProductRow: React.FC<DeletedProductRowProps> = ({ product, o
                                         color: theme.palette.text.secondary,
                                     }}
                                 >
-                                    {product.barcode ? (`#${product.barcode}`) : "No Barcode"}
+                                    {product.gst_hsn_code ? (`#${product.gst_hsn_code}`) : "No Barcode"}
                                 </Typography>
                             </Box>
                         </Box>
@@ -155,7 +156,7 @@ export const DeletedProductRow: React.FC<DeletedProductRowProps> = ({ product, o
                     <TableCell align="right" sx={{ px: 1 }}>
                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                <CurrencyRupeeIcon sx={{ fontSize: '1.1rem', mr: 0.5, color: theme.palette.success.main }} />
+                                {product?.sales_value !== 0 && <CurrencyRupeeIcon sx={{ fontSize: '1.1rem', mr: 0.5, color: theme.palette.success.main }} />}
                                 <Typography
                                     variant="h6"
                                     sx={{
@@ -164,10 +165,10 @@ export const DeletedProductRow: React.FC<DeletedProductRowProps> = ({ product, o
                                         color: theme.palette.success.main,
                                     }}
                                 >
-                                    {product.selling_price.toFixed(2)}
+                                    {product?.sales_value !== 0 ? product?.sales_value : 'No Sales Yet'}
                                 </Typography>
                             </Box>
-                            {profitMargin > 0 && (
+                            {/* {profitMargin > 0 && (
                                 <Typography
                                     variant="caption"
                                     sx={{
@@ -178,14 +179,14 @@ export const DeletedProductRow: React.FC<DeletedProductRowProps> = ({ product, o
                                 >
                                     {profitMargin.toFixed(1)}% margin
                                 </Typography>
-                            )}
+                            )} */}
                         </Box>
                     </TableCell>
 
                     {/* Purchase Price */}
                     <TableCell align="right" sx={{ px: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                            <CurrencyRupeeIcon sx={{ fontSize: '1rem', mr: 0.5, color: theme.palette.text.secondary }} />
+                            {product?.purchase_value !== 0 && <CurrencyRupeeIcon sx={{ fontSize: '1rem', mr: 0.5, color: theme.palette.text.secondary }} />}
                             <Typography
                                 variant="h6"
                                 sx={{
@@ -194,7 +195,7 @@ export const DeletedProductRow: React.FC<DeletedProductRowProps> = ({ product, o
                                     color: theme.palette.text.primary,
                                 }}
                             >
-                                {(product?.purchase_price ?? 0).toFixed(2)}
+                                {(product?.purchase_value !== 0 ? product?.purchase_value : 'No Purchase Yet')}
                             </Typography>
                         </Box>
                     </TableCell>
@@ -202,7 +203,7 @@ export const DeletedProductRow: React.FC<DeletedProductRowProps> = ({ product, o
                     {/* Actions */}
                     <TableCell align="center" >
                         <Zoom in={isHovered} timeout={200}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
                                 <Tooltip title="View Details" arrow>
                                     <IconButton
                                         size="small"
@@ -223,6 +224,27 @@ export const DeletedProductRow: React.FC<DeletedProductRowProps> = ({ product, o
                                         <VisibilityIcon fontSize="small" />
                                     </IconButton>
                                 </Tooltip>
+                               
+                                <Tooltip title="Restore Item" arrow>
+                                    <IconButton
+                                        size="small"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            // onView(product);
+                                        }}
+                                        sx={{
+                                            bgcolor: alpha(theme.palette.error.main, 0.1),
+                                            color: theme.palette.error.main,
+                                            transition: 'all 0.3s ease',
+                                            '&:hover': {
+                                                bgcolor: alpha(theme.palette.error.main, 0.2),
+                                                transform: 'scale(1.1)',
+                                            },
+                                        }}
+                                    >
+                                        <RestartAlt fontSize="small" />
+                                    </IconButton>
+                                </Tooltip>
                             </Box>
                         </Zoom>
                     </TableCell>
@@ -235,7 +257,7 @@ export const DeletedProductRow: React.FC<DeletedProductRowProps> = ({ product, o
                 aria-labelledby="delete-dialog-title"
                 PaperProps={{
                     sx: {
-                        borderRadius: 3,
+                        borderRadius: 1,
                         boxShadow: `0 24px 50px ${alpha(theme.palette.error.main, 0.2)}`,
                     }
                 }}
@@ -251,14 +273,14 @@ export const DeletedProductRow: React.FC<DeletedProductRowProps> = ({ product, o
                     }}
                 >
                     <DeleteIcon />
-                    Delete {product.product_name}?
+                    Delete {product.name}?
                 </DialogTitle>
                 <DialogContent>
                     <Alert severity="warning" sx={{ mb: 2 }}>
                         This action cannot be undone. The product will be permanently removed from your inventory.
                     </Alert>
                     <Typography>
-                        Are you sure you want to delete "<strong>{product.product_name}</strong>"?
+                        Are you sure you want to delete "<strong>{product.name}</strong>"?
                     </Typography>
                 </DialogContent>
                 <DialogActions sx={{ p: 3, gap: 1 }}>

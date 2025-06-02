@@ -4,8 +4,8 @@ import ProductIcon from "@mui/icons-material/LocalPharmacyOutlined";
 import QuantityIcon from "@mui/icons-material/LocalOffer";
 import ExpiryIcon from "@mui/icons-material/CalendarToday";
 import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
-import { OrderStatus, ProductSortField, SortOrder } from "./types";
-import { LocalShipping, Cancel, CheckCircle, ReceiptLong } from '@mui/icons-material';
+import { ProductSortField, SortOrder } from "./types";
+// import { LocalShipping, Cancel, CheckCircle, ReceiptLong } from '@mui/icons-material';
 import ImageIcon from '@mui/icons-material/Image';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
@@ -156,30 +156,30 @@ export const getFileTypeIcon = (file: File) => {
   return <AttachFileIcon sx={{ margin: "0 10px" }} />;
 };
 
-// Status chip color mapping
-export const getStatusColor = (status: OrderStatus) => {
-  switch (status) {
-    case OrderStatus.PENDING:
-      return 'warning';
-    case OrderStatus.SHIPPED:
-      return 'success';
-    case OrderStatus.CANCELLED:
-      return 'error';
-    default:
-      return 'default';
-  }
-};
+// // Status chip color mapping
+// export const getStatusColor = (status: OrderStatus) => {
+//   switch (status) {
+//     case OrderStatus.PENDING:
+//       return 'warning';
+//     case OrderStatus.SHIPPED:
+//       return 'success';
+//     case OrderStatus.CANCELLED:
+//       return 'error';
+//     default:
+//       return 'default';
+//   }
+// };
 
-// Status icon mapping
-export const getStatusIcon = (status: OrderStatus) => {
-  switch (status) {
-    case OrderStatus.PENDING:
-      return <ReceiptLong />;
-    case OrderStatus.SHIPPED:
-      return <LocalShipping />;
-    case OrderStatus.CANCELLED:
-      return <Cancel />;
-    default:
-      return <CheckCircle />;
-  }
-};
+// // Status icon mapping
+// export const getStatusIcon = (status: OrderStatus) => {
+//   switch (status) {
+//     case OrderStatus.PENDING:
+//       return <ReceiptLong />;
+//     case OrderStatus.SHIPPED:
+//       return <LocalShipping />;
+//     case OrderStatus.CANCELLED:
+//       return <Cancel />;
+//     default:
+//       return <CheckCircle />;
+//   }
+// };

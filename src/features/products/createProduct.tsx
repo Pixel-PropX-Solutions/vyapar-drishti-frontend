@@ -133,7 +133,7 @@ export default function CreateProduct() {
         ))}
       </Stepper>
 
-      <Card elevation={2} sx={{ borderRadius: 2, mb: 4 }}>
+      <Card elevation={2} sx={{ borderRadius: 1, mb: 4 }}>
         <CardContent sx={{ p: 4 }}>
           <Box
             component="form"

@@ -6,9 +6,9 @@ import { alpha, Theme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
-import AppNavbar from "@/components/AppNavbar";
-import Header from "@/components/Header";
-import SideMenu from "@/components/SideMenu";
+import AppNavbar from "@/components/MaterialUI/AppNavbar";
+import Header from "@/components/MaterialUI/Header";
+import SideMenu from "@/components/MaterialUI/SideMenu";
 import AppTheme from "@/theme/AppTheme";
 import {
   chartsCustomizations,

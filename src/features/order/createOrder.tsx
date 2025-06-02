@@ -141,7 +141,7 @@
 //                 sx={{
 //                     p: { xs: 2, sm: 4 },
 //                     my: 4,
-//                     borderRadius: 2,
+//                     borderRadius: 1,
 //                     background: theme.palette.background.paper,
 //                 }}
 //             >

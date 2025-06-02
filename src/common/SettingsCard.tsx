@@ -21,7 +21,7 @@ export const SettingsCard: React.FC<{ title: string; children: React.ReactNode; 
     <Card
       elevation={0}
       sx={{
-        borderRadius: 2,
+        borderRadius: 1,
         m: 0,
         p: 1,
         background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)} 0%, ${alpha(theme.palette.background.paper, 0.6)} 100%)`,

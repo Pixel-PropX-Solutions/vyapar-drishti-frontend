@@ -27,6 +27,9 @@ import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import CategoryIcon from "@mui/icons-material/Category";
 import { GetProduct } from "@/utils/types";
+import { viewProduct } from "@/services/products";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
 
 interface ProductRowProps {
     product: GetProduct;
@@ -39,6 +42,8 @@ interface ProductRowProps {
 
 export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdit, onView, index }) => {
     const theme = useTheme();
+    const dispatch = useDispatch<AppDispatch>();
+    const { currentCompany } = useSelector((state: RootState) => state.auth)
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
 
@@ -48,6 +53,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
     };
 
     const getInitials = (name: string): string => {
+        if (!name) return '';
         return name
             .split(' ')
             .map(word => word.charAt(0))
@@ -61,7 +67,8 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
             '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
             '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
         ];
-        const index = name.length % colors.length;
+        const safeName = name || '';
+        const index = safeName.length % colors.length;
         return colors[index];
     };
 
@@ -71,9 +78,9 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
         return { label: 'In Stock', color: 'success' as const, icon: <TrendingUpIcon fontSize="small" /> };
     };
 
-    const stockStatus = getStockStatus(product?.opening_quantity || 0);
-    const profit = (product.selling_price - (product.purchase_price || 0));
-    const profitMargin = product.purchase_price ? ((profit / product.selling_price) * 100) : 0;
+    const stockStatus = getStockStatus(product?.current_stock || 0);
+    const profit = (product.sales_value / product.sales_qty - (product.purchase_value / product.purchase_qty));
+    const profitMargin = product.purchase_value ? ((profit / (product.sales_value / product.sales_qty)) * 100) : 0;
 
     return (
         <>
@@ -102,16 +109,16 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                                     width: 48,
                                     height: 48,
                                     mr: 2,
-                                    bgcolor: getAvatarColor(product.product_name),
+                                    bgcolor: getAvatarColor(product.stock_item_name),
                                     fontSize: '1rem',
                                     fontWeight: 700,
-                                    boxShadow: `0 4px 12px ${alpha(getAvatarColor(product.product_name), 0.3)}`,
+                                    boxShadow: `0 4px 12px ${alpha(getAvatarColor(product.stock_item_name), 0.3)}`,
                                     transition: 'all 0.3s ease',
                                     transform: isHovered ? 'scale(1.1)' : 'scale(1)',
                                 }}
                                 src={product?.image ? product.image : ''}
                             >
-                                {(getInitials(product.product_name))}
+                                {(getInitials(product.stock_item_name))}
                             </Avatar>
                             <Box sx={{ flex: 1 }}>
                                 <Typography
@@ -124,7 +131,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                                         transition: 'color 0.3s ease',
                                     }}
                                 >
-                                    {product.product_name}
+                                    {product.stock_item_name}
                                 </Typography>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                     <Chip
@@ -157,7 +164,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                                     color: theme.palette.text.primary,
                                 }}
                             >
-                                {product.opening_quantity}
+                                {product.current_stock || 'Purchase to Stock'}
                             </Typography>
                             <Chip
                                 icon={stockStatus.icon}
@@ -185,7 +192,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                                         color: theme.palette.text.secondary,
                                     }}
                                 >
-                                    {product.barcode ? (`#${product.barcode}`) : ('No Barcode')}
+                                    {product.gst_hsn_code ? (`#${product.gst_hsn_code}`) : ('No HSN/SAC Code')}
                                 </Typography>
                             </Box>
                         </Box>
@@ -202,7 +209,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                                         color: theme.palette.success.main,
                                     }}
                                 >
-                                    {product.selling_price.toFixed(2)}
+                                    {product.sales_value || 'No Sales yet'}
                                 </Typography>
                             </Box>
                             {profitMargin > 0 && (
@@ -232,7 +239,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                                     color: theme.palette.text.primary,
                                 }}
                             >
-                                {(product?.purchase_price ?? 0).toFixed(2)}
+                                {(product?.purchase_value || 'No Purchase yet')}
                             </Typography>
                         </Box>
                     </TableCell>
@@ -265,9 +272,10 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                                 <Tooltip title="Edit Product" arrow>
                                     <IconButton
                                         size="small"
-                                        onClick={(e) => {
+                                        onClick={async (e) => {
                                             e.stopPropagation();
                                             onEdit(product);
+                                            dispatch(viewProduct({ product_id: product._id, company_id: currentCompany?._id ?? '' }));
                                         }}
                                         sx={{
                                             bgcolor: alpha(theme.palette.warning.main, 0.1),
@@ -315,7 +323,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                 aria-labelledby="delete-dialog-title"
                 PaperProps={{
                     sx: {
-                        borderRadius: 3,
+                        borderRadius: 1,
                         boxShadow: `0 24px 50px ${alpha(theme.palette.error.main, 0.2)}`,
                     }
                 }}
@@ -331,14 +339,14 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                     }}
                 >
                     <DeleteIcon />
-                    Delete {product.product_name}?
+                    Delete {product.stock_item_name}?
                 </DialogTitle>
                 <DialogContent>
                     <Alert severity="warning" sx={{ mb: 2 }}>
                         This action cannot be undone. The product will be permanently removed from your inventory.
                     </Alert>
                     <Typography>
-                        Are you sure you want to delete "<strong>{product.product_name}</strong>"?
+                        Are you sure you want to delete "<strong>{product.stock_item_name}</strong>"?
                     </Typography>
                 </DialogContent>
                 <DialogActions sx={{ p: 3, gap: 1 }}>

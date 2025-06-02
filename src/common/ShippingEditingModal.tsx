@@ -455,14 +455,14 @@ const ShippingEditingModal: React.FC<EditShippingModalProps> = ({
                                     width: 60,
                                     height: 4,
                                     backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                                    borderRadius: 2,
+                                    borderRadius: 1,
                                     overflow: 'hidden'
                                 }}>
                                     <Box sx={{
                                         width: `${completionPercentage}%`,
                                         height: '100%',
                                         backgroundColor: theme.palette.primary.main,
-                                        borderRadius: 2,
+                                        borderRadius: 1,
                                         transition: 'width 0.3s ease'
                                     }} />
                                 </Box>
@@ -517,7 +517,7 @@ const ShippingEditingModal: React.FC<EditShippingModalProps> = ({
                             mb: 3,
                             background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.secondary.main, 0.03)} 100%)`,
                             border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-                            borderRadius: 3,
+                            borderRadius: 1,
                             overflow: 'hidden',
                             position: 'relative',
                             '&::before': {
@@ -534,7 +534,7 @@ const ShippingEditingModal: React.FC<EditShippingModalProps> = ({
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                                     <Box sx={{
                                         p: 1.5,
-                                        borderRadius: 2,
+                                        borderRadius: 1,
                                         backgroundColor: alpha(theme.palette.primary.main, 0.1),
                                         display: 'flex',
                                         alignItems: 'center',
@@ -562,7 +562,7 @@ const ShippingEditingModal: React.FC<EditShippingModalProps> = ({
                             elevation={0}
                             sx={{
                                 p: { xs: 3, sm: 4 },
-                                borderRadius: 3,
+                                borderRadius: 1,
                                 background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)} 0%, ${alpha(theme.palette.background.paper, 0.7)} 100%)`,
                                 border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
                                 position: 'relative',
@@ -631,7 +631,7 @@ const ShippingEditingModal: React.FC<EditShippingModalProps> = ({
                                             }}
                                             sx={{
                                                 '& .MuiOutlinedInput-root': {
-                                                    borderRadius: 2,
+                                                    borderRadius: 1,
                                                     backgroundColor: focusedField === field.key
                                                         ? alpha(theme.palette.primary.main, 0.02)
                                                         : alpha(theme.palette.background.paper, 0.5),
@@ -704,7 +704,7 @@ const ShippingEditingModal: React.FC<EditShippingModalProps> = ({
                                     }}
                                     sx={{
                                         '& .MuiOutlinedInput-root': {
-                                            borderRadius: 2,
+                                            borderRadius: 1,
                                             backgroundColor: focusedField === 'notes'
                                                 ? alpha(theme.palette.primary.main, 0.02)
                                                 : alpha(theme.palette.background.paper, 0.5),
@@ -748,7 +748,7 @@ const ShippingEditingModal: React.FC<EditShippingModalProps> = ({
                                         sx={{
                                             textTransform: 'none',
                                             fontWeight: 600,
-                                            borderRadius: 2,
+                                            borderRadius: 1,
                                             px: 3,
                                             py: 1.5,
                                             borderColor: alpha(theme.palette.secondary.main, 0.3),
@@ -777,7 +777,7 @@ const ShippingEditingModal: React.FC<EditShippingModalProps> = ({
                                         sx={{
                                             textTransform: 'none',
                                             fontWeight: 600,
-                                            borderRadius: 2,
+                                            borderRadius: 1,
                                             px: 4,
                                             py: 1.5,
                                             background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
@@ -810,7 +810,7 @@ const ShippingEditingModal: React.FC<EditShippingModalProps> = ({
                             mt: 3,
                             background: `linear-gradient(135deg, ${alpha(theme.palette.info.main, 0.05)} 0%, ${alpha(theme.palette.info.light, 0.03)} 100%)`,
                             border: `1px solid ${alpha(theme.palette.info.main, 0.1)}`,
-                            borderRadius: 2,
+                            borderRadius: 1,
                         }}>
                             <CardContent sx={{ p: 2 }}>
                                 <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>

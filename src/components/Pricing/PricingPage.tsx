@@ -345,7 +345,7 @@ const PricingPage: React.FC = () => {
                       fullWidth
                       sx={{ 
                         py: 1.5, 
-                        borderRadius: 2,
+                        borderRadius: 1,
                         background: plan.highlighted 
                           ? `linear-gradient(45deg, ${plan.color} 30%, ${plan.color}99 90%)` 
                           : 'transparent',

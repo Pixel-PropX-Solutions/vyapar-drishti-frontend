@@ -12,13 +12,18 @@ import {
   alpha,
   Grid,
   Stack,
-  SpeedDial,
-  SpeedDialAction,
-  SpeedDialIcon,
   Tabs,
   Tab,
   FormControlLabel,
   Switch,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableSortLabel,
+  Tooltip,
 } from "@mui/material";
 import {
   useColorScheme,
@@ -26,23 +31,13 @@ import {
 import {
   Email as EmailIcon,
   Phone as PhoneIcon,
-  Language as WebsiteIcon,
   SecurityOutlined,
-  // Check,
   Settings,
   Person,
   AccessTime,
-  Share,
-  Download,
-  Refresh,
-  ContactSupport,
   DeleteForever,
   Password,
-  AddLocation,
   BusinessSharp,
-  AccountBalance,
-  BadgeOutlined,
-  AddBusiness,
   Palette,
   Brightness4,
   Brightness7,
@@ -53,34 +48,35 @@ import {
   Summarize,
   NotificationAdd,
   Colorize,
+  Contacts,
 } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import EditUserModal from "@/features/profile/EditUserModal";
 import { getCurrentUser } from "@/services/auth";
-import { getCompany } from "@/services/company";
+import { getAllCompanies } from "@/services/company";
 import { formatDatewithTime } from "@/utils/functions";
 import CompanyEditingModal from "@/common/CompanyEditingModal";
 import { InfoRow } from "@/common/InfoRow";
 import { SettingsCard } from "@/common/SettingsCard";
 import { ProfileHeader } from "@/common/ProfileHeader";
-import BillingEditingModal from "@/common/BillingEditingModal";
-import ShippingEditingModal from "@/common/ShippingEditingModal";
-import { ENUM_ENTITY } from "@/utils/enums";
+import { CompanyRow } from "@/common/CompanyRow";
+import { GetCompany } from "@/utils/types";
+import { useNavigate } from "react-router-dom";
 
 // Main Enhanced Component
 const ProfilePage: React.FC = () => {
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const { mode, setMode } = useColorScheme();
 
   const { user } = useSelector((state: RootState) => state.auth)
-  const { company } = useSelector((state: RootState) => state.company)
+  const { companies } = useSelector((state: RootState) => state.company)
 
   const [isUserEditing, setIsUserEditing] = useState(false);
   const [isCompanyEditing, setIsCompanyEditing] = useState(false);
-  const [isBillingEditing, setIsBillingEditing] = useState(false);
-  const [isShippingEditing, setIsShippingEditing] = useState(false);
+  const [editingCompany, setEditingCompany] = useState(null as GetCompany | null);
   const [darkMode, setDarkMode] = useState(false);
   // const [notifications, setNotifications] = useState({
   //   email: true,
@@ -88,33 +84,55 @@ const ProfilePage: React.FC = () => {
   //   sms: true,
   // });
   const [tabValue, setTabValue] = useState(0);
-  const [speedDialOpen, setSpeedDialOpen] = useState(false);
-
-  const speedDialActions = [
-    { icon: <Download />, name: 'Download Profile', action: () => console.log('Download') },
-    { icon: <Share />, name: 'Share Profile', action: () => console.log('Share') },
-    { icon: <Refresh />, name: 'Refresh Data', action: () => console.log('Refresh') },
-    { icon: <ContactSupport />, name: 'Get Help', action: () => console.log('Help') },
-  ];
+ 
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    // if (newValue === 1) {
-    //   // dispatch(getCompany());
-    // }
+
     setTabValue(newValue);
   };
+
+
+  const handleDelete = (company_id: string) => {
+    console.log("Delete company with ID:", company_id);
+    // dispatch(
+    //   deleteProduct(productId)
+    // )
+    //   .unwrap()
+    //   .then(() => {
+    //     setRefreshKey((prev) => prev + 1);
+    //     setLoading(false);
+    //     toast.success('Product deleted successfully')
+    //   });
+  };
+
+  const handleEdit = (company: GetCompany) => {
+    setIsCompanyEditing(true);
+    setEditingCompany(company);
+  };
+
+  const handleView = (company: GetCompany) => {
+    navigate(`/company/${company._id}`);
+  };
+
 
   const fetchUserData = () => {
     dispatch(getCurrentUser());
   }
+
   const fetchCompanyData = () => {
-    dispatch(getCompany());
+    dispatch(getAllCompanies());
   }
+
+
 
   const fetchCompleteData = () => {
     fetchUserData();
     fetchCompanyData();
   }
+
+  React.useEffect(() => {
+    fetchCompanyData();
+  }, []);
 
   return (
     <Box
@@ -131,14 +149,8 @@ const ProfilePage: React.FC = () => {
           {/* Enhanced Profile Header */}
           <ProfileHeader
             user={user}
-            company={company}
-            tabValue={tabValue}
             onEditToggle={() => {
-              if (tabValue !== 1) {
-                setIsUserEditing(!isUserEditing);
-              } else {
-                setIsCompanyEditing(!isCompanyEditing);
-              }
+              setIsUserEditing(!isUserEditing);
             }}
           />
 
@@ -146,7 +158,7 @@ const ProfilePage: React.FC = () => {
           <Paper
             elevation={0}
             sx={{
-              borderRadius: 3,
+              borderRadius: 1,
               bgcolor: alpha(theme.palette.background.paper, 0.8),
               backdropFilter: "blur(20px)",
             }}
@@ -356,272 +368,108 @@ const ProfilePage: React.FC = () => {
           )}
 
           {tabValue === 1 && (
-            (!company || Object.keys(company).length === 0) ? (
+            (companies.length < 1) ? (
               <Box sx={{ width: '100%', p: 4, textAlign: 'center' }}>
                 <Typography variant="h5" color="text.secondary" sx={{ mb: 2 }}>
                   No company data found.
                 </Typography>
                 <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-                  Please create your company profile to get started.
+                  Please create your first company profile to get started.
                 </Typography>
                 <Button
                   variant="contained"
                   color="primary"
                   onClick={() => setIsCompanyEditing(true)}
                 >
-                  Create Company Data
+                  Create Company
                 </Button>
               </Box>
             ) : (
-              <Grid container gap={2} sx={{ mt: 2 }}>
-                <Grid item xs={12} lg={4}>
-                  <SettingsCard title="Company Information" icon={<BusinessSharp />}>
-                    <Stack spacing={2}>
-                      <InfoRow
-                        icon={<EmailIcon />}
-                        label="Email Address"
-                        value={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            {company?.email || 'Not provided'}
-                          </Box>
+              <TableContainer
+                component={Paper}
+                elevation={0}
+                sx={{
+                  width: '100%',
+                  borderRadius: 1,
+                  border: `1px solid ${alpha(theme.palette.divider, 1)}`,
+                  boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
+                  // overflow: 'hidden',
+                }}
+              >
+                <Table sx={{ width: '100%' }}>
+                  <TableHead>
+                    <TableRow
+                      sx={{
+                        bgcolor: alpha(theme.palette.grey[50], 0.8),
+                        width: '100%',
+                        '& .MuiTableCell-head': {
+                          borderBottom: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
                         }
-                      />
-                      <InfoRow
-                        icon={<PhoneIcon />}
-                        label="Phone Number"
-                        value={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            {company?.phone?.code || ''} {" "}
-                            {company?.phone?.number || 'Not provided'}
-                          </Box>
-                        }
-                      />
-                      <InfoRow
-                        icon={<AccountBalance />}
-                        label="GST Number"
-                        value={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            {company?.gstin || 'Not provided'}
-                          </Box>
-                        }
-                      />
-                      <InfoRow
-                        icon={<BadgeOutlined />}
-                        label="PAN Number"
-                        value={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            {company?.pan_number || 'Not provided'}
-                          </Box>
-                        }
-                      />
-                      <InfoRow
-                        icon={<WebsiteIcon />}
-                        label="Website"
-                        value={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            {company?.website || 'Not provided'}
-                          </Box>
-                        }
-                      />
-                      <InfoRow
-                        icon={<AccessTime />}
-                        label="Member Since"
-                        value={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            {formatDatewithTime(company?.created_at ?? '')}
-                          </Box>
-                        }
-                      />
-                    </Stack>
-                  </SettingsCard>
-                </Grid>
-                <Grid item xs={12} lg={7}>
-                  <SettingsCard title="Address Details" icon={<AddLocation />}>
-                    <Stack spacing={3} sx={{ p: 1 }}>
-                      <Box>
-                        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, textDecoration: "underline", textUnderlineOffset: "4px" }}>
-                          Billing Address
+                      }}
+                    >
+                      <TableCell sx={{ pl: 3, pr: 1 }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                          Company Information
                         </Typography>
-                        <Paper elevation={0} sx={{ p: 3, borderRadius: 1, bgcolor: mode === 'light' ? alpha(theme.palette.success.main, 0.05) : alpha(theme.palette.success.light, 0.1), border: `1px solid ${alpha(theme.palette.success.main, 0.5)}` }}>
-                          {
-                            company?.billing ? (
-                              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                                {company.billing.address_1
-                                  ? company.billing.address_1
-                                  : <span style={{ color: '#aaa' }}>Address 1 not provided</span>}
-                                {company.billing.address_2
-                                  ? `, ${company.billing.address_2}`
-                                  : ''}
-                                {company.billing.city
-                                  ? `, ${company.billing.city}`
-                                  : ''}
-                                {company.billing.state
-                                  ? `, ${company.billing.state}`
-                                  : ''}
-                                {company.billing.country
-                                  ? `, ${company.billing.country}`
-                                  : ''}
-                                {company.billing.pinCode
-                                  ? ` - ${company.billing.pinCode}`
-                                  : ''}
-                                {
-                                  !company.billing.address_1 &&
-                                  !company.billing.address_2 &&
-                                  !company.billing.city &&
-                                  !company.billing.state &&
-                                  !company.billing.country &&
-                                  !company.billing.pinCode && (
-                                    <span style={{ color: '#aaa' }}>No billing address provided</span>
-                                  )
-                                }
-                              </Typography>
-                            ) : (
-                              <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#aaa' }}>
-                                No billing address provided
-                              </Typography>
-                            )
-                          }
-                          <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mt: 2 }}>
-                            <Box display="flex" alignItems="center">
-                              <Box
-                                sx={{
-                                  p: 1,
-                                  borderRadius: 1,
-                                  bgcolor: mode === 'light' ? alpha(theme.palette.success.main, 0.1) : alpha(theme.palette.success.light, 0.1),
-                                  color: mode === 'light' ? theme.palette.success.main : theme.palette.success.light,
-                                  mr: 2,
-                                }}
-                              >
-                                <AddBusiness />
-                              </Box>
-                              <Box>
-                                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                                  Want to Change Your Billing Address?
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  Update your billing address to ensure accurate invoicing.
-                                </Typography>
-                              </Box>
-                            </Box>
-                            <Box display="flex" alignItems="center" justifyContent="center" >
-                              <Button
-                                variant="contained"
-                                color="success"
-                                onClick={() => setIsBillingEditing(true)}
-                                startIcon={<AddBusiness />}
-                                sx={{
-                                  background: mode === 'light' ? alpha(theme.palette.success.main, 0.5) : alpha(theme.palette.success.light, 0.5),
-                                  "&:hover": {
-                                    background: mode === 'light' ? alpha(theme.palette.success.main, 1) : alpha(theme.palette.success.light, 1),
-                                  },
-                                  fontWeight: 600,
-                                  whiteSpace: "nowrap",
-                                  px: 3,
-                                }}
-                              >
-                                Change
-                              </Button>
-                            </Box>
-                          </Box>
-                        </Paper>
-                      </Box>
-
-                      <Divider sx={{ my: 1 }} />
-
-                      <Box>
-                        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, textDecoration: "underline", textUnderlineOffset: "4px" }}>
-                          Shipping Address
-                        </Typography>
-                        <Paper elevation={0} sx={{ p: 3, borderRadius: 1, bgcolor: mode === 'light' ? alpha(theme.palette.secondary.main, 0.05) : alpha(theme.palette.secondary.light, 0.1), border: `1px solid ${alpha(theme.palette.secondary.main, 0.5)}` }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
-                            {company?.shipping?.title ? company?.shipping?.title : 'No Shipping Title Provided'}
+                      </TableCell>
+                      <TableCell align="center" sx={{ px: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                          <Contacts fontSize="small" />
+                          <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                            Contact Information
                           </Typography>
-                          {
-                            company?.shipping ? (
-                              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                                {company.shipping.address_1
-                                  ? company.shipping.address_1
-                                  : <span style={{ color: '#aaa' }}>Address 1 not provided</span>}
-                                {company.shipping.address_2
-                                  ? `, ${company.shipping.address_2}`
-                                  : ''}
-                                {company.shipping.city
-                                  ? `, ${company.shipping.city}`
-                                  : ''}
-                                {company.shipping.state
-                                  ? `, ${company.shipping.state}`
-                                  : ''}
-                                {company.shipping.country
-                                  ? `, ${company.shipping.country}`
-                                  : ''}
-                                {company.shipping.pinCode
-                                  ? ` - ${company.shipping.pinCode}`
-                                  : ''}
-                                {
-                                  !company.shipping.address_1 &&
-                                  !company.shipping.address_2 &&
-                                  !company.shipping.city &&
-                                  !company.shipping.state &&
-                                  !company.shipping.country &&
-                                  !company.shipping.pinCode && (
-                                    <span style={{ color: '#aaa' }}>No shipping address provided</span>
-                                  )
-                                }
-                              </Typography>
-                            ) : (
-                              <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#aaa' }}>
-                                No shipping address provided
-                              </Typography>
-                            )
-                          }
-                          <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ mt: 2 }}>
-                            <Box display="flex" alignItems="center">
-                              <Box
-                                sx={{
-                                  p: 1,
-                                  borderRadius: 1,
-                                  bgcolor: mode === 'light' ? alpha(theme.palette.secondary.main, 0.1) : alpha(theme.palette.secondary.light, 0.1),
-                                  color: mode === 'light' ? theme.palette.secondary.main : theme.palette.secondary.light,
-                                  mr: 2,
-                                }}
-                              >
-                                <AddBusiness />
-                              </Box>
-                              <Box>
-                                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                                  Want to Change Your Shipping Address?
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  Update your shipping address to ensure timely deliveries.
-                                </Typography>
-                              </Box>
-                            </Box>
-                            <Box display="flex" alignItems="center" justifyContent="center" >
-                              <Button
-                                variant="contained"
-                                color="secondary"
-                                onClick={() => setIsShippingEditing(true)}
-                                startIcon={<AddBusiness />}
-                                sx={{
-                                  background: mode === 'light' ? alpha(theme.palette.secondary.main, 0.5) : alpha(theme.palette.secondary.light, 0.5),
-                                  "&:hover": {
-                                    background: mode === 'light' ? alpha(theme.palette.secondary.main, 1) : alpha(theme.palette.secondary.light, 1),
-                                  },
-                                  fontWeight: 600,
-                                  whiteSpace: "nowrap",
-                                  px: 3,
-                                }}
-                              >
-                                Change
-                              </Button>
-                            </Box>
-                          </Box>
-                        </Paper>
-                      </Box>
-                    </Stack>
-                  </SettingsCard>
-                </Grid>
-              </Grid>
+                        </Box>
+                      </TableCell>
+                      <TableCell align="right" sx={{ px: 1 }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                          Financial Year
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="right" sx={{ px: 1 }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                          Legal Information
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center" sx={{ px: 1 }}>
+                        <Tooltip title="Sort by Date Created" arrow>
+                          <TableSortLabel
+                          // active={sortBy === "purchase_price"}
+                          // direction={sortBy === "purchase_price" ? sortOrder : "asc"}
+                          // onClick={() => {
+                          //   setData((prevState) => ({
+                          //     ...prevState,
+                          //     sortBy: "purchase_price",
+                          //     sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
+                          //   }));
+                          // }}
+                          >
+                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                              Created on
+                            </Typography>
+                          </TableSortLabel>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell align="center" >
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                          Company Actions
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {(Array.isArray(companies) ? companies : []).map((com, index) => (
+                      <CompanyRow
+                        key={com._id}
+                        com={com}
+                        onDelete={handleDelete}
+                        onEdit={handleEdit}
+                        onView={handleView}
+                        index={index}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             ))}
 
           {tabValue === 2 && (
@@ -836,29 +684,6 @@ const ProfilePage: React.FC = () => {
           )}
         </Stack>
 
-        {/* Floating Action Button */}
-        <SpeedDial
-          ariaLabel="Profile Actions"
-          sx={{ position: 'fixed', bottom: 24, right: 24 }}
-          icon={<SpeedDialIcon />}
-          open={speedDialOpen}
-          onClose={() => setSpeedDialOpen(false)}
-          onOpen={() => setSpeedDialOpen(true)}
-        >
-          {speedDialActions.map((action) => (
-            <SpeedDialAction
-              key={action.name}
-              icon={action.icon}
-              tooltipTitle={action.name}
-              onClick={() => {
-                action.action();
-                setSpeedDialOpen(false);
-              }}
-            />
-          ))}
-        </SpeedDial>
-
-
       </Container>
       <EditUserModal
         open={isUserEditing}
@@ -875,31 +700,7 @@ const ProfilePage: React.FC = () => {
         onClose={() => {
           setIsCompanyEditing(false);
         }}
-        company={company}
-        onUpdated={async () => {
-          fetchCompleteData();
-        }}
-      />
-      <BillingEditingModal
-        entity_id={company?._id || ''}
-        entity_type={ENUM_ENTITY.COMPANY}
-        open={isBillingEditing}
-        onClose={() => {
-          setIsBillingEditing(false);
-        }}
-        billing={company?.billing ?? null}
-        onUpdated={async () => {
-          fetchCompleteData();
-        }}
-      />
-      <ShippingEditingModal
-        open={isShippingEditing}
-        onClose={() => {
-          setIsShippingEditing(false);
-        }}
-        entity_type={ENUM_ENTITY.COMPANY}
-        shipping={company?.shipping ?? null}
-        entity_id={company?._id || ''}
+        company={editingCompany}
         onUpdated={async () => {
           fetchCompleteData();
         }}

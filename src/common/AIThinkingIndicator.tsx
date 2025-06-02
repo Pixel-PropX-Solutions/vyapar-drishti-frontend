@@ -118,7 +118,7 @@ export const AIThinkingIndicator: React.FC<AIThinkingIndicatorProps> = ({
           width: '100%',
           maxWidth: 400,
           p: 3,
-          borderRadius: 2,
+          borderRadius: 1,
           background: theme.palette.background.paper,
           border: `1px solid ${theme.palette.divider}`,
           boxShadow: showResponse 
@@ -173,10 +173,10 @@ export const AIThinkingIndicator: React.FC<AIThinkingIndicatorProps> = ({
                 value={((currentStage + 1) / thinkingStages.length) * 100}
                 sx={{
                   height: 6,
-                  borderRadius: 3,
+                  borderRadius: 1,
                   backgroundColor: theme.palette.grey[200],
                   '& .MuiLinearProgress-bar': {
-                    borderRadius: 3,
+                    borderRadius: 1,
                     backgroundImage: `linear-gradient(45deg, 
                       ${theme.palette.primary.main} 25%, 
                       ${theme.palette.primary.light} 50%, 

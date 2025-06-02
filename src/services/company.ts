@@ -5,7 +5,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 export const createCompany = createAsyncThunk(
   "company/create",
   async (
-    {  data }: {  data: FormData },
+    data: FormData,
     { rejectWithValue }
   ) => {
     try {
@@ -48,6 +48,26 @@ export const getCompany = createAsyncThunk(
   }
 );
 
+export const getAllCompanies = createAsyncThunk(
+  "get/all/company",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await userApi.get('/user/all/company',);
+      console.log("getAllCompanies response", response.data);
+
+      if (response.data.success) {
+        const companies = response.data.data;
+        return { companies };
+      } else return rejectWithValue(" No access token recieved.");
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+        "Invalid credentials or server error."
+      );
+    }
+  }
+);
+
 
 export const updateCompany = createAsyncThunk(
   "update/company",
@@ -75,7 +95,7 @@ export const updateCompany = createAsyncThunk(
 export const createCompanyBilling = createAsyncThunk(
   "create/company/billing",
   async (
-    {  data }: {  data: FormData },
+    { data }: { data: FormData },
     { rejectWithValue }
   ) => {
     try {
@@ -123,7 +143,7 @@ export const updateCompanyBilling = createAsyncThunk(
 export const createCompanyShipping = createAsyncThunk(
   "create/company/shipping",
   async (
-    {  data }: {  data: FormData },
+    { data }: { data: FormData },
     { rejectWithValue }
   ) => {
     try {

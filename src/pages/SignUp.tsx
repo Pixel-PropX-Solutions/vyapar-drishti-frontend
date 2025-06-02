@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Box, Grid } from "@mui/material";
 import centerImage from "../assets/4.jpeg";
-import Logo1 from "../assets/1.svg";
+import Logo1 from "../assets/1.png";
 import Logo2 from "../assets/2.png";
 import Logo3 from "../assets/3.png";
-import Logo4 from "../assets/4.gif";
+import Logo4 from "../assets/4.png";
 import Logo5 from "../assets/5.png";
 import Logo6 from "../assets/6.png";
+import Logo7 from "../assets/7.png";
 import Logo from "../assets/Logo.png";
 import RegistrationForm from "@/features/auth/components/RegisterForm";
 
@@ -19,7 +20,7 @@ const SignUpPage: React.FC = () => {
 
   useEffect(() => {
     const calculatePaths = () => {
-      if (logoRefs.current.length >= 7) {
+      if (logoRefs.current.length >= 8) {
         const positions = logoRefs.current.map((ref) => {
           if (ref) {
             const rect = ref.getBoundingClientRect();
@@ -28,11 +29,11 @@ const SignUpPage: React.FC = () => {
           return { x: 0, y: 0 };
         });
 
-        const newPaths = positions.slice(0, 6).map((pos, index) => {
+        const newPaths = positions.slice(0, 7).map((pos, index) => {
           const x1 = pos.x;
           const y1 = pos.y;
-          const x2 = positions[6].x;
-          const y2 = positions[6].y;
+          const x2 = positions[7].x;
+          const y2 = positions[7].y;
 
           let controlX1 = 0, controlY1 = 0, controlX2 = 0, controlY2 = 0;
           if (index === 0) {
@@ -42,10 +43,12 @@ const SignUpPage: React.FC = () => {
           } else if (index === 2) {
             controlX1 = (x1 + x2) / 2; controlY1 = y1 - 10; controlX2 = (x1 + x2) / 2; controlY2 = y2 - 50;
           } else if (index === 3) {
-            controlX1 = (x1 + x2) / 2; controlY1 = y1 - 10; controlX2 = (x1 + x2) / 2; controlY2 = y2 + 50;
+            return `M ${x1} ${y1} L ${x2} ${y2}`;
           } else if (index === 4) {
-            controlX1 = (x1 + x2) / 2; controlY1 = y1 - 10; controlX2 = (x1 + x2) / 2; controlY2 = y2 + 100;
+            controlX1 = (x1 + x2) / 2; controlY1 = y1 - 10; controlX2 = (x1 + x2) / 2; controlY2 = y2 + 50;
           } else if (index === 5) {
+            controlX1 = (x1 + x2) / 2; controlY1 = y1 - 10; controlX2 = (x1 + x2) / 2; controlY2 = y2 + 100;
+          } else if (index === 6) {
             controlX1 = (x1 + x2) / 2; controlY1 = y1 - 10; controlX2 = (x1 + x2) / 2; controlY2 = y2 + 190;
           }
           return `M ${x1} ${y1} C ${controlX1} ${controlY1}, ${controlX2} ${controlY2}, ${x2} ${y2}`;
@@ -64,10 +67,10 @@ const SignUpPage: React.FC = () => {
         return { x: 0, y: 0 };
       });
 
-      const x1 = positions[6].x;
-      const y1 = positions[6].y;
-      const x2 = positions[7].x;
-      const y2 = positions[7].y;
+      const x1 = positions[7].x;
+      const y1 = positions[7].y;
+      const x2 = positions[8].x;
+      const y2 = positions[8].y;
 
       const controlX1 = (x1 + x2) / 2;
       const controlY1 = y1 + 60;
@@ -207,7 +210,7 @@ const SignUpPage: React.FC = () => {
               flexDirection: "column",
             }}
           >
-            {[Logo1, Logo2, Logo3, Logo4, Logo5, Logo6].map((logo, index) => (
+            {[Logo1, Logo2, Logo3, Logo4, Logo5, Logo6, Logo7].map((logo, index) => (
               <img
                 key={index}
                 src={logo}
@@ -231,7 +234,7 @@ const SignUpPage: React.FC = () => {
             <img
               src={Logo}
               alt="Logo"
-              ref={(el) => (logoRefs.current[6] = el)}
+              ref={(el) => (logoRefs.current[7] = el)}
               style={{
                 borderRadius: "50%",
                 margin: "5px",
@@ -254,7 +257,7 @@ const SignUpPage: React.FC = () => {
             <img
               src={centerImage}
               alt="Logo"
-              ref={(el) => (logoRefs.current[7] = el)}
+              ref={(el) => (logoRefs.current[8] = el)}
               style={{
                 position: "absolute",
                 top: "50%",

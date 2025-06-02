@@ -27,8 +27,6 @@ import {
   LinearProgress,
   Badge,
   Container,
-  // Breadcrumbs,
-  // Link,
   Collapse,
   List,
   ListItem,
@@ -46,8 +44,6 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
 import HistoryIcon from "@mui/icons-material/History";
 import InfoIcon from "@mui/icons-material/Info";
-// import HomeIcon from "@mui/icons-material/Home";
-// import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import ShareIcon from "@mui/icons-material/Share";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
@@ -61,10 +57,10 @@ import TimelineIcon from "@mui/icons-material/Timeline";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
-import { deleteProduct, viewProduct } from "@/services/products";
-import { GetProduct } from "@/utils/types";
+import { deleteProduct, getProduct, viewProduct } from "@/services/products";
+import { GetItem, GetProduct, ProductUpdate } from "@/utils/types";
 import toast from "react-hot-toast";
-// import UpdateProduct from "./UpdateProduct";
+import { formatDate } from "@/utils/functions";
 import ProductsSideModal from "./ProductsSideModal";
 
 interface HistoryEntry {
@@ -78,45 +74,53 @@ interface HistoryEntry {
 export default function ViewItem() {
   const { id } = useParams<{ id: string }>();
   const theme = useTheme();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   // const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  // const [_openEditProductModal, setOpenEditProductModal] =
-  //   useState<boolean>(false);
-  const { product } = useSelector((state: RootState) => state.product);
+  const { item } = useSelector((state: RootState) => state.product);
+  const { currentCompany } = useSelector((state: RootState) => state.auth);
   const [activeTab, setActiveTab] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
+  // const [isBookmarked, setIsBookmarked] = useState(false);
   const [showCopySnackbar, setShowCopySnackbar] = useState(false);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [drawer, setDrawer] = useState<boolean>(false);
-  const [selectedProduct, setSelectedProduct] = useState<GetProduct | null>(
+  const [selectedProduct, setSelectedProduct] = useState<ProductUpdate | null>(
     null
   );
 
-  const [data, setData] = useState<GetProduct>({
-    _id: "",
-    product_name: "",
-    selling_price: 0,
-    user_id: "",
-    is_deleted: false,
-    unit: "",
-    hsn_code: "",
-    purchase_price: 0,
-    barcode: "",
+  const [data, setData] = useState<GetItem>({
+    company_id: "",
+    _unit: "",
+    alias_name: "",
     category: "",
+    _category: "",
+    group: "",
+    _group: "",
     image: "",
     description: "",
-    opening_quantity: 0,
-    opening_purchase_price: 0,
-    opening_stock_value: 0,
+    gst_nature_of_goods: "",
+    gst_hsn_code: "",
+    gst_taxability: "",
     low_stock_alert: 0,
-    show_active_stock: true,
     created_at: "",
     updated_at: "",
+    current_stock: 0,
+    avg_purchase_rate: 0,
+    purchase_qty: 0,
+    purchase_value: 0,
+    sales_qty: 0,
+    sales_value: 0,
+    _id: "",
+    stock_item_name: "",
+    user_id: "",
+    unit: "",
+    opening_balance: 0,
+    opening_rate: 0,
+    opening_value: 0,
   });
 
   // Enhanced history data with types
@@ -153,10 +157,10 @@ export default function ViewItem() {
 
   // Calculate stock status
   const getStockStatus = () => {
-    const quantity = data.opening_quantity || 1;
-    const alertLevel = data.low_stock_alert || 1;
+    const quantity = data.current_stock ?? 0;
+    const alertLevel = data.low_stock_alert || 3;
 
-    if (quantity === 0)
+    if (quantity < 1)
       return {
         status: "Out of Stock",
         color: "error",
@@ -180,7 +184,7 @@ export default function ViewItem() {
   useEffect(() => {
     const fetchProduct = async () => {
       setIsLoading(true);
-      dispatch(viewProduct(id ?? ""))
+      dispatch(getProduct({ product_id: id ?? '', company_id: currentCompany?._id ?? '' }))
         .unwrap()
         .then(() => {
           setIsLoading(false);
@@ -190,22 +194,13 @@ export default function ViewItem() {
         });
     };
     fetchProduct();
-  }, [id, dispatch, refreshKey]);
+  }, [id, dispatch, refreshKey, currentCompany?._id]);
 
   useEffect(() => {
-    if (product) {
-      setData(product);
+    if (item) {
+      setData(item);
     }
-  }, [product]);
-
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-IN", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
+  }, [item]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     console.log(event);
@@ -214,7 +209,7 @@ export default function ViewItem() {
 
   const handleEdit = () => {
     setDrawer(true);
-    setSelectedProduct(product);
+    // setSelectedProduct(item);
     // setOpenEditProductModal(true);
   };
 
@@ -222,12 +217,12 @@ export default function ViewItem() {
     setOpenDeleteDialog(true);
   };
 
-  const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
-    toast.success(
-      isBookmarked ? "Removed from bookmarks" : "Added to bookmarks"
-    );
-  };
+  // const handleBookmark = () => {
+  //   setIsBookmarked(!isBookmarked);
+  //   toast.success(
+  //     isBookmarked ? "Removed from bookmarks" : "Added to bookmarks"
+  //   );
+  // };
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -240,17 +235,17 @@ export default function ViewItem() {
   };
 
   const confirmDelete = () => {
-    toast.promise(
-      dispatch(deleteProduct(data._id)).then(() => {
-        setOpenDeleteDialog(false);
-        navigate("/products");
-      }),
-      {
-        loading: "Deleting product...",
-        success: <b>Product deleted successfully!</b>,
-        error: <b>Failed to delete product. Please try again.</b>,
-      }
-    );
+    // toast.promise(
+    //   dispatch(deleteProduct(data._id)).then(() => {
+    //     setOpenDeleteDialog(false);
+    //     navigate("/products");
+    //   }),
+    //   {
+    //     loading: "Deleting product...",
+    //     success: <b>Product deleted successfully!</b>,
+    //     error: <b>Failed to delete product. Please try again.</b>,
+    //   }
+    // );
   };
 
   const getHistoryIcon = (type: string) => {
@@ -279,13 +274,13 @@ export default function ViewItem() {
           variant="rectangular"
           width="100%"
           height={60}
-          sx={{ borderRadius: 2, mb: 2 }}
+          sx={{ borderRadius: 1, mb: 2 }}
         />
         <Skeleton
           variant="rectangular"
           width="100%"
           height={200}
-          sx={{ borderRadius: 2, mb: 3 }}
+          sx={{ borderRadius: 1, mb: 3 }}
         />
         <Grid container spacing={3}>
           <Grid item xs={12} md={5}>
@@ -326,7 +321,7 @@ export default function ViewItem() {
           >
             <Typography variant="body2">
               <strong>{stockStatus.status}:</strong> Only{" "}
-              {data.opening_quantity} units remaining
+              {data.current_stock} units remaining
             </Typography>
           </Alert>
         </Fade>
@@ -338,7 +333,7 @@ export default function ViewItem() {
           elevation={0}
           sx={{
             mb: 3,
-            borderRadius: 3,
+            borderRadius: 1,
             border: `1px solid ${theme.palette.divider}`,
             background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.default} 100%)`,
             transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -359,7 +354,7 @@ export default function ViewItem() {
             >
               <Box sx={{ display: "flex", alignItems: "center", flex: 1 }}>
                 <Avatar
-                  src={data?.image}
+                  src={typeof data?.image === "string" && data.image ? data.image : undefined}
                   sx={{
                     width: 60,
                     height: 60,
@@ -368,7 +363,7 @@ export default function ViewItem() {
                     boxShadow: theme.shadows[4],
                   }}
                 >
-                  {data?.image ?? (
+                  {!data?.image && (
                     <MedicationIcon sx={{ fontSize: 40, color: "white" }} />
                   )}
                 </Avatar>
@@ -385,7 +380,7 @@ export default function ViewItem() {
                       mb: 1,
                     }}
                   >
-                    {data.product_name}
+                    {data.stock_item_name}
                   </Typography>
                   <Box
                     sx={{
@@ -424,13 +419,13 @@ export default function ViewItem() {
                     <ShareIcon />
                   </IconButton>
                 </Tooltip>
-                <Tooltip
+                {/* <Tooltip
                   title={isBookmarked ? "Remove Bookmark" : "Add Bookmark"}
                 >
                   <IconButton onClick={handleBookmark} color="primary">
                     {isBookmarked ? <BookmarkIcon /> : <BookmarkBorderIcon />}
                   </IconButton>
-                </Tooltip>
+                </Tooltip> */}
               </Box>
             </Box>
 
@@ -442,7 +437,7 @@ export default function ViewItem() {
                 justifyContent: "space-between",
                 p: 2,
                 bgcolor: "background.default",
-                borderRadius: 2,
+                borderRadius: 1,
                 mb: 2,
               }}
             >
@@ -458,8 +453,9 @@ export default function ViewItem() {
                     display: "flex",
                     alignItems: "center",
                   }}
-                >
-                  <CurrencyRupeeIcon /> {data.selling_price}
+                >{data.sales_qty > 0 ? <>
+                  <CurrencyRupeeIcon /> {data.sales_value}
+                </> : 'No Sale Yet'}
                 </Typography>
               </Box>
               <Box sx={{ textAlign: "right" }}>
@@ -467,7 +463,9 @@ export default function ViewItem() {
                   Purchase Price
                 </Typography>
                 <Typography variant="h6" color="text.primary">
-                  ₹{data.purchase_price}
+                  {data.purchase_qty > 0 ? <>
+                    ₹{data.purchase_value}
+                  </> : "No Purchase Yet"}
                 </Typography>
               </Box>
             </Box>
@@ -518,7 +516,7 @@ export default function ViewItem() {
               elevation={0}
               sx={{
                 height: "100%",
-                borderRadius: 3,
+                borderRadius: 1,
                 border: `1px solid ${theme.palette.divider}`,
                 transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                 "&:hover": {
@@ -577,12 +575,12 @@ export default function ViewItem() {
                       }}
                     >
                       <img
-                        src={data?.image}
-                        alt={data.product_name}
+                        src={typeof data?.image === "string" ? data.image : undefined}
+                        alt={data.stock_item_name}
                         style={{
                           width: "100%",
                           height: "100%",
-                          objectFit: "cover",
+                          objectFit: "contain",
                           borderRadius: "12px 12px 0 0",
                         }}
                       />
@@ -592,7 +590,7 @@ export default function ViewItem() {
                 </Box>
                 {/* Floating Stock Badge */}
                 <Badge
-                  badgeContent={`${data.opening_quantity} units`}
+                  badgeContent={`${data.current_stock} units`}
                   color={stockStatus.color as any}
                   sx={{
                     position: "absolute",
@@ -620,18 +618,21 @@ export default function ViewItem() {
                         p: 2,
                         textAlign: "center",
                         bgcolor: "background.default",
-                        borderRadius: 2,
+                        borderRadius: 1,
                       }}
                     >
                       <TrendingUpIcon color="success" sx={{ mb: 1 }} />
                       <Typography variant="h6" color="success.main">
-                        ₹{" "}
-                        {(
-                          ((data.selling_price - (data?.purchase_price ?? 0)) /
-                            (data?.purchase_price ?? 1)) *
-                          100
-                        ).toFixed(1)}
-                        %
+                        {data.sales_qty > 0 ? <>
+                          ₹{" "}
+                          {(
+                            ((data.sales_value ?? 0 - (data?.purchase_value ?? 0)) /
+                              (data?.purchase_value ?? 1)) *
+                            100
+                          ).toFixed(1)}
+                          %
+                        </> : "No Sale yet"}
+
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
                         Profit Margin
@@ -645,12 +646,16 @@ export default function ViewItem() {
                         p: 2,
                         textAlign: "center",
                         bgcolor: "background.default",
-                        borderRadius: 2,
+                        borderRadius: 1,
                       }}
                     >
                       <ShoppingCartIcon color="primary" sx={{ mb: 1 }} />
                       <Typography variant="h6" color="primary.main">
-                        ₹ {data.opening_stock_value ?? 0}
+                        {data.purchase_qty > 0
+                          ? <> ₹ {(data.current_stock ?? 0) * (data.avg_purchase_rate ?? 1)}</>
+                          : "No Purchase Yet"
+                        }
+
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
                         Stock Value
@@ -667,9 +672,23 @@ export default function ViewItem() {
                       variant="contained"
                       fullWidth
                       startIcon={<EditIcon />}
-                      onClick={handleEdit}
+                      onClick={async () => {
+                        setDrawer(true);
+                        await dispatch(viewProduct({ product_id: data._id, company_id: currentCompany?._id || '' }))
+                          .unwrap().then((res) => {
+                            console.log("Product details fetched successfully", res);
+                            setSelectedProduct(res.product);
+                            setDrawer(true);
+                          }
+                          ).catch((error) => {
+                            setDrawer(false);
+                            setSelectedProduct(null);
+                            console.error("Error fetching product details:", error);
+                            toast.error("Failed to fetch product details");
+                          });
+                      }}
                       sx={{
-                        borderRadius: 2,
+                        borderRadius: 1,
                         py: 1.5,
                         textTransform: "none",
                         fontWeight: 600,
@@ -691,7 +710,7 @@ export default function ViewItem() {
                       startIcon={<DeleteIcon />}
                       onClick={handleDelete}
                       sx={{
-                        borderRadius: 2,
+                        borderRadius: 1,
                         py: 1.5,
                         textTransform: "none",
                         fontWeight: 600,
@@ -717,7 +736,7 @@ export default function ViewItem() {
               <Card
                 elevation={0}
                 sx={{
-                  borderRadius: 3,
+                  borderRadius: 1,
                   border: `1px solid ${theme.palette.divider}`,
                   height: "100%",
                 }}
@@ -738,7 +757,7 @@ export default function ViewItem() {
                       elevation={0}
                       sx={{
                         border: `1px solid ${theme.palette.divider}`,
-                        borderRadius: 2,
+                        borderRadius: 1,
                         overflow: "hidden",
                       }}
                     >
@@ -798,7 +817,7 @@ export default function ViewItem() {
                                 HSN Code
                               </Typography>
                               <Typography variant="body1" fontWeight={500}>
-                                {data.hsn_code || "Not specified"}
+                                {data.gst_hsn_code || "Not specified"}
                               </Typography>
                             </Grid>
                             <Grid item xs={12} sm={6}>
@@ -807,10 +826,10 @@ export default function ViewItem() {
                                 color="text.secondary"
                                 gutterBottom
                               >
-                                Barcode
+                                Taxability
                               </Typography>
                               <Typography variant="body1" fontWeight={500}>
-                                {data.barcode || "Not specified"}
+                                {data.gst_taxability || "Not specified"}
                               </Typography>
                             </Grid>
                           </Grid>
@@ -823,7 +842,7 @@ export default function ViewItem() {
                       elevation={0}
                       sx={{
                         border: `1px solid ${theme.palette.divider}`,
-                        borderRadius: 2,
+                        borderRadius: 1,
                         overflow: "hidden",
                       }}
                     >
@@ -862,8 +881,9 @@ export default function ViewItem() {
                                 variant="body1"
                                 fontWeight={700}
                                 color="text.primary"
-                              >
-                                ₹{data.purchase_price}
+                              >{data.purchase_qty > 0
+                                ? <>₹{data.purchase_value}</>
+                                : 'No Purchase Yet'}
                               </Typography>
                             </Grid>
                             <Grid item xs={12} sm={6}>
@@ -878,8 +898,9 @@ export default function ViewItem() {
                                 variant="body1"
                                 fontWeight={700}
                                 color="success.main"
-                              >
-                                ₹{data.selling_price}
+                              >{data.purchase_qty > 0
+                                ? <> ₹{data.sales_value}</>
+                                : 'No Sale Yet'}
                               </Typography>
                             </Grid>
                             <Grid item xs={12} sm={6}>
@@ -891,12 +912,12 @@ export default function ViewItem() {
                                 Current Stock
                               </Typography>
                               <Typography variant="body1" fontWeight={500}>
-                                {data.opening_quantity} units
+                                {data.current_stock} units
                               </Typography>
                               <LinearProgress
                                 variant="determinate"
                                 value={Math.min(
-                                  ((data?.opening_quantity ?? 1) /
+                                  ((data?.current_stock ?? 1) /
                                     ((data?.low_stock_alert ?? 1) * 3)) *
                                   100,
                                   100
@@ -914,7 +935,7 @@ export default function ViewItem() {
                                 Low Stock Alert
                               </Typography>
                               <Typography variant="body1" fontWeight={500}>
-                                {data.low_stock_alert} units
+                                {data.low_stock_alert ?? 5} units
                               </Typography>
                             </Grid>
                           </Grid>
@@ -927,7 +948,7 @@ export default function ViewItem() {
                       elevation={0}
                       sx={{
                         border: `1px solid ${theme.palette.divider}`,
-                        borderRadius: 2,
+                        borderRadius: 1,
                         overflow: "hidden",
                       }}
                     >
@@ -1007,7 +1028,7 @@ export default function ViewItem() {
               <Card
                 elevation={0}
                 sx={{
-                  borderRadius: 3,
+                  borderRadius: 1,
                   border: `1px solid ${theme.palette.divider}`,
                   height: "100%",
                 }}
@@ -1032,7 +1053,7 @@ export default function ViewItem() {
                           sx={{
                             p: 0,
                             mb: 2,
-                            borderRadius: 2,
+                            borderRadius: 1,
                             transition: "all 0.3s ease",
                             "&:hover": {
                               transform: "translateX(8px)",
@@ -1045,7 +1066,7 @@ export default function ViewItem() {
                               width: "100%",
                               p: 2,
                               border: `1px solid ${theme.palette.divider}`,
-                              borderRadius: 2,
+                              borderRadius: 1,
                               position: "relative",
                               overflow: "hidden",
                               "&::before": {
@@ -1192,7 +1213,7 @@ export default function ViewItem() {
               <Card
                 elevation={0}
                 sx={{
-                  borderRadius: 3,
+                  borderRadius: 1,
                   border: `1px solid ${theme.palette.divider}`,
                   height: "100%",
                 }}
@@ -1225,12 +1246,12 @@ export default function ViewItem() {
                               textAlign: "center",
                               bgcolor: "success.light",
                               color: "success.contrastText",
-                              borderRadius: 2,
+                              borderRadius: 1,
                             }}
                           >
                             <Typography variant="h5" fontWeight={700}>
-                              ₹
-                              {data.selling_price - (data?.purchase_price ?? 0)}
+                              ₹{" "}
+                              {data.sales_value ?? 0 - (data?.purchase_value ?? 0)}
                             </Typography>
                             <Typography variant="caption">
                               Profit per Unit
@@ -1245,17 +1266,20 @@ export default function ViewItem() {
                               textAlign: "center",
                               bgcolor: "primary.light",
                               color: "primary.contrastText",
-                              borderRadius: 2,
+                              borderRadius: 1,
                             }}
                           >
                             <Typography variant="h5" fontWeight={700}>
-                              {(
-                                ((data.selling_price -
-                                  (data?.purchase_price ?? 0)) /
-                                  (data?.purchase_price ?? 1)) *
-                                100
-                              ).toFixed(1)}
-                              %
+                              {data.sales_qty > 0
+                                ? <>{(
+                                  ((data.sales_value ?? 0 -
+                                    (data?.purchase_value ?? 0)) /
+                                    (data?.purchase_value ?? 1)) *
+                                  100
+                                ).toFixed(1)}
+                                  %</>
+                                : "No Sale"}
+
                             </Typography>
                             <Typography variant="caption">
                               Profit Margin
@@ -1270,12 +1294,12 @@ export default function ViewItem() {
                               textAlign: "center",
                               bgcolor: "warning.light",
                               color: "warning.contrastText",
-                              borderRadius: 2,
+                              borderRadius: 1,
                             }}
                           >
                             <Typography variant="h5" fontWeight={700}>
                               {Math.ceil(
-                                (data?.opening_quantity ?? 1) /
+                                (data?.current_stock ?? 1) /
                                 (data.low_stock_alert || 1)
                               )}
                             </Typography>
@@ -1292,11 +1316,11 @@ export default function ViewItem() {
                               textAlign: "center",
                               bgcolor: "info.light",
                               color: "info.contrastText",
-                              borderRadius: 2,
+                              borderRadius: 1,
                             }}
                           >
                             <Typography variant="h5" fontWeight={700}>
-                              ₹{data.opening_stock_value}
+                              ₹{" "}{(data.current_stock ?? 0) * (data.sales_value ?? data.avg_purchase_rate)}
                             </Typography>
                             <Typography variant="caption">
                               Total Stock Value
@@ -1320,7 +1344,7 @@ export default function ViewItem() {
                         sx={{
                           p: 3,
                           border: `1px solid ${theme.palette.divider}`,
-                          borderRadius: 2,
+                          borderRadius: 1,
                         }}
                       >
                         <Box
@@ -1343,7 +1367,7 @@ export default function ViewItem() {
                         <LinearProgress
                           variant="determinate"
                           value={Math.min(
-                            ((data?.opening_quantity ?? 1) /
+                            ((data?.current_stock ?? 1) /
                               ((data?.low_stock_alert ?? 1) * 3)) *
                             100,
                             100
@@ -1366,7 +1390,7 @@ export default function ViewItem() {
                             0 units
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            {data.opening_quantity ?? 1} /{" "}
+                            {data.current_stock ?? 1} /{" "}
                             {(data.low_stock_alert ?? 1) * 3} units
                           </Typography>
                         </Box>
@@ -1385,18 +1409,18 @@ export default function ViewItem() {
                       <Stack spacing={2}>
                         <Alert
                           severity={
-                            data.selling_price > (data.purchase_price ?? 0)
+                            data.sales_value ?? 0 > (data.purchase_value ?? 0)
                               ? "success"
                               : "warning"
                           }
                           sx={{ borderRadius: 2 }}
                         >
                           <Typography variant="body2">
-                            {data.selling_price > (data.purchase_price ?? 0)
+                            {data.sales_value ?? 0 > (data.purchase_value ?? 0)
                               ? `Strong profit margin of ${(
-                                ((data.selling_price -
-                                  (data.purchase_price ?? 0)) /
-                                  (data.purchase_price ?? 1)) *
+                                ((data.sales_value ?? 0 -
+                                  (data.purchase_value ?? 0)) /
+                                  (data.purchase_value ?? 1)) *
                                 100
                               ).toFixed(1)}%`
                               : "Consider reviewing pricing strategy for better profitability"}
@@ -1405,7 +1429,7 @@ export default function ViewItem() {
 
                         <Alert
                           severity={
-                            (data.opening_quantity ?? 1) >
+                            (data.current_stock ?? 1) >
                               (data.low_stock_alert ?? 1)
                               ? "info"
                               : "warning"
@@ -1413,7 +1437,7 @@ export default function ViewItem() {
                           sx={{ borderRadius: 2 }}
                         >
                           <Typography variant="body2">
-                            {(data.opening_quantity ?? 1) >
+                            {(data.current_stock ?? 1) >
                               (data.low_stock_alert ?? 1)
                               ? "Stock level is healthy"
                               : "Stock level is below alert threshold - consider restocking"}
@@ -1437,7 +1461,7 @@ export default function ViewItem() {
         fullWidth
         PaperProps={{
           sx: {
-            borderRadius: 3,
+            borderRadius: 1,
             p: 1,
           },
         }}
@@ -1450,7 +1474,7 @@ export default function ViewItem() {
             <Box>
               <Typography variant="h6">Delete Product</Typography>
               <Typography variant="body2" color="text.secondary">
-                {data.product_name}
+                {data.stock_item_name}
               </Typography>
             </Box>
           </Box>
@@ -1492,7 +1516,7 @@ export default function ViewItem() {
           <Button
             onClick={() => setOpenDeleteDialog(false)}
             variant="outlined"
-            sx={{ borderRadius: 2, textTransform: "none" }}
+            sx={{ borderRadius: 1, textTransform: "none" }}
           >
             Cancel
           </Button>
@@ -1500,7 +1524,7 @@ export default function ViewItem() {
             onClick={confirmDelete}
             color="error"
             variant="contained"
-            sx={{ borderRadius: 2, textTransform: "none" }}
+            sx={{ borderRadius: 1, textTransform: "none" }}
             startIcon={<DeleteIcon />}
           >
             Delete Product
@@ -1528,7 +1552,7 @@ export default function ViewItem() {
         drawer={drawer}
         setDrawer={setDrawer}
         setRefreshKey={setRefreshKey}
-        selectedProduct={selectedProduct}
+        product={selectedProduct}
         setSelectedProduct={setSelectedProduct}
       />
     </Container>
