@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pharmacy Invoice Template</title>
+</head>
+
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 10px; font-size: 11px; line-height: 1.3; color: #000;">
+
+    <!-- Main Invoice Table Container -->
+    <table style="width: 100%; max-width: 800px; margin: 0 auto; border: 2px solid #000; border-collapse: collapse;"
+        cellpadding="0" cellspacing="0">
+
+        <!-- Header Section -->
+        <tr>
+            <td style="padding: 12px; border-bottom: 1px solid #000;">
+                <table style="width: 100%; border-collapse: collapse;" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <!-- Company Details -->
+                        <td style="width: 50%; vertical-align: top; padding-right: 15px;">
+                            <div style="font-size: 18px; font-weight: bold; margin-bottom: 8px;">R.D.PHARMA</div>
+                            <div style="margin-bottom: 3px;">KURAJ (RAJSMAND)</div>
+                            <div style="margin-bottom: 3px;"><strong>Phone:</strong> +91 6367097548</div>
+                            <div style="margin-bottom: 3px;"><strong>GST No.:</strong> 08ABIPJ1392D1ZT</div>
+                            <div style="margin-bottom: 8px;"><strong>PAN No.:</strong> 6843-6844</div>
+                            <div style="margin-top: 8px; padding-top: 5px; border-top: 1px solid #ccc;">
+                                <strong>BANK DETAILS:</strong> HDFC BANK, BRANCH CHETAK<br>
+                                A/c: 01198430000036 | IFSC: HDFC0000119
+                            </div>
+                        </td>
+
+                        <!-- Logo and Credit Info -->
+                        <!-- <td style="width: 25%; vertical-align: top; text-align: center; position: relative;">
+                            <!-- <img src="https://res.cloudinary.com/dnkp2gm1d/image/upload/v1738642194/Drishti_Docs/Logo_fznhpk.png"
+                                style="width: 40px; height: 40px;">
+                            <img src="https://res.cloudinary.com/dnkp2gm1d/image/upload/v1738642101/Drishti_Docs/Logo_Text_jgumzy.png"
+                                style="width: 60px; height: 20px;"> 
+                            <div style="font-weight: bold; font-size: 14px; color: #000; margin-top: 5px;">CREDIT</div>
+                        </td> -->
+
+                        <!-- Invoice Details -->
+                        <td style="width: 25%; vertical-align: top; text-align: left;">
+                            <div style="font-weight: bold; font-size: 14px; color: #000; margin-top: 5px;">CREDIT</div>
+
+                            <div style="margin-bottom: 3px;"><strong>Invoice No.:</strong> D-10838</div>
+                            <div style="margin-bottom: 8px;"><strong>Date:</strong> 21-01-2025</div>
+                            <div style="font-weight: bold; margin-bottom: 3px;">M/s NAKUL PHARMA & SURGICAL</div>
+                            <div style="margin-bottom: 3px;">KURAJ (RAJSMAND)</div>
+                            <div style="margin-bottom: 3px;"><strong>Phone:</strong> +91 6367097548</div>
+                            <div style="margin-bottom: 3px;"><strong>GST No.:</strong> 08AFXPS6636L1ZQ</div>
+                            <div><strong>PAN No.:</strong> 100698-100699</div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- GST Invoice Header -->
+        <tr>
+            <td
+                style="text-align: center; padding: 8px; background-color: #f2f2f2; border-bottom: 1px solid #000; font-size: 16px; font-weight: bold;">
+                INVOICE
+            </td>
+        </tr>
+
+        <!-- Product Details Table -->
+        <tr>
+            <td style="padding: 12px; border-bottom: 1px solid #000;">
+                <table style="width: 100%; border-collapse: collapse; border: 1px solid #000;" cellpadding="4"
+                    cellspacing="0">
+                    <tr style="background-color: #f2f2f2;">
+                        <th
+                            style="border: 1px solid #000; font-size: 10px; font-weight: bold; text-align: center; padding: 4px;">
+                            SN</th>
+                        <th
+                            style="border: 1px solid #000; font-size: 10px; font-weight: bold; text-align: center; padding: 4px; width: 16%;">
+                            NAME OF PRODUCTS</th>
+                        <th
+                            style="border: 1px solid #000; font-size: 10px; font-weight: bold; text-align: center; padding: 4px;">
+                            Pack</th>
+                        <th
+                            style="border: 1px solid #000; font-size: 10px; font-weight: bold; text-align: center; padding: 4px;">
+                            Batch</th>
+                        <th
+                            style="border: 1px solid #000; font-size: 10px; font-weight: bold; text-align: center; padding: 4px;">
+                            HSN</th>
+                        <th
+                            style="border: 1px solid #000; font-size: 10px; font-weight: bold; text-align: center; padding: 4px;">
+                            Exp.</th>
+                        <th
+                            style="border: 1px solid #000; font-size: 10px; font-weight: bold; text-align: center; padding: 4px;">
+                            Qty.</th>
+                        <th
+                            style="border: 1px solid #000; font-size: 10px; font-weight: bold; text-align: center; padding: 4px;">
+                            Free</th>
+                        <th
+                            style="border: 1px solid #000; font-size: 10px; font-weight: bold; text-align: center; padding: 4px;">
+                            MRP</th>
+                        <th
+                            style="border: 1px solid #000; font-size: 10px; font-weight: bold; text-align: center; padding: 4px;">
+                            GST%</th>
+                        <th 
+                        style="border: 1px solid #000; font-size: 10px; font-weight: bold; text-align: center; padding:
+                        4px;">
+                        RATE</th>
+                        <th
+                            style="border: 1px solid #000; font-size: 10px; font-weight: bold; text-align: center; padding: 4px;">
+                            Disc</th>
+                        <th
+                            style="border: 1px solid #000; font-size: 10px; font-weight: bold; text-align: center; padding: 4px;">
+                            AMOUNT</th>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">1</td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: left; padding: 4px;">CYRA MPS
+                            SYP</td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">200ML
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">FL-1944
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">30049032
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">-</td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">15</td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">0</td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">89.00
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">12.00
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">63.57
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">0.00</td>
+                        <td
+                            style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px; font-weight: bold;">
+                            953.55</td>
+                    </tr>
+                    <tr style="background-color: #f9f9f9;">
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">2</td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: left; padding: 4px;">NEWTEL-H 40
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">10'S</td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">SNH406
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">30049079
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">9/26</td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">60</td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">0</td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">51.00
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">12.00
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">36.43
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">0.00</td>
+                        <td
+                            style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px; font-weight: bold;">
+                            2185.80</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">3</td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: left; padding: 4px;">&nbsp;</td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                    </tr>
+                    <tr style="background-color: #f9f9f9;">
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">4</td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: left; padding: 4px;">&nbsp;</td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">5</td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: left; padding: 4px;">&nbsp;</td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                    </tr>
+                    <tr style="background-color: #f9f9f9;">
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">6</td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: left; padding: 4px;">&nbsp;</td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">7</td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: left; padding: 4px;">&nbsp;</td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                        <td style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">&nbsp;
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- Totals Section -->
+        <tr>
+            <td style="padding: 12px; border-bottom: 1px solid #000;">
+                <table style="width: 100%; border-collapse: collapse;" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <!-- Tax Table -->
+                        <td style="width: 50%; vertical-align: top; padding-right: 10px;">
+                            <table style="width: 100%; border-collapse: collapse; border: 1px solid #000;"
+                                cellpadding="4" cellspacing="0">
+                                <tr style="background-color: #f2f2f2;">
+                                    <th
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">
+                                        IGST</th>
+                                    <th
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">
+                                        Tax Amt.</th>
+                                    <th
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">
+                                        SGST</th>
+                                    <th
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">
+                                        CGST</th>
+                                    <th
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">
+                                        GST Amt.</th>
+                                </tr>
+                                <tr>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">
+                                        5.00%</td>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">
+                                        0.00</td>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">
+                                        0.00</td>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">
+                                        0.00</td>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">
+                                        0.00</td>
+                                </tr>
+                                <tr>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">
+                                        12.00%</td>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">
+                                        2835.35</td>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">
+                                        170.12</td>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">
+                                        170.12</td>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">
+                                        340.24</td>
+                                </tr>
+                                <tr>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">
+                                        18.00%</td>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">
+                                        0.00</td>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">
+                                        0.00</td>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">
+                                        0.00</td>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">
+                                        0.00</td>
+                                </tr>
+                                <tr>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">
+                                        28.00%</td>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">
+                                        0.00</td>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">
+                                        0.00</td>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">
+                                        0.00</td>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px;">
+                                        0.00</td>
+                                </tr>
+                                <tr style="background-color: #f2f2f2;">
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px; font-weight: bold;">
+                                        TOTAL</td>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px; font-weight: bold;">
+                                        2835.35</td>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px; font-weight: bold;">
+                                        170.12</td>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px; font-weight: bold;">
+                                        170.12</td>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; text-align: center; padding: 4px; font-weight: bold;">
+                                        340.24</td>
+                                </tr>
+                            </table>
+                        </td>
+
+                        <!-- Outstanding and QR Code -->
+                        <td style="width: 25%; vertical-align: top; padding: 0 5px;">
+                            <table
+                                style="width: 100%; border-collapse: collapse; border: 1px solid #000; margin-bottom: 10px;"
+                                cellpadding="5" cellspacing="0">
+                                <tr>
+                                    <td style="font-size: 10px; padding: 5px;">
+                                        <div style="margin-bottom: 3px;"><strong>Outstanding Bill:</strong> 1</div>
+                                        <div style="margin-bottom: 3px;"><strong>Outstanding Amount:</strong> 8304.00
+                                        </div>
+                                        <!-- <div style="margin-bottom: 3px;"><strong>Return Stocks Discount:</strong> 304.00
+                                        </div> -->
+                                        <div style="margin-bottom: 3px;"><strong>L.R. No.:</strong> __________________
+                                        </div>
+                                        <div><strong>Transport:</strong> __________________</div>
+                                    </td>
+                                </tr>
+                            </table>
+                            <table style="width: 100%; border-collapse: collapse;" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td style="text-align: center; padding: 10px;">
+                                        <img src="./a.jpeg" alt="QR Code"
+                                            style="width: 80px; height: 80px; border: 1px solid #ccc;">
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+
+                        <!-- Amount Summary -->
+                        <td style="width: 25%; vertical-align: top; padding-left: 10px;">
+                            <table style="width: 100%; border-collapse: collapse; border: 1px solid #000;"
+                                cellpadding="4" cellspacing="0">
+                                <tr>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; padding: 4px; font-weight: bold;">
+                                        SUB TOTAL</td>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; padding: 4px; text-align: right;">
+                                        3139.35</td>
+                                </tr>
+                                <tr>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; padding: 4px; font-weight: bold;">
+                                        DISCOUNT</td>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; padding: 4px; text-align: right;">
+                                        304.00</td>
+                                </tr>
+                                <tr>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; padding: 4px; font-weight: bold;">
+                                        TOTAL</td>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; padding: 4px; text-align: right;">
+                                        2835.35</td>
+                                </tr>
+                                <tr>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; padding: 4px; font-weight: bold;">
+                                        GST</td>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; padding: 4px; text-align: right;">
+                                        340.24</td>
+                                </tr>
+                                <tr>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; padding: 4px; font-weight: bold;">
+                                        CR/DR NOTE</td>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; padding: 4px; text-align: right;">
+                                        0.00</td>
+                                </tr>
+                                <tr>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; padding: 4px; font-weight: bold;">
+                                        Round Off</td>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 10px; padding: 4px; text-align: right;">
+                                        (+)0.40</td>
+                                </tr>
+                            </table>
+                            <table
+                                style="width: 100%; border-collapse: collapse; border: 1px solid #000; background-color: #f2f2f2; margin-top: 8px;"
+                                cellpadding="4" cellspacing="0">
+                                <tr>
+                                    <td
+                                        style="border: 1px solid #000; font-size: 14px; padding: 8px; text-align: center; font-weight: bold;">
+                                        GRAND TOTAL: ₹ 3176.00
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- Terms and Conditions -->
+        <tr>
+            <td style="padding: 12px; border-bottom: 1px solid #000;">
+                <table style="width: 100%; border-collapse: collapse; border: 1px solid #000;" cellpadding="8"
+                    cellspacing="0">
+                    <tr>
+                        <td style="font-size: 11px; line-height: 1.4;">
+                            <div style="margin-bottom: 5px;">Tax payable on reverse charge (Y/N): N</div>
+                            <div style="font-weight: bold; margin-bottom: 5px;">Terms & Conditions :</div>
+                            <div style="margin-bottom: 8px;">
+                                1. This is to certify that we have a valid GST Registration and the above information is
+                                true.
+                                2. Interest @ 18% per annum will be charged on payments due after 15 days from the date
+                                of billing.
+                                3. Please accept goods in proper condition only.
+                                4. All Disputes & claims will be referred to the court at Udaipur jurisdiction.
+                                5. Do not make payment without the printed receipt. Please keep the receipt safe.
+                            </div>
+                            <div style="font-weight: bold; margin-bottom: 5px;">Additional Terms and Conditions :</div>
+                            <div style="border-bottom: 1px solid #000; height: 20px; margin-bottom: 5px;"></div>
+                            <div style="border-bottom: 1px solid #000; height: 20px;"></div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- Signature Section -->
+        <tr>
+            <td style="padding: 15px;">
+                <table style="width: 100%; border-collapse: collapse;" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td style="width: 40%; text-align: center; vertical-align: top;">
+                            <div style="border-top: 1px solid #000; width: 200px; margin: 0 auto 5px auto;"></div>
+                            <div style="font-weight: bold; font-size: 12px;">Receiver's Signature</div>
+                        </td>
+                        <td style="width: 20%;">&nbsp;</td>
+                        <td style="width: 40%; text-align: center; vertical-align: top;">
+                            <div style="border-top: 1px solid #000; width: 200px; margin: 0 auto 5px auto;"></div>
+                            <div style="font-weight: bold; font-size: 12px;">For R.D.PHARMA</div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <!-- Motto -->
+        <tr>
+            <td
+                style="text-align: center; padding: 10px; font-size: 14px; font-weight: bold; color: #C04000; text-decoration: underline;">
+                LIFE'S A JOURNEY, KEEP SMILING
+            </td>
+        </tr>
+
+    </table>
+
+    <!-- <script>
+        // Print functionality
+        function printInvoice() {
+            window.print();
+        }
+
+        // Add print button (hidden in print mode)
+        document.addEventListener('DOMContentLoaded', function () {
+            var printButton = document.createElement('button');
+            printButton.innerHTML = 'Print Invoice';
+            printButton.onclick = printInvoice;
+            printButton.style.cssText = 'position: fixed; top: 10px; right: 10px; z-index: 1000; padding: 10px 20px; background: #007cba; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px;';
+
+            // Hide button when printing
+            var style = document.createElement('style');
+            style.innerHTML = '@media print { button { display: none !important; } }';
+            document.head.appendChild(style);
+
+            document.body.appendChild(printButton);
+        });
+
+        // Ensure proper PDF generation
+        window.addEventListener('beforeprint', function () {
+            // Force consistent styling for PDF generation
+            document.body.style.margin = '0';
+            document.body.style.padding = '0';
+        });
+    </script> -->
+
+</body>
+
+</html>

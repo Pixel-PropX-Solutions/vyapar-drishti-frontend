@@ -45,8 +45,9 @@ import TermsOfServicePage from "./components/Legal/TermsOfServicePage";
 import PricingPage from "./components/Pricing/PricingPage";
 import SignUpPage from "./pages/SignUp";
 import ProfilePage from "./pages/Profile";
-import { getCompany } from "./services/company";
-import Creditors from "./pages/Creditors";
+// import { getCompany } from "./services/company";
+import CreditorLedger from "./pages/CreditorLedger";
+import Invoices from "./pages/Invoices";
 // import PromptModal from "./common/PromptModal";
 
 const xThemeComponents = {
@@ -81,7 +82,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
       if (!isUserFetched && accessToken) {
         try {
           await dispatch(getCurrentUser());
-          await dispatch(getCompany());
+          // await dispatch(getCompany());
           dispatch(setUser({ authState: AuthStates.AUTHENTICATED }));
         } catch {
           localStorage.removeItem("accessToken");
@@ -147,7 +148,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 {/* <Route path="/settings" element={<Settings />} /> */}
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/create/user" element={<CreateUserProfile />} />
-                <Route path="/creditors" element={<Creditors />} />
+                <Route path="/customers" element={<CreditorLedger />} />
                 {/* <Route path="/stockists/:stockistId" element={<StockistProfile />} /> */}
                 {/* <Route
                   path="/create/user/stockist/:id"
@@ -186,10 +187,11 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 {/* <Route path="/upload" element={<UploadDocuments />} /> */}
                 {/* <Route path="/settings" element={<Settings />} /> */}
                 <Route path="/about" element={<AboutPage />} />
-                <Route path="/creditors" element={<Creditors />} />
+                <Route path="/customers" element={<CreditorLedger />} />
+                <Route path="/invoices" element={<Invoices />} />
                 {/* <Route path="/debitors" element={<ChemistProfile />} /> */}
                 {/* <Route path="/sell" element={<ProductBilling />} /> */}
-                <Route path="/*" element={<Navigate to="/" replace />} />
+                {/* <Route path="/*" element={<Navigate to="/" replace />} /> */}
               </Route>
             )}
           </>

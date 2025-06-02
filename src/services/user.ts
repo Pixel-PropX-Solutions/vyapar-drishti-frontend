@@ -24,7 +24,6 @@ export const createUser = createAsyncThunk(
 
       if (response.data.success === true) {
         const id = response.data.id;
-        // setCreatedId(userId);
         return { id };
       } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {
@@ -49,7 +48,6 @@ export const createBasicUser = createAsyncThunk(
 
       if (response.data.success === true) {
         const id = response.data.id;
-        // setCreatedId(userId);
         return { id };
       } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {
@@ -118,6 +116,29 @@ export const updateUser = createAsyncThunk(
     try {
       const response = await userApi.put(`/user/update/${id}`, data);
       console.log("updateUser response", response);
+
+      if (response.data.success === true) {
+        return;
+      } else return rejectWithValue("Login Failed: No access token recieved.");
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+        "Login failed: Invalid credentials or server error."
+      );
+    }
+  }
+);
+
+
+export const setCurrentCompany = createAsyncThunk(
+  "set/current/company",
+  async (
+    id: string,
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await userApi.put(`/user/set/company/${id}`);
+      console.log("setCurrentCumpnay response", response);
 
       if (response.data.success === true) {
         return;

@@ -1,10 +1,10 @@
-import { updateCreditor, getCreditor, createCreditor, deleteCreditor, restoreCreditor, viewAllCreditors } from "@/services/creditors";
-import { PageMeta, GetCreditors } from "@/utils/types";
+import { updateCreditor, getCreditor, createCreditor, deleteCreditor, restoreCreditor, viewAllCreditors } from "@/services/creditorsledger";
+import { PageMeta, GetUserLedgers } from "@/utils/types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface CreditorState {
-    creditors: Array<GetCreditors>;
-    creditor: GetCreditors | null;
+    creditors: Array<GetUserLedgers>;
+    creditor: GetUserLedgers | null;
     loading: boolean,
     error: string | null;
     pageMeta: PageMeta
@@ -24,7 +24,7 @@ const initialState: CreditorState = {
 }
 
 const creditorSlice = createSlice({
-    name: "creditors",
+    name: "creditorsLedger",
     initialState,
     reducers: {
 
@@ -60,13 +60,13 @@ const creditorSlice = createSlice({
                 state.loading = false;
             })
 
-            
+
             .addCase(getCreditor.pending, (state) => {
                 state.error = null;
                 state.loading = true;
             })
             .addCase(getCreditor.fulfilled,
-                (state, action: PayloadAction<GetCreditors>) => {
+                (state, action: PayloadAction<GetUserLedgers>) => {
                     state.creditor = action.payload;
                     state.loading = false;
                 }

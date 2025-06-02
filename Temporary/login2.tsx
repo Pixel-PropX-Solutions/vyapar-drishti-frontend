@@ -9,9 +9,9 @@ import Logo5 from "../assets/5.png";
 import Logo6 from "../assets/6.png";
 import Logo7 from "../assets/7.png";
 import Logo from "../assets/Logo.png";
-import RegistrationForm from "@/features/auth/components/RegisterForm";
+import LoginForm from "@/features/auth/components/LoginForm";
 
-const SignUpPage: React.FC = () => {
+const LoginPage: React.FC = () => {
   const logoRefs = useRef<(HTMLImageElement | null)[]>([]);
   const [paths, setPaths] = useState<string[]>([]);
   const [path, setPath] = useState<string>("");
@@ -79,6 +79,7 @@ const SignUpPage: React.FC = () => {
 
       setPath(`M ${x1} ${y1} C ${controlX1} ${controlY1}, ${controlX2} ${controlY2}, ${x2} ${y2}`);
     };
+
 
     calculatePaths();
     calculatePath();
@@ -265,7 +266,7 @@ const SignUpPage: React.FC = () => {
                 zIndex: 10,
                 filter: "drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.25))",
                 borderRadius: "10px",
-                height: "260px",
+                height: "200px",
                 objectFit: "contain",
               }}
             />
@@ -279,7 +280,7 @@ const SignUpPage: React.FC = () => {
                 zIndex: 10,
                 filter: "drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.25))",
                 borderRadius: "10px",
-                height: "260px",
+                height: "200px",
                 objectFit: "contain",
                 animation: animationPhase === "slide" ? "slide 3s linear" : "none",
               }}
@@ -299,7 +300,7 @@ const SignUpPage: React.FC = () => {
         </style>
       </Grid>
 
-      {/* Sign Up Form */}
+      {/* Right Section */}
       <Grid
         item
         sm={12}
@@ -319,12 +320,12 @@ const SignUpPage: React.FC = () => {
             flexDirection: "row",
           }}
         >
-          <RegistrationForm />
+          <LoginForm />
         </Box>
       </Grid>
     </Grid>
   );
 };
 
-export default SignUpPage;
+export default LoginPage;
 

@@ -8,6 +8,7 @@ import {
   Typography,
   Grid,
   InputAdornment,
+  useTheme,
 } from "@mui/material";
 import { Email } from "@mui/icons-material";
 import Logo from "../../../assets/Logo.png";
@@ -21,6 +22,7 @@ import { getCompany } from "@/services/company";
 
 const RegistrationForm: React.FC = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
   // const [showPassword, setShowPassword] = React.useState(false);
   const [data, setData] = useState({
@@ -29,8 +31,6 @@ const RegistrationForm: React.FC = () => {
     email: '',
     code: '',
     number: '',
-    company_name: "",
-    brand_name: "",
   });
 
   // const handleTogglePasswordVisibility = () => {
@@ -60,7 +60,7 @@ const RegistrationForm: React.FC = () => {
     }
 
     toast.promise(
-      dispatch(register({ userData: userData, company_name: data.company_name, brand_name: data.brand_name }))
+      dispatch(register(userData))
         .unwrap()
         .then(() => {
           dispatch(getCurrentUser());
@@ -197,6 +197,7 @@ const RegistrationForm: React.FC = () => {
               <TextField
                 required
                 margin="normal"
+                sx={{ width: "20%" }}
                 fullWidth
                 id="code"
                 label="Code"
@@ -216,6 +217,7 @@ const RegistrationForm: React.FC = () => {
                 required
                 margin="normal"
                 fullWidth
+                sx={{ width: "80%" }}
                 id="number"
                 label="Phone Number"
                 name="number"
@@ -231,7 +233,7 @@ const RegistrationForm: React.FC = () => {
                 }}
               />
             </Box>
-            <TextField
+            {/* <TextField
               required
               margin="normal"
               fullWidth
@@ -266,7 +268,7 @@ const RegistrationForm: React.FC = () => {
                   <InputAdornment position="start"></InputAdornment>
                 ),
               }}
-            />
+            /> */}
 
             {/* <TextField
               required
@@ -312,22 +314,34 @@ const RegistrationForm: React.FC = () => {
             >
               Create Account
             </Button>
-            {/* <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{
-                mt: 3,
-                mb: 2,
-                backgroundColor: "#006E89",
-                "&:hover": {
-                  backgroundColor: "#00405C",
-                  color: "#25D9DA",
-                },
-              }}
-            >
-              Sign Up
-            </Button> */}
+            <Box >
+              <Typography variant="body2">
+                Already have an account?{" "}
+                <Button
+                  onClick={() => navigate("/login")}
+                  sx={{fontSize:'1rem', color: theme.palette.primary.main, textDecoration: 'underline' }}
+                >
+                  Sign In
+                </Button>
+              </Typography>
+              <Typography variant="body2">
+                By signing up, you agree to our {" "}
+                <a
+                  onClick={() => navigate("/terms")}
+                  style={{ color: theme.palette.primary.main, textDecoration: 'underline' }}
+                >
+                  Terms of Service {" "}
+                </a>
+                and {" "}
+                <a
+                  onClick={() => navigate("/privacy")}
+                  style={{ color: theme.palette.primary.main, textDecoration: 'underline' }}
+
+                >
+                  Privacy Policy
+                </a>
+              </Typography>
+            </Box>
           </Box>
         </Box>
       </Container>

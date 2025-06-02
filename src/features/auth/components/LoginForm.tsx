@@ -10,6 +10,7 @@ import {
   Typography,
   Grid,
   InputAdornment,
+  useTheme,
 } from "@mui/material";
 import { Person, Lock, Visibility, VisibilityOff } from "@mui/icons-material";
 import Logo from "../../../assets/Logo.png";
@@ -25,6 +26,7 @@ import { getCompany } from "@/services/company";
 
 const LoginForm: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const theme = useTheme();
   const { authState } = useSelector((state: RootState) => state.auth);
   const pathName = window.location.pathname;
   const [data, setData] = useState({
@@ -217,6 +219,34 @@ const LoginForm: React.FC = () => {
             >
               {authState === AuthStates.INITIALIZING ? "Loading..." : "Log in"}
             </Button>
+            <Box >
+              <Typography variant="body2">
+                Don't have account Yet?{" "}
+                <Button
+                  onClick={() => navigate("/signup")}
+                  sx={{ fontSize: '1rem', color: theme.palette.primary.main, textDecoration: 'underline' }}
+                >
+                  Sign Up
+                </Button>
+              </Typography>
+              <Typography variant="body2">
+                By signing in, you agree to our {" "}
+                <a
+                  onClick={() => navigate("/terms")}
+                  style={{ color: theme.palette.primary.main, textDecoration: 'underline' }}
+                >
+                  Terms of Service {" "}
+                </a>
+                and {" "}
+                <a
+                  onClick={() => navigate("/privacy")}
+                  style={{ color: theme.palette.primary.main, textDecoration: 'underline' }}
+
+                >
+                  Privacy Policy
+                </a>
+              </Typography>
+            </Box>
           </Box>
         </Box>
       </Container>

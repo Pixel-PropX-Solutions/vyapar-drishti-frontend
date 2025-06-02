@@ -7,7 +7,8 @@ import categoryReducer from "./reducers/categoryReducer";
 import inventoryReducer from "./reducers/inventoryReducer";
 import invoiceReducer from "./reducers/invoiceReducer";
 import stockistReducer from "./reducers/stockistReducer";
-import creditorReducer from "./reducers/creditorsReducer";
+import creditorReducer from "./reducers/creditorsLedgerReducer";
+import groupReducer from "./reducers/groupReducer";
 import billingReducer from "./reducers/billingReducer";
 import shippingReducer from "./reducers/shippingReducer";
 // import orderReducer from "./reducers/orderReducer";
@@ -19,9 +20,10 @@ const store = configureStore({
     category: categoryReducer,
     company: companyReducer,
 
-    creditor: creditorReducer,
+    group: groupReducer,
     billing: billingReducer,
     shipping: shippingReducer,
+    creditorsLedger: creditorReducer,
 
     auth: authReducer,
     user: userReducer,

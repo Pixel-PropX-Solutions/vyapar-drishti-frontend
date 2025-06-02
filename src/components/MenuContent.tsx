@@ -12,9 +12,9 @@ import {
   useTheme
 } from '@mui/material';
 // import DashboardIcon from '@mui/icons-material/Dashboard';
-// import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 // import ChemistIcon from '@mui/icons-material/Store';
-import StockistIcon from '@mui/icons-material/Warehouse';
+// import StockistIcon from '@mui/icons-material/Warehouse';
 // import UploadBillIcon from '@mui/icons-material/UploadFile';
 import ProductIcon from '@mui/icons-material/LocalPharmacy';
 import InventoryIcon from "@mui/icons-material/Inventory";
@@ -25,7 +25,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { ROLE_ENUM } from '@/utils/enums';
-import { Security } from '@mui/icons-material';
+import { People, Security } from '@mui/icons-material';
 
 // Define menu item type
 interface MenuItem {
@@ -49,12 +49,12 @@ const createMainListItems = (role: string): MenuItem[] => {
     { text: "Inventory", path: "/inventory", icon: <InventoryIcon />, requiredRole: 'user' },
     { text: "Timeline", path: "/timeline", icon: <ViewTimelineIcon />, requiredRole: 'user' },
     { text: "Products", path: "/products", icon: <ProductIcon />, requiredRole: 'user' },
+    { text: "Customers", path: "/customers", icon: <People />, requiredRole: 'user' },
+    { text: "Invoices", path: "/invoices", icon: <LocalShippingIcon />, requiredRole: 'user' },
     // { text: "Sell Products", path: "/sell", icon: <ProductIcon />, requiredRole: 'user' },
     // { text: "Upload Bills", path: "/upload", icon: <UploadBillIcon />, requiredRole: 'user' },
-    { text: "Creditors", path: "/creditors", icon: <StockistIcon />, requiredRole: 'user' },
     // { text: "Debitors", path: "/debitors", icon: <StockistIcon />, requiredRole: 'user' },
     // { text: "Sales", path: "/sales", icon: <LocalShippingIcon />, requiredRole: 'user' },
-    // { text: "Purchases", path: "/purchases", icon: <LocalShippingIcon />, requiredRole: 'user' },
   ];
 
   if (role === ROLE_ENUM.USER)

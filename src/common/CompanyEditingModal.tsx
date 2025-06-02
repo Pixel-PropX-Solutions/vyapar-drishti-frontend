@@ -38,28 +38,31 @@ import {
     Save,
 } from "@mui/icons-material";
 import toast from "react-hot-toast";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/store/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
 import { GetCompany, SetCompany } from "@/utils/types";
-import { updateCompany } from "@/services/company";
+import { createCompany, updateCompany } from "@/services/company";
 import CountryCodes from '../internals/data/CountryCodes.json';
 import { MenuItem, Select, ListItemIcon, ListItemText, Avatar, InputLabel, FormHelperText } from '@mui/material';
 
 interface EditUserModalProps {
     open: boolean;
     onClose: () => void;
-    onUpdated: () => Promise<void>;
-    company: GetCompany | null;
+    onUpdated?: () => Promise<void>;
+    onCreated?: () => Promise<void>;
+    company: any;
 }
 
 const CompanyEditingModal: React.FC<EditUserModalProps> = ({
     open,
     onClose,
     onUpdated,
+    onCreated,
     company,
 }) => {
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
+    const { user } = useSelector((state: RootState) => state.auth);
     const [isLoading, setIsLoading] = useState(false);
     const [_showValidation, setShowValidation] = useState(false);
     const companyImageInputRef = useRef<HTMLInputElement | null>(null);
@@ -70,30 +73,35 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
 
     const [data, setData] = useState<SetCompany>({
         user_id: '',
-        company_name: '',
-        brand_name: '',
+        name: '',
+        mailing_name: '',
+        address_1: '',
+        address_2: '',
+        pinCode: '',
+        state: '',
+        country: '',
+        financial_year_start: '',
+        books_begin_from: '',
+        is_deleted: false,
+        number: '',
+        code: '',
+        email: '',
+        image: '',
         gstin: '',
         pan_number: '',
         website: '',
-        email: '',
-        alter_number: '',
-        alter_code: '',
-        number: '',
-        code: '',
-        image: '',
-        business_type: ''
     });
 
     // Validation function
     const validateForm = (formData = data) => {
         const errors: Record<string, string> = {};
 
-        if (!formData.company_name.trim()) {
+        if (!formData.name.trim()) {
             errors.company_name = 'Company name is required';
         }
 
-        if (!formData.brand_name.trim()) {
-            errors.brand_name = 'Brand name is required';
+        if (!formData.state.trim()) {
+            errors.state = 'State is required';
         }
 
         if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
@@ -151,6 +159,7 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
         reader.readAsDataURL(file);
     }, []);
 
+
     const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.stopPropagation();
@@ -193,18 +202,23 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
     const resetForm = () => {
         setData({
             user_id: '',
-            company_name: '',
-            brand_name: '',
+            name: '',
+            mailing_name: '',
+            address_1: '',
+            address_2: '',
+            pinCode: '',
+            state: '',
+            country: '',
+            financial_year_start: '',
+            books_begin_from: '',
+            is_deleted: false,
+            number: '',
+            code: '',
+            email: '',
+            image: '',
             gstin: '',
             pan_number: '',
             website: '',
-            email: '',
-            alter_number: '',
-            alter_code: '',
-            number: '',
-            code: '',
-            image: '',
-            business_type: ''
         });
         setImagePreview(null);
         setFormErrors({});
@@ -217,19 +231,24 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
     useEffect(() => {
         if (open && company) {
             setData({
+                pinCode: company.pinCode || '',
+                state: company.state || '',
+                financial_year_start: company.financial_year_start || '',
+                books_begin_from: company.books_begin_from || '',
+                is_deleted: false,
                 user_id: company?.user_id || '',
-                company_name: company.company_name || '',
-                brand_name: company.brand_name || '',
+                name: company.name || '',
+                mailing_name: company.mailing_name || '',
                 gstin: company?.gstin || '',
-                pan_number: company?.pan_number || '',
+                pan_number: company?.pan || '',
                 website: company?.website || '',
                 email: company?.email || '',
                 code: company?.phone?.code || '',
                 number: company?.phone?.number || '',
-                alter_code: company?.alter_phone?.code || '',
-                alter_number: company?.alter_phone?.number || '',
+                address_1: company?.address_1 || '',
+                address_2: company?.address_2 || '',
                 image: typeof company?.image === 'string' ? company?.image : '',
-                business_type: company?.business_type || ''
+                country: company?.country || ''
             });
 
             setImagePreview(
@@ -250,8 +269,9 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
 
         setIsLoading(true);
         const sanitizedData: Partial<SetCompany> = {
-            company_name: data.company_name.trim(),
-            brand_name: data.brand_name.trim(),
+            name: data.name.trim(),
+            state: data.state.trim(),
+            country: data.country.trim(),
         };
 
         if (data.email && data.email !== '') sanitizedData.email = data.email.trim();
@@ -259,12 +279,17 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
         if (data.pan_number && data.pan_number !== '') sanitizedData.pan_number = data.pan_number.trim();
         if (data.number && data.number !== '') sanitizedData.number = data.number.trim();
         if (data.code && data.code !== '') sanitizedData.code = data.code.trim();
-        if (data.alter_code && data.alter_code !== '') sanitizedData.alter_code = data.alter_code.trim();
-        if (data.alter_number && data.alter_number !== '') sanitizedData.alter_number = data.alter_number.trim();
-        if (data.website && data.website !== '') sanitizedData.website = data.website.trim();
-        if (data.image && typeof data.image !== 'string') sanitizedData.image = data.image;
-        if (data.business_type && data.business_type !== '') sanitizedData.business_type = data.business_type.trim();
+        if (data.address_1 && data.address_1 !== '') sanitizedData.address_1 = data.address_1.trim();
+        if (data.address_2 && data.address_2 !== '') sanitizedData.address_2 = data.address_2.trim();
+        if (data.pinCode && data.pinCode !== '') sanitizedData.pinCode = data.pinCode.trim();
+        if (data.financial_year_start && data.financial_year_start !== '') sanitizedData.financial_year_start = data.financial_year_start.trim();
+        if (data.books_begin_from && data.books_begin_from !== '') sanitizedData.books_begin_from = data.books_begin_from.trim();
 
+        if (data.website && data.website !== '') sanitizedData.website = data.website.trim();
+        if (data.mailing_name && data.mailing_name !== '') sanitizedData.mailing_name = data.mailing_name.trim();
+        if (data.image && typeof data.image !== 'string') sanitizedData.image = data.image;
+
+        console.log("Submitting company data:", sanitizedData);
         const formData = new FormData();
         Object.entries(sanitizedData).forEach(([key, value]) => {
             if (typeof value === 'boolean') {
@@ -274,29 +299,52 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
             }
         });
 
-        await toast.promise(
-            dispatch(updateCompany({
-                data: formData,
-                id: company?._id ?? '',
-            }))
-                .unwrap()
-                .then(() => {
-                    setIsLoading(false);
-                    onClose();
-                    onUpdated();
-                })
-                .catch(() => {
-                    setIsLoading(false);
-                }),
-            {
-                loading: <b>Updating your company... ⏳</b>,
-                success: <b>Company Details successfully updated! 🎉</b>,
-                error: <b>Failed to update company. 🚫</b>,
-            }
-        );
+        if (company) {
+            await toast.promise(
+                dispatch(updateCompany({ data: formData, id: company._id }))
+                    .unwrap()
+                    .then(() => {
+                        setIsLoading(false);
+                        onClose();
+                        if (onUpdated)
+                            onUpdated();
+                    })
+                    .catch(() => {
+                        setIsLoading(false);
+                    }),
+                {
+                    loading: <b>Updating your company... ⏳</b>,
+                    success: <b>Company Details successfully updated! 🎉</b>,
+                    error: <b>Failed to update company. 🚫</b>,
+                }
+            );
+        }
+        else {
+            await toast.promise(
+                dispatch(createCompany(formData))
+                    .unwrap()
+                    .then(() => {
+                        setIsLoading(false);
+                        onClose();
+                        if (onCreated)
+                            onCreated();
+                        if (onUpdated)
+                            onUpdated();
+                    })
+                    .catch(() => {
+                        setIsLoading(false);
+                    }),
+                {
+                    loading: <b>Creating your company... ⏳</b>,
+                    success: <b>Company Details successfully created! 🎉</b>,
+                    error: <b>Failed to create company. 🚫</b>,
+                }
+            );
+        }
+
     };
 
-    const isFormValid = data.company_name.trim() && data.brand_name.trim();
+    const isFormValid = data.name.trim() && data.state.trim();
 
     return (
         <Drawer
@@ -353,10 +401,10 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent',
                         }}>
-                            Edit Company Details
+                            {company ? 'Edit Company Details' : 'Create New Company'}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                            Update your company information and branding
+                            {company ? 'Update your company information' : 'Fill in the details to create a new company'}
                         </Typography>
                     </Box>
                 </Box>
@@ -569,8 +617,8 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                                                 fullWidth
                                                 label="Company Name"
                                                 placeholder="Enter your company name"
-                                                value={data.company_name}
-                                                onChange={(e) => handleInputChange('company_name', e.target.value)}
+                                                value={data.name}
+                                                onChange={(e) => handleInputChange('name', e.target.value)}
                                                 error={!!formErrors.company_name}
                                                 helperText={formErrors.company_name}
                                                 required
@@ -578,33 +626,6 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                                                     startAdornment: (
                                                         <InputAdornment position="start">
                                                             <Business color={formErrors.company_name ? 'error' : 'primary'} />
-                                                        </InputAdornment>
-                                                    ),
-                                                }}
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        borderRadius: 2,
-                                                        transition: 'all 0.3s ease',
-                                                        '&:hover': {
-                                                            transform: 'translateY(-1px)',
-                                                        }
-                                                    }
-                                                }}
-                                            />
-
-                                            <TextField
-                                                fullWidth
-                                                label="Brand Name"
-                                                placeholder="Enter your brand name"
-                                                value={data.brand_name}
-                                                onChange={(e) => handleInputChange('brand_name', e.target.value)}
-                                                error={!!formErrors.brand_name}
-                                                helperText={formErrors.brand_name}
-                                                required
-                                                InputProps={{
-                                                    startAdornment: (
-                                                        <InputAdornment position="start">
-                                                            <Business color={formErrors.brand_name ? 'error' : 'primary'} />
                                                         </InputAdornment>
                                                     ),
                                                 }}
@@ -694,10 +715,10 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
 
                                     <TextField
                                         fullWidth
-                                        label="Business Type"
+                                        label="Mailing Name"
                                         placeholder="e.g., Technology, Manufacturing, Retail"
-                                        value={data.business_type}
-                                        onChange={(e) => handleInputChange('business_type', e.target.value)}
+                                        value={data.mailing_name}
+                                        onChange={(e) => handleInputChange('mailing_name', e.target.value)}
                                         InputProps={{
                                             startAdornment: (
                                                 <InputAdornment position="start">
@@ -716,6 +737,147 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                                         }}
                                     />
                                 </Box>
+
+                                <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
+                                    <TextField
+                                        fullWidth
+                                        label="Street Address 1"
+                                        placeholder="123 Main St, Suite 456"
+                                        type="text"
+                                        value={data.address_1}
+                                        onChange={(e) => handleInputChange('address_1', e.target.value)}
+                                        error={!!formErrors.address_1}
+                                        helperText={formErrors.address_1}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <Email color={formErrors.address_1 ? 'error' : 'primary'} />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                                transition: 'all 0.3s ease',
+                                                '&:hover': {
+                                                    transform: 'translateY(-1px)',
+                                                }
+                                            }
+                                        }}
+                                    />
+                                    <TextField
+                                        fullWidth
+                                        label="Street Address 2"
+                                        placeholder="Apt, Suite, or Building"
+                                        type="text"
+                                        value={data.address_2}
+                                        onChange={(e) => handleInputChange('address_2', e.target.value)}
+                                        error={!!formErrors.address_2}
+                                        helperText={formErrors.address_2}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <Email color={formErrors.address_2 ? 'error' : 'primary'} />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                                transition: 'all 0.3s ease',
+                                                '&:hover': {
+                                                    transform: 'translateY(-1px)',
+                                                }
+                                            }
+                                        }}
+                                    />
+
+                                    <TextField
+                                        fullWidth
+                                        label="State/Province"
+                                        placeholder="e.g., California, Ontario"
+                                        type="text"
+                                        value={data.state}
+                                        onChange={(e) => handleInputChange('state', e.target.value)}
+                                        error={!!formErrors.state}
+                                        helperText={formErrors.state}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <Email color={formErrors.state ? 'error' : 'primary'} />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                                transition: 'all 0.3s ease',
+                                                '&:hover': {
+                                                    transform: 'translateY(-1px)',
+                                                }
+                                            }
+                                        }}
+                                    />
+
+                                    <TextField
+                                        fullWidth
+                                        label="Country"
+                                        placeholder="e.g., United States, Canada"
+                                        type="text"
+                                        value={data.country}
+                                        onChange={(e) => handleInputChange('country', e.target.value)}
+                                        error={!!formErrors.country}
+                                        helperText={formErrors.country}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <Email color={formErrors.country ? 'error' : 'primary'} />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                                transition: 'all 0.3s ease',
+                                                '&:hover': {
+                                                    transform: 'translateY(-1px)',
+                                                }
+                                            }
+                                        }}
+                                    />
+
+
+                                    <TextField
+                                        fullWidth
+                                        label="Postal Code"
+                                        placeholder="e.g., 12345, A1B 2C3"
+                                        type="text"
+                                        value={data.pinCode}
+                                        onChange={(e) => handleInputChange('pinCode', e.target.value)}
+                                        error={!!formErrors.pinCode}
+                                        helperText={formErrors.pinCode}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <Email color={formErrors.pinCode ? 'error' : 'primary'} />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                                transition: 'all 0.3s ease',
+                                                '&:hover': {
+                                                    transform: 'translateY(-1px)',
+                                                }
+                                            }
+                                        }}
+                                    />
+
+                                </Box>
+
+
+
                             </Box>
 
                             {/* Legal Information */}
@@ -771,6 +933,58 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                                             startAdornment: (
                                                 <InputAdornment position="start">
                                                     <AccountBalance color={formErrors.pan_number ? 'error' : 'primary'} />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                                transition: 'all 0.3s ease',
+                                                '&:hover': {
+                                                    transform: 'translateY(-1px)',
+                                                }
+                                            }
+                                        }}
+                                    />
+                                    <TextField
+                                        fullWidth
+                                        label="Finacial Year Start"
+                                        placeholder="YYYY-MM-DD"
+                                        type="date"
+                                        value={data.financial_year_start}
+                                        onChange={(e) => handleInputChange('financial_year_start', e.target.value.toUpperCase())}
+                                        error={!!formErrors.financial_year_start}
+                                        helperText={formErrors.financial_year_start || " YYYY-MM-DD format"}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <AccountBalance color={formErrors.financial_year_start ? 'error' : 'primary'} />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 2,
+                                                transition: 'all 0.3s ease',
+                                                '&:hover': {
+                                                    transform: 'translateY(-1px)',
+                                                }
+                                            }
+                                        }}
+                                    />
+                                    <TextField
+                                        fullWidth
+                                        label="Books Beginning Date"
+                                        placeholder="YYYY-MM-DD"
+                                        value={data.books_begin_from}
+                                        onChange={(e) => handleInputChange('books_begin_from', e.target.value.toUpperCase())}
+                                        error={!!formErrors.books_begin_from}
+                                        helperText={formErrors.books_begin_from || " YYYY-MM-DD format"}
+                                        type="date"
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <AccountBalance color={formErrors.books_begin_from ? 'error' : 'primary'} />
                                                 </InputAdornment>
                                             ),
                                         }}
@@ -879,114 +1093,7 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
 
                                 </Box>
                             </Box>
-                            {/* Additional Notes */}
-                            <Box sx={{ mb: 4 }}>
-                                <Typography variant="h6" gutterBottom sx={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 1,
-                                    fontWeight: 600,
-                                    color: theme.palette.primary.main
-                                }}>
-                                    <Note />
-                                    Additional Details
-                                </Typography>
-                                <Divider sx={{ mb: 3 }} />
 
-                                <Box sx={{ gridColumn: 'span 2', display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                        <FormControl fullWidth error={!!formErrors.alter_code}>
-                                            <InputLabel id="alter-country-code-label">Country Code</InputLabel>
-                                            <Select
-                                                labelId="alter-country-code-label"
-                                                value={data.alter_code || ''}
-                                                label="Country Code"
-                                                onChange={(e) => handleInputChange('alter_code', e.target.value)}
-                                                renderValue={(selected) => {
-                                                    const country = CountryCodes.find(c => c.dial_code === selected);
-                                                    return country ? (
-                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                            <Avatar
-                                                                src={`/src/assets/flags/${country.code.toLowerCase()}.png`}
-                                                                alt={country.code}
-                                                                sx={{ width: 24, height: 24 }}
-                                                                imgProps={{
-                                                                    onError: (e) => {
-                                                                        const target = e.target as HTMLImageElement;
-                                                                        target.onerror = null;
-                                                                        target.src = `https://flagcdn.com/24x18/${country.code.toLowerCase()}.png`;
-                                                                    }
-                                                                }}
-                                                            />
-                                                            <span>{country.dial_code}</span>
-                                                        </Box>
-                                                    ) : selected;
-                                                }}
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        borderRadius: 2,
-                                                        transition: 'all 0.3s ease',
-                                                        '&:hover': {
-                                                            transform: 'translateY(-1px)',
-                                                        }
-                                                    }
-                                                }}
-                                            >
-                                                {CountryCodes.map((country) => (
-                                                    <MenuItem key={country.code} value={country.dial_code}>
-                                                        <ListItemIcon>
-                                                            <Avatar
-                                                                src={`/src/assets/flags/${country.code.toLowerCase()}.png`}
-                                                                alt={country.code}
-                                                                sx={{ width: 24, height: 24 }}
-                                                                imgProps={{
-                                                                    onError: (e) => {
-                                                                        const target = e.target as HTMLImageElement;
-                                                                        target.onerror = null;
-                                                                        target.src = `https://flagcdn.com/24x18/${country.code.toLowerCase()}.png`;
-                                                                    }
-                                                                }}
-                                                            />
-                                                        </ListItemIcon>
-                                                        <ListItemText primary={`${country.name} (${country.dial_code})`} />
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
-                                            <FormHelperText>{formErrors.alter_code || 'Select country code'}</FormHelperText>
-                                        </FormControl>
-                                    </Box>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                        <TextField
-                                            fullWidth
-                                            label="Alternate Number"
-                                            placeholder="+91 98765 43210"
-                                            type="tel"
-                                            error={!!formErrors.alter_number}
-                                            value={data.alter_number}
-                                            helperText={formErrors.alter_number || "10 digits"}
-                                            onChange={(e) => handleInputChange('alter_number', e.target.value)}
-                                            InputProps={{
-                                                startAdornment: (
-                                                    <InputAdornment position="start">
-                                                        <Phone color={formErrors.alter_number ? 'error' : 'primary'} />
-                                                    </InputAdornment>
-                                                ),
-                                            }}
-                                            sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    borderRadius: 2,
-                                                    transition: 'all 0.3s ease',
-                                                    '&:hover': {
-                                                        transform: 'translateY(-1px)',
-                                                    }
-                                                }
-                                            }}
-                                        />
-                                    </Box>
-
-                                </Box>
-
-                            </Box>
                             {/* Action Buttons */}
                             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
                                 <Button
@@ -1018,7 +1125,7 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                                         }
                                     }}
                                 >
-                                    {isLoading ? 'Saving...' : 'Save Company'}
+                                    {isLoading ? 'Saving...' : company ? 'Update Company' : 'Create Company'}
                                 </Button>
                             </Box>
                         </Paper>

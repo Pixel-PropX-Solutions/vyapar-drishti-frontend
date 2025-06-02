@@ -102,6 +102,25 @@ export interface Address {
   zip_code: string;
 }
 
+export interface GetGroup {
+  _id: string,
+  name: string,
+  user_id: string,
+  company_id: string,
+  description: string,
+  image: string | File | null,
+  is_deleted: boolean,
+  parent?: string,
+  primary_group: string,
+  is_revenue: boolean,
+  is_deemedpositive: boolean,
+  is_reserved: boolean,
+  affects_gross_profit: boolean,
+  sort_position: number,
+  created_at: string,
+  updated_at: string,
+}
+
 export interface GetBilling {
   _id: string,
   user_id?: string,
@@ -169,28 +188,37 @@ export interface CreateBasicUser {
   phone: PhoneNumber
 }
 
-export interface GetCreditors {
+export interface GetUserLedgers {
   _id: string,
   name: string,
   user_id: string,
+  company_id: string,
   phone?: PhoneNumber,
   email?: string,
-  gstin?: string,
-  company_name?: string,
-  billing: GetBilling,
-  shipping?: ShippingAddress,
-  // opening_balance?: number,
-  // balance_type?: string,
+  parent: string,
+  mailing_name: string,
+  mailing_pincode: string,
+  mailing_country?: string,
+  opening_balance: number,
+  is_deemed_positive: boolean,
   image?: string | File | null,
-  pan_number?: string,
-  // credit_limit?: number,
-  tags?: string,
-  // due_date?: number,
+  mailing_state: string,
+  is_revenue: boolean,
+  mailing_address?: string,
+  alias?: string,
   created_at: string,
   updated_at: string,
   is_deleted: boolean
 }
 
+export interface GetAllUserGroups {
+  _id: string,
+  name: string,
+  user_id: string,
+  company_id: string,
+  description: string,
+  primary_group: string,
+}
 
 export interface UserData {
   _id: string;
@@ -259,6 +287,21 @@ export interface GetUser {
   },
   image: File | string | null;
   created_at: string;
+  company?: [{
+    company_id: string;
+    name: string;
+    image: string;
+    address_1: string;
+    address_2: string;
+    pinCode: string;
+    state: string;
+    country: string;
+    is_selected: boolean,
+    phone: PhoneNumber;
+    email: string;
+    financial_year_start: string;
+    books_begin_from: string;
+  }]
 }
 
 export interface CreateUser {
@@ -268,36 +311,45 @@ export interface CreateUser {
 
 export interface GetCompany {
   _id: string,
+  name: string,
   user_id: string,
-  brand_name: string,
-  company_name: string,
-  phone?: PhoneNumber,
-  email?: string,
-  image?: File | string | null,
-  gstin?: string,
-  pan_number?: string,
-  business_type?: string,
-  website?: string,
-  alter_phone?: PhoneNumber,
-  billing?: GetBilling,
-  shipping?: ShippingAddress,
-  created_at?: string,
-  updated_at?: string,
+  mailing_name: string,
+  address_1: string,
+  address_2: string,
+  pinCode: string,
+  state: string,
+  country: string,
+  phone: PhoneNumber,
+  email: string,
+  financial_year_start: string,
+  books_begin_from: string,
+  image: string,
+  gstin: string,
+  pan: string,
+  is_selected: boolean,
+  website: string,
+  created_at: string,
+  updated_at: string,
 }
 
 export interface SetCompany {
   user_id: string,
-  brand_name: string,
-  company_name: string,
+  name: string,
+  mailing_name?: string,
+  address_1?: string,
+  address_2?: string,
+  pinCode?: string,
+  state: string,
+  country: string,
+  financial_year_start: string, // Use string for date format
+  books_begin_from: string, // Use string for date format
+  is_deleted: boolean,
   number?: string;
   code?: string;
-  alter_number?: string;
-  alter_code?: string;
   email?: string,
   image?: File | string | null,
   gstin?: string,
   pan_number?: string,
-  business_type?: string,
   website?: string,
 }
 

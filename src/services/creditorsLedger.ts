@@ -2,12 +2,14 @@ import userApi from "@/api/api";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 export const viewAllCreditors = createAsyncThunk(
-    "view/all/creditors",
+    "view/all/ledger",
     async (
         {
             searchQuery,
+            company_id,
             filterState,
             pageNumber,
+            type,
             is_deleted,
             limit,
             sortField,
@@ -15,7 +17,9 @@ export const viewAllCreditors = createAsyncThunk(
         }: {
             searchQuery: string;
             filterState: string;
+            company_id: string;
             sortField: string;
+            type: string;
             is_deleted: boolean;
             pageNumber: number;
             limit: number;
@@ -25,11 +29,11 @@ export const viewAllCreditors = createAsyncThunk(
     ) => {
         try {
             const response = await userApi.get(
-                `creditor/view/all?search=${searchQuery}&is_deleted=${is_deleted}&state=${filterState === 'All-States' ? "" : filterState}&page_no=${pageNumber}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"
+                `/ledger/view/all?${company_id !== "" ? 'company_id=' + company_id : ''}&${searchQuery !== "" ? 'search=' + searchQuery : ''}&${type === "" || type === "All" ? "" : 'parent=' + type}&is_deleted=${is_deleted}&state=${filterState === 'All-States' ? "" : filterState}&page_no=${pageNumber}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"
                 }`
             );
 
-            // console.log("viewAllCreditors response", response);
+            console.log("view all ledger response", response);
 
             if (response.data.success === true) {
                 const creditors = response.data.data.docs;
@@ -131,7 +135,7 @@ export const updateCreditor = createAsyncThunk(
     "update/creditor",
     async ({ data, id }: { data: FormData; id: string }, { rejectWithValue }) => {
         try {
-            
+
             console.log("updateChemist data", data);
             const response = await userApi.put(
                 `/creditor/update/${id}`,

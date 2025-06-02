@@ -40,8 +40,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { GetUserLedgers } from "@/utils/types";
 import CountryCode from "@/common/CountryCode";
+// import { updateCreditor } from "@/services/creditorsLedger";
+// import { viewAllBillings } from "@/services/billing";
+// import BillingEditingModal from "@/common/BillingEditingModal";
+// import { ENUM_ENTITY } from "@/utils/enums";
 import { getAllGroups } from "@/services/group";
-import GroupEditingModal from "@/common/GroupEditingModal";
 
 interface EditUserModalProps {
     open: boolean;
@@ -91,9 +94,9 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
     const [showSuccessAlert, setShowSuccessAlert] = useState(false);
     const { currentCompany } = useSelector((state: RootState) => state.auth);
     const { groups } = useSelector((state: RootState) => state.group);
-
-
-    const [openGroupModal, setOpenGroupModal] = useState(false);
+    
+    
+    // const [openBillingModal, setOpenBillingModal] = useState(false);
     const [selectedBillingOption, setSelectedBillingOption] = useState<{
         label: string;
         value: string;
@@ -567,10 +570,10 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
                         </Tooltip>
                         <Box>
                             <Typography variant="h5" fontWeight={600}>
-                               {cred ? `Edit Creditor: ${cred.name}` : 'New Creditor'}
+                                Edit Customer Details
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                {cred ? `Editing details for ${cred.name}` : 'Fill in the details to create a new creditor.'}
+                                Update customer information and preferences
                             </Typography>
                         </Box>
                     </Box>
@@ -979,7 +982,7 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
                                             label: `${cat.name} (${cat.primary_group})`,
                                             value: cat._id
                                         })) ?? []),
-                                        { label: '+ Add a new Customer Type', value: '__add_new__' }
+                                        // { label: '+ Add a new Customer Type', value: '__add_new__' }
                                     ]}
                                     getOptionLabel={(option) =>
                                         typeof option === 'string'
@@ -1014,28 +1017,28 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
                                     )}
                                     value={selectedBillingOption}
                                     onChange={(_, newValue) => {
-                                        if (
-                                            newValue &&
-                                            typeof newValue === 'object' &&
-                                            'value' in newValue &&
-                                            newValue.value === '__add_new__'
-                                        ) {
-                                            setOpenGroupModal(true);
-                                        } else {
-                                        setSelectedBillingOption(newValue && typeof newValue === 'object' && 'value' in newValue
-                                            ? { label: newValue.label, value: newValue.value }
-                                            : typeof newValue === 'string'
-                                                ? { label: newValue, value: newValue }
-                                                : null);
-                                        handleInputChange(
-                                            'parent',
-                                            newValue && typeof newValue === 'object' && 'value' in newValue
-                                                ? String(newValue.value)
+                                        // if (
+                                        //     newValue &&
+                                        //     typeof newValue === 'object' &&
+                                        //     'value' in newValue &&
+                                        //     newValue.value === '__add_new__'
+                                        // ) {
+                                        //     setOpenBillingModal(true);
+                                        // } else {
+                                            setSelectedBillingOption(newValue && typeof newValue === 'object' && 'value' in newValue
+                                                ? { label: newValue.label, value: newValue.value }
                                                 : typeof newValue === 'string'
-                                                    ? newValue
-                                                    : ''
-                                        );
-                                        }
+                                                    ? { label: newValue, value: newValue }
+                                                    : null);
+                                            handleInputChange(
+                                                'parent',
+                                                newValue && typeof newValue === 'object' && 'value' in newValue
+                                                    ? String(newValue.value)
+                                                    : typeof newValue === 'string'
+                                                        ? newValue
+                                                        : ''
+                                            );
+                                        // }
                                     }}
                                     sx={{
                                         '& .MuiAutocomplete-endAdornment': { display: 'none' },
@@ -1099,12 +1102,14 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
                     </Card>
 
                     {/* Billing Editing Modal */}
-                    <GroupEditingModal
-                        open={openGroupModal}
+                    {/* <BillingEditingModal
+                        open={openBillingModal}
                         onClose={() => {
-                            setOpenGroupModal(false);
+                            setOpenBillingModal(false);
                         }}
-                        group={null}
+                        billing={null}
+                        entity_type={ENUM_ENTITY.CREDITOR}
+                        entity_id={cred?._id ?? ''}
                         onCreated={async (nBill) => {
                             setSelectedBillingOption({
                                 label: nBill.name, value: nBill._id
@@ -1113,15 +1118,15 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
                                 ...prev,
                                 category: nBill._id,
                             }));
-                            setOpenGroupModal(false);
+                            setOpenBillingModal(false);
                             try {
-                                await dispatch(getAllGroups(currentCompany?._id || '')).unwrap();
+                                await dispatch(viewAllBillings()).unwrap();
                             } catch (error) {
                                 console.error('Failed to refresh categories:', error);
                                 toast.error('Failed to refresh categories after creating new category.');
                             }
                         }}
-                    />
+                    /> */}
                 </Box>
             </Box>
             {/* Footer with Action Buttons */}

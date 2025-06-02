@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AuthStates } from "@/utils/enums";
-import { getCurrentUser, login, logout, register } from "@/services/auth";
-import { GetUser } from "@/utils/types";
+import { getCurrentCompany, getCurrentUser, login, logout, register } from "@/services/auth";
+import { GetCompany, GetUser } from "@/utils/types";
 
 interface SignupData {
   firstName: string;
@@ -16,7 +16,7 @@ interface SignupData {
 
 interface AuthState {
   signupData: SignupData;
-  userId: string | null;
+  currentCompany: GetCompany | null;
   email: string;
   user: GetUser | null;
   isUserFetched: boolean;
@@ -27,7 +27,7 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-  userId: null,
+  currentCompany: null,
   email: "",
   accessToken: localStorage.getItem("accessToken")
     ? (localStorage.getItem("accessToken") as string)
@@ -51,9 +51,11 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
+
     setSignupData(state, action: PayloadAction<SignupData>) {
       state.signupData = action.payload;
     },
+
     setUser(state, action: PayloadAction<any>) {
       state.authState = action.payload.authState ?? state.authState;
       state.error = action.payload.error ?? state.error;
@@ -94,6 +96,19 @@ const authSlice = createSlice({
         state.error = action.payload as string;
         // state.authState = AuthStates.IDLE
         state.isUserFetched = true;
+        state.loading = false;
+      })
+
+      .addCase(getCurrentCompany.pending, (state) => {
+        state.error = null;
+        state.loading = true;
+      })
+      .addCase(getCurrentCompany.fulfilled, (state, action: PayloadAction<any>) => {
+        state.currentCompany = action.payload.currentCompany;
+        state.loading = false;
+      })
+      .addCase(getCurrentCompany.rejected, (state, action) => {
+        state.error = action.payload as string;
         state.loading = false;
       })
 

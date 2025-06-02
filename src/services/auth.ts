@@ -50,22 +50,35 @@ export const getCurrentUser = createAsyncThunk(
   }
 );
 
+export const getCurrentCompany = createAsyncThunk(
+  "get/current/company",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await userApi.get(`user/company`,);
+      // console.log("Current user response", response.data);
+
+      if (response.data.success === true) {
+        const currentCompany = response.data.data[0];
+        localStorage.setItem("currentCompany", currentCompany);
+        return { currentCompany };
+      } else return rejectWithValue("Login Failed: No access token recieved.");
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+        "Login failed: Invalid credentials or server error."
+      );
+    }
+  }
+);
+
 export const register = createAsyncThunk(
   "user/register",
   async (
-    {
-      userData,
-      company_name,
-      brand_name
-    }: {
-      userData: UserSignUp;
-      company_name: string;
-      brand_name: string;
-    },
+    userData: UserSignUp,
     { rejectWithValue }
   ) => {
     try {
-      const response = await userApi.post(`/auth/register?company_name=${company_name}&brand_name=${brand_name}`, userData);
+      const response = await userApi.post(`/auth/register`, userData);
       console.log("register response", response.data);
 
       const accessToken = response.data.accessToken;
