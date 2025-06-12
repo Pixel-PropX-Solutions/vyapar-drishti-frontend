@@ -86,24 +86,25 @@ export default function DeletionModal({ id }: { id: string }) {
   const { productData, productId } = useSelector(
     (state: RootState) => state.product
   );
+  const { currentCompany } = useSelector((state: RootState) => state.auth);
 
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
     if (id) {
-      dispatch(viewProduct(id));
+      dispatch(viewProduct({ product_id: id, company_id: currentCompany?._id ?? '' }));
     }
     window.scrollTo(0, 0);
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = "auto";
     };
-  }, [id, productId, dispatch]);
+  }, [id, productId, dispatch, currentCompany?._id]);
 
   const handleDelete = () => {
     toast.promise(
-      dispatch(deleteProduct(id ?? ""))
+      dispatch(deleteProduct({ id: id ?? "", company_id: currentCompany?._id ?? '' }))
         .unwrap()
         .then(() => {
           dispatch(setProductId({ productId: "" }));

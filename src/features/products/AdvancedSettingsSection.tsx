@@ -80,11 +80,11 @@ const AdvancedSettingsSection: React.FC<AdvancedSettingsSectionProps> = ({
         handleChange(field, event.target.value);
     };
 
-    const handleSwitchChange = (field: keyof FormCreateProduct) => (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        handleChange(field, event.target.checked);
-    };
+    // const handleSwitchChange = (field: keyof FormCreateProduct) => (
+    //     event: React.ChangeEvent<HTMLInputElement>
+    // ) => {
+    //     handleChange(field, event.target.checked);
+    // };
 
     return (
         <Box sx={{ p: 3 }}>

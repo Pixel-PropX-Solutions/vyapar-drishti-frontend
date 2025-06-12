@@ -53,7 +53,7 @@ const GroupEditingModal: React.FC<GroupEditingModalProps> = ({
     open,
     onClose,
     onUpdated,
-    onCreated,
+    // onCreated,
     group,
 }) => {
     const theme = useTheme();

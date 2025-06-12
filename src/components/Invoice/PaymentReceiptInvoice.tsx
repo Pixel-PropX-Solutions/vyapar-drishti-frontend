@@ -98,13 +98,13 @@ const PaymentReceiptInvoice: React.FC = () => {
                 {
                     vouchar_id: '',
                     ledger: singleEntry.customer,
-                    ledger_id: customersList.find(c => c.name === singleEntry.customer)?._id || '',
+                    ledger_id: customersList.find(c => c.ledger_name === singleEntry.customer)?._id || '',
                     amount: transactionType === "Payment" ? -singleEntry.amount : singleEntry.amount,
                 },
                 {
                     vouchar_id: '',
                     ledger: partyName,
-                    ledger_id: customersList.find(c => c.name === partyName)?._id || '',
+                    ledger_id: customersList.find(c => c.ledger_name === partyName)?._id || '',
                     amount: transactionType === "Payment" ? singleEntry.amount : -singleEntry.amount,
                 },
             ];

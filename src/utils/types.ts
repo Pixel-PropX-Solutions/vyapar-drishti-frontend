@@ -747,7 +747,7 @@ export interface OrderDetailsCreate {
 export interface Order {
   _id: string,
   order_date: string,
-  status: OrderStatus,
+  status: string,
   total_amount: number,
   Stockist: {
     _id: string,
@@ -766,7 +766,7 @@ export interface OrderDetails {
     phone_number: PhoneNumber
   },
   order_details: {
-    status: OrderStatus,
+    status: string,
     order_date: string,
     total_amount: number,
     _id: string,

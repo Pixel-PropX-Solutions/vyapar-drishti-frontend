@@ -37,7 +37,7 @@ import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { UpdateAccountingGroup } from "@/utils/types";
-import { createInventoryGroup, updateInventoryGroup } from "@/services/inventoryGroup";
+import { updateInventoryGroup } from "@/services/inventoryGroup";
 import { createAccountingGroup, viewDefaultAccountingGroup } from "@/services/accountingGroup";
 
 interface CreateCustomerGroupModalProps {
@@ -126,7 +126,7 @@ const CreateCustomerGroupModal: React.FC<CreateCustomerGroupModalProps> = ({
     };
 
     const handleParentChange = (
-        event: React.SyntheticEvent<Element, Event>,
+        _: React.SyntheticEvent<Element, Event>,
         value: string | { label: string; value: string } | null
     ) => {
         if (typeof value === 'string') {

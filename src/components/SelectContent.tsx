@@ -129,7 +129,7 @@ export default function SelectContent() {
               <ListItemAvatar>
                 <img src={logo} alt="Vyapar Drishti" height={40} style={{ borderRadius: "100%", height: '40px', overflow: "hidden" }} />
               </ListItemAvatar>
-              <ListItemText primary={user?.name?.first + " " + user?.name?.last || 'User'} secondary={company.name} />
+              <ListItemText primary={user?.name?.first + " " + user?.name?.last || 'User'} secondary={company.company_name} />
             </StyledMenuItem>
           ))
             : (

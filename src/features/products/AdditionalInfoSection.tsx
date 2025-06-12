@@ -36,7 +36,7 @@ interface AdditionalInfoSectionProps {
 const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({
     data,
     handleChange,
-    validationErrors,
+    // validationErrors,
     theme,
     categoryLists,
     inventoryGroupLists,
@@ -61,7 +61,7 @@ const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({
         value: invGroup.name
     })) || [];
 
-    const handleCategoryChange = (_, newValue: { label: string; value: string } | null) => {
+    const handleCategoryChange = (_: React.SyntheticEvent, newValue: { label: string; value: string } | null) => {
         if (newValue?.value === '__add_new__') {
             setOpenCategoryModal(true);
             return;
@@ -72,7 +72,7 @@ const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({
         handleChange('_category', newValue?.label || '');
     };
 
-    const handleGroupChange = (_, newValue: { label: string; value: string } | null) => {
+    const handleGroupChange = (_: React.SyntheticEvent, newValue: { label: string; value: string } | null) => {
         if (newValue?.value === '__add_new__') {
             setOpenGroupModal(true);
             return;
@@ -300,20 +300,6 @@ const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({
             </Stack>
         </Box>
     );
-};
-
-// Helper function to get group descriptions
-const getGroupDescription = (value: string): string => {
-    const descriptions: Record<string, string> = {
-        'raw_materials': 'Materials used in production',
-        'finished_goods': 'Completed products ready for sale',
-        'work_in_progress': 'Items currently being manufactured',
-        'consumables': 'Items consumed during production',
-        'trading_goods': 'Products bought and sold without modification',
-        'services': 'Service-based offerings',
-        'assets': 'Fixed assets and equipment'
-    };
-    return descriptions[value] || '';
 };
 
 export default AdditionalInfoSection;

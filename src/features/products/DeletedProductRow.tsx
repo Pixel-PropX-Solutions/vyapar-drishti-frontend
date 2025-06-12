@@ -92,16 +92,16 @@ export const DeletedProductRow: React.FC<DeletedProductRowProps> = ({ product, o
                                     width: 48,
                                     height: 48,
                                     mr: 2,
-                                    bgcolor: getAvatarColor(product.name),
+                                    bgcolor: getAvatarColor(product.stock_item_name),
                                     fontSize: '1rem',
                                     fontWeight: 700,
-                                    boxShadow: `0 4px 12px ${alpha(getAvatarColor(product.name), 0.3)}`,
+                                    boxShadow: `0 4px 12px ${alpha(getAvatarColor(product.stock_item_name), 0.3)}`,
                                     transition: 'all 0.3s ease',
                                     transform: isHovered ? 'scale(1.1)' : 'scale(1)',
                                 }}
                                 src={product?.image ? product.image : ''}
                             >
-                                {(getInitials(product.name))}
+                                {(getInitials(product.stock_item_name))}
                             </Avatar>
                             <Box sx={{ flex: 1 }}>
                                 <Typography
@@ -114,7 +114,7 @@ export const DeletedProductRow: React.FC<DeletedProductRowProps> = ({ product, o
                                         transition: 'color 0.3s ease',
                                     }}
                                 >
-                                    {product.name}
+                                    {product.stock_item_name}
                                 </Typography>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                     <Chip
@@ -273,14 +273,14 @@ export const DeletedProductRow: React.FC<DeletedProductRowProps> = ({ product, o
                     }}
                 >
                     <DeleteIcon />
-                    Delete {product.name}?
+                    Delete {product.stock_item_name}?
                 </DialogTitle>
                 <DialogContent>
                     <Alert severity="warning" sx={{ mb: 2 }}>
                         This action cannot be undone. The product will be permanently removed from your inventory.
                     </Alert>
                     <Typography>
-                        Are you sure you want to delete "<strong>{product.name}</strong>"?
+                        Are you sure you want to delete "<strong>{product.stock_item_name}</strong>"?
                     </Typography>
                 </DialogContent>
                 <DialogActions sx={{ p: 3, gap: 1 }}>

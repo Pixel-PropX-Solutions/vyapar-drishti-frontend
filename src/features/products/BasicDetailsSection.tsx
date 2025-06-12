@@ -60,7 +60,7 @@ const BasicDetailsSection: React.FC<BasicDetailsSectionProps> = ({
     console.log('Selected unit option:', selectedUnitOption);
     console.log('Image preview:', imagePreview);
 
-    const handleUnitChange = (_, newValue: { label: string; value: string } | null) => {
+    const handleUnitChange = (_: React.SyntheticEvent, newValue: { label: string; value: string } | null) => {
         if (newValue?.value === '__add_new__') {
             setOpenCategoryModal(true);
             return;

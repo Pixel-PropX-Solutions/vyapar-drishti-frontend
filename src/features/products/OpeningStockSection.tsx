@@ -77,16 +77,16 @@ const OpeningStockSection: React.FC<OpeningStockSectionProps> = ({
                 </Box>
 
                 {/* Info Alert */}
-                <Alert 
-                    severity="info" 
-                    sx={{ 
+                <Alert
+                    severity="info"
+                    sx={{
                         borderRadius: 1,
                         backgroundColor: alpha(theme.palette.info.main, 0.1),
                         border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`
                     }}
                 >
                     <Typography variant="body2">
-                        Opening stock details are optional but help in better inventory management. 
+                        Opening stock details are optional but help in better inventory management.
                         The opening value will be automatically calculated based on quantity and rate.
                     </Typography>
                 </Alert>
@@ -103,8 +103,8 @@ const OpeningStockSection: React.FC<OpeningStockSectionProps> = ({
                         <Stack spacing={3}>
                             {/* Opening Stock Quantity */}
                             <Box>
-                                <Typography variant="subtitle1" sx={{ 
-                                    fontWeight: 600, 
+                                <Typography variant="subtitle1" sx={{
+                                    fontWeight: 600,
                                     mb: 2,
                                     display: 'flex',
                                     alignItems: 'center',
@@ -113,7 +113,7 @@ const OpeningStockSection: React.FC<OpeningStockSectionProps> = ({
                                     <InventoryIcon fontSize="small" color="primary" />
                                     Opening Stock Quantity
                                 </Typography>
-                                
+
                                 <TextField
                                     fullWidth
                                     label="Opening Balance"
@@ -156,8 +156,8 @@ const OpeningStockSection: React.FC<OpeningStockSectionProps> = ({
 
                             {/* Opening Stock Rate */}
                             <Box>
-                                <Typography variant="subtitle1" sx={{ 
-                                    fontWeight: 600, 
+                                <Typography variant="subtitle1" sx={{
+                                    fontWeight: 600,
                                     mb: 2,
                                     display: 'flex',
                                     alignItems: 'center',
@@ -166,7 +166,7 @@ const OpeningStockSection: React.FC<OpeningStockSectionProps> = ({
                                     <MoneyIcon fontSize="small" color="primary" />
                                     Opening Stock Rate
                                 </Typography>
-                                
+
                                 <TextField
                                     fullWidth
                                     label="Opening Rate"
@@ -208,10 +208,10 @@ const OpeningStockSection: React.FC<OpeningStockSectionProps> = ({
                             </Box>
 
                             {/* Calculated Value Display */}
-                            {(data.opening_balance > 0 || data.opening_rate > 0) && (
+                            {((data?.opening_balance ?? 0) > 0 || (data?.opening_rate ?? 0) > 0) && (
                                 <>
                                     <Divider sx={{ my: 2 }} />
-                                    
+
                                     <Box sx={{
                                         p: 3,
                                         borderRadius: 1,
@@ -237,9 +237,9 @@ const OpeningStockSection: React.FC<OpeningStockSectionProps> = ({
                                                     </Typography>
                                                 </Box>
                                             </Stack>
-                                            
+
                                             <Box sx={{ textAlign: 'right' }}>
-                                                <Typography variant="h5" sx={{ 
+                                                <Typography variant="h5" sx={{
                                                     fontWeight: 700,
                                                     color: theme.palette.success.main,
                                                     display: 'flex',
@@ -247,9 +247,9 @@ const OpeningStockSection: React.FC<OpeningStockSectionProps> = ({
                                                     gap: 0.5
                                                 }}>
                                                     <TrendingUpIcon fontSize="small" />
-                                                    ₹{stockValue.toLocaleString('en-IN', { 
-                                                        minimumFractionDigits: 2, 
-                                                        maximumFractionDigits: 2 
+                                                    ₹{stockValue.toLocaleString('en-IN', {
+                                                        minimumFractionDigits: 2,
+                                                        maximumFractionDigits: 2
                                                     })}
                                                 </Typography>
                                                 <Typography variant="body2" color="text.secondary">
@@ -263,8 +263,8 @@ const OpeningStockSection: React.FC<OpeningStockSectionProps> = ({
 
                             {/* Low Stock Alert */}
                             <Box>
-                                <Typography variant="subtitle1" sx={{ 
-                                    fontWeight: 600, 
+                                <Typography variant="subtitle1" sx={{
+                                    fontWeight: 600,
                                     mb: 2,
                                     display: 'flex',
                                     alignItems: 'center',
@@ -273,7 +273,7 @@ const OpeningStockSection: React.FC<OpeningStockSectionProps> = ({
                                     <TrendingUpIcon fontSize="small" color="warning" />
                                     Low Stock Alert Level
                                 </Typography>
-                                
+
                                 <TextField
                                     fullWidth
                                     label="Low Stock Alert"

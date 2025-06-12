@@ -122,7 +122,7 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
     };
 
     const handleParentChange = (
-        event: React.SyntheticEvent<Element, Event>,
+        _: React.SyntheticEvent<Element, Event>,
         value: string | { label: string; value: string } | null
     ) => {
         if (typeof value === 'string') {

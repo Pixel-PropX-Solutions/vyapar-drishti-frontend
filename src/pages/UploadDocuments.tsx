@@ -29,8 +29,8 @@ import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import { DocumentUploadLoader } from "@/common/Loader";
 import userApi from "@/api/api";
 // import { setInvoiceData } from "@/store/reducers/invoiceReducer";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/store/store";
+// import { useDispatch } from "react-redux";
+// import { AppDispatch } from "@/store/store";
 import { useNavigate } from "react-router-dom";
 import { AIThinkingIndicator } from "@/common/AIThinkingIndicator";
 
@@ -222,7 +222,7 @@ export default function UploadDocuments() {
   const [dragOver, setDragOver] = useState(false);
   const [previewFile, setPreviewFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const dispatch = useDispatch<AppDispatch>();
+  // const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
   const processFile = useCallback((newFile: File) => {
