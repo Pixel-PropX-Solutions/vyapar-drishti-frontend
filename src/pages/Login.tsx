@@ -123,11 +123,8 @@ const LoginPage: React.FC = () => {
     };
 
     const resizeObserver = new ResizeObserver((entries) => {
-      for (let entry of entries) {
-<<<<<<< HEAD
+      for (const entry of entries) {
         console.log("ResizeObserver entry:", entry);
-=======
->>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
         calculatePaths();
         calculatePath();
       }

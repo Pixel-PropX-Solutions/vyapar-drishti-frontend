@@ -48,10 +48,7 @@ export const CustomerRow: React.FC<ProductRowProps> = ({ cus, onDelete, onEdit, 
     };
 
     const getInitials = (name: string): string => {
-<<<<<<< HEAD:src/features/profile/customers/CustomerRow.tsx
         if (!name) return '';
-=======
->>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637:src/features/profile/creditors/CustomerRow.tsx
         return name
             .split(' ')
             .map(word => word.charAt(0))
@@ -65,12 +62,8 @@ export const CustomerRow: React.FC<ProductRowProps> = ({ cus, onDelete, onEdit, 
             '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
             '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
         ];
-<<<<<<< HEAD:src/features/profile/customers/CustomerRow.tsx
         const safeName = name || '';
         const index = safeName.length % colors.length;
-=======
-        const index = name.length % colors.length;
->>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637:src/features/profile/creditors/CustomerRow.tsx
         return colors[index];
     };
 
@@ -102,27 +95,16 @@ export const CustomerRow: React.FC<ProductRowProps> = ({ cus, onDelete, onEdit, 
                                     height: 48,
                                     mr: 2,
                                     objectFit: 'contain',
-<<<<<<< HEAD:src/features/profile/customers/CustomerRow.tsx
                                     bgcolor: getAvatarColor(cus.ledger_name),
                                     fontSize: '1rem',
                                     fontWeight: 700,
                                     boxShadow: `0 4px 12px ${alpha(getAvatarColor(cus.ledger_name), 0.3)}`,
-=======
-                                    bgcolor: getAvatarColor(cus.name),
-                                    fontSize: '1rem',
-                                    fontWeight: 700,
-                                    boxShadow: `0 4px 12px ${alpha(getAvatarColor(cus.name), 0.3)}`,
->>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637:src/features/profile/creditors/CustomerRow.tsx
                                     transition: 'all 0.3s ease',
                                     transform: isHovered ? 'scale(1.1)' : 'scale(1)',
                                 }}
                                 src={typeof cus?.image === 'string' ? cus.image : (cus?.image instanceof File ? URL.createObjectURL(cus.image) : '')}
                             >
-<<<<<<< HEAD:src/features/profile/customers/CustomerRow.tsx
                                 {(getInitials(cus.ledger_name))}
-=======
-                                {(getInitials(cus.name))}
->>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637:src/features/profile/creditors/CustomerRow.tsx
                             </Avatar>
                             <Box sx={{ flex: 1 }}>
                                 <Typography
@@ -135,11 +117,7 @@ export const CustomerRow: React.FC<ProductRowProps> = ({ cus, onDelete, onEdit, 
                                         transition: 'color 0.3s ease',
                                     }}
                                 >
-<<<<<<< HEAD:src/features/profile/customers/CustomerRow.tsx
                                     {cus.ledger_name}
-=======
-                                    {cus.name}
->>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637:src/features/profile/creditors/CustomerRow.tsx
                                 </Typography>
                                 {cus.alias && <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                     <Chip
@@ -330,11 +308,7 @@ export const CustomerRow: React.FC<ProductRowProps> = ({ cus, onDelete, onEdit, 
                 aria-labelledby="delete-dialog-title"
                 PaperProps={{
                     sx: {
-<<<<<<< HEAD:src/features/profile/customers/CustomerRow.tsx
                         borderRadius: 1,
-=======
-                        borderRadius: 3,
->>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637:src/features/profile/creditors/CustomerRow.tsx
                         boxShadow: `0 24px 50px ${alpha(theme.palette.error.main, 0.2)}`,
                     }
                 }}
@@ -350,22 +324,14 @@ export const CustomerRow: React.FC<ProductRowProps> = ({ cus, onDelete, onEdit, 
                     }}
                 >
                     <DeleteIcon />
-<<<<<<< HEAD:src/features/profile/customers/CustomerRow.tsx
                     Delete {cus.ledger_name}?
-=======
-                    Delete {cus.name}?
->>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637:src/features/profile/creditors/CustomerRow.tsx
                 </DialogTitle>
                 <DialogContent>
                     <Alert severity="warning" sx={{ mb: 2 }}>
                         This action cannot be undone. The product will be permanently removed from your company database.
                     </Alert>
                     <Typography>
-<<<<<<< HEAD:src/features/profile/customers/CustomerRow.tsx
                         Are you sure you want to delete "<strong>{cus.ledger_name}</strong>"?
-=======
-                        Are you sure you want to delete "<strong>{cus.name}</strong>"?
->>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637:src/features/profile/creditors/CustomerRow.tsx
                     </Typography>
                 </DialogContent>
                 <DialogActions sx={{ p: 3, gap: 1 }}>
