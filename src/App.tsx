@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "./store/store";
 import { setUser } from "./store/reducers/authReducer";
 import { AuthStates, ROLE_ENUM } from "./utils/enums";
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import LoginPage from "@/pages/Login";
 import Dashboard from "./pages/Dashboard";
 import { Box, CircularProgress, CssBaseline } from "@mui/material";
@@ -16,25 +16,14 @@ import {
 } from "./theme/customizations";
 import Products from "./pages/Products";
 // import UploadDocuments from "./pages/UploadDocuments";
-// import CreateChemistProfile from "./features/profile/customers/CreateChemistProfile";
-// import CreateStockistProfile from "./features/profile/stockist/CreateStockistProfile";
 import CreateUserProfile from "./features/profile/createUser";
 import CreateProduct from "./features/products/createProduct";
-// import Chemists from "./pages/Chemist";
-// import ChemistProfile from "./features/profile/chemist/Chemistprofile";
-// import StockistProfile from "./features/profile/stockist/StockistProfile";
 // import AdminDashboard from "./pages/AdminDashboard";
 import { getCurrentUser } from "./services/auth";
-// import OrdersPage from "./pages/Order";
-// import CreateOrder from "./features/order/createOrder";
-// import ViewOrder from "./features/order/viewOrder";
-// import UpdateOrderProduct from "./features/order/updateOrder";
 import LandingPage from "./components/LandingPage/LandingPage";
 import AboutPage from "./components/About/AboutPage";
 import Timeline from "./features/inventory/timeline";
 import Warehouse from "./features/inventory/warehouse";
-// import InvoiceEditor from "./features/upload-documents/InvoiceEditor";
-// import ProductBilling from "./features/products/SellProduct";
 import ViewInventory from "./pages/Inventory";
 import ViewItem from "./features/products/ViewItem";
 import { ContactPage } from "@mui/icons-material";
@@ -45,7 +34,6 @@ import TermsOfServicePage from "./components/Legal/TermsOfServicePage";
 import PricingPage from "./components/Pricing/PricingPage";
 import SignUpPage from "./pages/SignUp";
 import ProfilePage from "./pages/Profile";
-// import { getCompany } from "./services/company";
 import CustomerLedger from "./pages/CustomerLedger";
 import Invoices from "./pages/Invoices";
 import CreateInvoice from "./components/Invoice/createInvoice";
@@ -154,19 +142,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/create/user" element={<CreateUserProfile />} />
                 <Route path="/customers" element={<CustomerLedger />} />
-                {/* <Route path="/stockists/:stockistId" element={<StockistProfile />} /> */}
-                {/* <Route
-                  path="/create/user/stockist/:id"
-                  element={<CreateStockistProfile />}
-                /> */}
-                {/* <Route path="/chemists" element={<Chemists />} /> */}
-                {/* <Route path="/chemists/:chemistId" element={<ChemistProfile />} /> */}
-                {/* <Route
-                  path="/create/user/chemist/:id"
-                  element={<CreateChemistProfile />}
-                /> */}
-                {/* <Route path="/sell" element={<ProductBilling />} /> */}
-                <Route path="/*" element={<Navigate to="/" replace />} />
+                {/* <Route path="/*" element={<Navigate to="/" replace />} /> */}
 
               </Route>
             )}
@@ -183,24 +159,12 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/groups" element={<GroupAndTypes />} />
                 <Route path="/inventory" element={<Warehouse />} />
                 <Route path="/timeline" element={<Timeline />} />
-                {/* <Route path="/sales" element={<OrdersPage />} /> */}
-                {/* <Route path="/purchases" element={<OrdersPage />} /> */}
-                {/* <Route path="/orders" element={<OrdersPage />} />
-                <Route path="/orders/create" element={<CreateOrder />} />
-                <Route path="/orders/:orderId" element={<ViewOrder />} />
-                <Route path="/orders/:orderId/product" element={<UpdateOrderProduct />} /> */}
-                {/* <Route path="/invoice" element={<InvoiceEditor />} /> */}
-                {/* <Route path="/upload" element={<UploadDocuments />} /> */}
-                {/* <Route path="/settings" element={<Settings />} /> */}
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/customers" element={<CustomerLedger />} />
                 <Route path="/invoices" element={<Invoices />} />
                 <Route path="/invoices/create" element={<CreateInvoice />} />
                 <Route path="/invoices/payment" element={<PaymentReceiptInvoice />} />
                 <Route path="/invoices/create/:type" element={<SalePurchaseInvoiceCreation />} />
-                {/* <Route path="/debitors" element={<ChemistProfile />} /> */}
-                {/* <Route path="/sell" element={<ProductBilling />} /> */}
-                {/* <Route path="/*" element={<Navigate to="/" replace />} /> */}
                 {/* <Route path="/*" element={<Navigate to="/" replace />} /> */}
               </Route>
             )}
