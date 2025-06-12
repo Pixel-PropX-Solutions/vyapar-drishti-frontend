@@ -40,11 +40,23 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { GetUserLedgers } from "@/utils/types";
 import CountryCode from "@/common/CountryCode";
+<<<<<<< HEAD
+<<<<<<<< HEAD:Temporary/EditCreditorModal.tsx
 // import { updateCustomer } from "@/services/customersLedger";
+=======
+// import { updateCreditor } from "@/services/creditorsLedger";
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
 // import { viewAllBillings } from "@/services/billing";
 // import BillingEditingModal from "@/common/BillingEditingModal";
 // import { ENUM_ENTITY } from "@/utils/enums";
 import { getAllGroups } from "@/services/group";
+<<<<<<< HEAD
+========
+import { getAllGroups } from "@/services/group";
+import GroupEditingModal from "@/common/GroupEditingModal";
+>>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637:src/features/profile/creditors/EditCreditorModal.tsx
+=======
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
 
 interface EditUserModalProps {
     open: boolean;
@@ -53,7 +65,15 @@ interface EditUserModalProps {
     cred: GetUserLedgers | null;
 }
 
+<<<<<<< HEAD
+<<<<<<<< HEAD:Temporary/EditCreditorModal.tsx
 interface CustomerFormData {
+========
+interface CreditorFormData {
+>>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637:src/features/profile/creditors/EditCreditorModal.tsx
+=======
+interface CreditorFormData {
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
     company_id: string,
     parent: string,
     mailing_name: string,
@@ -76,7 +96,11 @@ interface ValidationErrors {
     [key: string]: string;
 }
 
+<<<<<<< HEAD
 const EditCustomerModal: React.FC<EditUserModalProps> = ({
+=======
+const EditCreditorModal: React.FC<EditUserModalProps> = ({
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
     open,
     onClose,
     onUpdated,
@@ -88,21 +112,47 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
     // const [currentStep, setCurrentStep] = useState(0);
     const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
     const [isFormValid, setIsFormValid] = useState(false);
+<<<<<<< HEAD
     const customerImageRef = useRef<HTMLInputElement | null>(null);
+=======
+    const creditorImageRef = useRef<HTMLInputElement | null>(null);
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
     const [isDragActive, setIsDragActive] = useState(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [showSuccessAlert, setShowSuccessAlert] = useState(false);
     const { currentCompany } = useSelector((state: RootState) => state.auth);
+<<<<<<< HEAD
+<<<<<<<< HEAD:Temporary/EditCreditorModal.tsx
     const { groups } = useSelector((state: RootState) => state.accountingGroup);
     
     
     // const [openBillingModal, setOpenBillingModal] = useState(false);
+========
+    const { groups } = useSelector((state: RootState) => state.group);
+
+
+    const [openGroupModal, setOpenGroupModal] = useState(false);
+>>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637:src/features/profile/creditors/EditCreditorModal.tsx
+=======
+    const { groups } = useSelector((state: RootState) => state.group);
+    
+    
+    // const [openBillingModal, setOpenBillingModal] = useState(false);
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
     const [selectedBillingOption, setSelectedBillingOption] = useState<{
         label: string;
         value: string;
     } | null>(null);
 
+<<<<<<< HEAD
+<<<<<<<< HEAD:Temporary/EditCreditorModal.tsx
     const [data, setData] = useState<CustomerFormData>({
+========
+    const [data, setData] = useState<CreditorFormData>({
+>>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637:src/features/profile/creditors/EditCreditorModal.tsx
+=======
+    const [data, setData] = useState<CreditorFormData>({
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
         name: '',
         email: '',
         code: '',
@@ -119,7 +169,11 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
     });
 
     // Enhanced form validation
+<<<<<<< HEAD
     const validateField = (field: keyof CustomerFormData, value: string): string => {
+=======
+    const validateField = (field: keyof CreditorFormData, value: string): string => {
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
         switch (field) {
             case 'name':
                 if (!value.trim()) return 'Name is required';
@@ -165,7 +219,11 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
     const validateForm = useCallback((): boolean => {
         const errors: ValidationErrors = {};
         Object.keys(data).forEach(key => {
+<<<<<<< HEAD
             const field = key as keyof CustomerFormData;
+=======
+            const field = key as keyof CreditorFormData;
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
             const error = validateField(field, String(data[field] || ''));
             if (error) errors[field] = error;
         });
@@ -175,7 +233,11 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
     }, [data]);
 
     const handleInputChange = (
+<<<<<<< HEAD
         field: keyof CustomerFormData,
+=======
+        field: keyof CreditorFormData,
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
         value: string
     ) => {
         setData(prev => ({
@@ -253,7 +315,11 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
     }, []);
 
     const handleBoxClick = () => {
+<<<<<<< HEAD
         customerImageRef.current?.click();
+=======
+        creditorImageRef.current?.click();
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
     };
 
     const removeImage = useCallback((e: React.MouseEvent) => {
@@ -263,8 +329,13 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
             ...prev,
             image: ''
         }));
+<<<<<<< HEAD
         if (customerImageRef.current) {
             customerImageRef.current.value = '';
+=======
+        if (creditorImageRef.current) {
+            creditorImageRef.current.value = '';
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
         }
     }, []);
 
@@ -286,8 +357,13 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
         setImagePreview(null);
         setValidationErrors({});
         // setCurrentStep(0);
+<<<<<<< HEAD
         if (customerImageRef.current) {
             customerImageRef.current.value = '';
+=======
+        if (creditorImageRef.current) {
+            creditorImageRef.current.value = '';
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
         }
     };
 
@@ -297,11 +373,19 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
         const optionalFields = ['email', 'image', 'mailing_name', 'mailing_address', 'mailing_country', 'code', 'number', 'mailing_pincode'];
 
         const requiredCompleted = requiredFields.filter(field =>
+<<<<<<< HEAD
             data[field as keyof CustomerFormData] && String(data[field as keyof CustomerFormData]).trim()
         ).length;
 
         const optionalCompleted = optionalFields.filter(field =>
             data[field as keyof CustomerFormData] && String(data[field as keyof CustomerFormData]).trim()
+=======
+            data[field as keyof CreditorFormData] && String(data[field as keyof CreditorFormData]).trim()
+        ).length;
+
+        const optionalCompleted = optionalFields.filter(field =>
+            data[field as keyof CreditorFormData] && String(data[field as keyof CreditorFormData]).trim()
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
         ).length;
 
         const totalFields = requiredFields.length + optionalFields.length;
@@ -375,7 +459,15 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
         });
 
         // await toast.promise(
+<<<<<<< HEAD
+<<<<<<<< HEAD:Temporary/EditCreditorModal.tsx
         //     dispatch(updateCustomer({
+========
+        //     dispatch(updateCreditor({
+>>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637:src/features/profile/creditors/EditCreditorModal.tsx
+=======
+        //     dispatch(updateCreditor({
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
         //         data: formData,
         //         id: cred?._id ?? '',
         //     }))
@@ -394,9 +486,21 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
         //             setIsLoading(false);
         //         }),
         //     {
+<<<<<<< HEAD
+<<<<<<<< HEAD:Temporary/EditCreditorModal.tsx
         //         loading: "Updating customer details...",
         //         success: <b>Customer successfully updated! 🎉</b>,
         //         error: <b>Failed to update customer. Please try again.</b>,
+========
+        //         loading: "Updating creditor details...",
+        //         success: <b>Creditor successfully updated! 🎉</b>,
+        //         error: <b>Failed to update creditor. Please try again.</b>,
+>>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637:src/features/profile/creditors/EditCreditorModal.tsx
+=======
+        //         loading: "Updating creditor details...",
+        //         success: <b>Creditor successfully updated! 🎉</b>,
+        //         error: <b>Failed to update creditor. Please try again.</b>,
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
         //     }
         // );
     };
@@ -408,7 +512,11 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
             sx={{
                 mb: 3,
                 border: `1px solid ${theme.palette.divider}`,
+<<<<<<< HEAD
                 borderRadius: 1,
+=======
+                borderRadius: 2,
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
                 overflow: 'hidden'
             }}
         >
@@ -423,7 +531,11 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                     type="file"
                     accept="image/png, image/jpeg, image/jpg, image/webp"
                     style={{ display: 'none' }}
+<<<<<<< HEAD
                     ref={customerImageRef}
+=======
+                    ref={creditorImageRef}
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
                     onChange={e => {
                         const file = e.target.files?.[0];
                         if (file) handleImageChange(file);
@@ -438,7 +550,11 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                     onDragLeave={handleDragLeave}
                     sx={{
                         border: `2px dashed ${isDragActive ? theme.palette.primary.main : theme.palette.divider}`,
+<<<<<<< HEAD
                         borderRadius: 1,
+=======
+                        borderRadius: 2,
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
                         p: 1,
                         position: 'relative',
                         textAlign: 'center',
@@ -570,10 +686,23 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                         </Tooltip>
                         <Box>
                             <Typography variant="h5" fontWeight={600}>
+<<<<<<< HEAD
+<<<<<<<< HEAD:Temporary/EditCreditorModal.tsx
+=======
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
                                 Edit Customer Details
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
                                 Update customer information and preferences
+<<<<<<< HEAD
+========
+                               {cred ? `Edit Creditor: ${cred.name}` : 'New Creditor'}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                {cred ? `Editing details for ${cred.name}` : 'Fill in the details to create a new creditor.'}
+>>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637:src/features/profile/creditors/EditCreditorModal.tsx
+=======
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
                             </Typography>
                         </Box>
                     </Box>
@@ -589,7 +718,11 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                             py: 1.5,
                             fontSize: '1rem',
                             fontWeight: 600,
+<<<<<<< HEAD
                             borderRadius: 1,
+=======
+                            borderRadius: 2,
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
                             background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
                             boxShadow: theme.shadows[4],
                             '&:hover': {
@@ -622,10 +755,17 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                         value={getFormCompletionPercentage()}
                         sx={{
                             height: 6,
+<<<<<<< HEAD
                             borderRadius: 1,
                             backgroundColor: theme.palette.action.hover,
                             '& .MuiLinearProgress-bar': {
                                 borderRadius: 1,
+=======
+                            borderRadius: 3,
+                            backgroundColor: theme.palette.action.hover,
+                            '& .MuiLinearProgress-bar': {
+                                borderRadius: 3,
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
                                 background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`
                             }
                         }}
@@ -638,7 +778,11 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                         severity="success"
                         icon={<CheckCircle />}
                         sx={{
+<<<<<<< HEAD
                             borderRadius: 1,
+=======
+                            borderRadius: 2,
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
                             '& .MuiAlert-icon': {
                                 fontSize: 24
                             }
@@ -982,7 +1126,15 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                                             label: `${cat.name} (${cat.primary_group})`,
                                             value: cat._id
                                         })) ?? []),
+<<<<<<< HEAD
+<<<<<<<< HEAD:Temporary/EditCreditorModal.tsx
                                         // { label: '+ Add a new Customer Type', value: '__add_new__' }
+========
+                                        { label: '+ Add a new Customer Type', value: '__add_new__' }
+>>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637:src/features/profile/creditors/EditCreditorModal.tsx
+=======
+                                        // { label: '+ Add a new Customer Type', value: '__add_new__' }
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
                                     ]}
                                     getOptionLabel={(option) =>
                                         typeof option === 'string'
@@ -1017,6 +1169,10 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                                     )}
                                     value={selectedBillingOption}
                                     onChange={(_, newValue) => {
+<<<<<<< HEAD
+<<<<<<<< HEAD:Temporary/EditCreditorModal.tsx
+=======
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
                                         // if (
                                         //     newValue &&
                                         //     typeof newValue === 'object' &&
@@ -1039,6 +1195,33 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                                                         : ''
                                             );
                                         // }
+<<<<<<< HEAD
+========
+                                        if (
+                                            newValue &&
+                                            typeof newValue === 'object' &&
+                                            'value' in newValue &&
+                                            newValue.value === '__add_new__'
+                                        ) {
+                                            setOpenGroupModal(true);
+                                        } else {
+                                        setSelectedBillingOption(newValue && typeof newValue === 'object' && 'value' in newValue
+                                            ? { label: newValue.label, value: newValue.value }
+                                            : typeof newValue === 'string'
+                                                ? { label: newValue, value: newValue }
+                                                : null);
+                                        handleInputChange(
+                                            'parent',
+                                            newValue && typeof newValue === 'object' && 'value' in newValue
+                                                ? String(newValue.value)
+                                                : typeof newValue === 'string'
+                                                    ? newValue
+                                                    : ''
+                                        );
+                                        }
+>>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637:src/features/profile/creditors/EditCreditorModal.tsx
+=======
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
                                     }}
                                     sx={{
                                         '& .MuiAutocomplete-endAdornment': { display: 'none' },
@@ -1102,6 +1285,19 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                     </Card>
 
                     {/* Billing Editing Modal */}
+<<<<<<< HEAD
+<<<<<<<< HEAD:Temporary/EditCreditorModal.tsx
+                    {/* <BillingEditingModal
+                        open={openBillingModal}
+========
+                    <GroupEditingModal
+                        open={openGroupModal}
+>>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637:src/features/profile/creditors/EditCreditorModal.tsx
+                        onClose={() => {
+                            setOpenGroupModal(false);
+                        }}
+                        group={null}
+=======
                     {/* <BillingEditingModal
                         open={openBillingModal}
                         onClose={() => {
@@ -1110,6 +1306,7 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                         billing={null}
                         entity_type={ENUM_ENTITY.CREDITOR}
                         entity_id={cred?._id ?? ''}
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
                         onCreated={async (nBill) => {
                             setSelectedBillingOption({
                                 label: nBill.name, value: nBill._id
@@ -1118,15 +1315,33 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                                 ...prev,
                                 category: nBill._id,
                             }));
+<<<<<<< HEAD
+                            setOpenGroupModal(false);
+                            try {
+<<<<<<<< HEAD:Temporary/EditCreditorModal.tsx
+                                await dispatch(viewAllBillings()).unwrap();
+========
+                                await dispatch(getAllGroups(currentCompany?._id || '')).unwrap();
+>>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637:src/features/profile/creditors/EditCreditorModal.tsx
+=======
                             setOpenBillingModal(false);
                             try {
                                 await dispatch(viewAllBillings()).unwrap();
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
                             } catch (error) {
                                 console.error('Failed to refresh categories:', error);
                                 toast.error('Failed to refresh categories after creating new category.');
                             }
                         }}
+<<<<<<< HEAD
+<<<<<<<< HEAD:Temporary/EditCreditorModal.tsx
                     /> */}
+========
+                    />
+>>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637:src/features/profile/creditors/EditCreditorModal.tsx
+=======
+                    /> */}
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
                 </Box>
             </Box>
             {/* Footer with Action Buttons */}
@@ -1148,7 +1363,11 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                         py: 1.5,
                         fontSize: '1rem',
                         fontWeight: 600,
+<<<<<<< HEAD
                         borderRadius: 1,
+=======
+                        borderRadius: 2,
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
                         transition: 'all 0.3s ease',
                         '&:hover': {
                             backgroundColor: theme.palette.action.hover,
@@ -1170,7 +1389,11 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                         py: 1.5,
                         fontSize: '1rem',
                         fontWeight: 600,
+<<<<<<< HEAD
                         borderRadius: 1,
+=======
+                        borderRadius: 2,
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
                         background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
                         boxShadow: theme.shadows[4],
                         '&:hover': {
@@ -1191,4 +1414,8 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
     );
 };
 
+<<<<<<< HEAD
 export default EditCustomerModal;
+=======
+export default EditCreditorModal;
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637

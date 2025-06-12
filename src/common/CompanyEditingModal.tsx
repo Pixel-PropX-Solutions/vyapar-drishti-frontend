@@ -50,12 +50,16 @@ interface EditUserModalProps {
     onUpdated?: () => Promise<void>;
     onCreated?: () => Promise<void>;
     company: any;
+    onUpdated?: () => Promise<void>;
+    onCreated?: () => Promise<void>;
+    company: any;
 }
 
 const CompanyEditingModal: React.FC<EditUserModalProps> = ({
     open,
     onClose,
     onUpdated,
+    onCreated,
     onCreated,
     company,
 }) => {
@@ -82,10 +86,24 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
         financial_year_start: '',
         books_begin_from: '',
         is_deleted: false,
+        name: '',
+        mailing_name: '',
+        address_1: '',
+        address_2: '',
+        pinCode: '',
+        state: '',
+        country: '',
+        financial_year_start: '',
+        books_begin_from: '',
+        is_deleted: false,
         number: '',
         code: '',
         email: '',
+        email: '',
         image: '',
+        gstin: '',
+        pan_number: '',
+        website: '',
         gstin: '',
         pan_number: '',
         website: '',
@@ -96,9 +114,12 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
         const errors: Record<string, string> = {};
 
         if (!formData.name.trim()) {
+        if (!formData.name.trim()) {
             errors.company_name = 'Company name is required';
         }
 
+        if (!formData.state.trim()) {
+            errors.state = 'State is required';
         if (!formData.state.trim()) {
             errors.state = 'State is required';
         }
@@ -159,6 +180,7 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
     }, []);
 
 
+
     const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.stopPropagation();
@@ -211,10 +233,24 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
             financial_year_start: '',
             books_begin_from: '',
             is_deleted: false,
+            name: '',
+            mailing_name: '',
+            address_1: '',
+            address_2: '',
+            pinCode: '',
+            state: '',
+            country: '',
+            financial_year_start: '',
+            books_begin_from: '',
+            is_deleted: false,
             number: '',
             code: '',
             email: '',
+            email: '',
             image: '',
+            gstin: '',
+            pan_number: '',
+            website: '',
             gstin: '',
             pan_number: '',
             website: '',
@@ -235,10 +271,18 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                 financial_year_start: company.financial_year_start || '',
                 books_begin_from: company.books_begin_from || '',
                 is_deleted: false,
+                pinCode: company.pinCode || '',
+                state: company.state || '',
+                financial_year_start: company.financial_year_start || '',
+                books_begin_from: company.books_begin_from || '',
+                is_deleted: false,
                 user_id: company?.user_id || '',
                 name: company.name || '',
                 mailing_name: company.mailing_name || '',
+                name: company.name || '',
+                mailing_name: company.mailing_name || '',
                 gstin: company?.gstin || '',
+                pan_number: company?.pan || '',
                 pan_number: company?.pan || '',
                 website: company?.website || '',
                 email: company?.email || '',
@@ -246,7 +290,10 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                 number: company?.phone?.number || '',
                 address_1: company?.address_1 || '',
                 address_2: company?.address_2 || '',
+                address_1: company?.address_1 || '',
+                address_2: company?.address_2 || '',
                 image: typeof company?.image === 'string' ? company?.image : '',
+                country: company?.country || ''
                 country: company?.country || ''
             });
 
@@ -271,6 +318,9 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
             name: data.name.trim(),
             state: data.state.trim(),
             country: data.country.trim(),
+            name: data.name.trim(),
+            state: data.state.trim(),
+            country: data.country.trim(),
         };
 
         if (data.email && data.email !== '') sanitizedData.email = data.email.trim();
@@ -284,10 +334,18 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
         if (data.financial_year_start && data.financial_year_start !== '') sanitizedData.financial_year_start = data.financial_year_start.trim();
         if (data.books_begin_from && data.books_begin_from !== '') sanitizedData.books_begin_from = data.books_begin_from.trim();
 
+        if (data.address_1 && data.address_1 !== '') sanitizedData.address_1 = data.address_1.trim();
+        if (data.address_2 && data.address_2 !== '') sanitizedData.address_2 = data.address_2.trim();
+        if (data.pinCode && data.pinCode !== '') sanitizedData.pinCode = data.pinCode.trim();
+        if (data.financial_year_start && data.financial_year_start !== '') sanitizedData.financial_year_start = data.financial_year_start.trim();
+        if (data.books_begin_from && data.books_begin_from !== '') sanitizedData.books_begin_from = data.books_begin_from.trim();
+
         if (data.website && data.website !== '') sanitizedData.website = data.website.trim();
+        if (data.mailing_name && data.mailing_name !== '') sanitizedData.mailing_name = data.mailing_name.trim();
         if (data.mailing_name && data.mailing_name !== '') sanitizedData.mailing_name = data.mailing_name.trim();
         if (data.image && typeof data.image !== 'string') sanitizedData.image = data.image;
 
+        console.log("Submitting company data:", sanitizedData);
         console.log("Submitting company data:", sanitizedData);
         const formData = new FormData();
         Object.entries(sanitizedData).forEach(([key, value]) => {
@@ -298,6 +356,52 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
             }
         });
 
+        if (company) {
+            await toast.promise(
+                dispatch(updateCompany({ data: formData, id: company._id }))
+                    .unwrap()
+                    .then(() => {
+                        setIsLoading(false);
+                        onClose();
+                        if (onUpdated)
+                            onUpdated();
+                    })
+                    .catch(() => {
+                        setIsLoading(false);
+                    }),
+                {
+                    loading: <b>Updating your company... ⏳</b>,
+                    success: <b>Company Details successfully updated! 🎉</b>,
+                    error: <b>Failed to update company. 🚫</b>,
+                }
+            );
+        }
+        else {
+            await toast.promise(
+                dispatch(createCompany(formData))
+                    .unwrap()
+                    .then(() => {
+                        setIsLoading(false);
+                        onClose();
+                        if (onCreated)
+                            onCreated();
+                        if (onUpdated)
+                            onUpdated();
+                    })
+                    .catch(() => {
+                        setIsLoading(false);
+                    }),
+                {
+                    loading: <b>Creating your company... ⏳</b>,
+                    success: <b>Company Details successfully created! 🎉</b>,
+                    error: <b>Failed to create company. 🚫</b>,
+                }
+            );
+        }
+
+    };
+
+    const isFormValid = data.name.trim() && data.state.trim();
         if (company) {
             await toast.promise(
                 dispatch(updateCompany({ data: formData, id: company._id }))
@@ -401,8 +505,10 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                             WebkitTextFillColor: 'transparent',
                         }}>
                             {company ? 'Edit Company Details' : 'Create New Company'}
+                            {company ? 'Edit Company Details' : 'Create New Company'}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
+                            {company ? 'Update your company information' : 'Fill in the details to create a new company'}
                             {company ? 'Update your company information' : 'Fill in the details to create a new company'}
                         </Typography>
                     </Box>
@@ -618,6 +724,8 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                                                 placeholder="Enter your company name"
                                                 value={data.name}
                                                 onChange={(e) => handleInputChange('name', e.target.value)}
+                                                value={data.name}
+                                                onChange={(e) => handleInputChange('name', e.target.value)}
                                                 error={!!formErrors.company_name}
                                                 helperText={formErrors.company_name}
                                                 required
@@ -715,7 +823,10 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                                     <TextField
                                         fullWidth
                                         label="Mailing Name"
+                                        label="Mailing Name"
                                         placeholder="e.g., Technology, Manufacturing, Retail"
+                                        value={data.mailing_name}
+                                        onChange={(e) => handleInputChange('mailing_name', e.target.value)}
                                         value={data.mailing_name}
                                         onChange={(e) => handleInputChange('mailing_name', e.target.value)}
                                         InputProps={{
@@ -1089,6 +1200,10 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                                         </Box>
 
                                     </Box>
+                                    </Box>
+
+                                </Box>
+                            </Box>
 
                                 </Box>
                             </Box>
@@ -1124,6 +1239,7 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                                         }
                                     }}
                                 >
+                                    {isLoading ? 'Saving...' : company ? 'Update Company' : 'Create Company'}
                                     {isLoading ? 'Saving...' : company ? 'Update Company' : 'Create Company'}
                                 </Button>
                             </Box>

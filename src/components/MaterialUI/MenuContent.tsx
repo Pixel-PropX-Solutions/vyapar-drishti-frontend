@@ -49,7 +49,10 @@ const createMainListItems = (role: string): MenuItem[] => {
     { text: "Inventory", path: "/inventory", icon: <InventoryIcon />, requiredRole: 'user' },
     { text: "Timeline", path: "/timeline", icon: <ViewTimelineIcon />, requiredRole: 'user' },
     { text: "Products", path: "/products", icon: <ProductIcon />, requiredRole: 'user' },
+<<<<<<< HEAD:src/components/MaterialUI/MenuContent.tsx
     { text: "Groups & Types", path: "/groups", icon: <ProductIcon />, requiredRole: 'user' },
+=======
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637:src/components/MenuContent.tsx
     { text: "Customers", path: "/customers", icon: <People />, requiredRole: 'user' },
     { text: "Invoices", path: "/invoices", icon: <LocalShippingIcon />, requiredRole: 'user' },
     // { text: "Sell Products", path: "/sell", icon: <ProductIcon />, requiredRole: 'user' },
