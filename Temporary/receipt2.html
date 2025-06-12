@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voucher</title>
+    <style>
+        @media print {
+            @page {
+                size: A4;
+                margin: 0.5cm;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+            }
+        }
+
+        body {
+            max-width: 190mm;
+            max-height: 150mm;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.4;
+            margin: 20px;
+            padding: 0;
+            background-color: #ffffff;
+        }
+
+        .voucher-container {
+            border: 2px solid #000;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+        }
+
+        .header {
+            color: black;
+            padding: 10px 15px;
+            font-size: 20px;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .header-title {
+            background-color: #2c5aa0;
+            color: white;
+            padding: 10px 10px;
+            display: inline-block;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .header-right {
+            position: absolute;
+            right: 30px;
+            text-align: right;
+            top: 10px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .header-field {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+        }
+
+        .rupee-symbol {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .main-content {
+            padding: 20px;
+        }
+
+        .form-row {
+            display: flex;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .form-label {
+            font-size: 16px;
+            font-weight: bold;
+            margin-right: 10px;
+            min-width: 120px;
+        }
+
+
+        .form-input {
+            flex: 1;
+            border: none;
+            border-bottom: 1px solid #000;
+            padding: 5px 0;
+            font-size: 12px;
+            background: transparent;
+        }
+
+
+        .bottom-section {
+            /* margin-top: 20px; */
+            display: flex;
+            gap: 20px;
+        }
+
+        .left-bottom {
+            flex: 1;
+        }
+
+        .right-bottom {
+            width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .approval-box {
+            margin-bottom: 15px;
+        }
+
+        .box-label {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .payment-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .payment-box {
+            border: 2px solid #000;
+            padding: 8px 15px;
+            font-weight: bold;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .paid-by-label {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .stamp-box {
+            border: 2px solid #000;
+            padding: 10px;
+            text-align: center;
+            font-size: 14px;
+            margin-bottom: 10px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .signature-section {
+            text-align: center;
+            font-size: 11px;
+            border-top: 1px solid #000;
+            padding-top: 10px;
+        }
+
+        .watermark {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            font-size: 10px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="voucher-container">
+
+        <div class="header">
+            <span class="header-title">
+                VOUCHER
+            </span>
+            <div class="header-right">
+                <div class="header-field">
+                    <span>No. REC-234565</span>
+                </div>
+                <div class="header-field">
+                    <span>Date - 24-05-2025</span>
+                </div>
+                <div class="header-field">
+                    <span class="rupee-symbol">₹ 50000.00</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="form-row">
+                <span class="form-label">Pay to - </span>
+            </div>
+
+            <div class="form-row">
+                <span class="form-label">Rupees (In words)</span>
+            </div>
+
+
+
+            <div class="bottom-section">
+                <div class="left-bottom">
+                    <div class="approval-box">
+                        <div class="box-label">Paid by - </div>
+                    </div>
+                    <div class="form-row">
+                        <span class="form-label">Note - </span>
+                    </div>
+                </div>
+
+                <div class="right-bottom">
+
+                    <div class="stamp-box">
+                        Sender's Stamp
+                    </div>
+
+                    <div class="signature-section">
+                        Receiver's Signature
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

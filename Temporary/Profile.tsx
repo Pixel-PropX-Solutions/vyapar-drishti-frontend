@@ -176,7 +176,7 @@ const ProfilePage: React.FC = () => {
           <Paper
             elevation={0}
             sx={{
-              borderRadius: 3,
+              borderRadius: 1,
               bgcolor: alpha(theme.palette.background.paper, 0.8),
               backdropFilter: "blur(20px)",
             }}
@@ -408,7 +408,7 @@ const ProfilePage: React.FC = () => {
                 elevation={0}
                 sx={{
                   width: '100%',
-                  borderRadius: 3,
+                  borderRadius: 1,
                   border: `1px solid ${alpha(theme.palette.divider, 1)}`,
                   boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
                   // overflow: 'hidden',

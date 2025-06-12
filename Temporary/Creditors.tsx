@@ -43,16 +43,16 @@ import {
 //   // alpha,
 //   // useColorScheme,
 // } from "@mui/material/styles";
-import { CreditorSortField, SortOrder, GetCreditors } from "@/utils/types";
+import { CustomerSortField, SortOrder, GetCustomers } from "@/utils/types";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { useNavigate } from "react-router-dom";
-import { viewAllCreditors } from "@/services/creditors";
+import { viewAllCustomers } from "@/services/customers";
 
-const Creditors: React.FC = () => {
+const Customers: React.FC = () => {
   // const { mode } = useColorScheme();
 
-  const { creditors, pageMeta, loading } = useSelector((state: RootState) => state.creditor);
+  const { customers, pageMeta, loading } = useSelector((state: RootState) => state.customer);
 
   const theme = useTheme();
   const navigate = useNavigate();
@@ -64,7 +64,7 @@ const Creditors: React.FC = () => {
     is_deleted: false,
     page: 1,
     rowsPerPage: 10,
-    sortField: "created_at" as CreditorSortField,
+    sortField: "created_at" as CustomerSortField,
     sortOrder: "asc" as SortOrder,
   });
 
@@ -73,9 +73,9 @@ const Creditors: React.FC = () => {
 
   // Fetch stockists data from API
   useEffect(() => {
-    const fetchCreditors = async () => {
+    const fetchCustomers = async () => {
       dispatch(
-        viewAllCreditors({
+        viewAllCustomers({
           searchQuery: searchQuery,
           filterState: filterState,
           is_deleted: is_deleted,
@@ -87,7 +87,7 @@ const Creditors: React.FC = () => {
       )
     };
 
-    fetchCreditors();
+    fetchCustomers();
   }, [
     searchQuery,
     page,
@@ -100,7 +100,7 @@ const Creditors: React.FC = () => {
   ]);
 
   // Handle sorting change
-  const handleSortRequest = (field: CreditorSortField) => {
+  const handleSortRequest = (field: CustomerSortField) => {
     const isAsc = sortField === field && sortOrder === "asc";
     setState((prevState) => ({
       ...prevState,
@@ -131,7 +131,7 @@ const Creditors: React.FC = () => {
       is_deleted: false,
       page: 1,
       rowsPerPage: 10,
-      sortField: "created_at" as CreditorSortField,
+      sortField: "created_at" as CustomerSortField,
       sortOrder: "asc" as SortOrder,
     });
   }, []);
@@ -146,8 +146,8 @@ const Creditors: React.FC = () => {
   }
 
   // Handle view stockist details
-  const handleViewCreditor = (creditor: GetCreditors) => {
-    navigate(`/creditors/${creditor._id}`)
+  const handleViewCustomer = (customer: GetCustomers) => {
+    navigate(`/customers/${customer._id}`)
   };
 
   return (
@@ -170,10 +170,10 @@ const Creditors: React.FC = () => {
                 component="h1"
                 gutterBottom
               >
-                Creditors Directory
+                Customers Directory
               </Typography>
               <Typography variant="body2" color="text.secondary" >
-                {pageMeta.total} creditors available in your database after applying
+                {pageMeta.total} customers available in your database after applying
                 filters
               </Typography>
             </Grid>
@@ -199,7 +199,7 @@ const Creditors: React.FC = () => {
                     width: "max-content",
                   }}
                 >
-                  Add Creditors
+                  Add Customers
                 </Button>
 
 
@@ -285,7 +285,7 @@ const Creditors: React.FC = () => {
         </Button>
       </Box>
 
-      {/* Creditors Table */}
+      {/* Customers Table */}
       <TableContainer component={Paper} elevation={3} sx={{ mb: 3 }}>
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
@@ -348,8 +348,8 @@ const Creditors: React.FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {creditors?.length > 0 ? (
-                creditors.map((cred, index) => {
+              {customers?.length > 0 ? (
+                customers.map((cred, index) => {
                   if (!cred.name) {
                     return null;
                   }
@@ -357,7 +357,7 @@ const Creditors: React.FC = () => {
                     <TableRow
                       key={cred._id}
                       hover
-                      onClick={() => handleViewCreditor(cred)}
+                      onClick={() => handleViewCustomer(cred)}
                     >
                       <TableCell>
                         <Typography
@@ -555,7 +555,7 @@ const Creditors: React.FC = () => {
               ) : (
                 <TableRow>
                   <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
-                    <Typography variant="body1">No Creditors found</Typography>
+                    <Typography variant="body1">No Customers found</Typography>
                   </TableCell>
                 </TableRow>
               )}
@@ -576,7 +576,7 @@ const Creditors: React.FC = () => {
           {`Showing ${(pageMeta.page - 1) * rowsPerPage + 1}-${Math.min(
             pageMeta.page * rowsPerPage,
             pageMeta.total
-          )} of ${pageMeta.total} creditors`}
+          )} of ${pageMeta.total} customers`}
         </Typography>
 
         {pageMeta.total > 1 && <Pagination
@@ -592,4 +592,4 @@ const Creditors: React.FC = () => {
   );
 };
 
-export default Creditors;
+export default Customers;

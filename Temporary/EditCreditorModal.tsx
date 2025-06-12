@@ -40,7 +40,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { GetUserLedgers } from "@/utils/types";
 import CountryCode from "@/common/CountryCode";
-// import { updateCreditor } from "@/services/creditorsLedger";
+// import { updateCustomer } from "@/services/customersLedger";
 // import { viewAllBillings } from "@/services/billing";
 // import BillingEditingModal from "@/common/BillingEditingModal";
 // import { ENUM_ENTITY } from "@/utils/enums";
@@ -53,7 +53,7 @@ interface EditUserModalProps {
     cred: GetUserLedgers | null;
 }
 
-interface CreditorFormData {
+interface CustomerFormData {
     company_id: string,
     parent: string,
     mailing_name: string,
@@ -76,7 +76,7 @@ interface ValidationErrors {
     [key: string]: string;
 }
 
-const EditCreditorModal: React.FC<EditUserModalProps> = ({
+const EditCustomerModal: React.FC<EditUserModalProps> = ({
     open,
     onClose,
     onUpdated,
@@ -88,12 +88,12 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
     // const [currentStep, setCurrentStep] = useState(0);
     const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
     const [isFormValid, setIsFormValid] = useState(false);
-    const creditorImageRef = useRef<HTMLInputElement | null>(null);
+    const customerImageRef = useRef<HTMLInputElement | null>(null);
     const [isDragActive, setIsDragActive] = useState(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [showSuccessAlert, setShowSuccessAlert] = useState(false);
     const { currentCompany } = useSelector((state: RootState) => state.auth);
-    const { groups } = useSelector((state: RootState) => state.group);
+    const { groups } = useSelector((state: RootState) => state.accountingGroup);
     
     
     // const [openBillingModal, setOpenBillingModal] = useState(false);
@@ -102,7 +102,7 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
         value: string;
     } | null>(null);
 
-    const [data, setData] = useState<CreditorFormData>({
+    const [data, setData] = useState<CustomerFormData>({
         name: '',
         email: '',
         code: '',
@@ -119,7 +119,7 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
     });
 
     // Enhanced form validation
-    const validateField = (field: keyof CreditorFormData, value: string): string => {
+    const validateField = (field: keyof CustomerFormData, value: string): string => {
         switch (field) {
             case 'name':
                 if (!value.trim()) return 'Name is required';
@@ -165,7 +165,7 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
     const validateForm = useCallback((): boolean => {
         const errors: ValidationErrors = {};
         Object.keys(data).forEach(key => {
-            const field = key as keyof CreditorFormData;
+            const field = key as keyof CustomerFormData;
             const error = validateField(field, String(data[field] || ''));
             if (error) errors[field] = error;
         });
@@ -175,7 +175,7 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
     }, [data]);
 
     const handleInputChange = (
-        field: keyof CreditorFormData,
+        field: keyof CustomerFormData,
         value: string
     ) => {
         setData(prev => ({
@@ -253,7 +253,7 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
     }, []);
 
     const handleBoxClick = () => {
-        creditorImageRef.current?.click();
+        customerImageRef.current?.click();
     };
 
     const removeImage = useCallback((e: React.MouseEvent) => {
@@ -263,8 +263,8 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
             ...prev,
             image: ''
         }));
-        if (creditorImageRef.current) {
-            creditorImageRef.current.value = '';
+        if (customerImageRef.current) {
+            customerImageRef.current.value = '';
         }
     }, []);
 
@@ -286,8 +286,8 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
         setImagePreview(null);
         setValidationErrors({});
         // setCurrentStep(0);
-        if (creditorImageRef.current) {
-            creditorImageRef.current.value = '';
+        if (customerImageRef.current) {
+            customerImageRef.current.value = '';
         }
     };
 
@@ -297,11 +297,11 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
         const optionalFields = ['email', 'image', 'mailing_name', 'mailing_address', 'mailing_country', 'code', 'number', 'mailing_pincode'];
 
         const requiredCompleted = requiredFields.filter(field =>
-            data[field as keyof CreditorFormData] && String(data[field as keyof CreditorFormData]).trim()
+            data[field as keyof CustomerFormData] && String(data[field as keyof CustomerFormData]).trim()
         ).length;
 
         const optionalCompleted = optionalFields.filter(field =>
-            data[field as keyof CreditorFormData] && String(data[field as keyof CreditorFormData]).trim()
+            data[field as keyof CustomerFormData] && String(data[field as keyof CustomerFormData]).trim()
         ).length;
 
         const totalFields = requiredFields.length + optionalFields.length;
@@ -375,7 +375,7 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
         });
 
         // await toast.promise(
-        //     dispatch(updateCreditor({
+        //     dispatch(updateCustomer({
         //         data: formData,
         //         id: cred?._id ?? '',
         //     }))
@@ -394,9 +394,9 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
         //             setIsLoading(false);
         //         }),
         //     {
-        //         loading: "Updating creditor details...",
-        //         success: <b>Creditor successfully updated! 🎉</b>,
-        //         error: <b>Failed to update creditor. Please try again.</b>,
+        //         loading: "Updating customer details...",
+        //         success: <b>Customer successfully updated! 🎉</b>,
+        //         error: <b>Failed to update customer. Please try again.</b>,
         //     }
         // );
     };
@@ -408,7 +408,7 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
             sx={{
                 mb: 3,
                 border: `1px solid ${theme.palette.divider}`,
-                borderRadius: 2,
+                borderRadius: 1,
                 overflow: 'hidden'
             }}
         >
@@ -423,7 +423,7 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
                     type="file"
                     accept="image/png, image/jpeg, image/jpg, image/webp"
                     style={{ display: 'none' }}
-                    ref={creditorImageRef}
+                    ref={customerImageRef}
                     onChange={e => {
                         const file = e.target.files?.[0];
                         if (file) handleImageChange(file);
@@ -438,7 +438,7 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
                     onDragLeave={handleDragLeave}
                     sx={{
                         border: `2px dashed ${isDragActive ? theme.palette.primary.main : theme.palette.divider}`,
-                        borderRadius: 2,
+                        borderRadius: 1,
                         p: 1,
                         position: 'relative',
                         textAlign: 'center',
@@ -589,7 +589,7 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
                             py: 1.5,
                             fontSize: '1rem',
                             fontWeight: 600,
-                            borderRadius: 2,
+                            borderRadius: 1,
                             background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
                             boxShadow: theme.shadows[4],
                             '&:hover': {
@@ -622,10 +622,10 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
                         value={getFormCompletionPercentage()}
                         sx={{
                             height: 6,
-                            borderRadius: 3,
+                            borderRadius: 1,
                             backgroundColor: theme.palette.action.hover,
                             '& .MuiLinearProgress-bar': {
-                                borderRadius: 3,
+                                borderRadius: 1,
                                 background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`
                             }
                         }}
@@ -638,7 +638,7 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
                         severity="success"
                         icon={<CheckCircle />}
                         sx={{
-                            borderRadius: 2,
+                            borderRadius: 1,
                             '& .MuiAlert-icon': {
                                 fontSize: 24
                             }
@@ -1148,7 +1148,7 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
                         py: 1.5,
                         fontSize: '1rem',
                         fontWeight: 600,
-                        borderRadius: 2,
+                        borderRadius: 1,
                         transition: 'all 0.3s ease',
                         '&:hover': {
                             backgroundColor: theme.palette.action.hover,
@@ -1170,7 +1170,7 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
                         py: 1.5,
                         fontSize: '1rem',
                         fontWeight: 600,
-                        borderRadius: 2,
+                        borderRadius: 1,
                         background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
                         boxShadow: theme.shadows[4],
                         '&:hover': {
@@ -1191,4 +1191,4 @@ const EditCreditorModal: React.FC<EditUserModalProps> = ({
     );
 };
 
-export default EditCreditorModal;
+export default EditCustomerModal;

@@ -159,7 +159,7 @@ const ProductCard: React.FC<{
             fontSize: "2.5rem",
             color: alpha(theme.palette.text.primary, 0.4),
             background: alpha(theme.palette.error.light, 0.2),
-            borderRadius: 2,
+            borderRadius: 1,
             p: 0.5,
             transition: "all 0.2s",
             "&:hover": {
