@@ -87,6 +87,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
         try {
           await dispatch(getCurrentUser());
           // await dispatch(getCompany());
+          // await dispatch(getCompany());
           dispatch(setUser({ authState: AuthStates.AUTHENTICATED }));
         } catch {
           localStorage.removeItem("accessToken");
@@ -199,6 +200,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/invoices/create/:type" element={<SalePurchaseInvoiceCreation />} />
                 {/* <Route path="/debitors" element={<ChemistProfile />} /> */}
                 {/* <Route path="/sell" element={<ProductBilling />} /> */}
+                {/* <Route path="/*" element={<Navigate to="/" replace />} /> */}
                 {/* <Route path="/*" element={<Navigate to="/" replace />} /> */}
               </Route>
             )}

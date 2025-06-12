@@ -7,9 +7,14 @@ import categoryReducer from "./reducers/categoryReducer";
 import inventoryReducer from "./reducers/inventoryReducer";
 import invoiceReducer from "./reducers/invoiceReducer";
 import stockistReducer from "./reducers/stockistReducer";
+<<<<<<< HEAD
 import customerReducer from "./reducers/customersReducer";
 import accountingGroupReducer from "./reducers/accountingGroupReducer";
 import inventoryGroupReducer from "./reducers/inventoryGroupReducer";
+=======
+import creditorReducer from "./reducers/creditorsLedgerReducer";
+import groupReducer from "./reducers/groupReducer";
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
 import billingReducer from "./reducers/billingReducer";
 import shippingReducer from "./reducers/shippingReducer";
 // import orderReducer from "./reducers/orderReducer";
@@ -21,11 +26,18 @@ const store = configureStore({
     category: categoryReducer,
     company: companyReducer,
 
+<<<<<<< HEAD
     accountingGroup: accountingGroupReducer,
     inventoryGroup: inventoryGroupReducer,
     billing: billingReducer,
     shipping: shippingReducer,
     customersLedger: customerReducer,
+=======
+    group: groupReducer,
+    billing: billingReducer,
+    shipping: shippingReducer,
+    creditorsLedger: creditorReducer,
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
 
     auth: authReducer,
     user: userReducer,

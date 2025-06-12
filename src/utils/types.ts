@@ -209,6 +209,7 @@ export interface GetUserLedgers {
   is_deleted: boolean
 }
 
+<<<<<<< HEAD
 export interface CustomersList {
   _id: string,
   ledger_name: string,
@@ -216,12 +217,15 @@ export interface CustomersList {
   alias: string,
 }
 
+=======
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
 export interface GetAllUserGroups {
   _id: string,
   name: string,
   user_id: string,
   company_id: string,
   description: string,
+<<<<<<< HEAD
   parent: string,
 }
 
@@ -249,6 +253,9 @@ export interface CreateInvoiceData {
     rate: number;
     amount: number;
   }>
+=======
+  primary_group: string,
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
 }
 
 export interface UserData {
@@ -320,7 +327,11 @@ export interface GetUser {
   created_at: string;
   company?: [{
     company_id: string;
+<<<<<<< HEAD
     company_name: string;
+=======
+    name: string;
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
     image: string;
     address_1: string;
     address_2: string;

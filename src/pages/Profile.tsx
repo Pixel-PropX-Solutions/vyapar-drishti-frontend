@@ -54,7 +54,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import EditUserModal from "@/features/profile/EditUserModal";
 import { getCurrentUser } from "@/services/auth";
+<<<<<<< HEAD
 import { getAllCompanies } from "@/services/company";
+=======
+import { getAllCompanies, getCompany } from "@/services/company";
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
 import { formatDatewithTime } from "@/utils/functions";
 import CompanyEditingModal from "@/common/CompanyEditingModal";
 import { InfoRow } from "@/common/InfoRow";
@@ -93,7 +97,10 @@ const ProfilePage: React.FC = () => {
 
 
   const handleDelete = (company_id: string) => {
+<<<<<<< HEAD
     console.log("Delete company with ID:", company_id);
+=======
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
     // dispatch(
     //   deleteProduct(productId)
     // )
@@ -390,7 +397,11 @@ const ProfilePage: React.FC = () => {
                 elevation={0}
                 sx={{
                   width: '100%',
+<<<<<<< HEAD
                   borderRadius: 1,
+=======
+                  borderRadius: 3,
+>>>>>>> 5c5a27c4386cee0a00ece93aada65cbc238ee637
                   border: `1px solid ${alpha(theme.palette.divider, 1)}`,
                   boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
                   // overflow: 'hidden',
