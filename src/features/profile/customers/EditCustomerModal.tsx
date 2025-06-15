@@ -301,7 +301,10 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                 number: cred.phone?.number || '',
                 image: typeof cred.image === 'string' ? cred.image : '',
             });
-
+            setSelectedTypeOption({
+                label: cred.parent || 'Select Group',
+                value: cred.parent || ''
+            });
             setImagePreview(
                 typeof cred?.image === "string" ? cred.image : null
             );

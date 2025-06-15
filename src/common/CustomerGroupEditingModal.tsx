@@ -25,7 +25,6 @@ import {
     Group,
     Description,
     AccountTree,
-    Category,
     Save,
     Close,
     Delete,
@@ -71,7 +70,7 @@ const CustomerGroupEditingModal: React.FC<CustomerGroupEditingModalProps> = ({
         description: "",
         image: "",
         parent: "",
-        primary_group: "",
+        // primary_group: "",
         _id: "",
         user_id: "",
         company_id: "",
@@ -84,8 +83,8 @@ const CustomerGroupEditingModal: React.FC<CustomerGroupEditingModalProps> = ({
         if (!formData.name?.trim()) {
             errors.name = "Group name is required";
         }
-        if (!formData.primary_group?.trim()) {
-            errors.primary_group = "Primary group is required";
+        if (!formData.parent?.trim()) {
+            errors.parent = "Parent group is required";
         }
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
@@ -174,7 +173,7 @@ const CustomerGroupEditingModal: React.FC<CustomerGroupEditingModalProps> = ({
             description: "",
             image: "",
             parent: "",
-            primary_group: "",
+            // primary_group: "",
             _id: "",
             user_id: "",
             company_id: "",
@@ -193,7 +192,7 @@ const CustomerGroupEditingModal: React.FC<CustomerGroupEditingModalProps> = ({
                 user_id: user?._id || "",
                 image: group.image || "",
                 parent: group.parent || "",
-                primary_group: group.primary_group || "",
+                // primary_group: group.primary_group || "",
                 is_deleted: group.is_deleted || false,
             });
             setFormErrors({});
@@ -213,12 +212,12 @@ const CustomerGroupEditingModal: React.FC<CustomerGroupEditingModalProps> = ({
             name: data.name?.trim(),
             user_id: user?._id,
             company_id: currentCompany?._id,
-            primary_group: data.primary_group?.trim(),
+            parent: data.parent?.trim(),
         };
 
         if (data.description?.trim())
             sanitizedData.description = data.description.trim();
-        if (data.parent?.trim()) sanitizedData.parent = data.parent.trim();
+        // if (data.parent?.trim()) sanitizedData.parent = data.parent.trim();
         if (data.image && typeof data.image !== 'string') sanitizedData.image = data.image;
 
         const formData = new FormData();
@@ -282,8 +281,8 @@ const CustomerGroupEditingModal: React.FC<CustomerGroupEditingModalProps> = ({
         }
     };
 
-    const requiredFields = ["name", "primary_group"];
-    const optionalFields = ["description", "image", "parent"];
+    const requiredFields = ["name", "parent"];
+    const optionalFields = ["description", "image"];
     const filledFields = [
         ...requiredFields.filter(
             (field) => !!data[field as keyof GetGroup]?.toString().trim()
@@ -318,16 +317,8 @@ const CustomerGroupEditingModal: React.FC<CustomerGroupEditingModalProps> = ({
             label: "Parent Group",
             placeholder: "Enter parent group",
             icon: AccountTree,
-            required: false,
-            description: "Parent group for hierarchy (optional)",
-        },
-        {
-            key: "primary_group",
-            label: "Primary Group",
-            placeholder: "Enter primary group",
-            icon: Category,
             required: true,
-            description: "Primary group category",
+            description: "Parent group for hierarchy",
         },
     ];
 

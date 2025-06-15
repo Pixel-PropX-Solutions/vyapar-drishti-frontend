@@ -246,7 +246,7 @@ const CreateInventoryGroupModal: React.FC<CreateInventoryGroupModalProps> = ({
         } else if (open && !inventoryGroup) {
             resetForm();
         }
-    }, [open, inventoryGroup]);
+    }, [open, inventoryGroup, dispatch, currentCompany?._id]);
 
     const handleSubmit = async () => {
         if (!validateForm()) {
@@ -615,7 +615,7 @@ const CreateInventoryGroupModal: React.FC<CreateInventoryGroupModalProps> = ({
                                     Parent Group
                                 </Typography>
                                 <Autocomplete
-                                    options={inventoryGroupOptions || []}
+                                    options={[{ label: 'Primary Group', value: 'Primary Group' }, ...inventoryGroupOptions]}
                                     freeSolo
                                     value={selectedParentOption}
                                     onChange={handleParentChange}
