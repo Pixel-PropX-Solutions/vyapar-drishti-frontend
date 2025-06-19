@@ -58,11 +58,18 @@ const LoginForm: React.FC = () => {
     toast.promise(
       dispatch(login(formData))
         .unwrap()
-        .then(() => {
+        .then((response) => {
+          console.log("Login response:", response);
           dispatch(getCurrentUser());
           dispatch(getCompany());
 
           navigate("/");
+        }).catch((error) => {
+          if (error.response && error.response.status === 401) {
+            throw new Error("Invalid credentials. Please try again.");
+          } else {
+            throw new Error("An unexpected error occurred. Please try again later.");
+          }
         }),
       {
         loading: "Login with the credentials ...",

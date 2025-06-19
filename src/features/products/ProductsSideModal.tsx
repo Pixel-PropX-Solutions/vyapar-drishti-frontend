@@ -39,7 +39,7 @@ import { useNavigate } from 'react-router-dom';
 import BasicDetailsSection from './BasicDetailsSection';
 import AdditionalInfoSection from './AdditionalInfoSection';
 import OpeningStockSection from './OpeningStockSection';
-// import AdvancedSettingsSection from './AdvancedSettingsSection';
+import AdvancedSettingsSection from './AdvancedSettingsSection';
 import CategoryCreateModal from '../category/CategoryCreateModal';
 import CreateInventoryGroupModal from '../Group/CreateInventoryGroupModal';
 import { viewAllInventoryGroups } from '@/services/inventoryGroup';
@@ -81,6 +81,8 @@ const ProductsSideModal = (props: SideModalProps) => {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const { setDrawer, drawer, setRefreshKey, product, setSelectedProduct } = props;
+    const { user } = useSelector((state: RootState) => state.auth);
+    const currentCompanyDetails = user?.company?.find(c => c._id === user.user_settings.current_company_id);
 
     // State management
     const [currentStep, setCurrentStep] = useState(0);
@@ -132,18 +134,22 @@ const ProductsSideModal = (props: SideModalProps) => {
         gst_nature_of_goods: '',
         gst_hsn_code: '',
         gst_taxability: '',
+        gst_percentage:'',
         low_stock_alert: 0,
     });
 
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     // Step configuration
-    const steps = [
+    const steps = currentCompanyDetails?.company_settings?.features?.enable_gst ? [
         { label: 'Basic Details', icon: EditIcon },
         { label: 'Additional Info', icon: AddIcon },
-        { label: 'Stock & Pricing', icon: SaveIcon },
-        // { label: 'Advanced Settings', icon: CheckCircleIcon }
-    ];
+        { label: 'Advanced Settings', icon: CheckCircleIcon }
+    ] :
+        [
+            { label: 'Basic Details', icon: EditIcon },
+            { label: 'Additional Info', icon: AddIcon },
+        ];
 
     // Validation
     const validateForm = useCallback(() => {
@@ -271,6 +277,9 @@ const ProductsSideModal = (props: SideModalProps) => {
                 }
             });
 
+            console.log('Submitting Sanitized Data:', sanitizedData);
+            console.log('Form Data Entries:', Array.from(formData.entries()));
+            console.log('Submitting Form Data:', Object.fromEntries(formData.entries()));
             if (product && product._id) {
                 await toast.promise(
                     dispatch(updateProduct({ data: formData, id: product._id }))
@@ -501,9 +510,7 @@ const ProductsSideModal = (props: SideModalProps) => {
             case 1:
                 return <AdditionalInfoSection {...commonProps} />;
             case 2:
-                return <OpeningStockSection {...commonProps} />;
-            // case 3:
-            //     return <AdvancedSettingsSection {...commonProps} />;
+                return <AdvancedSettingsSection {...commonProps} />;
             default:
                 return <BasicDetailsSection {...commonProps} />;
         }
@@ -676,7 +683,7 @@ const ProductsSideModal = (props: SideModalProps) => {
                                             transition: 'all 0.3s ease',
                                             transform: active ? 'scale(1.1)' : 'scale(1)',
                                         }}>
-                                            {completed ? (
+                                            {completed  ? (
                                                 <CheckCircleIcon fontSize="small" />
                                             ) : active ? (
                                                 <step.icon fontSize="small" />

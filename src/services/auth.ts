@@ -13,9 +13,9 @@ export const login = createAsyncThunk(
 
       console.log("Login response", response.data);
 
-      const accessToken = response.data.accessToken;
 
-      if (accessToken) {
+      if (response.data.ok) {
+        const accessToken = response.data.accessToken;
         localStorage.setItem("accessToken", accessToken);
         return { accessToken };
       } else return rejectWithValue("Login Failed: No access token recieved.");

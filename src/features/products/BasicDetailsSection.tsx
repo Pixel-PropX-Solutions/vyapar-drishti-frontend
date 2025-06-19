@@ -56,9 +56,6 @@ const BasicDetailsSection: React.FC<BasicDetailsSectionProps> = ({
     fileInputRef
 }) => {
 
-    console.log('BasicDetailsSection rendered with data:', data);
-    console.log('Selected unit option:', selectedUnitOption);
-    console.log('Image preview:', imagePreview);
 
     const handleUnitChange = (_: React.SyntheticEvent, newValue: { label: string; value: string } | null) => {
         if (newValue?.value === '__add_new__') {

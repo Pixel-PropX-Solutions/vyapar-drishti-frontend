@@ -90,7 +90,7 @@ export default function SelectContent() {
       company: currentCompany
         ? currentCompany._id
         : (user?.company?.length ?? 0) > 0
-          ? user?.company?.find((com) => com.is_selected === true)?.company_id || ''
+          ? user?.company?.find(c => c._id === user.user_settings.current_company_id)?.company_id || ''
           : 'Add Company'
     })
 

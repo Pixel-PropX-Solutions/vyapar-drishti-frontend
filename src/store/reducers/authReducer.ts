@@ -18,7 +18,7 @@ interface AuthState {
   signupData: SignupData;
   currentCompany: GetCompany | null;
   email: string;
-  user: GetUser | null;
+  user: any ;
   isUserFetched: boolean;
   authState: AuthStates;
   accessToken: string | null;

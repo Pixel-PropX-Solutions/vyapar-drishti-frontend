@@ -60,18 +60,18 @@ const AdvancedSettingsSection: React.FC<AdvancedSettingsSectionProps> = ({
 
     // GST Nature of Goods options
     const gstNatureOptions = [
-        { value: 'goods', label: 'Goods' },
-        { value: 'services', label: 'Services' },
-        { value: 'composite', label: 'Composite Supply' },
-        { value: 'mixed', label: 'Mixed Supply' }
+        { value: 'Goods', label: 'Goods' },
+        { value: 'Services', label: 'Services' },
+        { value: 'Composite Supply', label: 'Composite Supply' },
+        { value: 'Mixed Supply', label: 'Mixed Supply' }
     ];
 
     // GST Taxability options
     const gstTaxabilityOptions = [
-        { value: 'taxable', label: 'Taxable' },
-        { value: 'exempt', label: 'Exempt' },
-        { value: 'zero_rated', label: 'Zero Rated' },
-        { value: 'nil_rated', label: 'Nil Rated' }
+        { value: 'Taxable', label: 'Taxable' },
+        { value: 'Exempt', label: 'Exempt' },
+        { value: 'Zero Rated', label: 'Zero Rated' },
+        { value: 'Nil Rated', label: 'Nil Rated' }
     ];
 
     const handleSelectChange = (field: keyof FormCreateProduct) => (
@@ -285,7 +285,7 @@ const AdvancedSettingsSection: React.FC<AdvancedSettingsSectionProps> = ({
                                                 </Select>
                                             </FormControl>
 
-                                            {data.gst_taxability === "taxable" && (<TextField
+                                            {data.gst_taxability === "Taxable" && (<TextField
                                                 fullWidth
                                                 label="GST Tax Rate"
                                                 placeholder="Enter GST tax rate"

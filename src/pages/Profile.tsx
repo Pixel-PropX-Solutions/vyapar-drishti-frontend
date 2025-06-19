@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   Container,
   Paper,
@@ -49,6 +49,7 @@ import {
   NotificationAdd,
   Colorize,
   Contacts,
+  Tune,
 } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
@@ -84,7 +85,7 @@ const ProfilePage: React.FC = () => {
   //   sms: true,
   // });
   const [tabValue, setTabValue] = useState(0);
- 
+
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
 
@@ -119,9 +120,9 @@ const ProfilePage: React.FC = () => {
     dispatch(getCurrentUser());
   }
 
-  const fetchCompanyData = () => {
+  const fetchCompanyData = useCallback(() => {
     dispatch(getAllCompanies());
-  }
+  }, [dispatch])
 
 
 
@@ -132,7 +133,9 @@ const ProfilePage: React.FC = () => {
 
   React.useEffect(() => {
     fetchCompanyData();
-  }, []);
+  }, [fetchCompanyData]);
+
+  const currentCompanyDetails = user?.company?.find(c => c._id === user.user_settings.current_company_id);
 
   return (
     <Box
@@ -179,7 +182,8 @@ const ProfilePage: React.FC = () => {
               <Tab label="Personal Info" icon={<Person />} iconPosition="start" />
               <Tab label="Company Info" icon={<BusinessSharp />} iconPosition="start" />
               <Tab label="Templates" icon={<Print />} iconPosition="start" />
-              <Tab label="Preferences" icon={<Settings />} iconPosition="start" />
+              <Tab label="Preferences" icon={<Tune />} iconPosition="start" />
+              <Tab label="Settings" icon={<Settings />} iconPosition="start" />
             </Tabs>
           </Paper>
 
@@ -678,6 +682,405 @@ const ProfilePage: React.FC = () => {
                       </Grid>
                     </Box> */}
                   </Stack>
+                </SettingsCard>
+              </Grid>
+            </Grid>
+          )}
+
+          {tabValue === 4 && (
+            <Grid container justifyContent={'space-between'}>
+              {/* Account Settings */}
+              <Grid item xs={12} lg={5.8}>
+                <SettingsCard title="Account Settings" icon={<Person />}>
+                  <Stack spacing={3}>
+                    {/* User Type */}
+                    <InfoRow
+                      icon={<Person />}
+                      label="Account Type"
+                      value={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Paper
+                            elevation={0}
+                            sx={{
+                              px: 2,
+                              // py: 0.5,
+                              bgcolor: alpha(theme.palette.primary.main, 0.1),
+                              border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+                              borderRadius: 1,
+                            }}
+                          >
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                color: theme.palette.primary.main,
+                                textTransform: 'capitalize'
+                              }}
+                            >
+                              {user?.user_type || 'User'}
+                            </Typography>
+                          </Paper>
+                        </Box>
+                      }
+
+                    />
+
+                    <Divider />
+
+                    {/* Permissions */}
+                    <Box>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+                        Permissions
+                      </Typography>
+                      <Stack spacing={2}>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={user?.user_settings?.permissions?.create_vouchers || false}
+                              disabled
+                              color="primary"
+                            />
+                          }
+                          label={
+                            <Box>
+                              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                                Create Vouchers
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Permission to create and manage vouchers
+                              </Typography>
+                            </Box>
+                          }
+                          sx={{ width: '100%', margin: 0 }}
+                        />
+                      </Stack>
+                    </Box>
+
+                    <Divider />
+
+                    {/* Last Login Information */}
+                    <Box>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+                        Session Information
+                      </Typography>
+                      <Stack spacing={1.5}>
+                        <InfoRow
+                          icon={<AccessTime />}
+                          label="Last Login"
+                          value={
+                            <Typography variant="body2">
+                              {user?.user_settings?.last_login
+                                ? formatDatewithTime(user.user_settings.last_login.toString())
+                                : 'Never'
+                              }
+                            </Typography>
+                          }
+                        />
+                        <InfoRow
+                          icon={<PhoneIcon />}
+                          label="Device"
+                          value={
+                            <Typography variant="body2">
+                              {user?.user_settings?.last_login_device || 'Unknown'}
+                            </Typography>
+                          }
+                        />
+                        <InfoRow
+                          icon={<SecurityOutlined />}
+                          label="IP Address"
+                          value={
+                            <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+                              {user?.user_settings?.last_login_ip || 'Unknown'}
+                            </Typography>
+                          }
+                        />
+                      </Stack>
+                    </Box>
+                  </Stack>
+                </SettingsCard>
+              </Grid>
+
+              {/* Company Settings */}
+              <Grid item xs={12} lg={5.8}>
+                <SettingsCard title="Company Settings" icon={<BusinessSharp />}>
+                  <Stack spacing={3}>
+                    {/* Current Company */}
+                    <Box>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+                        Current Company
+                      </Typography>
+                      {currentCompanyDetails ? (
+                        <Paper
+                          elevation={0}
+                          sx={{
+                            p: 2.5,
+                            borderRadius: 1,
+                            bgcolor: alpha(theme.palette.primary.main, 0.05),
+                            border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+                          }}
+                        >
+                          <Box display="flex" alignItems="center" gap={2}>
+                            {currentCompanyDetails?.image && (
+                              <Box
+                                component="img"
+                                src={currentCompanyDetails?.image}
+                                alt="Company Logo"
+                                sx={{
+                                  width: 48,
+                                  height: 48,
+                                  borderRadius: 1,
+                                  objectFit: 'cover',
+                                  border: `2px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+                                }}
+                              />
+                            )}
+                            <Box flex={1}>
+                              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                                {currentCompanyDetails?.company_name}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {currentCompanyDetails?.state}, {currentCompanyDetails?.country}
+                              </Typography>
+                            </Box>
+                            <Paper
+                              elevation={0}
+                              sx={{
+                                px: 1.5,
+                                py: 0.5,
+                                bgcolor: alpha(theme.palette.success.main, 0.1),
+                                border: `1px solid ${alpha(theme.palette.success.main, 0.3)}`,
+                                borderRadius: 1,
+                              }}
+                            >
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  color: theme.palette.success.main,
+                                  fontWeight: 600,
+                                }}
+                              >
+                                CHANGE
+                              </Typography>
+                            </Paper>
+                          </Box>
+                        </Paper>
+                      ) : (
+                        <Typography variant="body2" color="text.secondary">
+                          No company selected or Created yet.
+                        </Typography>
+                      )}
+                    </Box>
+
+                    <Divider />
+
+                    {/* Company Features */}
+                    <Box>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+                        Features
+                      </Typography>
+                      <Stack spacing={2}>
+                        {currentCompanyDetails?.company_settings ? (
+                          <>
+                            <FormControlLabel
+                              control={
+                                <Switch
+                                  checked={currentCompanyDetails?.company_settings?.features?.enable_gst || false}
+                                  disabled
+                                  color="primary"
+                                />
+                              }
+                              label={
+                                <Box>
+                                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                                    GST Management
+                                  </Typography>
+                                  <Typography variant="caption" color="text.secondary">
+                                    Tax calculation and GST return filing
+                                  </Typography>
+                                </Box>
+                              }
+                              sx={{ width: '100%', margin: 0 }}
+                            />
+                            <FormControlLabel
+                              control={
+                                <Switch
+                                  checked={currentCompanyDetails?.company_settings?.features?.enable_inventory || false}
+                                  disabled
+                                  color="primary"
+                                />
+                              }
+                              label={
+                                <Box>
+                                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                                    Inventory Management
+                                  </Typography>
+                                  <Typography variant="caption" color="text.secondary">
+                                    Stock tracking and inventory control
+                                  </Typography>
+                                </Box>
+                              }
+                              sx={{ width: '100%', margin: 0 }}
+                            />
+                          </>
+                        ) : (
+                          <Typography variant="body2" color="text.secondary">
+                            Please create or select a company from the list.
+                          </Typography>
+                        )}
+                      </Stack>
+                    </Box>
+
+                    <Divider />
+
+                    {/* Financial Info */}
+                    <Box>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+                        Financial Info
+                      </Typography>
+                      {currentCompanyDetails ? (
+                        <Stack spacing={1.5}>
+                          {currentCompanyDetails?.company_settings?.gst_details?.gstin && (
+                            <InfoRow
+                              icon={<SecurityOutlined />}
+                              label="GSTIN"
+                              value={
+                                <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+                                  {currentCompanyDetails?.company_settings?.gst_details?.gstin}
+                                </Typography>
+                              }
+                            />
+                          )}
+                          {currentCompanyDetails?.company_settings?.books_start_date && (
+                            <InfoRow
+                              icon={<AccessTime />}
+                              label="Books Start Date"
+                              value={
+                                <Typography variant="body2">
+                                  {currentCompanyDetails?.company_settings?.books_start_date
+                                    ? formatDatewithTime(currentCompanyDetails?.company_settings?.books_start_date.toString() || '')
+                                    : 'Not Set'
+                                  }
+                                </Typography>
+                              }
+                            />
+                          )}
+                        </Stack>
+                      ) : (
+                        <Typography variant="body2" color="text.secondary">
+                          No company selected or Created yet.
+                        </Typography>
+                      )}
+                    </Box>
+                  </Stack>
+                </SettingsCard>
+              </Grid>
+
+              {/* Data Management */}
+              <Grid item xs={12}>
+                <SettingsCard title="Data Management" icon={<Settings />}>
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} md={6}>
+                      <Paper
+                        elevation={0}
+                        sx={{
+                          p: 3,
+                          borderRadius: 1,
+                          bgcolor: alpha(theme.palette.info.main, 0.05),
+                          border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+                        }}
+                      >
+                        <Box display="flex" alignItems="center" justifyContent="space-between">
+                          <Box display="flex" alignItems="center">
+                            <Box
+                              sx={{
+                                p: 1,
+                                borderRadius: 1,
+                                bgcolor: alpha(theme.palette.info.main, 0.1),
+                                color: theme.palette.info.main,
+                                mr: 2,
+                              }}
+                            >
+                              <Print />
+                            </Box>
+                            <Box>
+                              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                                Export Data
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Download your account and company data
+                              </Typography>
+                            </Box>
+                          </Box>
+                          <Button
+                            variant="contained"
+                            color="info"
+                            disabled
+                            // startIcon={<Print />}
+                            sx={{
+                              background: alpha(theme.palette.info.main, 0.8),
+                              cursor: 'not-allowed',
+                              fontWeight: 600,
+                              whiteSpace: "nowrap",
+                              px: 3,
+                            }}
+                          >
+                            Available Soon
+                          </Button>
+                        </Box>
+                      </Paper>
+                    </Grid>
+
+                    <Grid item xs={12} md={6}>
+                      <Paper
+                        elevation={0}
+                        sx={{
+                          p: 3,
+                          borderRadius: 1,
+                          bgcolor: alpha(theme.palette.warning.main, 0.05),
+                          border: `1px solid ${alpha(theme.palette.warning.main, 0.2)}`,
+                        }}
+                      >
+                        <Box display="flex" alignItems="center" justifyContent="space-between">
+                          <Box display="flex" alignItems="center">
+                            <Box
+                              sx={{
+                                p: 1,
+                                borderRadius: 1,
+                                bgcolor: alpha(theme.palette.warning.main, 0.1),
+                                color: theme.palette.warning.main,
+                                mr: 2,
+                              }}
+                            >
+                              <Settings />
+                            </Box>
+                            <Box>
+                              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                                Reset Settings
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Reset all preferences to default values
+                              </Typography>
+                            </Box>
+                          </Box>
+                          <Button
+                            variant="contained"
+                            color="warning"
+                            startIcon={<Settings />}
+                            sx={{
+                              background: alpha(theme.palette.warning.main, 0.8),
+                              "&:hover": {
+                                background: theme.palette.warning.main,
+                              },
+                              fontWeight: 600,
+                              whiteSpace: "nowrap",
+                              px: 3,
+                            }}
+                          >
+                            Reset
+                          </Button>
+                        </Box>
+                      </Paper>
+                    </Grid>
+                  </Grid>
                 </SettingsCard>
               </Grid>
             </Grid>

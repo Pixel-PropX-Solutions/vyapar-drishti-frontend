@@ -56,9 +56,9 @@ const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({
     console.log("inventoryGroupLists", inventoryGroupLists);
 
     const inventoryGroupOptions = inventoryGroupLists?.map(invGroup => ({
-        id: invGroup._id,
-        label: invGroup.name,
-        value: invGroup.name
+        // id: invGroup._id,
+        label: invGroup.inventory_group_name,
+        value: invGroup.inventory_group_name
     })) || [];
 
     const handleCategoryChange = (_: React.SyntheticEvent, newValue: { label: string; value: string } | null) => {
