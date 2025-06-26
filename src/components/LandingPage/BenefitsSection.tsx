@@ -61,7 +61,7 @@ const BenefitsSection: React.FC = () => {
                             mb: 2
                         }}
                     >
-                        Why Pharmacies Choose Us
+                        Why Businesses Choose Us
                     </Typography>
                     <Typography
                         variant="h6"
@@ -73,7 +73,7 @@ const BenefitsSection: React.FC = () => {
                             fontWeight: 400
                         }}
                     >
-                        Our solution delivers measurable improvements to your pharmacy operations, helping you save time and increase profitability.
+                        Our solution delivers measurable improvements to your billing and inventory operations, helping you save time and increase profitability.
                     </Typography>
                 </Box>
 
@@ -88,11 +88,11 @@ const BenefitsSection: React.FC = () => {
                 >
                     {[
                         "99% reduction in data entry errors",
-                        "Save 15+ hours per week on inventory management",
+                        "Save 15+ hours per week on billing and inventory management",
                         "Real-time access to critical business data",
                         "25% average reduction in excess inventory costs",
                         "Improved supplier relationships through timely returns",
-                        "Increased customer satisfaction with better stock availability"
+                        "Increased customer satisfaction with accurate billing and stock availability"
                     ].map((benefit, index) => (
                         <Grid
                             item

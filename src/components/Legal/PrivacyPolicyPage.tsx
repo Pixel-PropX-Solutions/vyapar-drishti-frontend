@@ -495,8 +495,8 @@ const PrivacyPolicyPage: React.FC = () => {
                 <Typography variant="subtitle1" fontWeight="medium" gutterBottom>
                   Our Data Protection Officer
                 </Typography>
-                <Typography variant="body1">Email: privacy@yourcompany.com</Typography>
-                <Typography variant="body1">Phone: +91 98765 43210</Typography>
+                <Typography variant="body1">Email: privacy@vyapardrishti.in</Typography>
+                <Typography variant="body1">Phone: +91 63670 97548</Typography>
                 <Typography variant="body1">Address: 123 Tech Park, Bangalore 560001, India</Typography>
               </Box>
               

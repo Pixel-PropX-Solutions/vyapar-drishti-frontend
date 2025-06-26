@@ -9,7 +9,7 @@ import {
     useTheme,
     useMediaQuery,
 } from '@mui/material';
-import HeroSectionImage from "../../assets/herosection.jpg";
+import HeroSectionImage from "../../assets/herosection.png";
 import {
     ArrowForward,
 } from '@mui/icons-material';
@@ -58,7 +58,7 @@ const HeroSection: React.FC = () => {
                                 color: 'primary.dark'
                             }}
                         >
-                            Smart Pharmacy Inventory Management
+                            Powerful Billing & Inventory Management
                             <Box component="span" sx={{ color: 'secondary.main' }}> Made Simple</Box>
                         </Typography>
 
@@ -68,7 +68,7 @@ const HeroSection: React.FC = () => {
                             color="text.secondary"
                             sx={{ mb: 4, fontWeight: 400 }}
                         >
-                            Automate your pharmacy stock tracking, sales analysis, and returns management with our intelligent platform powered by AI.
+                            Simplify your business operations with our all-in-one billing and inventory management platform. Effortlessly track stock, generate invoices, and analyze sales with smart automation tools.
                         </Typography>
 
                         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>

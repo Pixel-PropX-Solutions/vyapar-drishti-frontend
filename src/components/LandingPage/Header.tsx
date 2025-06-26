@@ -45,15 +45,11 @@ const Header: React.FC = () => {
     return (
         <>
             <AppBar position="static" color="transparent" elevation={0}>
-                <Container maxWidth="xl">
+                <Container maxWidth="xl" sx={{ borderBottom:'1px solid #000' }}>
                     <Toolbar disableGutters>
                         <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}
                             onClick={() => navigate("/")}
                         >
-                            {/* <MedicalServices sx={{ color: 'primary.main', mr: 1, fontSize: 32 }} />
-                            <Typography variant="h5" component="div" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                                DristiDocs-PharmTrack
-                            </Typography> */}
                             <Box
                                 sx={{
                                     display: "flex",
@@ -71,12 +67,13 @@ const Header: React.FC = () => {
                                     style={{
                                         height: "50px",
                                         borderRadius: "50%",
+                                        cursor: 'pointer',
                                     }}
                                 />
                                 <img
                                     src={logoText}
                                     alt="Logo Text"
-                                    style={{ marginBottom: "-10px", height: "40px" }}
+                                    style={{ marginBottom: "-10px", height: "40px", cursor: 'pointer', }}
                                 />
                             </Box>
                         </Box>

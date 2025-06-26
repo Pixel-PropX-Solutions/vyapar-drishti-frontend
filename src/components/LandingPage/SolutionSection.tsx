@@ -16,11 +16,11 @@ import {
     CloudUpload,
     Analytics,
     Inventory,
-    Notifications,
     TrendingUp,
     AccessTime,
     MonetizationOn,
-    CheckCircle
+    CheckCircle,
+    Dashboard
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -71,30 +71,30 @@ const solutions = [
         stats: "Customers report 18% increase in high-margin product sales",
         color: "#f57c00"
     },
-    {
-        title: "Intelligent Returns Management",
-        description: "Never miss a return deadline again. Receive timely reminders for stock returns to maintain healthy supplier relationships.",
-        icon: <Notifications fontSize="large" />,
-        benefits: [
-            { text: "Reduce expired stock losses by 75%", icon: <MonetizationOn fontSize="small" /> },
-            { text: "Automated return deadline tracking", icon: <AccessTime fontSize="small" /> },
-            { text: "Supplier-specific return policies", icon: <CheckCircle fontSize="small" /> }
-        ],
-        stats: "Average pharmacy saves $12,000+ annually on returnable stock",
-        color: "#d32f2f"
-    },
     // {
-    //     title: "Interactive Dashboard",
-    //     description: "Get a bird's-eye view of your entire operation with our intuitive dashboard. Monitor key metrics and make data-driven decisions.",
-    //     icon: <Dashboard fontSize="large" />,
+    //     title: "Intelligent Returns Management",
+    //     description: "Never miss a return deadline again. Receive timely reminders for stock returns to maintain healthy supplier relationships.",
+    //     icon: <Notifications fontSize="large" />,
     //     benefits: [
-    //         { text: "Real-time KPI monitoring", icon: <TrendingUp fontSize="small" /> },
-    //         { text: "Customizable widget layout", icon: <CheckCircle fontSize="small" /> },
-    //         { text: "Role-based access controls", icon: <CheckCircle fontSize="small" /> }
+    //         { text: "Reduce expired stock losses by 75%", icon: <MonetizationOn fontSize="small" /> },
+    //         { text: "Automated return deadline tracking", icon: <AccessTime fontSize="small" /> },
+    //         { text: "Supplier-specific return policies", icon: <CheckCircle fontSize="small" /> }
     //     ],
-    //     stats: "92% of users report making better business decisions with our dashboard",
-    //     color: "#9c27b0"
-    // }
+    //     stats: "Average pharmacy saves $12,000+ annually on returnable stock",
+    //     color: "#d32f2f"
+    // },
+    {
+        title: "Interactive Dashboard",
+        description: "Get a bird's-eye view of your entire operation with our intuitive dashboard. Monitor key metrics and make data-driven decisions.",
+        icon: <Dashboard fontSize="large" />,
+        benefits: [
+            { text: "Real-time KPI monitoring", icon: <TrendingUp fontSize="small" /> },
+            { text: "Customizable widget layout", icon: <CheckCircle fontSize="small" /> },
+            { text: "Role-based access controls", icon: <CheckCircle fontSize="small" /> }
+        ],
+        stats: "92% of users report making better business decisions with our dashboard",
+        color: "#9c27b0"
+    }
 ];
 
 const SolutionSection = () => {
@@ -174,7 +174,7 @@ const SolutionSection = () => {
                                 mb: 2,
                             }}
                         >
-                            Transforming Pharmacy Operations
+                            Transforming Billng & Inventory Operations
                         </Typography>
                         <Typography
                             variant="h6"

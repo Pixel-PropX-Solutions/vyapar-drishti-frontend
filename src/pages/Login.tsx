@@ -1,6 +1,6 @@
 import React, { useEffect, useId, useRef, useState } from "react";
 import { Box, Grid } from "@mui/material";
-import centerImage from "../assets/4.jpeg";
+import centerImage from "../assets/herosection.png";
 import Logo1 from "../assets/1.png";
 import Logo2 from "../assets/2.png";
 import Logo3 from "../assets/3.png";
@@ -415,7 +415,7 @@ const LoginPage: React.FC = () => {
                 objectFit: "contain",
               }}
             />
-            <img
+            {/* <img
               src={centerImage}
               alt="Logo"
               style={{
@@ -430,9 +430,9 @@ const LoginPage: React.FC = () => {
                 objectFit: "contain",
                 // animationDelay: animationPhase === "slide" ? "0s" : "3s",
                 // animationDuration: "3s",
-                transitionDelay: "0s",
+                // transitionDelay: "0s",
                 // animationTimingFunction: "ease-in-out",
-                animation: animationPhase === "slide" ? "slide 3s infinite" : "none",
+                // animation: animationPhase === "slide" ? "slide 3s infinite" : "none",
               }}
             />
             <style>
@@ -443,7 +443,7 @@ const LoginPage: React.FC = () => {
               100% { transform: translateX(0); opacity: 1; }
             }
             `}
-            </style>
+            </style> */}
           </div>
         </div>
       </Grid>

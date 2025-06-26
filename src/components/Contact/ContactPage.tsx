@@ -148,7 +148,7 @@ const OfficeHoursCard: React.FC = () => {
                     </Grid>
                     <Grid item xs={6}>
                         <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                            9:00 AM - 6:00 PM EST
+                            9:00 AM - 6:00 PM IST
                         </Typography>
                     </Grid>
                     <Grid item xs={6}>
@@ -158,7 +158,7 @@ const OfficeHoursCard: React.FC = () => {
                     </Grid>
                     <Grid item xs={6}>
                         <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                            10:00 AM - 2:00 PM EST
+                            10:00 AM - 2:00 PM IST
                         </Typography>
                     </Grid>
                     <Grid item xs={6}>
@@ -206,12 +206,15 @@ const ContactPage: React.FC = () => {
     });
 
     const industries = [
-        'Hospital Pharmacy',
-        'Retail Pharmacy',
-        'Specialty Pharmacy',
-        'Clinic Pharmacy',
-        'Mail Order Pharmacy',
-        'Long-term Care Pharmacy',
+        'Healthcare',
+        'Finance',
+        'Education',
+        'Manufacturing',
+        'Retail',
+        'Technology',
+        'Hospitality',
+        'Transportation',
+        'Government',
         'Other'
     ];
 
@@ -374,10 +377,34 @@ const ContactPage: React.FC = () => {
                     position: 'absolute',
                     top: -100,
                     right: -100,
-                    width: 300,
-                    height: 300,
+                    width: 400,
+                    height: 400,
                     borderRadius: '50%',
-                    background: 'radial-gradient(circle, rgba(46, 125, 50, 0.05) 0%, rgba(46, 125, 50, 0) 70%)',
+                    background: 'radial-gradient(circle, rgba(54, 126, 56, 0.3) 0%, rgba(46, 125, 50, 0) 70%)',
+                    zIndex: 0
+                }}
+            />
+            <Box
+                sx={{
+                    position: 'absolute',
+                    top: 100,
+                    left: 100,
+                    width: 400,
+                    height: 400,
+                    borderRadius: '50%',
+                    background: 'radial-gradient(circle, rgba(54, 126, 56, 0.3) 0%, rgba(46, 125, 50, 0) 70%)',
+                    zIndex: 0
+                }}
+            />
+            <Box
+                sx={{
+                    position: 'absolute',
+                    bottom: 100,
+                    right: 100,
+                    width: 400,
+                    height: 400,
+                    borderRadius: '50%',
+                    background: 'radial-gradient(circle, rgba(54, 126, 56, 0.3) 0%, rgba(46, 125, 50, 0) 70%)',
                     zIndex: 0
                 }}
             />
@@ -386,10 +413,10 @@ const ContactPage: React.FC = () => {
                     position: 'absolute',
                     bottom: -50,
                     left: -50,
-                    width: 200,
-                    height: 200,
+                    width: 400,
+                    height: 400,
                     borderRadius: '50%',
-                    background: 'radial-gradient(circle, rgba(46, 125, 50, 0.05) 0%, rgba(46, 125, 50, 0) 70%)',
+                    background: 'radial-gradient(circle, rgba(54, 126, 56, 0.3) 0%, rgba(46, 125, 50, 0) 70%)',
                     zIndex: 0
                 }}
             />
@@ -440,7 +467,7 @@ const ContactPage: React.FC = () => {
 
                 <Grid
                     container
-                    spacing={4}
+                    spacing={1}
                     component={motion.div}
                     variants={containerVariants}
                     initial="hidden"
@@ -450,14 +477,14 @@ const ContactPage: React.FC = () => {
                     <Grid
                         item
                         xs={12}
-                        md={8}
+                        md={7.5}
                         component={motion.div}
                         variants={itemVariants}
                     >
                         <Paper
                             elevation={0}
                             sx={{
-                                p: { xs: 3, md: 4 },
+                                p: { xs: 2, md: 3 },
                                 borderRadius: 1,
                                 height: '100%',
                                 border: '1px solid',
@@ -653,7 +680,7 @@ const ContactPage: React.FC = () => {
                     <Grid
                         item
                         xs={12}
-                        md={4}
+                        md={4.5}
                         component={motion.div}
                         variants={itemVariants}
                     >
@@ -680,15 +707,15 @@ const ContactPage: React.FC = () => {
                             <ContactInfoCard
                                 icon={<Email />}
                                 title="Email Us"
-                                content="support@dristidocs.com"
-                                link="mailto:prajapatjinesh585@gmail.com"
+                                content="support@vyapardrishti.in"
+                                link="mailto:tohidkhan1193407@gmail.com"
                             />
 
                             <ContactInfoCard
                                 icon={<Phone />}
                                 title="Call Us"
-                                content="+91 (890) 500-9854"
-                                link="tel:+918905009854"
+                                content="+91 (636) 7097-548"
+                                link="tel:+916367097548"
                             />
 
                             <ContactInfoCard
@@ -700,15 +727,15 @@ const ContactPage: React.FC = () => {
                             <ContactInfoCard
                                 icon={<Support />}
                                 title="Technical Support"
-                                content="help@dristidocs.com"
-                                link="mailto:help@dristidocs.com"
+                                content="help@vyapardrishti.in"
+                                link="mailto:tohidkhan1193407@gmail.com"
                             />
 
                             <ContactInfoCard
                                 icon={<BusinessCenter />}
                                 title="Sales Inquiries"
-                                content="sales@dristidocs.com"
-                                link="mailto:sales@dristidocs.com"
+                                content="sales@vyapardrishti.in"
+                                link="mailto:tohidkhan1193407@gmail.com"
                             />
 
                             <OfficeHoursCard />

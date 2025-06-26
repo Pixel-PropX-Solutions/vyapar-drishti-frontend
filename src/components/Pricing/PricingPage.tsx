@@ -66,13 +66,13 @@ const PricingPage: React.FC = () => {
   const pricingPlans: PricingPlan[] = [
     {
       title: 'Starter',
-      subtitle: 'Perfect for small teams and startups',
+      subtitle: 'Perfect for small businesses and startups',
       priceMonthlyINR: 999,
       priceYearlyINR: 9990,
       priceMonthlyUSD: 12,
       priceYearlyUSD: 120,
       features: [
-        'Up to 5 team members',
+        'Up to 5 users',
         '10GB data storage',
         'Basic analytics',
         'Email support'
@@ -89,7 +89,7 @@ const PricingPage: React.FC = () => {
       priceMonthlyUSD: 30,
       priceYearlyUSD: 300,
       features: [
-        'Up to 20 team members',
+        'Up to 20 users',
         '50GB data storage',
         'Advanced analytics',
         'Priority email support',
@@ -109,7 +109,7 @@ const PricingPage: React.FC = () => {
       priceMonthlyUSD: 97,
       priceYearlyUSD: 970,
       features: [
-        'Unlimited team members',
+        'Unlimited users',
         '250GB data storage',
         'Enterprise analytics',
         '24/7 phone & email support',

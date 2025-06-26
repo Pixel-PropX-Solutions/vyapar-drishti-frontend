@@ -29,8 +29,10 @@ const CTASection: React.FC = () => {
             variants={fadeIn}
             sx={{
                 py: { xs: 8, md: 12 },
-                bgcolor: 'primary.dark',
-                color: 'white',
+                borderColor: 'primary.dark',
+                borderWidth: 1,
+                borderStyle: 'solid',
+                // color: 'white',
                 borderRadius: { md: 4 },
                 mx: { md: 4 },
                 my: 4
@@ -44,7 +46,7 @@ const CTASection: React.FC = () => {
                         gutterBottom
                         sx={{ fontWeight: 700 }}
                     >
-                        Ready to Transform Your Pharmacy?
+                        Ready to Transform Your Billing & Inventory?
                     </Typography>
                     <Typography
                         variant="h6"
@@ -55,7 +57,7 @@ const CTASection: React.FC = () => {
                             opacity: 0.9
                         }}
                     >
-                        Join hundreds of pharmacy owners who have simplified their operations and increased profitability with our solution.
+                        Join hundreds of businesses who have simplified their billing and inventory operations and increased profitability with our solution.
                     </Typography>
                     <Stack
                         direction={{ xs: 'column', sm: 'row' }}

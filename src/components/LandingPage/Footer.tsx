@@ -47,10 +47,6 @@ const Footer: React.FC = () => {
                 <Grid container spacing={4}>
                     <Grid item xs={12} md={4}>
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                            {/* <MedicalServices sx={{ color: 'primary.main', mr: 1, fontSize: 24 }} />
-                            <Typography variant="h6" component="div" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                                PharmTrack
-                            </Typography> */}
                             <Box
                                 sx={{
                                     display: "flex",
@@ -66,22 +62,22 @@ const Footer: React.FC = () => {
                                     src={Logo}
                                     alt="Logo"
                                     style={{
-                                        height: "50px",
-                                        borderRadius: "50%",
+                                        height: "40px",
+                                        // borderRadius: "50%",
                                     }}
                                 />
                                 <img
                                     src={logoText}
                                     alt="Logo Text"
-                                    style={{ marginBottom: "5px", height: "50px" }}
+                                    style={{ height: "30px", marginTop: "10px" }}
                                 />
                             </Box>
                         </Box>
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                            Intelligent pharmacy inventory management solution that streamlines operations and boosts productivity.
+                            Intelligent billing and inventory management solution that streamlines operations and boosts productivity.
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                            © {new Date().getFullYear()} DristiDocs. All rights reserved.
+                            ©  Vyapar Drishti. All rights reserved.
                         </Typography>
                     </Grid>
 
@@ -101,7 +97,7 @@ const Footer: React.FC = () => {
                                         textTransform: 'none',
                                         color: 'text.secondary'
                                     }}
-                                    onClick={() => navigate(linkPaths[item])}  // Navigate to the path
+                                    // onClick={() => navigate(linkPaths[item])}
                                 >
                                     {item}
                                 </Button>
@@ -125,7 +121,7 @@ const Footer: React.FC = () => {
                                         textTransform: 'none',
                                         color: 'text.secondary'
                                     }}
-                                    onClick={() => navigate(linkPaths[item])}  // Navigate to the path
+                                    // onClick={() => navigate(linkPaths[item])} 
                                 >
                                     {item}
                                 </Button>
@@ -149,7 +145,7 @@ const Footer: React.FC = () => {
                                         textTransform: 'none',
                                         color: 'text.secondary'
                                     }}
-                                    onClick={() => navigate(linkPaths[item])}  // Navigate to the path
+                                    // onClick={() => navigate(linkPaths[item])}
                                 >
                                     {item}
                                 </Button>
@@ -173,7 +169,7 @@ const Footer: React.FC = () => {
                                         textTransform: 'none',
                                         color: 'text.secondary'
                                     }}
-                                    onClick={() => navigate(linkPaths[item])}  // Navigate to the path
+                                    onClick={() => navigate(linkPaths[item])} 
                                 >
                                     {item}
                                 </Button>

@@ -92,7 +92,7 @@ const SecurityPolicyPage: React.FC = () => {
     },
     {
       question: "What should I do if I discover a security vulnerability?",
-      answer: "If you believe you've found a security vulnerability, please contact our security team immediately at security@example.com. We have a responsible disclosure policy and appreciate the security community's efforts to help us maintain a secure platform."
+      answer: "If you believe you've found a security vulnerability, please contact our security team immediately at security@vyapardrishti.in. We have a responsible disclosure policy and appreciate the security community's efforts to help us maintain a secure platform."
     },
     {
       question: "How can I make my account more secure?",
@@ -124,7 +124,7 @@ const SecurityPolicyPage: React.FC = () => {
         </Typography>
         
         <Typography variant="body1" paragraph>
-          At [Your Company], security is our top priority. We employ industry-leading practices to ensure your data remains safe, 
+          At Vyapar Drishti, security is our top priority. We employ industry-leading practices to ensure your data remains safe, 
           private, and accessible only to authorized parties. This document outlines our security measures and commitment to protecting your information.
         </Typography>
 

@@ -74,8 +74,8 @@ const ProblemSection: React.FC = () => {
   
   // Statistics data
   const stats = [
-    { value: "68%", label: "of pharmacies struggle with inventory errors" },
-    { value: "12.5", label: "hours wasted weekly on manual data entry" },
+    { value: "68%", label: "of businesses struggle with inventory errors" },
+    { value: "12.5", label: "hours wasted weekly on manual billing and data entry" },
     { value: "42%", label: "experience stockouts due to poor tracking" },
     { value: "30%", label: "higher costs from inefficient returns" }
   ];
@@ -215,7 +215,7 @@ const ProblemSection: React.FC = () => {
                 WebkitTextFillColor: 'transparent',
               }}
             >
-              Common Pharmacy Management Problems
+              Common Problems in Billing & Inventory Management
             </Typography>
           </motion.div>
           
@@ -235,7 +235,7 @@ const ProblemSection: React.FC = () => {
                 lineHeight: 1.6
               }}
             >
-              Pharmacy owners face significant challenges with manual inventory tracking systems that lead to errors, inefficiencies, and missed opportunities.
+              Bussiness owners face significant challenges with manual inventory tracking systems that lead to errors, inefficiencies, and missed opportunities.
             </Typography>
           </motion.div>
         </Box>

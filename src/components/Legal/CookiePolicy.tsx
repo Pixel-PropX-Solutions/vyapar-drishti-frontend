@@ -137,7 +137,7 @@ const CookiePolicyPage: React.FC = () => {
         </Typography>
 
         <Typography variant="body1" paragraph>
-          This Cookie Policy explains how [Your Company] uses cookies and similar technologies 
+          This Cookie Policy explains how Vyapar Drishti uses cookies and similar technologies 
           to recognize you when you visit our website. It explains what these technologies are 
           and why we use them, as well as your rights to control our use of them.
         </Typography>

@@ -57,7 +57,7 @@ const Home = () => {
           Overview
         </Typography>
         <Typography variant="body1" paragraph align="center" sx={{ fontSize: '1.2rem', lineHeight: '1.8' }}>
-          This is a web-based application that enables users to interact with various types of documents in an intelligent and user-friendly manner. It offers search functionality through both voice and text prompts and provides advanced features for managing and analyzing bills.
+          This is a web-based application that enables users to interact with various types of documents in an intelligent and user-friendly manner. It offers search functionality through both voice and text prompts and provides advanced features for managing and analyzing bills and inventory.
         </Typography>
       </Stack>
 
@@ -211,12 +211,10 @@ const Home = () => {
         }}
       >
         <Typography variant="body2" sx={{ fontSize: '14px' }}>
-          © 2025 Smart Document & Billing Management. All Rights Reserved.
+          © 2025 Smart Billing & Inventory Management. All Rights Reserved.
         </Typography>
         <Box sx={{ marginTop: 2 }}>
-          <Button sx={{ color: '#fff', textTransform: 'none', margin: '0 10px' }}>Privacy</Button>
-          <Button sx={{ color: '#fff', textTransform: 'none', margin: '0 10px' }}>Terms</Button>
-          <Button sx={{ color: '#fff', textTransform: 'none', margin: '0 10px' }}>Support</Button>
+          {/* Add any additional footer content here */}
         </Box>
       </Box>
     </Stack>
