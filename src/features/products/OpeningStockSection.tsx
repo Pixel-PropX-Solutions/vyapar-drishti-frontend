@@ -131,7 +131,7 @@ const OpeningStockSection: React.FC<OpeningStockSectionProps> = ({
                                         endAdornment: data.unit && (
                                             <InputAdornment position="end">
                                                 <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                                                    {data._unit || data.unit}
+                                                    {data.unit_id || data.unit}
                                                 </Typography>
                                             </InputAdornment>
                                         )
@@ -184,7 +184,7 @@ const OpeningStockSection: React.FC<OpeningStockSectionProps> = ({
                                         endAdornment: (
                                             <InputAdornment position="end">
                                                 <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                                                    per {data._unit || data.unit || 'unit'}
+                                                    per {data.unit_id || data.unit || 'unit'}
                                                 </Typography>
                                             </InputAdornment>
                                         )
@@ -291,7 +291,7 @@ const OpeningStockSection: React.FC<OpeningStockSectionProps> = ({
                                         endAdornment: data.unit && (
                                             <InputAdornment position="end">
                                                 <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                                                    {data._unit || data.unit}
+                                                    {data.unit_id || data.unit}
                                                 </Typography>
                                             </InputAdornment>
                                         )

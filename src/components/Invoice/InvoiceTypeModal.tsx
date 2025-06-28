@@ -71,6 +71,7 @@ const InvoiceTypeModal: React.FC<Props> = ({ open, onClose, onSubmit }) => {
                 timeout: 500,
                 sx: { backgroundColor: alpha('#000', 0.7) }
             }}
+            {...(open ? {} : { inert: '' })}
         >
             <Fade in={open}>
                 <Box sx={modalStyle}>

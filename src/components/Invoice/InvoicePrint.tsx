@@ -79,7 +79,7 @@ const InvoicePrint: React.FC<Props> = ({
                 .outputPdf('blob');
 
 
-            console.log('PDF generated successfully:', pdf);
+            // console.log('PDF generated successfully:', pdf);
 
             return pdf;
         } finally {

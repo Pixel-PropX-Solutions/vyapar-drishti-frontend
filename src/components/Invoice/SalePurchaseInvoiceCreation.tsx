@@ -7,7 +7,6 @@ import {
     Card,
     CardContent,
     Grid,
-    Divider,
     Paper,
     IconButton,
     Table,
@@ -19,31 +18,22 @@ import {
     Tooltip,
     Autocomplete,
     InputAdornment,
-    Alert,
-    Stepper,
-    Step,
-    StepLabel,
     Container,
     CircularProgress,
     Avatar,
     useTheme,
     alpha,
-    Collapse,
     Stack
 } from "@mui/material";
 import {
     Inventory,
-    Calculate,
-    Assignment,
     Delete,
     Add,
     Receipt,
-    DateRange,
     Save,
     AddCircleOutline,
     BusinessCenter,
     LocalOffer,
-    TrendingUp,
     PeopleAlt,
     Info
 } from "@mui/icons-material";
@@ -51,17 +41,21 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { viewAllCustomerWithType } from '@/services/customers';
 import { viewProductsWithId } from '@/services/products';
-import { createInvoice } from '@/services/invoice';
+import { createInvoice, createInvoiceWithGST } from '@/services/invoice';
 import { useNavigate, useParams } from 'react-router-dom';
+import type { TableRowProps } from "@mui/material";
 
 // Interfaces
 interface InvoiceItems {
     vouchar_id: string;
     item: string;
-    _item: string;
+    item_id: string;
     quantity: number;
     rate: number;
     amount: number;
+    gst?: number;
+    gst_amount?: number;
+
 }
 
 interface InvoiceAccounting {
@@ -72,17 +66,20 @@ interface InvoiceAccounting {
 }
 
 // Styled Components
-const StyledCard = ({ children, ...props }: any) => {
+const StyledCard = ({
+    children,
+    ...props
+}: React.PropsWithChildren<{ sx?: object } & React.ComponentProps<typeof Card>>) => {
     const theme = useTheme();
     return (
         <Card
             elevation={0}
             sx={{
                 borderRadius: 1,
-                border: `1px solid ${alpha(theme.palette.primary.dark, 1)}`,
+                // border: `1px solid ${alpha(theme.palette.primary.dark, 1)}`,
                 background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.8)} 0%, ${alpha(theme.palette.background.paper, 1)} 100%)`,
                 backdropFilter: 'blur(10px)',
-                transition: 'all 0.3s ease-in-out',
+                // transition: 'all 0.3s ease-in-out',
                 // '&:hover': {
                 //   borderColor: alpha(theme.palette.primary.dark, 1),
                 // },
@@ -95,12 +92,15 @@ const StyledCard = ({ children, ...props }: any) => {
     );
 };
 
-const AnimatedTableRow = ({ children, ...props }: any) => (
+const AnimatedTableRow = ({ children, ...props }: React.PropsWithChildren<TableRowProps>) => (
     <TableRow
         sx={{
             transition: 'all 0.2s ease-in-out',
             '&:hover': {
                 backgroundColor: alpha('#1976d2', 0.04),
+            },
+            '& .MuiTableCell-root': {
+                padding: '8px 8px',
             },
             ...props.sx
         }}
@@ -112,16 +112,17 @@ const AnimatedTableRow = ({ children, ...props }: any) => (
 // Main Component
 export default function SalePurchaseInvoiceCreation() {
     const { type } = useParams();
-    const [activeStep, setActiveStep] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [parties, setParties] = useState<{ id: string; name: string; }[]>([]);
     const [counterParties, setCounterParties] = useState<{ id: string; name: string; }[]>([]);
-    const [itemsList, setItemsList] = useState<{ id: string; name: string; unit: string }[]>([]);
+    const [itemsList, setItemsList] = useState<{ id: string; name: string; unit: string, gst: string, hsn_code: string }[]>([]);
     const theme = useTheme();
 
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const { currentCompany } = useSelector((state: RootState) => state.auth);
+    const { user } = useSelector((state: RootState) => state.auth);
+    const currentCompanyDetails = user?.company?.find((c :any) => c._id === user.user_settings.current_company_id);
 
     const [data, setData] = useState({
         company_id: "",
@@ -140,13 +141,12 @@ export default function SalePurchaseInvoiceCreation() {
         items: [] as InvoiceItems[],
     });
 
-    const steps = ['Invoice Details', 'Add Items', 'Review & Submit'];
 
     const handleAddItem = () => {
         const newItem: InvoiceItems = {
             vouchar_id: '',
             item: '',
-            _item: '',
+            item_id: '',
             quantity: 1,
             rate: 0.0,
             amount: 0.0
@@ -164,7 +164,7 @@ export default function SalePurchaseInvoiceCreation() {
         }));
     };
 
-    const handleItemChange = (index: number, field: keyof InvoiceItems, value: any) => {
+    const handleItemChange = (index: number, field: keyof InvoiceItems, value: string | number | undefined) => {
         setData(prev => ({
             ...prev,
             items: prev.items.map((item, i) => {
@@ -173,7 +173,9 @@ export default function SalePurchaseInvoiceCreation() {
                     // Auto-calculate amount
                     if (field === 'quantity' || field === 'rate') {
                         updatedItem.amount = updatedItem.quantity * updatedItem.rate;
+                        updatedItem.gst_amount = updatedItem.amount * (updatedItem.gst || 0) / 100;
                     }
+
                     return updatedItem;
                 }
                 return item;
@@ -181,7 +183,7 @@ export default function SalePurchaseInvoiceCreation() {
         }));
     };
 
-    const handleChange = (e: any) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setData((prevState) => ({
             ...prevState,
@@ -190,9 +192,10 @@ export default function SalePurchaseInvoiceCreation() {
     };
 
     const calculateTotals = () => {
-        const subtotal = data.items.reduce((sum, item) => sum + (item.amount || 0), 0);
-        const grandTotal = subtotal; // Add tax calculations here if needed
-        return { subtotal, grandTotal };
+        const subtotal = data.items.reduce((sum, item) => sum + (item.amount || 0), 0).toFixed(2);
+        const gstTotal = data.items.reduce((sum, item) => sum + (item.gst_amount || 0), 0).toFixed(2);
+        const grandTotal = (parseFloat(subtotal) + parseFloat(gstTotal)).toFixed(2);
+        return { subtotal, grandTotal, gstTotal };
     };
 
     const { grandTotal } = calculateTotals();
@@ -201,59 +204,95 @@ export default function SalePurchaseInvoiceCreation() {
         e.preventDefault();
         setIsLoading(true);
 
-        const dataToSend = {
-            ...data,
-            company_id: currentCompany?._id || '',
-            items: data.items.map(item => ({
-                ...item,
-                vouchar_id: '',
-            })),
-            accounting: [
-                {
+        if (currentCompanyDetails?.company_settings?.features?.enable_gst) {
+            const dataToSend = {
+                ...data,
+                company_id: currentCompany?._id || '',
+                voucher_type_id: '',
+                party_name_id: '',
+                items: data.items.map(item => ({
+                    ...item,
                     vouchar_id: '',
-                    ledger: data.party_name,
-                    ledger_id: data.party_id,
-                    amount: type === 'sales' ? -grandTotal : grandTotal,
-                },
-                {
+                    gst_rate: item.gst?.toString() || '0',
+                    gst_amount: item.gst_amount || 0,
+                    additional_amount: 0,
+                    discount_amount: 0,
+                    godown: '',
+                    godown_id: '',
+                    order_number: '',
+                    order_due_date: '',
+                    hsn_code: itemsList.find((p) => p.id === item.item_id)?.hsn_code || '',
+                })),
+                accounting: [
+                    {
+                        vouchar_id: '',
+                        ledger: data.party_name,
+                        ledger_id: data.party_id,
+                        amount: type === 'sales' ? -Number(grandTotal) : Number(grandTotal),
+                    },
+                    {
+                        vouchar_id: '',
+                        ledger: data.counter_party,
+                        ledger_id: data.counter_id,
+                        amount: type === 'sales' ? Number(grandTotal) : -Number(grandTotal),
+                    }
+                ],
+            }
+
+            
+
+            dispatch(createInvoiceWithGST(dataToSend)).then(() => {
+                setIsLoading(false);
+                navigate('/invoices', { replace: true });
+            })
+        }
+        else {
+            const dataToSend = {
+                ...data,
+                company_id: currentCompany?._id || '',
+                items: data.items.map(item => ({
+                    ...item,
                     vouchar_id: '',
-                    ledger: data.counter_party,
-                    ledger_id: data.counter_id,
-                    amount: type === 'sales' ? grandTotal : -grandTotal,
-                }
-            ],
+                })),
+                accounting: [
+                    {
+                        vouchar_id: '',
+                        ledger: data.party_name,
+                        ledger_id: data.party_id,
+                        amount: type === 'sales' ? -Number(grandTotal) : Number(grandTotal),
+                    },
+                    {
+                        vouchar_id: '',
+                        ledger: data.counter_party,
+                        ledger_id: data.counter_id,
+                        amount: type === 'sales' ? Number(grandTotal) : -Number(grandTotal),
+                    }
+                ],
+            }
+
+            dispatch(createInvoice(dataToSend)).then(() => {
+                setIsLoading(false);
+                navigate('/invoices', { replace: true });
+            })
         }
 
-        console.log('Submitting Invoice Data:', dataToSend);
-        dispatch(createInvoice(dataToSend)).then(() => {
-            setIsLoading(false);
-            navigate('/invoices', { replace: true });
-        })
-    };
-
-    const handleNext = () => {
-        setActiveStep((prevStep) => prevStep + 1);
-    };
-
-    const handleBack = () => {
-        setActiveStep((prevStep) => prevStep - 1);
     };
 
     useEffect(() => {
-        if (currentCompany) {
+        if (user.user_settings.current_company_id) {
             setData(prev => ({
                 ...prev,
-                company_id: currentCompany._id,
+                company_id: user.user_settings.current_company_id,
                 voucher_type: type ? type.charAt(0).toUpperCase() + type.slice(1) : '',
             }));
         }
 
         dispatch(viewAllCustomerWithType({
-            company_id: currentCompany?._id || '',
+            company_id: user.user_settings.current_company_id || '',
             customerType: type === 'sales' ? 'Sundry Debtors' : 'Sundry Creditors',
         })).then((response) => {
             if (response.meta.requestStatus === 'fulfilled') {
-                console.log('viewAllCustomerWithType response', response);
+                // console.log('viewAllCustomerWithType response', response);
                 const ledgersWithType = response.payload;
                 setParties(ledgersWithType.map((part: any) => ({ name: part.ledger_name, id: part._id })));
             }
@@ -263,11 +302,11 @@ export default function SalePurchaseInvoiceCreation() {
         });
 
         dispatch(viewAllCustomerWithType({
-            company_id: currentCompany?._id || '',
+            company_id: user.user_settings.current_company_id || '',
             customerType: type === 'sales' ? 'Sales Account' : 'Purchase Account',
         })).then((response) => {
             if (response.meta.requestStatus === 'fulfilled') {
-                console.log('viewAllCustomerWithType response for counter parties', response);
+                // console.log('viewAllCustomerWithType response for counter parties', response);
                 const ledgersWithType = response.payload;
                 setCounterParties(ledgersWithType.map((part: any) => ({ name: part.ledger_name, id: part._id })));
             }
@@ -276,157 +315,264 @@ export default function SalePurchaseInvoiceCreation() {
             console.error('Error fetching customers:', error);
         });
 
-        dispatch(viewProductsWithId(currentCompany?._id || '')).then((response) => {
+        dispatch(viewProductsWithId(user.user_settings.current_company_id || '')).then((response) => {
             if (response.meta.requestStatus === 'fulfilled') {
-                console.log('viewProductsWithId response', response);
+                // console.log('viewProductsWithId response', response);
                 const products = response.payload;
                 setItemsList(
                     products.map((product: any) => ({
                         name: product.stock_item_name,
                         id: product._id,
                         unit: product.unit,
+                        gst: product.rate,
+                        hsn_code: product.hsn_code || ''
                     }))
                 );
             }
             return response;
         });
-    }, [dispatch, currentCompany?._id, type, currentCompany]);
+    }, [dispatch, type, user.user_settings.current_company_id, user]);
+
+    // useEffect(() => {
+
+    // }, [user])
 
 
     return (
         <Container maxWidth="xl" sx={{ py: 4 }}>
             {/* Header Section */}
-            <Box sx={{ mb: 4 }}>
+            <Box sx={{ mb: 2 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <Avatar
                         sx={{
                             bgcolor: 'primary.main',
-                            width: 56,
-                            height: 56,
-                            mr: 3
+                            width: 36,
+                            height: 36,
+                            mr: 1
                         }}
                     >
-                        <Receipt sx={{ fontSize: 32 }} />
+                        <Receipt sx={{ fontSize: 24 }} />
                     </Avatar>
                     <Box>
-                        <Typography variant="h4" fontWeight="700" color="primary.main">
+                        <Typography variant="h6" fontWeight="700" color="primary.main">
                             Create Invoice
                         </Typography>
-                        <Typography variant="subtitle1" color="text.secondary">
-                            Generate professional invoices with ease
+                        <Typography variant="body2" color="text.secondary">
+                            Create professional invoices with ease
                         </Typography>
                     </Box>
                 </Box>
-
-                {/* Progress Stepper */}
-                <Stepper activeStep={activeStep} sx={{ mt: 3 }}>
-                    {steps.map((label) => (
-                        <Step key={label}>
-                            <StepLabel
-                                sx={{
-                                    '& .MuiStepLabel-label': {
-                                        fontSize: '1rem',
-                                        fontWeight: 500
-                                    }
-                                }}
-                            >
-                                {label}
-                            </StepLabel>
-                        </Step>
-                    ))}
-                </Stepper>
             </Box>
 
             {/* Main Form */}
             <StyledCard>
-                <CardContent sx={{ p: 4 }}>
+                <CardContent sx={{ p: 2 }}>
                     <Box component="form" onSubmit={handleSubmit}>
+                        <Box>
+                            <Grid container spacing={3}>
+                                <Grid item xs={12} md={6}>
+                                    <StyledCard>
+                                        <CardContent>
+                                            <Box display="flex" alignItems="center" mb={3}>
+                                                <Receipt color="primary" sx={{ mr: 1 }} />
+                                                <Typography variant="h6">Invoice Details {(type ? type.charAt(0).toUpperCase() + type.slice(1) : '')}</Typography>
+                                            </Box>
 
-                        {/* Step 1: Invoice Details */}
-                        <Collapse in={activeStep === 0}>
-                            <Box p={2}>
-                                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                                    <DateRange sx={{ mr: 2, color: 'primary.main' }} />
-                                    Invoice Information
-                                </Typography>
+                                            <Stack spacing={2}>
+                                                <TextField
+                                                    label="Invoice Number"
+                                                    fullWidth
+                                                    value={data.voucher_number}
+                                                    onChange={handleChange}
+                                                    name="voucher_number"
+                                                    variant="outlined"
+                                                    InputProps={{
+                                                        startAdornment: (
+                                                            <InputAdornment position="start">
+                                                                <LocalOffer color="action" />
+                                                            </InputAdornment>
+                                                        ),
+                                                    }}
+                                                />
 
-                                <Grid container spacing={3}>
-                                    <Grid item xs={12} md={6}>
-                                        <StyledCard>
-                                            <CardContent>
-                                                <Box display="flex" alignItems="center" mb={3}>
-                                                    <Receipt color="primary" sx={{ mr: 1 }} />
-                                                    <Typography variant="h6">Invoice Details {(type ? type.charAt(0).toUpperCase() + type.slice(1) : '')}</Typography>
-                                                </Box>
+                                                <TextField
+                                                    label="Invoice Date"
+                                                    type="date"
+                                                    fullWidth
+                                                    value={data.date}
+                                                    onChange={handleChange}
+                                                    name="date"
+                                                    variant="outlined"
+                                                    InputLabelProps={{ shrink: true }}
+                                                />
 
-                                                <Stack spacing={2}>
-                                                    <TextField
-                                                        label="Invoice Number"
-                                                        fullWidth
-                                                        value={data.voucher_number}
-                                                        onChange={handleChange}
-                                                        name="voucher_number"
-                                                        variant="outlined"
-                                                        InputProps={{
-                                                            startAdornment: (
-                                                                <InputAdornment position="start">
-                                                                    <LocalOffer color="action" />
-                                                                </InputAdornment>
-                                                            ),
-                                                        }}
-                                                    />
+                                            </Stack>
+                                        </CardContent>
+                                    </StyledCard>
+                                </Grid>
 
-                                                    <TextField
-                                                        label="Invoice Date"
-                                                        type="date"
-                                                        fullWidth
-                                                        value={data.date}
-                                                        onChange={handleChange}
-                                                        name="date"
-                                                        variant="outlined"
-                                                        InputLabelProps={{ shrink: true }}
-                                                    />
+                                <Grid item xs={12} md={6}>
+                                    <StyledCard>
+                                        <CardContent>
+                                            <Box display="flex" alignItems="center" mb={3}>
+                                                <PeopleAlt color="primary" sx={{ mr: 1 }} />
+                                                <Typography variant="h6">Party Information</Typography>
+                                            </Box>
 
-                                                </Stack>
-                                            </CardContent>
-                                        </StyledCard>
-                                    </Grid>
-
-                                    <Grid item xs={12} md={6}>
-                                        <StyledCard>
-                                            <CardContent>
-                                                <Box display="flex" alignItems="center" mb={3}>
-                                                    <PeopleAlt color="primary" sx={{ mr: 1 }} />
-                                                    <Typography variant="h6">Party Information</Typography>
-                                                </Box>
-
-                                                <Stack spacing={2}>
-                                                    <Autocomplete
-                                                        options={parties}
-                                                        getOptionLabel={(option) => option.name}
-                                                        value={parties.find(p => p.id === data.party_id) || null}
-                                                        onChange={(_, newValue) =>
-                                                            setData(prev => ({
-                                                                ...prev,
-                                                                party_name: newValue ? newValue.name : '',
-                                                                party_id: newValue ? newValue.id : ''
-                                                            }))
+                                            <Stack spacing={2}>
+                                                <Autocomplete
+                                                    options={parties}
+                                                    getOptionLabel={(option) => option.name}
+                                                    value={parties.find(p => p.id === data.party_id) || null}
+                                                    onChange={(_, newValue) =>
+                                                        setData(prev => ({
+                                                            ...prev,
+                                                            party_name: newValue ? newValue.name : '',
+                                                            party_id: newValue ? newValue.id : ''
+                                                        }))
+                                                    }
+                                                    renderInput={(params) => (
+                                                        <TextField
+                                                            {...params}
+                                                            label={type === 'sales' ? "Select Customer" : "Select Supplier"}
+                                                            placeholder={type === 'sales' ? "Start typing for customer suggestions..." : "Start typing for supplier suggestions..."}
+                                                            variant="outlined"
+                                                            fullWidth
+                                                            InputProps={{
+                                                                ...params.InputProps,
+                                                                startAdornment: (
+                                                                    <InputAdornment position="start">
+                                                                        <BusinessCenter color="primary" />
+                                                                    </InputAdornment>
+                                                                ),
+                                                            }}
+                                                        />
+                                                    )}
+                                                    sx={{
+                                                        '& .MuiAutocomplete-endAdornment': {
+                                                            display: 'none'
                                                         }
+                                                    }}
+                                                />
+                                                <Autocomplete
+                                                    options={counterParties}
+                                                    getOptionLabel={(option) => option.name}
+                                                    value={counterParties.find(p => p.id === data.counter_id) || null}
+                                                    onChange={(_, newValue) =>
+                                                        setData(prev => ({
+                                                            ...prev,
+                                                            counter_party: newValue ? newValue.name : '',
+                                                            counter_id: newValue ? newValue.id : ''
+                                                        }))
+                                                    }
+                                                    renderInput={(params) => (
+                                                        <TextField
+                                                            {...params}
+                                                            label={type === 'sales' ? "Select Sales Account" : "Select Purchase Account"}
+                                                            placeholder={type === 'sales' ? "Start typing for sales account suggestions..." : "Start typing for purchase account suggestions..."}
+                                                            variant="outlined"
+                                                            fullWidth
+                                                            InputProps={{
+                                                                ...params.InputProps,
+                                                                startAdornment: (
+                                                                    <InputAdornment position="start">
+                                                                        <BusinessCenter color="primary" />
+                                                                    </InputAdornment>
+                                                                ),
+                                                            }}
+                                                            sx={{
+                                                                '& .MuiAutocomplete-endAdornment': {
+                                                                    display: 'none'
+                                                                }
+                                                            }}
+                                                        />
+                                                    )}
+                                                />
+                                            </Stack>
+                                        </CardContent>
+                                    </StyledCard>
+                                </Grid>
+                            </Grid>
+                        </Box>
+
+                        <Box>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', my: 2 }}>
+                                <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <Inventory sx={{ mr: 2, color: 'primary.main' }} />
+                                    Invoice Items
+                                </Typography>
+                                <Button
+                                    variant="contained"
+                                    startIcon={<AddCircleOutline />}
+                                    onClick={handleAddItem}
+                                    sx={{ borderRadius: 1 }}
+                                >
+                                    Add Item Row
+                                </Button>
+                            </Box>
+
+                            <TableContainer
+                                component={Paper}
+                                sx={{
+                                    borderRadius: 1,
+                                    overflow: "hidden",
+                                    boxShadow: theme.shadows[4],
+                                    border: `1px solid ${alpha(theme.palette.divider, 0.1)}`
+                                }}
+                            >
+                                <Table>
+                                    <TableHead>
+                                        <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1) }}>
+                                            <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem', width: '30%' }}>Product Name</TableCell>
+                                            <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }}>QTY</TableCell>
+                                            <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Rate (&#8377;)</TableCell>
+                                            {currentCompanyDetails?.company_settings?.features?.enable_gst && (
+                                                <>
+                                                    <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }}>GST (%)</TableCell>
+                                                    <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }}>GST (&#8377;)</TableCell>
+                                                </>
+                                            )}
+                                            <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Amount (&#8377;)</TableCell>
+                                            {currentCompanyDetails?.company_settings?.features?.enable_gst && (
+                                                <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Total (&#8377;)</TableCell>
+                                            )}
+                                            <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Action</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {data.items.map((item, index) => (
+                                            <AnimatedTableRow key={index}>
+                                                <TableCell>
+                                                    <Autocomplete
+                                                        options={itemsList}
+                                                        getOptionLabel={(option) =>
+                                                            typeof option === 'string'
+                                                                ? option
+                                                                : option?.name || ''
+                                                        }
+                                                        value={
+                                                            itemsList.find((p) => p.id === item.item_id) ||
+                                                            (item.item ? { id: '', name: item.item, unit: '', gst: '', hsn_code: '' } : null)
+                                                        }
+                                                        onChange={(_, newValue) => {
+                                                            if (newValue && typeof newValue === 'object') {
+                                                                handleItemChange(index, 'item', newValue.name);
+                                                                handleItemChange(index, 'item_id', newValue.id);
+                                                                if (currentCompanyDetails?.company_settings?.features?.enable_gst)
+                                                                    handleItemChange(index, 'gst', newValue.gst);
+                                                            } else {
+                                                                handleItemChange(index, 'item', '');
+                                                                handleItemChange(index, 'item_id', '');
+                                                            }
+                                                        }}
                                                         renderInput={(params) => (
                                                             <TextField
                                                                 {...params}
-                                                                label="Select Party"
-                                                                placeholder="Start typing for party suggestions..."
+                                                                placeholder="Start typing for items suggestions..."
                                                                 variant="outlined"
                                                                 fullWidth
-                                                                InputProps={{
-                                                                    ...params.InputProps,
-                                                                    startAdornment: (
-                                                                        <InputAdornment position="start">
-                                                                            <BusinessCenter color="primary" />
-                                                                        </InputAdornment>
-                                                                    ),
-                                                                }}
+                                                                size="small"
+                                                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1, width: '100%' } }}
                                                             />
                                                         )}
                                                         sx={{
@@ -434,170 +580,139 @@ export default function SalePurchaseInvoiceCreation() {
                                                                 display: 'none'
                                                             }
                                                         }}
+                                                        isOptionEqualToValue={(option, value) => option.id === value.id}
                                                     />
-                                                    <Autocomplete
-                                                        options={counterParties}
-                                                        getOptionLabel={(option) => option.name}
-                                                        value={counterParties.find(p => p.id === data.counter_id) || null}
-                                                        onChange={(_, newValue) =>
-                                                            setData(prev => ({
-                                                                ...prev,
-                                                                counter_party: newValue ? newValue.name : '',
-                                                                counter_id: newValue ? newValue.id : ''
-                                                            }))
-                                                        }
-                                                        renderInput={(params) => (
-                                                            <TextField
-                                                                {...params}
-                                                                label="Select Counter-Party"
-                                                                placeholder="Start typing for counter-party suggestions..."
-                                                                variant="outlined"
-                                                                fullWidth
-                                                                InputProps={{
-                                                                    ...params.InputProps,
-                                                                    startAdornment: (
-                                                                        <InputAdornment position="start">
-                                                                            <BusinessCenter color="primary" />
-                                                                        </InputAdornment>
-                                                                    ),
-                                                                }}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <TextField
+                                                        type="number"
+                                                        value={item.quantity}
+                                                        onChange={(e) => handleItemChange(index, 'quantity', parseFloat(e.target.value) || 0)}
+                                                        variant="outlined"
+                                                        size="small"
+                                                        fullWidth
+                                                        inputProps={{
+                                                            min: 0,
+                                                            step: 1,
+                                                            style: {
+                                                                MozAppearance: 'textfield',
+                                                            },
+                                                        }}
+                                                        InputProps={{
+                                                            startAdornment: null,
+                                                            endAdornment: null,
+                                                            inputProps: {
+                                                                min: 0,
+                                                                step: 1,
+                                                                style: {
+                                                                    MozAppearance: 'textfield',
+                                                                },
+                                                            },
+                                                        }}
+                                                        sx={{
+                                                            '& .MuiOutlinedInput-root': { borderRadius: 1, maxWidth: 70 },
+                                                            '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
+                                                                WebkitAppearance: 'none',
+                                                                margin: 0,
+                                                            },
+                                                            '& input[type=number]': {
+                                                                MozAppearance: 'textfield',
+                                                            },
+                                                        }}
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <TextField
+                                                        type="number"
+                                                        value={item.rate}
+                                                        onChange={(e) => handleItemChange(index, 'rate', parseFloat(e.target.value) || 0)}
+                                                        variant="outlined"
+                                                        size="small"
+                                                        fullWidth
+                                                        inputProps={{
+                                                            min: 0,
+                                                            step: 0.01,
+                                                            style: {
+                                                                MozAppearance: 'textfield',
+                                                            },
+                                                        }}
+                                                        InputProps={{
+                                                            startAdornment: <InputAdornment position="start">&#8377;</InputAdornment>,
+                                                            endAdornment: null,
+                                                            inputProps: {
+                                                                min: 0,
+                                                                step: 0.01,
+                                                                style: {
+                                                                    MozAppearance: 'textfield',
+                                                                },
+                                                            },
+                                                        }}
+                                                        sx={{
+                                                            '& .MuiOutlinedInput-root': { borderRadius: 1, maxWidth: 70 },
+                                                            '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
+                                                                WebkitAppearance: 'none',
+                                                                margin: 0,
+                                                            },
+                                                            '& input[type=number]': {
+                                                                MozAppearance: 'textfield',
+                                                            },
+                                                        }}
+                                                    />
+                                                </TableCell>
+                                                {currentCompanyDetails?.company_settings?.features?.enable_gst && (
+                                                    <>
+                                                        <TableCell>
+                                                            <Box
                                                                 sx={{
-                                                                    '& .MuiAutocomplete-endAdornment': {
-                                                                        display: 'none'
-                                                                    }
+                                                                    py: 1,
+                                                                    // bgcolor: alpha(theme.palette.success.main, 0.1),
+                                                                    borderRadius: 1,
+                                                                    border: `1px solid ${alpha(theme.palette.success.main, 0.5)}`,
+                                                                    textAlign: 'center',
+                                                                    fontWeight: 'bold',
+                                                                    color: 'success.main',
+                                                                    maxWidth: 70
                                                                 }}
-                                                            />
-                                                        )}
-                                                    />
-                                                </Stack>
-                                            </CardContent>
-                                        </StyledCard>
-                                    </Grid>
-                                </Grid>
+                                                            >
+                                                                {itemsList.find((p) => p.id === item.item_id)?.gst || 0} %
+                                                            </Box>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Box
+                                                                sx={{
+                                                                    py: 1,
+                                                                    bgcolor: alpha(theme.palette.success.main, 0.1),
+                                                                    borderRadius: 1,
+                                                                    border: `1px solid ${alpha(theme.palette.success.main, 0.5)}`,
+                                                                    textAlign: 'center',
+                                                                    fontWeight: 'bold',
+                                                                    color: 'success.main',
+                                                                    // maxWidth: 100
+                                                                }}
+                                                            >
+                                                                &#8377; {(item.gst_amount ?? 0).toFixed(2)}
+                                                            </Box>
+                                                        </TableCell>
+                                                    </>
+                                                )}
 
-                                <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end' }}>
-                                    <Button
-                                        variant="contained"
-                                        onClick={handleNext}
-                                        disabled={!data.party_name || !data.voucher_number || !data.date || !data.counter_party}
-                                        sx={{ px: 4, py: 1.5, borderRadius: 1 }}
-                                        endIcon={<TrendingUp />}
-                                    >
-                                        Next: Add Items
-                                    </Button>
-                                </Box>
-                            </Box>
-                        </Collapse>
-
-                        {/* Step 2: Items */}
-                        <Collapse in={activeStep === 1}>
-                            <Box>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                                    <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
-                                        <Inventory sx={{ mr: 2, color: 'primary.main' }} />
-                                        Invoice Items
-                                    </Typography>
-                                    <Button
-                                        variant="contained"
-                                        startIcon={<AddCircleOutline />}
-                                        onClick={handleAddItem}
-                                        sx={{ borderRadius: 1 }}
-                                    >
-                                        Add Item
-                                    </Button>
-                                </Box>
-
-                                <TableContainer
-                                    component={Paper}
-                                    sx={{
-                                        borderRadius: 1,
-                                        overflow: "hidden",
-                                        boxShadow: theme.shadows[4],
-                                        border: `1px solid ${alpha(theme.palette.divider, 0.1)}`
-                                    }}
-                                >
-                                    <Table>
-                                        <TableHead>
-                                            <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1) }}>
-                                                <TableCell width={'50%'} sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Product Name</TableCell>
-                                                <TableCell width={'12%'} sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Quantity</TableCell>
-                                                <TableCell width={'12%'} sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Rate (₹)</TableCell>
-                                                <TableCell width={'12%'} sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Amount (₹)</TableCell>
-                                                <TableCell width={'12%'} sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Action</TableCell>
-                                            </TableRow>
-                                        </TableHead>
-                                        <TableBody>
-                                            {data.items.map((item, index) => (
-                                                <AnimatedTableRow key={index}>
-                                                    <TableCell>
-                                                        <Autocomplete
-                                                            options={itemsList}
-                                                            getOptionLabel={(option) =>
-                                                                typeof option === 'string'
-                                                                    ? option
-                                                                    : option?.name || ''
-                                                            }
-                                                            value={
-                                                                itemsList.find((p) => p.id === item._item) ||
-                                                                (item.item ? { id: '', name: item.item, unit: '' } : null)
-                                                            }
-                                                            onChange={(_, newValue) => {
-                                                                if (typeof newValue === 'string') {
-                                                                    handleItemChange(index, 'item', newValue);
-                                                                    handleItemChange(index, '_item', '');
-                                                                } else if (newValue && typeof newValue === 'object') {
-                                                                    handleItemChange(index, 'item', newValue.name);
-                                                                    handleItemChange(index, '_item', newValue.id);
-                                                                } else {
-                                                                    handleItemChange(index, 'item', '');
-                                                                    handleItemChange(index, '_item', '');
-                                                                }
-                                                            }}
-                                                            renderInput={(params) => (
-                                                                <TextField
-                                                                    {...params}
-                                                                    placeholder="Start typing for items suggestions..."
-                                                                    variant="outlined"
-                                                                    fullWidth
-                                                                    size="small"
-                                                                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1, width: '100%' } }}
-                                                                />
-                                                            )}
-                                                            sx={{
-                                                                '& .MuiAutocomplete-endAdornment': {
-                                                                    display: 'none'
-                                                                }
-                                                            }}
-                                                            isOptionEqualToValue={(option, value) => option.id === value.id}
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <TextField
-                                                            type="number"
-                                                            value={item.quantity}
-                                                            onChange={(e) => handleItemChange(index, 'quantity', parseFloat(e.target.value) || 0)}
-                                                            variant="outlined"
-                                                            size="small"
-                                                            fullWidth
-                                                            inputProps={{ min: 0, step: 0.01 }}
-                                                            sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1, maxWidth: 90 } }}
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <TextField
-                                                            type="number"
-                                                            value={item.rate}
-                                                            onChange={(e) => handleItemChange(index, 'rate', parseFloat(e.target.value) || 0)}
-                                                            variant="outlined"
-                                                            size="small"
-                                                            fullWidth
-                                                            inputProps={{ min: 0, step: 0.01 }}
-                                                            InputProps={{
-                                                                startAdornment: <InputAdornment position="start">₹</InputAdornment>,
-                                                            }}
-                                                            sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1, maxWidth: 90 } }}
-                                                        />
-                                                    </TableCell>
+                                                <TableCell>
+                                                    <Box
+                                                        sx={{
+                                                            py: 1,
+                                                            bgcolor: alpha(theme.palette.success.main, 0.1),
+                                                            borderRadius: 1,
+                                                            border: `1px solid ${alpha(theme.palette.success.main, 0.5)}`,
+                                                            textAlign: 'center',
+                                                            fontWeight: 'bold',
+                                                            color: 'success.main',
+                                                            // maxWidth: 100
+                                                        }}
+                                                    >
+                                                        &#8377; {item.amount.toFixed(2)}
+                                                    </Box>
+                                                </TableCell>
+                                                {currentCompanyDetails?.company_settings?.features?.enable_gst && (
                                                     <TableCell>
                                                         <Box
                                                             sx={{
@@ -608,226 +723,138 @@ export default function SalePurchaseInvoiceCreation() {
                                                                 textAlign: 'center',
                                                                 fontWeight: 'bold',
                                                                 color: 'success.main',
-                                                                maxWidth: 100
+                                                                // maxWidth: 100
                                                             }}
                                                         >
-                                                            ₹{item.amount.toFixed(2)}
+                                                            &#8377; {(Number(item.amount) + Number(item.gst_amount ?? 0)).toFixed(2)}
                                                         </Box>
                                                     </TableCell>
-                                                    <TableCell>
-                                                        <Tooltip title="Remove Item">
-                                                            <IconButton
-                                                                color="error"
-                                                                onClick={() => handleRemoveItem(index)}
-                                                                sx={{
-                                                                    '&:hover': {
-                                                                        backgroundColor: alpha(theme.palette.error.main, 0.1)
-                                                                    }
-                                                                }}
-                                                            >
-                                                                <Delete />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                    </TableCell>
-                                                </AnimatedTableRow>
-                                            ))}
+                                                )}
+                                                <TableCell align="center">
+                                                    <Tooltip title="Remove Item">
+                                                        <IconButton
+                                                            color="error"
+                                                            onClick={() => handleRemoveItem(index)}
+                                                            sx={{
+                                                                '&:hover': {
+                                                                    backgroundColor: alpha(theme.palette.error.main, 0.1)
+                                                                }
+                                                            }}
+                                                        >
+                                                            <Delete />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </TableCell>
+                                            </AnimatedTableRow>
+                                        ))}
 
-                                            {data.items.length === 0 && (
-                                                <TableRow>
-                                                    <TableCell colSpan={5}>
-                                                        <Box py={1} textAlign="center">
-                                                            <Inventory sx={{ fontSize: 56, color: 'text.disabled', mb: 1 }} />
-                                                            <Typography variant="h6" color="text.secondary" gutterBottom>
-                                                                No items added yet
-                                                            </Typography>
-                                                            <Typography variant="body2" color="text.secondary" mb={2}>
-                                                                Click "Add Item" to start building your invoice
-                                                            </Typography>
-                                                            <Button
-                                                                variant="contained"
-                                                                startIcon={<Add />}
-                                                                onClick={handleAddItem}
-                                                                sx={{ borderRadius: 1 }}
-                                                            >
-                                                                Add First Item
-                                                            </Button>
+                                        {data.items.length > 0 && (
+                                            <TableRow sx={{
+                                                fontWeight: 'bold',
+                                                borderTop: `2px solid ${theme.palette.primary.main}`,
+                                                '& .MuiTableCell-root': {
+                                                    padding: '8px 8px',
+                                                },
+                                            }}>
+                                                <TableCell align="left">
+                                                    <Typography variant="h6" color="text.secondary" gutterBottom marginLeft={1}>
+                                                        Sub-Totals
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    {data.items.reduce((total, item) => total + (item.quantity || 0), 0)} items
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    &#8377; {data.items.reduce((total, item) => total + (item.rate || 0), 0).toFixed(2)}
+                                                </TableCell>
+                                                <TableCell align="center"></TableCell>
+                                                <TableCell align="center">
+                                                    &#8377; {data.items.reduce((total, item) => total + (item.gst_amount || 0), 0).toFixed(2)}
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    &#8377; {data.items.reduce((total, item) => total + (item.amount || 0), 0).toFixed(2)}
+                                                </TableCell>
+                                                <TableCell align="center">
+                                                    {currentCompanyDetails?.company_settings?.features?.enable_gst && (
+                                                        <Box
+                                                            sx={{
+                                                                py: 1,
+                                                                bgcolor: alpha(theme.palette.success.main, 0.1),
+                                                                borderRadius: 1,
+                                                                border: `1px solid ${alpha(theme.palette.success.main, 0.5)}`,
+                                                                textAlign: 'center',
+                                                                fontWeight: 'bold',
+                                                                color: 'success.main',
+                                                            }}
+                                                        >
+                                                            &#8377; {(data.items.reduce((total, item) => total + (item.amount || 0), 0) + data.items.reduce((total, item) => total + (item.gst_amount || 0), 0)).toFixed(2)}
                                                         </Box>
-                                                    </TableCell>
-                                                </TableRow>
-                                            )}
-                                        </TableBody>
-                                    </Table>
-                                </TableContainer>
-
-                                <Box sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
-                                    <TextField
-                                        label="Remarks"
-                                        fullWidth
-                                        size='small'
-                                        // sx={{ maxWidth: 400 }}
-                                        value={data.narration}
-                                        onChange={handleChange}
-                                        name="narration"
-                                        variant="outlined"
-                                        InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <Info color="action" />
-                                                </InputAdornment>
-                                            ),
-                                        }}
-                                    />
-                                </Box>
-                                <Box sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
-                                    <Button
-                                        variant="outlined"
-                                        onClick={handleBack}
-                                        sx={{ px: 4, py: 1.5, borderRadius: 1 }}
-                                    >
-                                        Back
-                                    </Button>
-                                    <Button
-                                        variant="contained"
-                                        onClick={handleNext}
-                                        disabled={data.items.length === 0 || data.items.some(item => !item.item || item.quantity <= 0 || item.rate < 0)}
-                                        sx={{ px: 4, py: 1.5, borderRadius: 1 }}
-                                        endIcon={<Calculate />}
-                                    >
-                                        Review Invoice
-                                    </Button>
-                                </Box>
-                            </Box>
-                        </Collapse>
-
-                        {/* Step 3: Review */}
-                        <Collapse in={activeStep === 2}>
-                            <Box p={2}>
-                                <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                                    <Assignment sx={{ mr: 2, color: 'primary.main' }} />
-                                    Invoice Summary {(type ? type.charAt(0).toUpperCase() + type.slice(1) : '')}
-                                </Typography>
-                                {/* <Box mb={3}>
-                                    <Typography variant="body1" color="text.secondary">
-                                        Please review all details before submitting your invoice. Ensure that all information is correct and complete.
-                                    </Typography>
-                                </Box> */}
-                                <Grid container spacing={3}>
-                                    <Grid item xs={12} md={8}>
-                                        <Alert severity="info" sx={{ mb: 3, borderRadius: 2 }}>
-                                            <Typography variant="subtitle2">
-                                                Review all details before submitting your invoice
-                                            </Typography>
-                                        </Alert>
-
-                                        <StyledCard>
-                                            <CardContent>
-                                                <Typography variant="h6" gutterBottom>Invoice Details</Typography>
-                                                <Divider sx={{ my: 2 }} />
-                                                <Grid container spacing={2}>
-                                                    <Grid item xs={6}>
-                                                        <Typography variant="body2" color="text.secondary">Party Name:</Typography>
-                                                        <Typography variant="body1" fontWeight="500">{data.party_name || 'Not specified'}</Typography>
-                                                    </Grid>
-                                                    <Grid item xs={6}>
-                                                        <Typography variant="body2" color="text.secondary">Counter Party Name:</Typography>
-                                                        <Typography variant="body1" fontWeight="500">{data.counter_party || 'Not specified'}</Typography>
-                                                    </Grid>
-                                                    <Grid item xs={6}>
-                                                        <Typography variant="body2" color="text.secondary">Invoice Number:</Typography>
-                                                        <Typography variant="body1" fontWeight="500">{data.voucher_number}</Typography>
-                                                    </Grid>
-                                                    <Grid item xs={6}>
-                                                        <Typography variant="body2" color="text.secondary">Date:</Typography>
-                                                        <Typography variant="body1" fontWeight="500">{data.date}</Typography>
-                                                    </Grid>
-                                                </Grid>
-                                            </CardContent>
-                                        </StyledCard>
-                                    </Grid>
-
-                                    <Grid item xs={12} md={4}>
-                                        <StyledCard>
-                                            <CardContent>
-                                                <Box display="flex" alignItems="center" mb={2}>
-                                                    <Calculate color="primary" sx={{ mr: 1 }} />
-                                                    <Typography variant="h6">Payment Summary</Typography>
-                                                </Box>
-
-                                                <Box
-                                                    sx={{
-                                                        p: 3,
-                                                        borderRadius: 1,
-                                                        bgcolor: alpha(theme.palette.primary.main, 0.05),
-                                                        border: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`
-                                                    }}
-                                                >
-                                                    <Box display="flex" justifyContent="space-between" mb={2}>
-                                                        <Typography variant="body1" color="text.secondary">
-                                                            Items Count:
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+                                        {data.items.length === 0 && (
+                                            <TableRow>
+                                                <TableCell colSpan={currentCompanyDetails?.company_settings?.features?.enable_gst ? 8 : 5} align="center">
+                                                    <Box py={1} textAlign="center">
+                                                        <Inventory sx={{ fontSize: 56, color: 'text.disabled', mb: 1 }} />
+                                                        <Typography variant="h6" color="text.secondary" gutterBottom>
+                                                            No items added yet
                                                         </Typography>
-                                                        <Typography variant="body1" fontWeight="600">
-                                                            {data.items.length} items
+                                                        <Typography variant="body2" color="text.secondary" mb={2}>
+                                                            Click "Add Item Row" to start building your invoice
                                                         </Typography>
+                                                        <Button
+                                                            variant="contained"
+                                                            startIcon={<Add />}
+                                                            onClick={handleAddItem}
+                                                            sx={{ borderRadius: 1 }}
+                                                        >
+                                                            Add First Item
+                                                        </Button>
                                                     </Box>
-                                                    <Divider sx={{ my: 2 }} />
-                                                    <Box display="flex" justifyContent="space-between">
-                                                        <Typography variant="h6" color="primary.main">
-                                                            Grand Total:
-                                                        </Typography>
-                                                        <Typography variant="h6" color="primary.main" fontWeight="700">
-                                                            ₹{grandTotal.toFixed(2)}
-                                                        </Typography>
-                                                    </Box>
-                                                    <Divider sx={{ my: 2 }} />
-                                                </Box>
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
 
-                                                <Box display="flex" justifyContent="flex-start" gap={1} mt={2}>
-                                                    <Typography variant="body1" color="text.secondary">
-                                                        Remarks:
-                                                    </Typography>
-                                                    <Typography variant="body1" fontWeight="600">
-                                                        {data.narration || 'No Remarks'}
-                                                    </Typography>
-                                                </Box>
-
-                                                {/* <Box mt={1}>
-                          <Chip
-                            label="Ready to Submit"
-                            color="success"
-                            icon={<CheckCircle />}
-                            sx={{ borderRadius: 1, fontWeight: 'bold' }}
-                          />
-                        </Box> */}
-                                            </CardContent>
-                                        </StyledCard>
-                                    </Grid>
-                                </Grid>
-
-                                <Box sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
-                                    <Button
-                                        variant="outlined"
-                                        onClick={handleBack}
-                                        sx={{ px: 4, py: 1.5, borderRadius: 1 }}
-                                    >
-                                        Back to Items
-                                    </Button>
-                                    <Button
-                                        type="submit"
-                                        variant="contained"
-                                        disabled={isLoading}
-                                        sx={{
-                                            px: 4,
-                                            py: 1.5,
-                                            borderRadius: 1,
-                                            // background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`
-                                        }}
-                                        startIcon={isLoading ? <CircularProgress size={20} /> : <Save />}
-                                    >
-                                        {isLoading ? 'Creating Invoice...' : 'Create Invoice'}
-                                    </Button>
-                                </Box>
+                            <Box sx={{ my: 4, display: 'flex', justifyContent: 'space-between' }}>
+                                <TextField
+                                    label="Remarks"
+                                    fullWidth
+                                    size='small'
+                                    value={data.narration}
+                                    onChange={handleChange}
+                                    name="narration"
+                                    variant="outlined"
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <Info color="action" />
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                />
                             </Box>
-                        </Collapse>
+                        </Box>
+
+                        <Box sx={{ my: 2, width: '100%', display: 'flex', justifyContent: 'flex-end' }}>
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                disabled={isLoading}
+                                sx={{
+                                    px: 4,
+                                    py: 1.5,
+                                    borderRadius: 1,
+                                }}
+                                startIcon={isLoading ? <CircularProgress size={20} /> : <Save />}
+                            >
+                                {isLoading ? 'Creating Invoice...' : 'Create Invoice'}
+                            </Button>
+                        </Box>
                     </Box>
                 </CardContent>
             </StyledCard>

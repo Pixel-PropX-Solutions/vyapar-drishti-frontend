@@ -386,6 +386,7 @@
 //             }}
 //             open={open}
 //             onClose={onClose}
+//             {...(open ? {} : { inert: '' })}
 //         >
 //             {/* Enhanced Header */}
 //             <Slide direction="down" in={open} timeout={500}>

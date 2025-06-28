@@ -331,13 +331,13 @@ const CustomerLedger: React.FC = () => {
               sx={{
                 bgcolor: alpha(theme.palette.grey[50], 0.8),
                 width: '100%',
+                "& .MuiTableCell-root": {
+                  padding: '8px 16px',
+                },
                 '& .MuiTableCell-head': {
                   borderBottom: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
                 }
               }}>
-              {/* <TableCell size="small">
-                Sr. No.
-              </TableCell> */}
               <TableCell sx={{ pl: 3, pr: 1 }}>
                 <Tooltip title="Sort by Name">
                   <TableSortLabel
@@ -445,6 +445,9 @@ const CustomerLedger: React.FC = () => {
                 if (!cred.ledger_name) {
                   return null;
                 }
+                // if (cred.parent !== 'Sundry Debtors' && cred.parent !== 'Sundry Creditors') {
+                //   return null;
+                // }
                 return (
                   <CustomerRow
                     key={cred._id}

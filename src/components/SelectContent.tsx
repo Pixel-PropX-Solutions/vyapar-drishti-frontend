@@ -90,7 +90,7 @@ export default function SelectContent() {
       company: currentCompany
         ? currentCompany._id
         : (user?.company?.length ?? 0) > 0
-          ? user?.company?.find((com) => com.is_selected === true)?.company_id || ''
+          ? user?.company?.find((com: { company_id: string; company_name: string; is_selected?: boolean }) => com.is_selected === true)?.company_id || ''
           : 'Add Company'
     })
 
@@ -124,7 +124,7 @@ export default function SelectContent() {
             },
           }}
         >
-          {(user?.company?.length ?? 0) > 0 ? user?.company?.map((company, index) => (
+          {(user?.company?.length ?? 0) > 0 ? user?.company?.map((company: { company_id: string; company_name: string; is_selected?: boolean }, index: number) => (
             <StyledMenuItem key={index} value={company.company_id}>
               <ListItemAvatar>
                 <img src={logo} alt="Vyapar Drishti" height={40} style={{ borderRadius: "100%", height: '40px', overflow: "hidden" }} />

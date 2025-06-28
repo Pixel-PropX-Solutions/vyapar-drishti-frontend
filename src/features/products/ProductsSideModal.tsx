@@ -9,8 +9,6 @@ import {
     Tooltip,
     Stack,
     Typography,
-    Fade,
-    Zoom,
     Stepper,
     Step,
     StepLabel,
@@ -38,7 +36,7 @@ import { useNavigate } from 'react-router-dom';
 // Components
 import BasicDetailsSection from './BasicDetailsSection';
 import AdditionalInfoSection from './AdditionalInfoSection';
-import OpeningStockSection from './OpeningStockSection';
+// import OpeningStockSection from './OpeningStockSection';
 import AdvancedSettingsSection from './AdvancedSettingsSection';
 import CategoryCreateModal from '../category/CategoryCreateModal';
 import CreateInventoryGroupModal from '../Group/CreateInventoryGroupModal';
@@ -82,7 +80,7 @@ const ProductsSideModal = (props: SideModalProps) => {
     const navigate = useNavigate();
     const { setDrawer, drawer, setRefreshKey, product, setSelectedProduct } = props;
     const { user } = useSelector((state: RootState) => state.auth);
-    const currentCompanyDetails = user?.company?.find(c => c._id === user.user_settings.current_company_id);
+    const currentCompanyDetails = user?.company?.find((c :any) => c._id === user.user_settings.current_company_id);
 
     // State management
     const [currentStep, setCurrentStep] = useState(0);
@@ -96,15 +94,18 @@ const ProductsSideModal = (props: SideModalProps) => {
     const [selectedCategoryOption, setSelectedCategoryOption] = useState<{
         label: string;
         value: string;
+        id: string;
     } | null>(null);
     const [selectedGroupOption, setSelectedGroupOption] = useState<{
         label: string;
         value: string;
+        id: string;
     } | null>(null);
 
     const [selectedUnitOption, setSelectedUnitOption] = useState<{
         label: string;
         value: string;
+        id: string;
     } | null>(null);
 
     const [showGstFields, setShowGstFields] = useState(false);
@@ -119,13 +120,13 @@ const ProductsSideModal = (props: SideModalProps) => {
         stock_item_name: '',
         company_id: '',
         unit: '',
-        _unit: '',
+        unit_id: '',
         is_deleted: false,
         alias_name: '',
         category: '',
-        _category: '',
+        category_id: '',
         group: '',
-        _group: '',
+        group_id: '',
         image: '',
         description: '',
         opening_balance: 0,
@@ -134,7 +135,7 @@ const ProductsSideModal = (props: SideModalProps) => {
         gst_nature_of_goods: '',
         gst_hsn_code: '',
         gst_taxability: '',
-        gst_percentage:'',
+        gst_percentage: '',
         low_stock_alert: 0,
     });
 
@@ -252,14 +253,14 @@ const ProductsSideModal = (props: SideModalProps) => {
             const sanitizedData: FormCreateProduct = {
                 stock_item_name: data.stock_item_name.trim(),
                 unit: data.unit.trim(),
-                _unit: data._unit.trim(),
+                unit_id: data.unit_id.trim(),
                 company_id: (currentCompany?._id || '').trim(),
                 is_deleted: data.is_deleted === false,
             };
 
             // Add optional fields
             Object.entries(data).forEach(([key, value]) => {
-                if (key !== 'stock_item_name' && key !== 'unit' && key !== '_unit' && key !== 'company_id' && key !== 'is_deleted') {
+                if (key !== 'stock_item_name' && key !== 'unit' && key !== 'unit_id' && key !== 'company_id' && key !== 'is_deleted') {
                     if (value && value !== '' && value !== 0) {
                         (sanitizedData as any)[key] = value;
                     }
@@ -312,9 +313,12 @@ const ProductsSideModal = (props: SideModalProps) => {
                 );
             }
 
+            setIsLoading(false);
+            setValidationErrors({});
+            setImagePreview(null);
+            setSelectedProduct(null);
             resetForm();
             setDrawer(false);
-            setSelectedProduct(null);
             setRefreshKey(prev => prev + 1);
         } catch (error) {
             console.error('Error creating/updating product:', error);
@@ -335,13 +339,13 @@ const ProductsSideModal = (props: SideModalProps) => {
             stock_item_name: '',
             company_id: '',
             unit: '',
-            _unit: '',
+            unit_id: '',
             is_deleted: false,
             alias_name: '',
             category: '',
-            _category: '',
+            category_id: '',
             group: '',
-            _group: '',
+            group_id: '',
             image: '',
             description: '',
             opening_balance: 0,
@@ -390,13 +394,13 @@ const ProductsSideModal = (props: SideModalProps) => {
                 stock_item_name: product.stock_item_name || '',
                 company_id: product.company_id || '',
                 unit: product.unit || '',
-                _unit: product._unit || '',
+                unit_id: product.unit_id || '',
                 is_deleted: product.is_deleted || false,
                 alias_name: product.alias_name || '',
                 category: product.category || '',
-                _category: product._category || '',
+                category_id: product.category_id || '',
                 group: product.group || '',
-                _group: product._group || '',
+                group_id: product.group_id || '',
                 image: product.image || '',
                 description: product.description || '',
                 opening_balance: product.opening_balance || 0,
@@ -408,18 +412,22 @@ const ProductsSideModal = (props: SideModalProps) => {
                 low_stock_alert: product.low_stock_alert || 0,
             });
             const foundUnit = units
-                ?.find(option => option.value === product.unit);
-            setSelectedUnitOption(foundUnit || null);
+                ?.find(option => option.value === product.unit && option.id === product.unit_id);
+            setSelectedUnitOption(
+                foundUnit
+                    ? { label: foundUnit.label, value: foundUnit.value, id: foundUnit.id }
+                    : null
+            );
 
             const foundGroup = inventoryGroupLists
-                ?.map(grp => ({ label: grp.inventory_group_name, value: grp._id }))
-                .find(option => option.label === product.group);
+                ?.map(grp => ({ label: grp.inventory_group_name, value: grp._id, id: grp._id }))
+                .find(option => option.label === product.group && option.id === product.group_id);
 
             setSelectedGroupOption(foundGroup || null);
 
             const foundCategory = categoryLists
-                ?.map(cat => ({ label: cat.category_name, value: cat._id }))
-                .find(option => option.label === product.category);
+                ?.map(cat => ({ label: cat.category_name, value: cat._id, id: cat._id }))
+                .find(option => option.label === product.category && option.id === product.category_id);
 
             setSelectedCategoryOption(foundCategory || null);
             setImagePreview(typeof product?.image === 'string' ? product.image : '');
@@ -442,13 +450,14 @@ const ProductsSideModal = (props: SideModalProps) => {
             }
             const found = categoryLists.map(cat => ({
                 label: cat.category_name,
-                value: cat._id
+                value: cat._id,
+                id: cat._id
             })).find(option => option.value === data.category);
 
             if (found) {
                 setSelectedCategoryOption(found);
             } else if (data.category && data.category !== '__add_new__') {
-                setSelectedCategoryOption({ label: data.category, value: data.category });
+                setSelectedCategoryOption({ label: data.category, value: data.category, id: data.category_id || '' });
             } else {
                 setSelectedCategoryOption(null);
             }
@@ -459,18 +468,19 @@ const ProductsSideModal = (props: SideModalProps) => {
             }
             const found = inventoryGroupLists.map(cat => ({
                 label: cat.inventory_group_name,
-                value: cat._id
+                value: cat._id,
+                id: cat._id
             })).find(option => option.value === data.group);
 
             if (found) {
                 setSelectedGroupOption(found);
             } else if (data.group && data.group !== '__add_new__') {
-                setSelectedGroupOption({ label: data.group, value: data.group });
+                setSelectedGroupOption({ label: data.group, value: data.group, id: data.group_id || '' });
             } else {
                 setSelectedGroupOption(null);
             }
         }
-    }, [categoryLists, inventoryGroupLists, data.category, selectedCategoryOption, data.group, selectedGroupOption]);
+    }, [categoryLists, inventoryGroupLists, data.category, selectedCategoryOption, data.group, selectedGroupOption, data.category_id, data.group_id]);
 
     useEffect(() => {
         setShowGstFields(!!data.gst_hsn_code);
@@ -544,6 +554,7 @@ const ProductsSideModal = (props: SideModalProps) => {
                         backdropFilter: 'blur(8px)',
                     }
                 }}
+                {...(drawer ? {} : { inert: '' })}
             >
                 {/* Progress Indicator */}
                 {isLoading && (
@@ -568,7 +579,7 @@ const ProductsSideModal = (props: SideModalProps) => {
                 }}>
                     <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
                         <Stack direction="row" alignItems="center" spacing={2}>
-                            <Tooltip title="Close" TransitionComponent={Zoom}>
+                            <Tooltip title="Close">
                                 <IconButton
                                     onClick={handleClose}
                                     sx={{
@@ -683,7 +694,7 @@ const ProductsSideModal = (props: SideModalProps) => {
                                             transition: 'all 0.3s ease',
                                             transform: active ? 'scale(1.1)' : 'scale(1)',
                                         }}>
-                                            {completed  ? (
+                                            {completed ? (
                                                 <CheckCircleIcon fontSize="small" />
                                             ) : active ? (
                                                 <step.icon fontSize="small" />
@@ -722,11 +733,9 @@ const ProductsSideModal = (props: SideModalProps) => {
                         '&:hover': { backgroundColor: theme.palette.text.secondary }
                     }
                 }}>
-                    <Fade in timeout={300} key={currentStep}>
-                        <Box>
-                            {renderStepContent()}
-                        </Box>
-                    </Fade>
+                    <Box>
+                        {renderStepContent()}
+                    </Box>
                 </Box>
 
                 {/* Enhanced Footer */}
@@ -787,15 +796,16 @@ const ProductsSideModal = (props: SideModalProps) => {
                 open={openCategoryModal}
                 onClose={() => setOpenCategoryModal(false)}
                 onCreated={async (newCategory) => {
-                    console.log("New Category Created:", newCategory);
+                    // console.log("New Category Created:", newCategory);
                     dispatch(viewAllCategories(currentCompany?._id ?? ""));
                     setSelectedCategoryOption({
                         label: newCategory.name,
                         value: newCategory.name,
+                        id: newCategory._id
                     });
                     setOpenCategoryModal(false);
-                    setSelectedCategoryOption({ label: newCategory.name, value: newCategory.name });
-                    setData(prev => ({ ...prev, _category: newCategory._id }));
+                    setSelectedCategoryOption({ label: newCategory.name, value: newCategory.name, id: newCategory._id });
+                    setData(prev => ({ ...prev, category_id: newCategory._id }));
                     setData(prev => ({ ...prev, category: newCategory.name }));
                     setOpenCategoryModal(false);
 
@@ -805,14 +815,15 @@ const ProductsSideModal = (props: SideModalProps) => {
                 open={openGroupModal}
                 onClose={() => setOpenGroupModal(false)}
                 onCreated={async (newGroup) => {
-                    console.log("New Group Created:", newGroup);
+                    // console.log("New Group Created:", newGroup);
                     dispatch(viewAllInventoryGroups(currentCompany?._id ?? ""));
                     setSelectedGroupOption({
                         label: newGroup.name,
                         value: newGroup.name,
+                        id: newGroup._id
                     });
                     setOpenGroupModal(false);
-                    setSelectedGroupOption({ label: newGroup.name, value: newGroup.name });
+                    setSelectedGroupOption({ label: newGroup.name, value: newGroup.name, id: newGroup._id });
                     setData(prev => ({ ...prev, _cgroup: newGroup._id }));
                     setData(prev => ({ ...prev, group: newGroup.name }));
                     setOpenGroupModal(false);

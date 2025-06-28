@@ -67,7 +67,7 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
     const { currentCompany } = useSelector((state: RootState) => state.auth);
     const { categoryLists } = useSelector((state: RootState) => state.category);
     const [isLoading, setIsLoading] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState(0);
+    const [_uploadProgress, setUploadProgress] = useState(0);
     const categoryfileInputRef = useRef<HTMLInputElement | null>(null);
     const [isDragActive, setIsDragActive] = useState(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -302,7 +302,7 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
                 dispatch(createCategory({ categoryData: formData }))
                     .unwrap()
                     .then((response) => {
-                        console.log("Category created:", response);
+                        // console.log("Category created:", response);
                         const newCategory = {
                             name: response.category_name,
                             _id: response._id
@@ -344,6 +344,7 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
             open={open}
             onClose={onClose}
             transitionDuration={300}
+            {...(open ? {} : { inert: '' })}
         >
             <Fade in={isLoading}>
                 <LinearProgress
@@ -364,7 +365,7 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                borderBottom: `1px solid ${theme.palette.divider}`,
+                borderBottom: `2px solid ${theme.palette.primary.main}`,
                 background: `linear-gradient(135deg, ${theme.palette.primary.main}20 0%, ${theme.palette.primary.light}15 100%)`,
                 backdropFilter: 'blur(20px)',
                 position: 'sticky',
@@ -409,7 +410,6 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
                         </Typography>
                     </Box>
                 </Box>
-
                 {!isMobile && (
                     <Chip
                         icon={<Info />}
@@ -423,6 +423,8 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
                     />
                 )}
             </Box>
+
+
 
             {/* Content */}
             <Box sx={{
@@ -534,19 +536,6 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
                                                 <Delete fontSize="small" />
                                             </IconButton>
                                         </Tooltip>
-                                        {uploadProgress > 0 && uploadProgress < 100 && (
-                                            <LinearProgress
-                                                variant="determinate"
-                                                value={uploadProgress}
-                                                sx={{
-                                                    position: 'absolute',
-                                                    bottom: -8,
-                                                    left: 0,
-                                                    right: 0,
-                                                    borderRadius: 1
-                                                }}
-                                            />
-                                        )}
                                     </Box>
                                 ) : (
                                     <Box>
@@ -789,7 +778,7 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
                     )}
                 </Stack>
             </Box>
-        </Drawer>
+        </Drawer >
     );
 };
 

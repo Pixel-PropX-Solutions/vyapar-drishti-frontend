@@ -108,23 +108,23 @@ const GroupAndTypes: React.FC = () => {
     };
 
     const handleCustomerGroupEdit = (cusGroup: GetAllAccountingGroups) => {
-        console.log("Editing Customer Group:", cusGroup);
+        // console.log("Editing Customer Group:", cusGroup);
         setOpenCustomerGroupModal(true);
         setSelectedCustomerGroup(cusGroup);
     };
     const handleCustomerGroupView = (cusGroup: GetAllAccountingGroups) => {
-        console.log("Editing Customer Group:", cusGroup);
+        // console.log("Editing Customer Group:", cusGroup);
         setOpenCustomerGroupModal(true);
         setSelectedCustomerGroup(cusGroup);
     };
 
     const handleInventoryGroupEdit = (inventoryGroup: GetInventoryGroups) => {
-        console.log("Editing Inventory Group:", inventoryGroup);
+        // console.log("Editing Inventory Group:", inventoryGroup);
         setOpenInventoryGroupModal(true);
         setSelectedInventoryGroup(inventoryGroup);
     };
     const handleInventoryGroupView = (inventoryGroup: GetInventoryGroups) => {
-        console.log("Editing Inventory Group:", inventoryGroup);
+        // console.log("Editing Inventory Group:", inventoryGroup);
         setOpenInventoryGroupModal(true);
         setSelectedInventoryGroup(inventoryGroup);
     };
@@ -330,7 +330,7 @@ const GroupAndTypes: React.FC = () => {
                                     setSelectedCustomerGroup(null);
                                 }
                                 else if (selectedTab === 1) {
-                                    console.log("Add New Invoice Group");
+                                    // console.log("Add New Invoice Group");
                                 }
                                 else if (selectedTab === 2) {
                                     setOpenInventoryGroupModal(true);
@@ -683,7 +683,7 @@ const GroupAndTypes: React.FC = () => {
                                 lg={3}
                                 key={invGroup._id}
                                 onClick={() => {
-                                    console.log("Clicked Invoice Group", invGroup);
+                                    // console.log("Clicked Invoice Group", invGroup);
                                 }}
                             >
                                 <InvoiceTypesCard

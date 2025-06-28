@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AuthStates } from "@/utils/enums";
 import { getCurrentCompany, getCurrentUser, login, logout, register } from "@/services/auth";
-import { GetCompany, GetUser } from "@/utils/types";
+import { GetCompany } from "@/utils/types";
 
 interface SignupData {
   firstName: string;
@@ -18,7 +18,7 @@ interface AuthState {
   signupData: SignupData;
   currentCompany: GetCompany | null;
   email: string;
-  user: any ;
+  user: any;
   isUserFetched: boolean;
   authState: AuthStates;
   accessToken: string | null;
@@ -104,6 +104,7 @@ const authSlice = createSlice({
         state.loading = true;
       })
       .addCase(getCurrentCompany.fulfilled, (state, action: PayloadAction<any>) => {
+        console.log('action.payload in auth Reducer', action.payload)
         state.currentCompany = action.payload.currentCompany;
         state.loading = false;
       })

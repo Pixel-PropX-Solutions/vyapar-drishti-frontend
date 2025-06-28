@@ -74,6 +74,9 @@ export const CustomerRow: React.FC<ProductRowProps> = ({ cus, onDelete, onEdit, 
                     onMouseEnter={() => setIsHovered(true)}
                     onMouseLeave={() => setIsHovered(false)}
                     sx={{
+                        "& .MuiTableCell-root": {
+                            padding: '8px 16px',
+                        },
                         cursor: 'pointer',
                         width: '100%',
                         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -91,12 +94,12 @@ export const CustomerRow: React.FC<ProductRowProps> = ({ cus, onDelete, onEdit, 
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
                             <Avatar
                                 sx={{
-                                    width: 48,
-                                    height: 48,
+                                    width: 36,
+                                    height: 36,
                                     mr: 2,
                                     objectFit: 'contain',
                                     bgcolor: getAvatarColor(cus.ledger_name),
-                                    fontSize: '1rem',
+                                    fontSize: '.9rem',
                                     fontWeight: 700,
                                     boxShadow: `0 4px 12px ${alpha(getAvatarColor(cus.ledger_name), 0.3)}`,
                                     transition: 'all 0.3s ease',
@@ -108,10 +111,9 @@ export const CustomerRow: React.FC<ProductRowProps> = ({ cus, onDelete, onEdit, 
                             </Avatar>
                             <Box sx={{ flex: 1 }}>
                                 <Typography
-                                    variant="subtitle1"
+                                    variant="body1"
                                     sx={{
                                         fontWeight: 600,
-                                        fontSize: '0.95rem',
                                         color: theme.palette.text.primary,
                                         mb: 0.5,
                                         transition: 'color 0.3s ease',
@@ -143,85 +145,80 @@ export const CustomerRow: React.FC<ProductRowProps> = ({ cus, onDelete, onEdit, 
                     <TableCell align="center" sx={{ px: 1 }}>
                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
 
-                            <Typography
-                                variant="h6"
+                            {cus?.phone?.number && (<Typography
+                                variant="body1"
                                 sx={{
                                     fontWeight: 700,
-                                    fontSize: '1rem',
+                                    fontSize: '.9rem',
                                     color: theme.palette.text.primary,
                                 }}
                             >
                                 <Phone
                                     fontSize="small"
-                                    sx={{ verticalAlign: "middle", mr: 1 }}
+                                    sx={{ verticalAlign: "middle", fontSize: '.9rem', mr: 1 }}
                                 />
                                 {cus.phone?.code}{" "}
                                 {cus?.phone?.number || "N/A"}
-                            </Typography>
-                            <Chip
-                                icon={<Email />}
+                            </Typography>)}
+                            {cus.email && (<Chip
+                                icon={<Email sx={{ mr: 0.5, fontSize: '.9rem', color: theme.palette.text.secondary }} />}
                                 label={cus.email || 'No Email'}
                                 color={'primary'}
-                                size="medium"
                                 sx={{
                                     fontSize: '0.7rem',
                                     height: '22px',
                                     fontWeight: 600,
                                 }}
-                            />
+                            />)}
+                            {!cus.email && !cus.phone?.number && (
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                    No contact info available
+                                </Box>
+                            )}
                         </Box>
                     </TableCell>
 
                     {/* Selling Price */}
-                    <TableCell align="right" sx={{ px: 1 }}>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                <Typography
-                                    variant="h6"
-                                    sx={{
-                                        fontWeight: 600,
-                                        fontSize: '1rem',
-                                        color: theme.palette.text.secondary,
-                                    }}
-                                >
-                                    {cus.mailing_state ? `State: ${cus.mailing_state}` : 'State: N/A'}
-                                </Typography>
-                            </Box>
-                        </Box>
+                    <TableCell align="center" sx={{ px: 1 }}>
+                        <Typography
+                            variant="body1"
+                            sx={{
+                                fontWeight: 600,
+                                color: theme.palette.text.secondary,
+                            }}
+                        >
+                            {cus.mailing_state ? `${cus.mailing_state}` : 'No State'}
+                        </Typography>
                     </TableCell>
 
                     <TableCell align="left" sx={{ px: 1 }}>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                <CategoryIcon
-                                    sx={{
-                                        fontSize: '1.1rem',
-                                        mr: 0.5,
-                                        color: cus.parent.includes('Debtors') ? theme.palette.error.main : theme.palette.success.main
-                                    }} />
-                                <Typography
-                                    variant="h6"
-                                    sx={{
-                                        fontWeight: 700,
-                                        fontSize: '1.1rem',
-                                        color: cus.parent.includes('Debtors') ? theme.palette.error.main : theme.palette.success.main,
-                                    }}
-                                >
-                                    {cus.parent || "N/A"}
-                                </Typography>
-                            </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <CategoryIcon
+                                sx={{
+                                    fontSize: '.9rem',
+                                    mr: 0.5,
+                                    color: cus.parent.includes('Debtors') ? theme.palette.error.main : theme.palette.success.main
+                                }} />
+                            <Typography
+                                variant="body1"
+                                sx={{
+                                    fontWeight: 700,
+                                    color: cus.parent.includes('Debtors') ? theme.palette.error.main : theme.palette.success.main,
+                                }}
+                            >
+                                {cus.parent || "N/A"}
+                            </Typography>
                         </Box>
                     </TableCell>
 
                     {/* Purchase Price */}
                     <TableCell align="right" sx={{ px: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                            <Today sx={{ fontSize: '1rem', mr: 0.5, color: theme.palette.text.secondary }} />
+                        <Box sx={{ display: 'flex', alignItems: 'center', }}>
+                            <Today sx={{ mr: 0.5, fontSize: '.9rem', color: theme.palette.text.secondary }} />
                             <Typography
-                                variant="h6"
+                                variant="body1"
                                 sx={{
-                                    fontWeight: 600,
-                                    fontSize: '1rem',
+                                    fontWeight: 700,
                                     color: theme.palette.text.primary,
                                 }}
                             >

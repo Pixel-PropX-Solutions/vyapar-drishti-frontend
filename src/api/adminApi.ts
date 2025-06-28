@@ -33,13 +33,13 @@ adminApi.interceptors.response.use(
                 // if(!adminRefreshToken)
                 //     throw new Error("Refresh Token not available. Please log in again.");
 
-                console.log("Attempting token refresh");
+                // console.log("Attempting token refresh");
                 const {data} = await axios.post<Token>(
                     `${import.meta.env.VITE_LOCAL_BACKEND_ADMIN_URL}/auth/handleadminRefreshToken`,
                     {},
                     {withCredentials : true}
                 );
-                console.log("Token refreshed:", data);
+                // console.log("Token refreshed:", data);
                 localStorage.setItem("accessToken", data.adminAccessToken);
                 localStorage.setItem("refreshToken", data.adminRefreshToken);
 

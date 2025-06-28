@@ -55,11 +55,11 @@ export const getCurrentCompany = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await userApi.get(`user/company`,);
-      // console.log("Current user response", response.data);
+      console.log("getCurrentCompany api response", response.data);
 
       if (response.data.success === true) {
         const currentCompany = response.data.data[0];
-        localStorage.setItem("currentCompany", currentCompany);
+        // localStorage.setItem("currentCompany", currentCompany);
         return { currentCompany };
       } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {

@@ -130,6 +130,29 @@ export const updateUser = createAsyncThunk(
 );
 
 
+export const updateUserSettings = createAsyncThunk(
+  "update/user/settings",
+  async (
+    { id, data }: { id: string; data: Record<string, unknown> },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await userApi.put(`/user/settings/update/${id}`, data);
+      console.log("updateUserSettings response", response);
+
+      if (response.data.success === true) {
+        const data = response.data.data;
+        return data;
+      } else return rejectWithValue("Login Failed: No access token recieved.");
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+        "Login failed: Invalid credentials or server error."
+      );
+    }
+  }
+);
+
 export const setCurrentCompany = createAsyncThunk(
   "set/current/company",
   async (

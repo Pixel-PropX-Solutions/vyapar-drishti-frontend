@@ -282,6 +282,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
             }}
             open={open}
             onClose={onClose}
+            {...(open ? {} : { inert: '' })}
         >
             <Box sx={{
                 p: 3,

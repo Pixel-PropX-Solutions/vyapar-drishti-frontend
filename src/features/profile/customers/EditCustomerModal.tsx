@@ -11,7 +11,6 @@ import {
     FormControl,
     Chip,
     Alert,
-    LinearProgress,
     Avatar,
     Autocomplete,
     Fade,
@@ -44,6 +43,7 @@ import { GetUserLedgers } from "@/utils/types";
 import CustomerGroupEditingModal from "@/common/CustomerGroupEditingModal";
 import { viewAllAccountingGroups } from "@/services/accountingGroup";
 import { createCustomer, updateCustomer } from "@/services/customers";
+import countries from "@/internals/data/CountriesStates.json";
 
 interface EditUserModalProps {
     open: boolean;
@@ -56,6 +56,7 @@ interface EditUserModalProps {
 interface CustomerFormData {
     company_id: string;
     parent: string;
+    parent_id: string;
     mailing_name: string;
     mailing_pincode: string;
     mailing_country?: string;
@@ -67,6 +68,13 @@ interface CustomerFormData {
     image?: string | File | null;
     code: string;
     number: string;
+    bank_name?: string;
+    account_number?: string;
+    bank_ifsc?: string;
+    bank_branch?: string;
+    account_holder?: string;
+    gstin?: string;
+    it_pan?: string;
 }
 
 interface ValidationErrors {
@@ -90,13 +98,16 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [showSuccessAlert, setShowSuccessAlert] = useState(false);
     const { currentCompany, user } = useSelector((state: RootState) => state.auth);
+    const currentCompanyDetails = user?.company?.find((c :any) => c._id === user.user_settings.current_company_id);
     const { accountingGroups } = useSelector((state: RootState) => state.accountingGroup);
     const [openGroupModal, setOpenGroupModal] = useState(false);
     const [selectedTypeOption, setSelectedTypeOption] = useState<{
         label: string;
         value: string;
+        user_id: string;
+        parent: string;
+        id: string;
     } | null>(null);
-
     const [data, setData] = useState<CustomerFormData>({
         name: '',
         email: '',
@@ -110,37 +121,17 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
         mailing_pincode: '',
         company_id: '',
         parent: '',
+        parent_id: '',
+        bank_name: '',
+        account_number: '',
+        bank_ifsc: '',
+        bank_branch: '',
+        account_holder: '',
+        gstin: '',
+        it_pan: '',
     });
 
-    const validateField = (field: keyof CustomerFormData, value: string): string => {
-        switch (field) {
-            case 'name':
-                if (!value.trim()) return 'Name is required';
-                if (value.trim().length < 2) return 'Name must be at least 2 characters';
-                return '';
-            case 'email':
-                if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Invalid email format';
-                return '';
-            case 'mailing_country':
-                if (value && value.trim().length < 2) return 'Mailing country must be at least 2 characters';
-                return '';
-            case 'mailing_state':
-                if (!value.trim()) return 'Mailing state is required';
-                if (value.trim().length < 2) return 'Mailing state must be at least 2 characters';
-                return '';
-            case 'mailing_pincode':
-                if (value && !/^\d{6}$/.test(value)) return 'Invalid pincode format';
-                return '';
-            case 'code':
-                if (value && !/^\+\d{1,3}$/.test(value)) return 'Invalid phone code format';
-                return '';
-            case 'number':
-                if (value && !/^\d{10}$/.test(value)) return 'Invalid phone number';
-                return '';
-            default:
-                return '';
-        }
-    };
+
 
     const validateForm = useCallback((): boolean => {
         const errors: ValidationErrors = {};
@@ -259,6 +250,7 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
             mailing_pincode: '',
             company_id: '',
             parent: '',
+            parent_id: '',
         });
         setImagePreview(null);
         setValidationErrors({});
@@ -267,23 +259,177 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
         }
     };
 
-    const getFormCompletionPercentage = (): number => {
-        const requiredFields = ['name', 'mailing_state', 'parent'];
-        const optionalFields = ['email', 'image', 'mailing_name', 'mailing_address', 'mailing_country', 'code', 'number', 'mailing_pincode'];
+    const getVisibleFields = useCallback(() => {
+        const type = (selectedTypeOption?.user_id === '' || selectedTypeOption?.user_id === null)
+            ? selectedTypeOption?.value?.toLowerCase()
+            : selectedTypeOption?.parent?.toLowerCase() || '';
+        if (type === 'sundry debtors' || type === 'sundry creditors') {
+            return {
+                showAll: true,
+                showBasicDetails: true,
+                showProfileImage: true,
+                showMailingDetails: true,
+                showBankDetails: true,
+                isBankOptional: true,
+                isGSTINOptional: currentCompanyDetails?.company_settings?.features?.enable_gst ? true : false,
+                isMailingAddressOptional: false,
+                showPAN: true,
+                showGSTIN: true,
+                requiredFields: [
+                    'name',
+                    'mailing_state',
+                    'parent',
+                    'mailing_country',
+                    ...(currentCompanyDetails?.company_settings?.features?.enable_gst ? ['gstin', 'pan'] : []),
+                ],
+            };
+        }
+        if (type === 'bank accounts') {
+            return {
+                showAll: false,
+                showBasicDetails: true,
+                showProfileImage: false,
+                showMailingDetails: true,
+                showBankDetails: true,
+                isBankOptional: false,
+                isGSTINOptional: false,
+                isMailingAddressOptional: true,
+                showPAN: false,
+                showGSTIN: false,
+                requiredFields: ['name', 'parent'],
+            };
+        }
+        if (type === 'capital account') {
+            return {
+                showAll: false,
+                showBasicDetails: true,
+                showProfileImage: false,
+                showMailingDetails: true,
+                showBankDetails: true,
+                isBankOptional: true,
+                isGSTINOptional: currentCompanyDetails?.company_settings?.features?.enable_gst ? false : true,
+                isMailingAddressOptional: true,
+                showPAN: true,
+                showGSTIN: true,
+                requiredFields: ['name', 'parent', ...(currentCompanyDetails?.company_settings?.features?.enable_gst ? ['gstin', 'pan'] : []),],
+            };
+        }
+        if (
+            type === 'purchase account' ||
+            type === 'sales account' ||
+            type === 'stock-in-hand' ||
+            type === 'suspense account'
+        ) {
+            return {
+                showAll: false,
+                showBasicDetails: true,
+                showProfileImage: false,
+                showMailingDetails: false,
+                showBankDetails: true,
+                isBankOptional: false,
+                isGSTINOptional: false,
+                isMailingAddressOptional: false,
+                showPAN: false,
+                showGSTIN: false,
+                requiredFields: ['name', 'parent'],
+            };
+        }
+        if (
+            type === 'direct expense' ||
+            type === 'direct income' ||
+            type === 'indirect expenses' ||
+            type === 'indirect incomes' ||
+            type === 'duties & taxes' ||
+            type === 'misc. expenses'
+        ) {
+            return {
+                showAll: false,
+                showBasicDetails: true,
+                showProfileImage: false,
+                showMailingDetails: false,
+                showBankDetails: false,
+                isBankOptional: true,
+                isGSTINOptional: false,
+                isMailingAddressOptional: true,
+                showPAN: false,
+                showGSTIN: false,
+                requiredFields: ['name', 'parent'],
+            };
+        }
+        if (
+            type === 'current assets' ||
+            type === 'current liabilities' ||
+            type === 'fixed assets' ||
+            type === 'loans (liability)' ||
+            type === 'investments' ||
+            type === 'loans & advances' ||
+            type === 'secured loans' ||
+            type === 'unsecured loans' ||
+            type === 'deposits assets'
+        ) {
+            return {
+                showAll: false,
+                showBasicDetails: true,
+                showProfileImage: false,
+                showMailingDetails: true,
+                showBankDetails: true,
+                showPAN: true,
+                showGSTIN: true,
+                isBankOptional: true,
+                isGSTINOptional: currentCompanyDetails?.company_settings?.features?.enable_gst ? false : true,
+                isMailingAddressOptional: true,
+                requiredFields: ['name', 'parent', 'mailing_state', 'mailing_country', ...(currentCompanyDetails?.company_settings?.features?.enable_gst ? ['gstin', 'pan'] : []),],
+            };
+        } if (
+            type === 'cash-in-hand'
+        ) {
+            return {
+                showAll: false,
+                showBasicDetails: true,
+                showProfileImage: false,
+                showMailingDetails: false,
+                showBankDetails: true,
+                isBankOptional: true,
+                isGSTINOptional: false,
+                isMailingAddressOptional: false,
+                showPAN: false,
+                showGSTIN: false,
+                requiredFields: ['name', 'parent'],
+            };
+        }
+        return {
+            showAll: true,
+            showBasicDetails: true,
+            showProfileImage: true,
+            showMailingDetails: true,
+            showBankDetails: true,
+            isBankOptional: true,
+            isGSTINOptional: currentCompanyDetails?.company_settings?.features?.enable_gst ? false : true,
+            isMailingAddressOptional: true,
+            showPAN: true,
+            showGSTIN: true,
+            requiredFields: ['name', 'mailing_state', 'parent', ...(currentCompanyDetails?.company_settings?.features?.enable_gst ? ['gstin', 'pan'] : []),],
+        };
+    }, [currentCompanyDetails?.company_settings?.features?.enable_gst, selectedTypeOption?.parent, selectedTypeOption?.user_id, selectedTypeOption?.value]);
 
-        const requiredCompleted = requiredFields.filter(field =>
-            data[field as keyof CustomerFormData] && String(data[field as keyof CustomerFormData]).trim()
-        ).length;
+    const { showAll, showBankDetails, showBasicDetails, showGSTIN, showMailingDetails, showPAN, showProfileImage, isBankOptional, isGSTINOptional, isMailingAddressOptional, requiredFields } = getVisibleFields();
 
-        const optionalCompleted = optionalFields.filter(field =>
-            data[field as keyof CustomerFormData] && String(data[field as keyof CustomerFormData]).trim()
-        ).length;
-
-        const totalFields = requiredFields.length + optionalFields.length;
-        const completedFields = requiredCompleted + optionalCompleted;
-
-        return Math.round((completedFields / totalFields) * 100);
+    const validateField = (field: keyof CustomerFormData, value: string): string => {
+        if (!showAll && !['name', 'parent'].includes(field)) return '';
+        if (!value && requiredFields.includes(field)) return `${field.charAt(0).toUpperCase() + field.slice(1).replace("_", " ")} is required`;
+        if (isMailingAddressOptional && field === 'mailing_address' && !value.trim()) return '';
+        if (field === 'mailing_pincode' && value && !/^\d{1,6}$/.test(value)) return 'Invalid pincode format';
+        if (field === 'code' && value && !/^\+\d{1,4}$/.test(value)) return 'Invalid phone code format';
+        if (field === 'number' && value && !/^\d{10}$/.test(value)) return 'Invalid phone number format';
+        if (field === 'email' && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Invalid email format';
+        if (field === 'name' && value.trim().length < 2) return 'Name must be at least 2 characters';
+        if (field === 'gstin' && value && !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][A-Z0-9][Z][0-9A-Z]$/.test(value)) return 'Invalid GSTIN format';
+        if (field === 'it_pan' && value && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(value)) return 'Invalid PAN format';
+        if (field === 'account_number' && value && !/^\d{9,18}$/.test(value)) return 'Invalid bank account number format';
+        if (field === 'bank_ifsc' && value && !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(value)) return 'Invalid IFSC code format';
+        return '';
     };
+
 
     useEffect(() => {
         if (open && cred) {
@@ -295,15 +441,26 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                 mailing_state: cred.mailing_state || '',
                 mailing_pincode: cred.mailing_pincode || '',
                 parent: cred.parent || '',
+                parent_id: cred.parent_id || '',
                 company_id: cred.company_id || '',
                 email: cred.email || '',
                 code: cred.phone?.code || '',
                 number: cred.phone?.number || '',
                 image: typeof cred.image === 'string' ? cred.image : '',
+                bank_name: cred?.bank_name || '',
+                account_number: cred?.account_number || '',
+                bank_ifsc: cred?.bank_ifsc || '',
+                bank_branch: cred?.bank_branch || '',
+                account_holder: cred?.account_holder || '',
+                gstin: cred.gstin || '',
+                it_pan: cred.it_pan || '',
             });
             setSelectedTypeOption({
                 label: cred.parent || 'Select Group',
-                value: cred.parent || ''
+                value: cred.parent || '',
+                user_id: cred.user_id || '',
+                parent: cred.parent || '',
+                id: cred._id || '',
             });
             setImagePreview(
                 typeof cred?.image === "string" ? cred.image : null
@@ -325,16 +482,16 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
         }
 
         setIsLoading(true);
-        const sanitizedData: any = {
+        const sanitizedData: Record<string, string | File | undefined> = {
             name: data.name?.trim(),
             user_id: user?._id,
             company_id: currentCompany?._id,
-            mailing_state: data.mailing_state?.trim(),
         };
 
         if (data.email?.trim())
             sanitizedData.email = data.email.trim();
         if (data.parent?.trim()) sanitizedData.parent = data.parent.trim();
+        if (data.parent_id?.trim()) sanitizedData.parent_id = data.parent_id.trim();
         if (data.mailing_pincode?.trim()) sanitizedData.mailing_pincode = data.mailing_pincode.trim();
         if (data.code?.trim()) sanitizedData.code = data.code.trim();
         if (data.number?.trim()) sanitizedData.number = data.number.trim();
@@ -342,6 +499,14 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
         if (data.mailing_address?.trim()) sanitizedData.mailing_address = data.mailing_address.trim();
         if (data.mailing_country?.trim()) sanitizedData.mailing_country = data.mailing_country.trim();
         if (data.image && typeof data.image !== 'string') sanitizedData.image = data.image;
+        if (data.mailing_state?.trim()) sanitizedData.mailing_state = data.mailing_state.trim();
+        if (data.bank_name?.trim()) sanitizedData.bank_name = data.bank_name.trim();
+        if (data.account_number?.trim()) sanitizedData.account_number = data.account_number.trim();
+        if (data.bank_ifsc?.trim()) sanitizedData.bank_ifsc = data.bank_ifsc.trim();
+        if (data.bank_branch?.trim()) sanitizedData.bank_branch = data.bank_branch.trim();
+        if (data.account_holder?.trim()) sanitizedData.account_holder = data.account_holder.trim();
+        if (data.gstin?.trim()) sanitizedData.gstin = data.gstin.trim();
+        if (data.it_pan?.trim()) sanitizedData.it_pan = data.it_pan.trim();
 
         const formData = new FormData();
         Object.entries(sanitizedData).forEach(([key, value]) => {
@@ -471,32 +636,6 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                     </Button>
                 </Box>
 
-                {/* Form Progress Bar */}
-                <Box sx={{ mt: 1 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                        <Typography variant="caption" color="text.secondary">
-                            Form Completion
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary" fontWeight={600}>
-                            {getFormCompletionPercentage()}%
-                        </Typography>
-                    </Box>
-                    <LinearProgress
-                        variant="determinate"
-                        value={getFormCompletionPercentage()}
-                        sx={{
-                            height: 6,
-                            borderRadius: 1,
-                            backgroundColor: theme.palette.action.hover,
-                            '& .MuiLinearProgress-bar': {
-                                borderRadius: 1,
-                                background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-                                transition: 'width 0.5s ease'
-                            }
-                        }}
-                    />
-                </Box>
-
                 {/* Success Alert */}
                 <Slide direction="down" in={showSuccessAlert} mountOnEnter unmountOnExit>
                     <Alert
@@ -539,6 +678,153 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                 }}
             >
                 <Box sx={{ p: 3 }}>
+                    {/* Accounting Section */}
+                    <Paper
+                        elevation={0}
+                        sx={{
+                            p: 2,
+                            mb: 3,
+                            borderRadius: 2,
+                            border: `1px solid ${theme.palette.divider}`,
+                            backgroundColor: theme.palette.background.paper
+                        }}
+                    >
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                cursor: 'pointer',
+                            }}
+                        >
+                            <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <CreditCard color="primary" />
+                                Accounting Details
+                            </Typography>
+
+                        </Box>
+
+                        <Box sx={{ mt: 2 }}>
+                            <FormControl fullWidth sx={{ mb: 2 }}>
+                                <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Business fontSize="small" color="primary" />
+                                    Customer Type
+                                    <Chip label="Required" size="small" color="primary" variant="outlined" />
+                                </Typography>
+                                <Autocomplete
+                                    fullWidth
+                                    size="small"
+                                    options={[
+                                        ...(accountingGroups?.map(cat => ({
+                                            label: `${cat?.name} (${cat.parent})`,
+                                            value: cat.name,
+                                            user_id: cat.user_id,
+                                            parent: cat.parent,
+                                            id: cat._id,
+                                        })) ?? []),
+                                        { label: 'Add new customer type', value: '__add_new__', user_id: '', parent: '__add_new__', id: '' }
+                                    ]}
+                                    getOptionLabel={(option) =>
+                                        typeof option === 'string' ? option : option.label || ''
+                                    }
+                                    freeSolo
+                                    renderOption={(props, option) => {
+                                        const { key, ...rest } = props;
+                                        return (
+                                            <li
+                                                key={key}
+                                                {...rest}
+                                                style={{
+                                                    fontWeight:
+                                                        option.value === '__add_new__'
+                                                            ? 600
+                                                            : 400,
+                                                    color:
+                                                        option.value === '__add_new__'
+                                                            ? theme.palette.primary.main
+                                                            : 'inherit',
+                                                    ...(props.style || {}),
+                                                }}
+                                            >
+                                                {option.value === '__add_new__' ? (
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                        <AddCircleOutline fontSize="small" />
+                                                        {option.label}
+                                                    </Box>
+                                                ) : (
+                                                    option.label
+                                                )}
+                                            </li>
+                                        );
+                                    }}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            placeholder="Select customer type"
+                                            size="small"
+                                            error={!!validationErrors.parent}
+                                            helperText={validationErrors.parent || "Category for accounting purposes"}
+                                        />
+                                    )}
+                                    value={selectedTypeOption}
+                                    onChange={(_, newValue) => {
+                                        if (
+                                            newValue &&
+                                            typeof newValue === 'object' &&
+                                            'value' in newValue &&
+                                            newValue.value === '__add_new__'
+                                        ) {
+                                            setOpenGroupModal(true);
+                                        } else {
+                                            setSelectedTypeOption(newValue && typeof newValue === 'object' && 'value' in newValue
+                                                ? { label: newValue.label, value: newValue.value, user_id: newValue.user_id, parent: newValue.parent, id: newValue.id }
+                                                : typeof newValue === 'string'
+                                                    ? { label: newValue, value: newValue, user_id: '', parent: '', id: '' }
+                                                    : null);
+                                            handleInputChange(
+                                                'parent',
+                                                newValue && typeof newValue === 'object' && 'value' in newValue
+                                                    ? String(newValue.value)
+                                                    : typeof newValue === 'string'
+                                                        ? newValue
+                                                        : ''
+                                            );
+                                            handleInputChange(
+                                                'parent_id',
+                                                newValue && typeof newValue === 'object' && 'id' in newValue ? newValue.id || '' : ''
+                                            );
+                                        }
+                                    }}
+                                    sx={{
+                                        '& .MuiAutocomplete-endAdornment': { display: 'none' },
+                                        '& .MuiOutlinedInput-root': {
+                                            borderRadius: 1,
+                                            '&:hover': {
+                                                '& > fieldset': {
+                                                    borderColor: theme.palette.primary.main,
+                                                }
+                                            }
+                                        }
+                                    }}
+                                />
+                            </FormControl>
+
+                            <Box sx={{
+                                backgroundColor: theme.palette.action.hover,
+                                p: 2,
+                                borderRadius: 1,
+                                display: 'flex',
+                                alignItems: 'flex-start',
+                                gap: 1
+                            }}>
+                                <InfoOutlined color="info" fontSize="small" />
+                                <Typography variant="body2" color="text.secondary">
+                                    Customer types help categorize your customers for better accounting and reporting.
+                                </Typography>
+                            </Box>
+                        </Box>
+                    </Paper>
+
                     {/* Profile Section */}
                     <Paper
                         elevation={0}
@@ -566,127 +852,133 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
 
                         <Box sx={{ mt: 2, display: 'flex', flexDirection: 'row', gap: 2 }}>
                             {/* Image Upload Section */}
-                            <Box sx={{ width: '50%', position: 'relative' }} >
-                                <Typography variant="subtitle2" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <PhotoCamera fontSize="small" color="primary" />
-                                    Profile Image
-                                    <Chip label="Optional" size="small" color="default" variant="outlined" />
-                                </Typography>
+                            {showProfileImage &&
+                                <Box sx={{ width: '50%', position: 'relative' }} >
+                                    <Typography variant="subtitle2" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <PhotoCamera fontSize="small" color="primary" />
+                                        Profile Image
+                                        <Chip label="Optional" size="small" color="default" variant="outlined" />
+                                    </Typography>
 
-                                <input
-                                    type="file"
-                                    accept="image/png, image/jpeg, image/jpg, image/webp"
-                                    style={{ display: 'none' }}
-                                    ref={customerImageRef}
-                                    onChange={e => {
-                                        const file = e.target.files?.[0];
-                                        if (file) handleImageChange(file);
-                                    }}
-                                />
+                                    <input
+                                        type="file"
+                                        accept="image/png, image/jpeg, image/jpg, image/webp"
+                                        style={{ display: 'none' }}
+                                        ref={customerImageRef}
+                                        onChange={e => {
+                                            const file = e.target.files?.[0];
+                                            if (file) handleImageChange(file);
+                                        }}
+                                    />
 
-                                <Box
-                                    onClick={handleBoxClick}
-                                    onDrop={handleDrop}
-                                    onDragOver={e => e.preventDefault()}
-                                    onDragEnter={handleDragEnter}
-                                    onDragLeave={handleDragLeave}
-                                    sx={{
-                                        border: `2px dashed ${isDragActive ? theme.palette.primary.main : theme.palette.divider}`,
-                                        borderRadius: 1,
-                                        p: 3,
-                                        position: 'relative',
-                                        textAlign: 'center',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.3s ease',
-                                        backgroundColor: isDragActive ? theme.palette.primary.main + '10' : theme.palette.background.default,
-                                        minHeight: 150,
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        '&:hover': {
-                                            borderColor: theme.palette.primary.main,
-                                            backgroundColor: theme.palette.primary.main + '05',
-                                        },
-                                    }}
-                                >
-                                    {imagePreview ? (
-                                        <Box sx={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                                            <Avatar
-                                                src={imagePreview}
-                                                alt="Profile Preview"
-                                                sx={{
-                                                    width: 100,
-                                                    height: 100,
-                                                    border: `3px solid ${theme.palette.primary.main}`,
-                                                    boxShadow: theme.shadows[2],
-                                                    transition: 'all 0.3s ease',
-                                                    objectFit: 'contain',
-                                                }}
-                                            />
-                                            <Tooltip title="Remove image" TransitionComponent={Zoom}>
-                                                <IconButton
-                                                    onClick={removeImage}
+                                    <Box
+                                        onClick={handleBoxClick}
+                                        onDrop={handleDrop}
+                                        onDragOver={e => e.preventDefault()}
+                                        onDragEnter={handleDragEnter}
+                                        onDragLeave={handleDragLeave}
+                                        sx={{
+                                            border: `2px dashed ${isDragActive ? theme.palette.primary.main : theme.palette.divider}`,
+                                            borderRadius: 1,
+                                            p: 3,
+                                            position: 'relative',
+                                            textAlign: 'center',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.3s ease',
+                                            backgroundColor: isDragActive ? theme.palette.primary.main + '10' : theme.palette.background.default,
+                                            minHeight: 150,
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            '&:hover': {
+                                                borderColor: theme.palette.primary.main,
+                                                backgroundColor: theme.palette.primary.main + '05',
+                                            },
+                                        }}
+                                    >
+                                        {imagePreview ? (
+                                            <Box sx={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                                <Avatar
+                                                    src={imagePreview}
+                                                    alt="Profile Preview"
                                                     sx={{
-                                                        position: 'absolute',
-                                                        top: 8,
-                                                        right: 8,
-                                                        backgroundColor: theme.palette.error.main,
-                                                        color: 'white',
-                                                        '&:hover': {
-                                                            backgroundColor: theme.palette.error.dark,
-                                                            transform: 'scale(1.1)'
-                                                        },
-                                                        width: 28,
-                                                        height: 28,
-                                                        transition: 'all 0.2s ease'
-                                                    }}
-                                                >
-                                                    <Delete fontSize="small" />
-                                                </IconButton>
-                                            </Tooltip>
-                                            <Typography variant="body2" sx={{ mt: 2, fontWeight: 500 }}>
-                                                Click to change image
-                                            </Typography>
-                                        </Box>
-                                    ) : (
-                                        <Fade in={true} timeout={500}>
-                                            <Box>
-                                                <CloudUpload
-                                                    sx={{
-                                                        fontSize: 48,
-                                                        color: theme.palette.primary.main,
-                                                        mb: 1
+                                                        width: 100,
+                                                        height: 100,
+                                                        border: `3px solid ${theme.palette.primary.main}`,
+                                                        boxShadow: theme.shadows[2],
+                                                        transition: 'all 0.3s ease',
+                                                        objectFit: 'contain',
                                                     }}
                                                 />
-                                                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
-                                                    Upload Profile Image
-                                                </Typography>
-                                                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                                                    Drag & drop or click to browse
-                                                </Typography>
-                                                <Typography variant="caption" color="text.secondary">
-                                                    PNG, JPEG, JPG, WebP • Max 5MB
+                                                <Tooltip title="Remove image" TransitionComponent={Zoom}>
+                                                    <IconButton
+                                                        onClick={removeImage}
+                                                        sx={{
+                                                            position: 'absolute',
+                                                            top: 8,
+                                                            right: 8,
+                                                            backgroundColor: theme.palette.error.main,
+                                                            color: 'white',
+                                                            '&:hover': {
+                                                                backgroundColor: theme.palette.error.dark,
+                                                                transform: 'scale(1.1)'
+                                                            },
+                                                            width: 28,
+                                                            height: 28,
+                                                            transition: 'all 0.2s ease'
+                                                        }}
+                                                    >
+                                                        <Delete fontSize="small" />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Typography variant="body2" sx={{ mt: 2, fontWeight: 500 }}>
+                                                    Click to change image
                                                 </Typography>
                                             </Box>
-                                        </Fade>
-                                    )}
+                                        ) : (
+                                            <Fade in={true} timeout={500}>
+                                                <Box>
+                                                    <CloudUpload
+                                                        sx={{
+                                                            fontSize: 48,
+                                                            color: theme.palette.primary.main,
+                                                            mb: 1
+                                                        }}
+                                                    />
+                                                    <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                                                        Upload Profile Image
+                                                    </Typography>
+                                                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                                                        Drag & drop or click to browse
+                                                    </Typography>
+                                                    <Typography variant="caption" color="text.secondary">
+                                                        PNG, JPEG, JPG, WebP • Max 5MB
+                                                    </Typography>
+                                                </Box>
+                                            </Fade>
+                                        )}
+                                    </Box>
+
                                 </Box>
+                            }
 
-                            </Box>
-
-                            <Box sx={{ mt: 3 }}>
-                                <FormControl fullWidth sx={{ mb: 1 }}>
+                            <Box sx={{
+                                mt: 3,
+                                width: showProfileImage ? '50%' : '100%',
+                            }}>
+                                {showBasicDetails && (<FormControl fullWidth sx={{ mb: 1 }}>
                                     <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
                                         <Person fontSize="small" color="primary" />
                                         Full Name
-                                        <Chip label="Required" size="small" color="primary" variant="outlined" />
+                                        <Chip label={requiredFields.includes('name') ? "Required" : 'Optional'} size="small" color={requiredFields.includes('name') ? "primary" : "default"} variant="outlined" />
                                     </Typography>
                                     <TextField
                                         fullWidth
                                         size="small"
                                         placeholder="John Doe"
                                         value={data.name || ''}
+                                        required={requiredFields.includes('name')}
                                         onChange={(e) => handleInputChange('name', e.target.value)}
                                         error={!!validationErrors.name}
                                         helperText={validationErrors.name || "Legal name of the customer"}
@@ -701,17 +993,19 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                                             }
                                         }}
                                     />
-                                </FormControl>
+                                </FormControl>)}
 
-                                <FormControl fullWidth sx={{ mb: 1 }}>
+                                {showMailingDetails && <FormControl fullWidth sx={{ mb: 1 }}>
                                     <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
                                         <Email fontSize="small" color="primary" />
                                         Email
-                                        <Chip label="Optional" size="small" color="default" variant="outlined" />
+                                        <Chip label={requiredFields.includes('email') ? "Required" : 'Optional'} size="small" color={requiredFields.includes('email') ? "primary" : "default"} variant="outlined" />
                                     </Typography>
                                     <TextField
                                         fullWidth
                                         size="small"
+                                        required={requiredFields.includes('email')}
+                                        type="email"
                                         placeholder="john@example.com"
                                         value={data.email || ''}
                                         onChange={(e) => handleInputChange('email', e.target.value)}
@@ -723,13 +1017,13 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                                             }
                                         }}
                                     />
-                                </FormControl>
+                                </FormControl>}
                             </Box>
                         </Box>
                     </Paper>
 
                     {/* Contact Information Section */}
-                    <Paper
+                    {showMailingDetails && <Paper
                         elevation={0}
                         sx={{
                             p: 2,
@@ -758,8 +1052,8 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                             <FormControl fullWidth sx={{ mb: 2, width: '50%' }}>
                                 <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
                                     <Business fontSize="small" color="primary" />
-                                    Company Name
-                                    <Chip label="Optional" size="small" color="default" variant="outlined" />
+                                    Mailing Name
+                                    <Chip label={requiredFields.includes('name') ? "Required" : 'Optional'} size="small" color={requiredFields.includes('name') ? "primary" : "default"} variant="outlined" />
                                 </Typography>
                                 <TextField
                                     fullWidth
@@ -768,7 +1062,7 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                                     value={data.mailing_name || ''}
                                     onChange={(e) => handleInputChange('mailing_name', e.target.value)}
                                     error={!!validationErrors.mailing_name}
-                                    helperText={validationErrors.mailing_name || "Customer's company name"}
+                                    helperText={validationErrors.mailing_name || "Customer's mailing name"}
                                     InputProps={{
                                         sx: {
                                             borderRadius: 1,
@@ -818,10 +1112,10 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                                 </Box>
                             </Box>
                         </Box>
-                    </Paper>
+                    </Paper>}
 
                     {/* Address Information Section */}
-                    <Paper
+                    {showMailingDetails && <Paper
                         elevation={0}
                         sx={{
                             p: 2,
@@ -901,21 +1195,67 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                                 <Box sx={{ width: '50%' }}>
                                     <FormControl fullWidth>
                                         <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                            <LocationOn fontSize="small" color="primary" />
-                                            Mailing State
-                                            <Chip label="Required" size="small" color="primary" variant="outlined" />
+                                            <Label fontSize="small" color="primary" />
+                                            Mailing Country
+                                            <Chip label={requiredFields.includes('mailing_country') ? "Required" : 'Optional'} size="small" color={requiredFields.includes('mailing_country') ? "primary" : "default"} variant="outlined" />
                                         </Typography>
-                                        <TextField
+                                        <Autocomplete
                                             fullWidth
                                             size="small"
-                                            placeholder="e.g. Rajasthan, Gujarat, California"
-                                            value={data.mailing_state || ''}
-                                            onChange={(e) => handleInputChange('mailing_state', e.target.value)}
-                                            error={!!validationErrors.mailing_state}
-                                            helperText={validationErrors.mailing_state}
-                                            InputProps={{
-                                                sx: {
+                                            options={[
+                                                ...(countries?.map(con => ({
+                                                    label: con.name,
+                                                })) ?? []),
+                                            ]}
+                                            getOptionLabel={(option) =>
+                                                typeof option === 'string' ? option : option.label || ''
+                                            }
+                                            freeSolo
+                                            renderOption={(props, option) => {
+                                                const { key, ...rest } = props;
+                                                return (
+                                                    <li
+                                                        key={key}
+                                                        {...rest}
+                                                        style={{
+                                                            fontWeight: 400,
+                                                            color: 'inherit',
+                                                            ...(props.style || {}),
+                                                        }}
+                                                    >
+                                                        {option.label}
+                                                    </li>
+                                                );
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    placeholder="Select mailing country"
+                                                    size="small"
+                                                    error={!!validationErrors.mailing_country}
+                                                    helperText={validationErrors.mailing_country || "Country for mailing address"}
+                                                />
+                                            )}
+                                            value={data.mailing_country || ''}
+                                            onChange={(_, newValue) => {
+                                                handleInputChange(
+                                                    'mailing_country',
+                                                    typeof newValue === 'string'
+                                                        ? newValue
+                                                        : (typeof newValue === 'object' && newValue !== null && 'label' in newValue)
+                                                            ? newValue.label
+                                                            : ''
+                                                );
+                                            }}
+                                            sx={{
+                                                '& .MuiAutocomplete-endAdornment': { display: 'none' },
+                                                '& .MuiOutlinedInput-root': {
                                                     borderRadius: 1,
+                                                    '&:hover': {
+                                                        '& > fieldset': {
+                                                            borderColor: theme.palette.primary.main,
+                                                        }
+                                                    }
                                                 }
                                             }}
                                         />
@@ -924,35 +1264,76 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                                 <Box sx={{ width: '50%' }}>
                                     <FormControl fullWidth>
                                         <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                            <Label fontSize="small" color="primary" />
-                                            Mailing Country
-                                            <Chip label="Optional" size="small" color="default" variant="outlined" />
+                                            <LocationOn fontSize="small" color="primary" />
+                                            Mailing State
+                                            <Chip label={requiredFields.includes('mailing_state') ? "Required" : 'Optional'} size="small" color={requiredFields.includes('mailing_state') ? "primary" : "default"} variant="outlined" />
                                         </Typography>
-                                        <TextField
+                                        <Autocomplete
                                             fullWidth
                                             size="small"
-                                            placeholder="e.g. India, USA, UK"
-                                            value={data.mailing_country || ''}
-                                            onChange={(e) => handleInputChange('mailing_country', e.target.value)}
-                                            error={!!validationErrors.mailing_country}
-                                            helperText={validationErrors.mailing_country || "Country of the customer"}
-                                            InputProps={{
-                                                sx: {
+                                            options={
+                                                countries.filter(con => con.name === data.mailing_country)[0]?.states.length < 1
+                                                    ? ['No States']
+                                                    : countries.filter(con => con.name === data.mailing_country)[0]?.states
+                                            }
+                                            freeSolo
+                                            renderOption={(props, option) => {
+                                                const { key, ...rest } = props;
+                                                return (
+                                                    <li
+                                                        key={key}
+                                                        {...rest}
+                                                        style={{
+                                                            fontWeight: 400,
+                                                            color: 'inherit',
+                                                            ...(props.style || {}),
+                                                        }}
+                                                    >
+                                                        {option}
+                                                    </li>
+                                                );
+                                            }}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    placeholder="Select mailing state"
+                                                    size="small"
+                                                    error={!!validationErrors.mailing_state}
+                                                    helperText={validationErrors.mailing_state || "State for mailing address"}
+                                                />
+                                            )}
+                                            value={data.mailing_state || ''}
+                                            onChange={(_, newValue) => {
+                                                handleInputChange(
+                                                    'mailing_state',
+                                                    countries.filter(con => con.name === data.mailing_country)[0]?.states.length < 1 ? '' : newValue || ''
+                                                );
+                                            }}
+                                            sx={{
+                                                '& .MuiAutocomplete-endAdornment': { display: 'none' },
+                                                '& .MuiOutlinedInput-root': {
                                                     borderRadius: 1,
+                                                    '&:hover': {
+                                                        '& > fieldset': {
+                                                            borderColor: theme.palette.primary.main,
+                                                        }
+                                                    }
                                                 }
                                             }}
                                         />
                                     </FormControl>
                                 </Box>
+
                             </Box>
                         </Box>
-                    </Paper>
+                    </Paper>}
 
-                    {/* Accounting Section */}
-                    <Paper
+                    {/* Bank Details Section */}
+                    {showBankDetails && <Paper
                         elevation={0}
                         sx={{
                             p: 2,
+                            mb: 3,
                             borderRadius: 2,
                             border: `1px solid ${theme.palette.divider}`,
                             backgroundColor: theme.palette.background.paper
@@ -967,125 +1348,222 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                             }}
                         >
                             <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <CreditCard color="primary" />
-                                Accounting Details
+                                <LocationOn color="primary" />
+                                Bank Details
                             </Typography>
 
                         </Box>
 
                         <Box sx={{ mt: 2 }}>
-                            <FormControl fullWidth sx={{ mb: 2 }}>
-                                <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <Business fontSize="small" color="primary" />
-                                    Customer Type
-                                    <Chip label="Required" size="small" color="primary" variant="outlined" />
-                                </Typography>
-                                <Autocomplete
-                                    fullWidth
-                                    size="small"
-                                    options={[
-                                        ...(accountingGroups?.map(cat => ({
-                                            label: `${cat?.name} (${cat.parent})`,
-                                            value: cat.name,
-                                        })) ?? []),
-                                        { label: 'Add new customer type', value: '__add_new__' }
-                                    ]}
-                                    getOptionLabel={(option) =>
-                                        typeof option === 'string' ? option : option.label || ''
-                                    }
-                                    freeSolo
-                                    renderOption={(props, option) => {
-                                        const { key, ...rest } = props;
-                                        return (
-                                            <li
-                                                key={key}
-                                                {...rest}
-                                                style={{
-                                                    fontWeight:
-                                                        option.value === '__add_new__'
-                                                            ? 600
-                                                            : 400,
-                                                    color:
-                                                        option.value === '__add_new__'
-                                                            ? theme.palette.primary.main
-                                                            : 'inherit',
-                                                    ...(props.style || {}),
-                                                }}
-                                            >
-                                                {option.value === '__add_new__' ? (
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                        <AddCircleOutline fontSize="small" />
-                                                        {option.label}
-                                                    </Box>
-                                                ) : (
-                                                    option.label
-                                                )}
-                                            </li>
-                                        );
-                                    }}
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            placeholder="Select customer type"
-                                            size="small"
-                                            error={!!validationErrors.parent}
-                                            helperText={validationErrors.parent || "Category for accounting purposes"}
-                                        />
-                                    )}
-                                    value={selectedTypeOption}
-                                    onChange={(_, newValue) => {
-                                        if (
-                                            newValue &&
-                                            typeof newValue === 'object' &&
-                                            'value' in newValue &&
-                                            newValue.value === '__add_new__'
-                                        ) {
-                                            setOpenGroupModal(true);
-                                        } else {
-                                            setSelectedTypeOption(newValue && typeof newValue === 'object' && 'value' in newValue
-                                                ? { label: newValue.label, value: newValue.value }
-                                                : typeof newValue === 'string'
-                                                    ? { label: newValue, value: newValue }
-                                                    : null);
-                                            handleInputChange(
-                                                'parent',
-                                                newValue && typeof newValue === 'object' && 'value' in newValue
-                                                    ? String(newValue.value)
-                                                    : typeof newValue === 'string'
-                                                        ? newValue
-                                                        : ''
-                                            );
-                                        }
-                                    }}
-                                    sx={{
-                                        '& .MuiAutocomplete-endAdornment': { display: 'none' },
-                                        '& .MuiOutlinedInput-root': {
-                                            borderRadius: 1,
-                                            '&:hover': {
-                                                '& > fieldset': {
-                                                    borderColor: theme.palette.primary.main,
-                                                }
+                            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                                <FormControl fullWidth sx={{ mb: 2, width: '50%' }}>
+                                    <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Label fontSize="small" color="primary" />
+                                        Account Holder Name
+                                        <Chip label={isBankOptional ? "Required" : 'Optional'} size="small" color={isBankOptional ? "primary" : "default"} variant="outlined" />
+                                    </Typography>
+                                    <TextField
+                                        fullWidth
+                                        size="small"
+                                        placeholder="John Doe"
+                                        required={isBankOptional}
+                                        value={data.account_holder || ''}
+                                        onChange={(e) => handleInputChange('account_holder', e.target.value)}
+                                        error={!!validationErrors.bank_account_holder}
+                                        helperText={validationErrors.bank_account_holder || "Name on the bank account"}
+                                        InputProps={{
+                                            sx: {
+                                                borderRadius: 1,
                                             }
-                                        }
-                                    }}
-                                />
-                            </FormControl>
+                                        }}
+                                    />
+                                </FormControl>
+                                <Box sx={{ width: '50%' }}>
+                                    <FormControl fullWidth>
+                                        <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <Label fontSize="small" color="primary" />
+                                            Account Number
+                                            <Chip label={isBankOptional ? "Required" : 'Optional'} size="small" color={isBankOptional ? "primary" : "default"} variant="outlined" />
+                                        </Typography>
+                                        <TextField
+                                            fullWidth
+                                            size="small"
+                                            placeholder="123456789012"
+                                            required={isBankOptional}
+                                            value={data.account_number || ''}
+                                            onChange={(e) => handleInputChange('account_number', e.target.value)}
+                                            error={!!validationErrors.account_number}
+                                            helperText={validationErrors.account_number || "12-digit account number"}
+                                            InputProps={{
+                                                sx: {
+                                                    borderRadius: 1,
+                                                }
+                                            }}
+                                        />
+                                    </FormControl>
+                                </Box>
+                            </Box>
 
-                            <Box sx={{
-                                backgroundColor: theme.palette.action.hover,
-                                p: 2,
-                                borderRadius: 1,
-                                display: 'flex',
-                                alignItems: 'flex-start',
-                                gap: 1
-                            }}>
-                                <InfoOutlined color="info" fontSize="small" />
-                                <Typography variant="body2" color="text.secondary">
-                                    Customer types help categorize your customers for better accounting and reporting.
-                                </Typography>
+                            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                                <FormControl fullWidth>
+                                    <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <LocationOn fontSize="small" color="primary" />
+                                        Bank Name
+                                        <Chip label={isBankOptional ? "Required" : 'Optional'} size="small" color={isBankOptional ? "primary" : "default"} variant="outlined" />
+                                    </Typography>
+                                    <TextField
+                                        fullWidth
+                                        size="small"
+                                        placeholder="e.g. State Bank of India"
+                                        required={isBankOptional}
+                                        value={data.bank_name || ''}
+                                        onChange={(e) => handleInputChange('bank_name', e.target.value)}
+                                        error={!!validationErrors.bank_name}
+                                        helperText={validationErrors.bank_name || "Name of the bank"}
+                                        InputProps={{
+                                            sx: {
+                                                borderRadius: 1,
+                                            }
+                                        }}
+                                    />
+                                </FormControl>
+                            </Box>
+
+                            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                                <Box sx={{ width: '50%' }}>
+                                    <FormControl fullWidth>
+                                        <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <LocationOn fontSize="small" color="primary" />
+                                            IFSC Code
+                                            <Chip label={isBankOptional ? "Required" : 'Optional'} size="small" color={isBankOptional ? "primary" : "default"} variant="outlined" />
+                                        </Typography>
+                                        <TextField
+                                            fullWidth
+                                            size="small"
+                                            placeholder="e.g. SBIN0001234"
+                                            value={data.bank_ifsc || ''}
+                                            required={isBankOptional}
+                                            onChange={(e) => handleInputChange('bank_ifsc', e.target.value)}
+                                            error={!!validationErrors.bank_ifsc}
+                                            helperText={validationErrors.bank_ifsc}
+                                            InputProps={{
+                                                sx: {
+                                                    borderRadius: 1,
+                                                }
+                                            }}
+                                        />
+                                    </FormControl>
+                                </Box>
+                                <Box sx={{ width: '50%' }}>
+                                    <FormControl fullWidth>
+                                        <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <Label fontSize="small" color="primary" />
+                                            Branch Name
+                                            <Chip label={isBankOptional ? "Required" : 'Optional'} size="small" color={isBankOptional ? "primary" : "default"} variant="outlined" />
+                                        </Typography>
+                                        <TextField
+                                            fullWidth
+                                            size="small"
+                                            placeholder="Main Branch, Downtown"
+                                            value={data.bank_branch || ''}
+                                            required={isBankOptional}
+                                            onChange={(e) => handleInputChange('bank_branch', e.target.value)}
+                                            error={!!validationErrors.bank_branch}
+                                            helperText={validationErrors.bank_branch || "Name of the bank branch"}
+                                            InputProps={{
+                                                sx: {
+                                                    borderRadius: 1,
+                                                }
+                                            }}
+                                        />
+                                    </FormControl>
+                                </Box>
                             </Box>
                         </Box>
-                    </Paper>
+                    </Paper>}
+
+                    {/* Tax Info Section */}
+                    {(showGSTIN || showPAN) && <Paper
+                        elevation={0}
+                        sx={{
+                            p: 2,
+                            mb: 3,
+                            borderRadius: 2,
+                            border: `1px solid ${theme.palette.divider}`,
+                            backgroundColor: theme.palette.background.paper
+                        }}
+                    >
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                cursor: 'pointer',
+                            }}
+                        >
+                            <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <LocationOn color="primary" />
+                                Tax Information
+                            </Typography>
+
+                        </Box>
+
+                        <Box sx={{ mt: 2 }}>
+                            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+
+                                {showGSTIN && <Box sx={{ width: showPAN ? '50%' : '100%' }}>
+                                    <FormControl fullWidth>
+                                        <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <Label fontSize="small" color="primary" />
+                                            GSTIN Number
+                                            <Chip label={!isGSTINOptional ? "Required" : 'Optional'} size="small" color={!isGSTINOptional ? "primary" : "default"} variant="outlined" />
+                                        </Typography>
+                                        <TextField
+                                            fullWidth
+                                            size="small"
+                                            placeholder="27XXXXXXXXXXXX"
+                                            value={data.gstin || ''}
+                                            required={!isGSTINOptional}
+                                            onChange={(e) => handleInputChange('gstin', e.target.value)}
+                                            error={!!validationErrors.gstin}
+                                            helperText={validationErrors.gstin || "15-digit GSTIN number"}
+                                            InputProps={{
+                                                sx: {
+                                                    borderRadius: 1,
+                                                }
+                                            }}
+                                        />
+                                    </FormControl>
+                                </Box>}
+                                {showPAN && <Box sx={{ width: showGSTIN ? '50%' : '100%' }}>
+                                    <FormControl fullWidth>
+                                        <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <Label fontSize="small" color="primary" />
+                                            PAN Number
+                                            <Chip label={!isGSTINOptional ? "Required" : 'Optional'} size="small" color={!isGSTINOptional ? "primary" : "default"} variant="outlined" />
+                                        </Typography>
+                                        <TextField
+                                            fullWidth
+                                            size="small"
+                                            placeholder="ABCDE1234F"
+                                            required={!isGSTINOptional}
+                                            value={data.it_pan || ''}
+                                            onChange={(e) => handleInputChange('it_pan', e.target.value)}
+                                            error={!!validationErrors.it_pan}
+                                            helperText={validationErrors.it_pan || "10-character PAN number"}
+                                            InputProps={{
+                                                sx: {
+                                                    borderRadius: 1,
+                                                }
+                                            }}
+                                        />
+                                    </FormControl>
+                                </Box>}
+                            </Box>
+                        </Box>
+                    </Paper>}
+
+
 
                     {/* Customer Group Editing Modal */}
                     <CustomerGroupEditingModal
@@ -1095,14 +1573,17 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
                         }}
                         group={null}
                         onCreated={async (newGroup) => {
-                            console.log("New Group Created:", newGroup);
+                            // console.log("New Group Created:", newGroup);
                             dispatch(viewAllAccountingGroups(currentCompany?._id ?? ""));
                             setSelectedTypeOption({
                                 label: newGroup.name,
                                 value: newGroup.name,
+                                user_id: newGroup.user_id,
+                                parent: newGroup.parent,
+                                id: newGroup._id
                             });
                             setOpenGroupModal(false);
-                            setSelectedTypeOption({ label: newGroup.name, value: newGroup.name });
+                            setSelectedTypeOption({ label: newGroup.name, value: newGroup.name, user_id: newGroup.user_id, parent: newGroup.parent, id: newGroup._id });
                             setData(prev => ({ ...prev, _cgroup: newGroup._id }));
                             setData(prev => ({ ...prev, group: newGroup.name }));
                             setOpenGroupModal(false);

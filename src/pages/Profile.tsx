@@ -135,7 +135,7 @@ const ProfilePage: React.FC = () => {
     fetchCompanyData();
   }, [fetchCompanyData]);
 
-  const currentCompanyDetails = user?.company?.find(c => c._id === user.user_settings.current_company_id);
+  const currentCompanyDetails = user?.company?.find((c:any) => c._id === user.user_settings.current_company_id);
 
   return (
     <Box

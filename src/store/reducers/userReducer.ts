@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
   createUser,
+  updateUserSettings,
 } from "@/services/user";
 import { CreateUser, PageMeta } from "@/utils/types";
 import { setCurrentCompany } from "@/services/user";
@@ -62,6 +63,18 @@ const userSlice = createSlice({
         state.loading = false;
       })
       .addCase(setCurrentCompany.rejected, (state, action) => {
+        state.error = action.payload as string;
+        state.loading = false;
+      })
+      
+      .addCase(updateUserSettings.pending, (state) => {
+        state.error = null;
+        state.loading = true;
+      })
+      .addCase(updateUserSettings.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(updateUserSettings.rejected, (state, action) => {
         state.error = action.payload as string;
         state.loading = false;
       })

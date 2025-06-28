@@ -156,6 +156,25 @@ export const getFileTypeIcon = (file: File) => {
   return <AttachFileIcon sx={{ margin: "0 10px" }} />;
 };
 
+export const getInitials = (name: string): string => {
+  if (!name) return '';
+  return name
+    .split(' ')
+    .map(word => word.charAt(0))
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+};
+
+export const getAvatarColor = (name: string): string => {
+  const colors = [
+    '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+    '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
+  ];
+  const safeName = name || '';
+  const index = safeName.length % colors.length;
+  return colors[index];
+};
 // // Status chip color mapping
 // export const getStatusColor = (status: OrderStatus) => {
 //   switch (status) {

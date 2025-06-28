@@ -47,6 +47,7 @@ export type CustomerSortField =
 export type SortOrder = "asc" | "desc";
 
 export interface Units {
+  id: string;
   label: string;
   value: string;
 }
@@ -194,6 +195,7 @@ export interface GetUserLedgers {
   qr_image: string,
   email?: string,
   parent: string,
+  parent_id: string,
   mailing_name: string,
   mailing_pincode: string,
   mailing_country?: string,
@@ -204,6 +206,13 @@ export interface GetUserLedgers {
   is_revenue: boolean,
   mailing_address?: string,
   alias?: string,
+  bank_name?: string;
+  account_number?: string;
+  bank_ifsc?: string;
+  bank_branch?: string;
+  account_holder?: string;
+  gstin?: string;
+  it_pan?: string;
   created_at: string,
   updated_at: string,
   is_deleted: boolean
@@ -244,13 +253,49 @@ export interface CreateInvoiceData {
   items: Array<{
     vouchar_id: string;
     item: string;
-    _item: string;
+    item_id: string;
     quantity: number;
     rate: number;
     amount: number;
   }>
 }
 
+export interface CreateInvoiceWithGSTData {
+  company_id: string,
+  date: string,
+  voucher_type: string,
+  voucher_type_id: string,
+  voucher_number: string,
+  party_name: string,
+  party_name_id: string,
+  narration: string,
+  reference_number: string,
+  reference_date: string,
+  place_of_supply: string,
+  accounting: Array<{
+    vouchar_id: string,
+    ledger: string,
+    ledger_id: string,
+    amount: number
+  }>,
+  items: Array<{
+    vouchar_id: string;
+    item: string;
+    item_id: string;
+    quantity: number;
+    rate: number;
+    amount: number;
+    additional_amount: number;
+    discount_amount: number;
+    godown: string;
+    godown_id: string;
+    order_number: string;
+    order_due_date: string;
+    hsn_code: string;
+    gst_rate: string;
+    gst_amount: number;
+  }>
+}
 export interface UserData {
   _id: string;
   name: Name;
@@ -372,8 +417,8 @@ export interface SetCompany {
   pinCode?: string,
   state: string,
   country: string,
-  financial_year_start: string, // Use string for date format
-  books_begin_from: string, // Use string for date format
+  financial_year_start: string | Date, // Use string for date format
+  books_begin_from: string | Date, // Use string for date format
   is_deleted: boolean,
   number?: string;
   code?: string;
@@ -382,6 +427,12 @@ export interface SetCompany {
   gstin?: string,
   pan_number?: string,
   website?: string,
+  account_number?: string,
+  account_holder?: string,
+  bank_ifsc?: string,
+  bank_name?: string,
+  bank_branch?: string,
+  qr_code_url?: File | string | null,
 }
 
 
@@ -425,13 +476,13 @@ export interface FormCreateProduct {
   stock_item_name: string;
   company_id: string;
   unit: string;
-  _unit: string;
+  unit_id: string;
   is_deleted: boolean;
   alias_name?: string;
   category?: string;
-  _category?: string;
+  category_id?: string;
   group?: string;
-  _group?: string;
+  group_id?: string;
   image?: File | string;
   description?: string;
 
@@ -452,13 +503,13 @@ export interface ProductUpdate {
   stock_item_name: string;
   company_id: string;
   unit: string;
-  _unit: string;
+  unit_id: string;
   is_deleted: boolean;
   alias_name?: string;
   category?: string;
-  _category?: string;
+  category_id?: string;
   group?: string;
-  _group?: string;
+  group_id?: string;
   image?: File | string | null;
   description?: string;
 
@@ -513,12 +564,12 @@ export interface GetItem {
   company_id: string;
   user_id: string;
   unit: string;
-  _unit: string;
+  unit_id: string;
   alias_name: string;
   category: string;
-  _category: string;
+  category_id: string;
   group: string;
-  _group: string;
+  group_id: string;
   image: File | string | null;
   description: string;
   gst_nature_of_goods: string;

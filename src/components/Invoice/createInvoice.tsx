@@ -65,7 +65,7 @@ import { useNavigate } from 'react-router-dom';
 interface InvoiceItems {
   vouchar_id: string;
   item: string;
-  _item: string;
+  item_id: string;
   quantity: number;
   rate: number;
   amount: number;
@@ -302,7 +302,7 @@ export default function CreateInvoice() {
     const newItem: InvoiceItems = {
       vouchar_id: '',
       item: '',
-      _item: '',
+      item_id: '',
       quantity: 1,
       rate: 0.0,
       amount: 0.0
@@ -380,7 +380,7 @@ export default function CreateInvoice() {
       ],
     }
 
-    console.log('Submitting Invoice Data:', dataToSend);
+    // console.log('Submitting Invoice Data:', dataToSend);
     dispatch(createInvoice(dataToSend)).then(() => {
       setIsLoading(false);
       navigate('/invoices', { replace: true });
@@ -693,19 +693,19 @@ export default function CreateInvoice() {
                                   : option?.name || ''
                               }
                               value={
-                                itemsList.find((p) => p.id === item._item) ||
+                                itemsList.find((p) => p.id === item.item_id) ||
                                 (item.item ? { id: '', name: item.item, unit: '' } : null)
                               }
                               onChange={(_, newValue) => {
                                 if (typeof newValue === 'string') {
                                   handleItemChange(index, 'item', newValue);
-                                  handleItemChange(index, '_item', '');
+                                  handleItemChange(index, 'item_id', '');
                                 } else if (newValue && typeof newValue === 'object') {
                                   handleItemChange(index, 'item', newValue.name);
-                                  handleItemChange(index, '_item', newValue.id);
+                                  handleItemChange(index, 'item_id', newValue.id);
                                 } else {
                                   handleItemChange(index, 'item', '');
-                                  handleItemChange(index, '_item', '');
+                                  handleItemChange(index, 'item_id', '');
                                 }
                               }}
                               renderInput={(params) => (

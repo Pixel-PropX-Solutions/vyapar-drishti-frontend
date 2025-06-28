@@ -28,8 +28,8 @@ interface BasicDetailsSectionProps {
     handleChange: (field: keyof FormCreateProduct, value: string | boolean) => void;
     validationErrors: Record<string, string>;
     theme: any;
-    selectedUnitOption: { label: string; value: string } | null;
-    setSelectedUnitOption: React.Dispatch<React.SetStateAction<{ label: string; value: string } | null>>;
+    selectedUnitOption: { label: string; value: string; id: string; } | null;
+    setSelectedUnitOption: React.Dispatch<React.SetStateAction<{ label: string; value: string; id: string; } | null>>;
     setOpenCategoryModal: React.Dispatch<React.SetStateAction<boolean>>;
     imagePreview: string | null;
     setImagePreview: React.Dispatch<React.SetStateAction<string | null>>;
@@ -57,7 +57,7 @@ const BasicDetailsSection: React.FC<BasicDetailsSectionProps> = ({
 }) => {
 
 
-    const handleUnitChange = (_: React.SyntheticEvent, newValue: { label: string; value: string } | null) => {
+    const handleUnitChange = (_: React.SyntheticEvent, newValue: { label: string; value: string; id: string; } | null) => {
         if (newValue?.value === '__add_new__') {
             setOpenCategoryModal(true);
             return;
@@ -65,7 +65,7 @@ const BasicDetailsSection: React.FC<BasicDetailsSectionProps> = ({
 
         setSelectedUnitOption(newValue);
         handleChange('unit', newValue?.value || '');
-        handleChange('_unit', newValue?.label || '');
+        handleChange('unit_id', newValue?.id || '');
     };
     
     const handleDragEnter = (e: React.DragEvent) => {

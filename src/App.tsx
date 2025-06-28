@@ -163,7 +163,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/customers" element={<CustomerLedger />} />
                 <Route path="/invoices" element={<Invoices />} />
                 <Route path="/invoices/create" element={<CreateInvoice />} />
-                <Route path="/invoices/payment" element={<PaymentReceiptInvoice />} />
+                <Route path="/transaction/:type" element={<PaymentReceiptInvoice />} />
                 <Route path="/invoices/create/:type" element={<SalePurchaseInvoiceCreation />} />
                 {/* <Route path="/*" element={<Navigate to="/" replace />} /> */}
               </Route>

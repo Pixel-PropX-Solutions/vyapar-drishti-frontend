@@ -737,7 +737,7 @@ const ProductsListing: React.FC = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={4} sx={{ textAlign: "center", py: 8 }}>
+                  <TableCell colSpan={5} sx={{ textAlign: "center", py: 8 }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                       <InventoryIcon sx={{ fontSize: '4rem', color: theme.palette.text.disabled }} />
                       <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 600 }}>

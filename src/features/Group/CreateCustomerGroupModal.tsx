@@ -304,7 +304,7 @@ const CreateCustomerGroupModal: React.FC<CreateCustomerGroupModalProps> = ({
                 dispatch(createAccountingGroup(formData))
                     .unwrap()
                     .then((response) => {
-                        console.log("Inventory Group created:", response);
+                        // console.log("Inventory Group created:", response);
                         const newGroup = {
                             name: response.accounting_group_name,
                             _id: response._id

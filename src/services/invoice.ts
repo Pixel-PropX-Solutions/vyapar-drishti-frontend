@@ -1,5 +1,5 @@
 import userApi from "@/api/api";
-import { CreateInvoiceData } from "@/utils/types";
+import { CreateInvoiceData, CreateInvoiceWithGSTData } from "@/utils/types";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 
@@ -11,6 +11,31 @@ export const createInvoice = createAsyncThunk(
     ) => {
         try {
             const createRes = await userApi.post(`user/create/vouchar`, data);
+            console.log("createInvoice response", createRes);
+            if (createRes.data.success === true) {
+                return;
+            } else {
+                return rejectWithValue("Product creation failed");
+            }
+        } catch (error: any) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Upload or creation failed: Invalid input or server error."
+            );
+        }
+    }
+);
+
+
+export const createInvoiceWithGST = createAsyncThunk(
+    "create/invoice/gst",
+    async (
+        data: CreateInvoiceWithGSTData,
+        { rejectWithValue }
+    ) => {
+        try {
+            console.log("createInvoiceWithGST data", data);
+            const createRes = await userApi.post(`user/create/vouchar/gst`, data);
             console.log("createInvoice response", createRes);
             if (createRes.data.success === true) {
                 return;
@@ -92,6 +117,39 @@ export const printInvoices = createAsyncThunk(
         try {
             const response = await userApi.get(
                 `/user/print/vouchar?vouchar_id=${vouchar_id}&company_id=${company_id}`
+            );
+            console.log("printInvoices response", response.data);
+
+            if (response.data.success === true) {
+                const invoceHtml = response.data.data;
+                return {invoceHtml};
+            } else return rejectWithValue("Login Failed: No access token recieved.");
+        } catch (error: any) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Login failed: Invalid credentials or server error."
+            );
+        }
+    }
+);
+
+export const printGSTInvoices = createAsyncThunk(
+    "print/gst/invoices",
+    async (
+        {
+            vouchar_id,
+            company_id,
+
+        }: {
+            vouchar_id: string;
+            company_id: string;
+
+        },
+        { rejectWithValue }
+    ) => {
+        try {
+            const response = await userApi.get(
+                `/user/print/vouchar/gst?vouchar_id=${vouchar_id}&company_id=${company_id}`
             );
             console.log("printInvoices response", response.data);
 

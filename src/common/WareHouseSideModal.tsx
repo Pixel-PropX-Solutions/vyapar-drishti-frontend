@@ -184,6 +184,7 @@
 //                     borderLeft: '2px solid #e0e0e0',
 //                 }
 //             }}
+//             {...(drawer.isOpen && drawer.type !== null ? {} : { inert: '' })}
 //         >
 //             <Box sx={{
 //                 p: 2,

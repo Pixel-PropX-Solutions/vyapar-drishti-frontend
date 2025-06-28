@@ -111,6 +111,7 @@
 //           borderLeft: '2px solid #e0e0e0',
 //         },
 //       }}
+//       {...(open ? {} : { inert: '' })}
 //     >
 //       <Box sx={{
 //         p: 2,

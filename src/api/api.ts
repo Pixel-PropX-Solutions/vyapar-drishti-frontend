@@ -33,14 +33,14 @@ userApi.interceptors.response.use(
                 // if(!refreshToken)
                 //     throw new Error("Refresh Token not available. Please log in again.");
 
-                console.log("Attempting token refresh");
+                // console.log("Attempting token refresh");
                 const {data} = await axios.post<Token>(
                     // `${import.meta.env.VITE_BACKEND_BASE_URL}/auth/handleRefreshToken`,
                     `${import.meta.env.VITE_LOCAL_BACKEND_BASE_URL}/auth/handleRefreshToken`,
                     {},
                     {withCredentials : true}
                 );
-                console.log("Token refreshed:", data);
+                // console.log("Token refreshed:", data);
                 localStorage.setItem("accessToken", data.accessToken);
                 localStorage.setItem("refreshToken", data.refreshToken);
 

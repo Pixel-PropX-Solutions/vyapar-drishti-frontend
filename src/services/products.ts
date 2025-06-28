@@ -74,7 +74,7 @@ export const viewAllProducts = createAsyncThunk(
         `/product/view/all/product?company_id=${company_id}&search=${searchQuery}${category === 'All' ? "" : "&category=" + category}&page_no=${pageNumber}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"
         }`
       );
-      console.log("viewAllProduct response", response.data);
+      // console.log("viewAllProduct response", response.data);
 
       if (response.data.success === true) {
         const productsData = response.data.data.docs;
@@ -95,7 +95,7 @@ export const viewProduct = createAsyncThunk(
   async ({ product_id, company_id }: { product_id: string, company_id: string }, { rejectWithValue }) => {
     try {
       const response = await userApi.get(`/product/get/product/${product_id}?company_id=${company_id}`);
-      console.log("view Product response", response.data);
+      // console.log("view Product response", response.data);
 
       if (response.data.success === true) {
         const product = response.data.data[0];
@@ -115,7 +115,7 @@ export const getProduct = createAsyncThunk(
   async ({ product_id, company_id }: { product_id: string, company_id: string }, { rejectWithValue }) => {
     try {
       const response = await userApi.get(`/product/get/product/details/${product_id}?company_id=${company_id}`);
-      console.log("view Product response", response.data);
+      // console.log("view Product response", response.data);
 
       if (response.data.success === true) {
         const item = response.data.data[0];
@@ -135,7 +135,7 @@ export const viewProductsWithId = createAsyncThunk(
   async (company_id: string, { rejectWithValue }) => {
     try {
       const response = await userApi.get(`product/view/products/with_id?company_id=${company_id}`);
-      // console.log("view Product response", response.data);
+      console.log("view Product with id response", response.data);
 
       if (response.data.success === true) {
         const itemsList = response.data.data;

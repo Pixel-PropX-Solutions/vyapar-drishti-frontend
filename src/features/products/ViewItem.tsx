@@ -77,6 +77,7 @@ export default function ViewItem() {
   // const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const { item } = useSelector((state: RootState) => state.product);
+  
   const { currentCompany } = useSelector((state: RootState) => state.auth);
   const [activeTab, setActiveTab] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -92,12 +93,12 @@ export default function ViewItem() {
 
   const [data, setData] = useState<GetItem>({
     company_id: "",
-    _unit: "",
+    unit_id: "",
     alias_name: "",
     category: "",
-    _category: "",
+    category_id: "",
     group: "",
-    _group: "",
+    group_id: "",
     image: "",
     description: "",
     gst_nature_of_goods: "",
@@ -200,8 +201,8 @@ export default function ViewItem() {
     }
   }, [item]);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    console.log(event);
+  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
+    // console.log(event);
     setActiveTab(newValue);
   };
 
@@ -674,7 +675,7 @@ export default function ViewItem() {
                         setDrawer(true);
                         await dispatch(viewProduct({ product_id: data._id, company_id: currentCompany?._id || '' }))
                           .unwrap().then((res) => {
-                            console.log("Product details fetched successfully", res);
+                            // console.log("Product details fetched successfully", res);
                             setSelectedProduct(res.product);
                             setDrawer(true);
                           }

@@ -47,7 +47,7 @@ import { useNavigate } from "react-router-dom";
 import { CustomerRowSkeleton } from "@/common/CustomerRowSkeleton";
 // import { CustomerRow } from "@/features/profile/customers/CustomerRow";
 // import { getAllGroups } from "@/services/group";
-import { printInvoices, printPaymentInvoices, printRecieptInvoices, viewAllInvoices } from "@/services/invoice";
+import { printGSTInvoices, printInvoices, printPaymentInvoices, printRecieptInvoices, viewAllInvoices } from "@/services/invoice";
 import { InvoicerRow } from "@/components/Invoice/InvoiceRow";
 import InvoicePrint from "@/components/Invoice/InvoicePrint";
 import InvoiceTypeModal from "@/components/Invoice/InvoiceTypeModal";
@@ -68,7 +68,8 @@ const Invoices: React.FC = () => {
   const { invoiceGroupList } = useSelector((state: RootState) => state.accountingGroup);
   const { invoices, loading, pageMeta } = useSelector((state: RootState) => state.invoice);
   // const { accountingGroups } = useSelector((state: RootState) => state.accountingGroup);
-  const { currentCompany } = useSelector((state: RootState) => state.auth);
+  const { currentCompany, user } = useSelector((state: RootState) => state.auth);
+  const currentCompanyDetails = user?.company?.find((c :any)=> c._id === user.user_settings.current_company_id);
   const navigate = useNavigate();
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
@@ -173,24 +174,46 @@ const Invoices: React.FC = () => {
   const handlePrintInvoice = (invoice: GetAllVouchars) => {
     console.log("Print Invoice", invoice);
     if (invoice.voucher_type === 'Sales' || invoice.voucher_type === 'Purchase') {
-      dispatch(printInvoices({
-        vouchar_id: invoice._id,
-        company_id: currentCompany?._id || "",
-      })).then((response) => {
-        if (response.meta.requestStatus === 'fulfilled') {
-          console.log("Print Invoice Response:", response.payload);
-          const payload = response.payload as { invoceHtml: string };
-          setHtmlFromAPI(payload.invoceHtml);
-          setInvoiceId(invoice.voucher_number);
-          setHtml(true);
-        } else {
-          console.error("Failed to print invoice:", response.payload);
+      if (currentCompanyDetails?.company_settings?.features?.enable_gst) {
+        dispatch(printGSTInvoices({
+          vouchar_id: invoice._id,
+          company_id: currentCompany?._id || "",
+        })).then((response) => {
+          if (response.meta.requestStatus === 'fulfilled') {
+            console.log("Print Invoice Response:", response.payload);
+            const payload = response.payload as { invoceHtml: string };
+            setHtmlFromAPI(payload.invoceHtml);
+            setInvoiceId(invoice.voucher_number);
+            setHtml(true);
+          } else {
+            console.error("Failed to print invoice:", response.payload);
+          }
         }
+        ).catch((error) => {
+          console.error("Error printing invoice:", error);
+        }
+        );
+      } else {
+        dispatch(printInvoices({
+          vouchar_id: invoice._id,
+          company_id: currentCompany?._id || "",
+        })).then((response) => {
+          if (response.meta.requestStatus === 'fulfilled') {
+            console.log("Print Invoice Response:", response.payload);
+            const payload = response.payload as { invoceHtml: string };
+            setHtmlFromAPI(payload.invoceHtml);
+            setInvoiceId(invoice.voucher_number);
+            setHtml(true);
+          } else {
+            console.error("Failed to print invoice:", response.payload);
+          }
+        }
+        ).catch((error) => {
+          console.error("Error printing invoice:", error);
+        }
+        );
       }
-      ).catch((error) => {
-        console.error("Error printing invoice:", error);
-      }
-      );
+
     } else if (invoice.voucher_type === 'Receipt') {
       dispatch(printRecieptInvoices({
         vouchar_id: invoice._id,
@@ -654,10 +677,10 @@ const Invoices: React.FC = () => {
               navigate('/invoices/create/' + voucharTypeValue.toLowerCase());
             }
             if (voucharTypeValue === 'Payment') {
-              navigate('/invoices/payment');
+              navigate('/transaction/' + voucharTypeValue.toLowerCase());
             }
             if (voucharTypeValue === 'Receipt') {
-              navigate('/invoices/payment');
+              navigate('/transaction/' + voucharTypeValue.toLowerCase());
             }
 
             setPromptModal(false);
