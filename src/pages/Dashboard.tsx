@@ -40,9 +40,9 @@ export default function Dashboard(props: {
           component="main"
           sx={(theme:Theme) => ({
             flexGrow: 1,
-            backgroundColor: theme.palette.background.defaultChannel
-              ? `rgba(${theme.palette.background.defaultChannel} / 1)`
-              : alpha(theme.palette.background.default, 1),
+            // backgroundColor: theme.palette.background.defaultChannel
+            //   ? `rgba(${theme.palette.background.defaultChannel} / 1)`
+            //   : alpha(theme.palette.background.default, 1),
             overflow: "auto",
           })}
         >

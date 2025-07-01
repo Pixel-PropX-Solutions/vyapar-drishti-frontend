@@ -41,12 +41,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { viewAllCustomerWithType } from '@/services/customers';
 import { viewProductsWithId } from '@/services/products';
-import { createInvoice, createInvoiceWithGST } from '@/services/invoice';
+import { createInvoiceWithGST, updateInvoice, viewInvoice } from '@/services/invoice';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { TableRowProps } from "@mui/material";
 
 // Interfaces
 interface InvoiceItems {
+    _id: string;
     vouchar_id: string;
     item: string;
     item_id: string;
@@ -59,6 +60,7 @@ interface InvoiceItems {
 }
 
 interface InvoiceAccounting {
+    _id: string;
     vouchar_id: string;
     ledger: string;
     ledger_id: string;
@@ -109,9 +111,11 @@ const AnimatedTableRow = ({ children, ...props }: React.PropsWithChildren<TableR
         {children}
     </TableRow>
 );
+
+
 // Main Component
-export default function SalePurchaseInvoiceCreation() {
-    const { type } = useParams();
+export default function UpdateSalePurchase() {
+    const { type, voucher_id } = useParams();
     const [isLoading, setIsLoading] = useState(false);
     const [parties, setParties] = useState<{ id: string; name: string; }[]>([]);
     const [counterParties, setCounterParties] = useState<{ id: string; name: string; }[]>([]);
@@ -121,14 +125,16 @@ export default function SalePurchaseInvoiceCreation() {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const { currentCompany } = useSelector((state: RootState) => state.auth);
+    const { invoiceData } = useSelector((state: RootState) => state.invoice);
     const { user } = useSelector((state: RootState) => state.auth);
     const currentCompanyDetails = user?.company?.find((c: any) => c._id === user.user_settings.current_company_id);
 
     const [data, setData] = useState({
+        _id: '',
         company_id: "",
-        date: new Date().toISOString().split('T')[0],
+        date: '',
         voucher_type: "",
-        voucher_number: "INV-" + Date.now().toString().slice(-6),
+        voucher_number: "",
         party_name: "",
         party_id: "",
         counter_party: "",
@@ -204,79 +210,98 @@ export default function SalePurchaseInvoiceCreation() {
         e.preventDefault();
         setIsLoading(true);
 
-        if (currentCompanyDetails?.company_settings?.features?.enable_gst) {
-            const dataToSend = {
-                ...data,
-                company_id: currentCompany?._id || '',
-                voucher_type_id: '',
-                party_name_id: '',
-                items: data.items.map(item => ({
-                    ...item,
-                    vouchar_id: '',
-                    gst_rate: item.gst?.toString() || '0',
-                    gst_amount: item.gst_amount || 0,
-                    additional_amount: 0,
-                    discount_amount: 0,
-                    godown: '',
-                    godown_id: '',
-                    order_number: '',
-                    order_due_date: '',
-                    hsn_code: itemsList.find((p) => p.id === item.item_id)?.hsn_code || '',
+        // if (currentCompanyDetails?.company_settings?.features?.enable_gst) {
+        //     const dataToSend = {
+        //         ...data,
+        //         company_id: currentCompany?._id || '',
+        //         voucher_type_id: '',
+        //         party_name_id: '',
+        //         items: data.items.map(item => ({
+        //             ...item,
+        //             vouchar_id: '',
+        //             gst_rate: item.gst?.toString() || '0',
+        //             gst_amount: item.gst_amount || 0,
+        //             additional_amount: 0,
+        //             discount_amount: 0,
+        //             godown: '',
+        //             godown_id: '',
+        //             order_number: '',
+        //             order_due_date: '',
+        //             hsn_code: itemsList.find((p) => p.id === item.item_id)?.hsn_code || '',
+        //         })),
+        //         accounting: [
+        //             {
+        //                 vouchar_id: '',
+        //                 ledger: data.party_name,
+        //                 ledger_id: data.party_id,
+        //                 amount: type === 'sales' ? -Number(grandTotal) : Number(grandTotal),
+        //             },
+        //             {
+        //                 vouchar_id: '',
+        //                 ledger: data.counter_party,
+        //                 ledger_id: data.counter_id,
+        //                 amount: type === 'sales' ? Number(grandTotal) : -Number(grandTotal),
+        //             }
+        //         ],
+        //     }
+
+
+
+        //     dispatch(createInvoiceWithGST(dataToSend)).then(() => {
+        //         setIsLoading(false);
+        //         navigate('/invoices', { replace: true });
+        //     })
+        // }
+        // else {
+        const dataToSend = {
+            vouchar_id: data._id || '',
+            user_id: user._id,
+            company_id: currentCompany?._id || '',
+            date: data.date,
+            voucher_type: data.voucher_type,
+            voucher_type_id: data.voucher_type,
+            voucher_number: data.voucher_number,
+            party_name: data.party_name,
+            party_name_id: data.party_id,
+            narration: data.narration || '',
+            reference_number: data.reference_number || '',
+            reference_date: data.reference_date || '',
+            place_of_supply: data.place_of_supply || '',
+            accounting:
+                data.accounting.map(acc => ({
+                    entry_id: acc._id,
+                    vouchar_id: data._id,
+                    ledger: acc.ledger,
+                    ledger_id: acc.ledger_id,
+                    amount: type === 'purchase' ?
+                        acc.ledger === data.party_name ? Number(grandTotal) : -Number(grandTotal)
+                        : acc.ledger === data.counter_party ? -Number(grandTotal) : Number(grandTotal),
                 })),
-                accounting: [
-                    {
-                        vouchar_id: '',
-                        ledger: data.party_name,
-                        ledger_id: data.party_id,
-                        amount: type === 'sales' ? -Number(grandTotal) : Number(grandTotal),
-                    },
-                    {
-                        vouchar_id: '',
-                        ledger: data.counter_party,
-                        ledger_id: data.counter_id,
-                        amount: type === 'sales' ? Number(grandTotal) : -Number(grandTotal),
-                    }
-                ],
-            }
 
+            items: data.items.map(item => ({
+                entry_id: item._id,
+                vouchar_id: data._id,
+                item: item.item,
+                item_id: item.item_id,
+                quantity: item.quantity,
+                rate: item.rate,
+                amount: item.amount,
+                additional_amount: 0,
+                discount_amount: 0,
+                godown: '',
+                godown_id: '',
+                order_number: '',
+                order_due_date: '',
+            })),
 
-
-            dispatch(createInvoiceWithGST(dataToSend)).then(() => {
-                setIsLoading(false);
-                navigate('/invoices', { replace: true });
-            })
         }
-        else {
-            const dataToSend = {
-                ...data,
-                company_id: currentCompany?._id || '',
-                voucher_type_id: '',
-                party_name_id: '',
-                items: data.items.map(item => ({
-                    ...item,
-                    vouchar_id: '',
-                })),
-                accounting: [
-                    {
-                        vouchar_id: '',
-                        ledger: data.party_name,
-                        ledger_id: data.party_id,
-                        amount: type === 'sales' ? -Number(grandTotal) : Number(grandTotal),
-                    },
-                    {
-                        vouchar_id: '',
-                        ledger: data.counter_party,
-                        ledger_id: data.counter_id,
-                        amount: type === 'sales' ? Number(grandTotal) : -Number(grandTotal),
-                    }
-                ],
-            }
 
-            dispatch(createInvoice(dataToSend)).then(() => {
-                setIsLoading(false);
-                navigate('/invoices', { replace: true });
-            })
-        }
+
+        dispatch(updateInvoice(dataToSend)).then(() => {
+            setIsLoading(false);
+            navigate('/invoices', { replace: true });
+        })
+        // }
 
     };
 
@@ -335,6 +360,44 @@ export default function SalePurchaseInvoiceCreation() {
         });
     }, [dispatch, type, user.user_settings.current_company_id, user]);
 
+    useEffect(() => {
+        dispatch(viewInvoice({
+            vouchar_id: voucher_id || '',
+            company_id: currentCompany?._id || '',
+        }));
+    }, [dispatch, currentCompany?._id, voucher_id]);
+
+    useEffect(() => {
+        if (invoiceData) {
+            setData({
+                _id: invoiceData._id,
+                company_id: invoiceData.company_id,
+                date: invoiceData.date,
+                voucher_type: invoiceData.voucher_type,
+                voucher_number: invoiceData.voucher_number,
+                party_name: invoiceData.party_name,
+                party_id: invoiceData.accounting_entries.find(entry => entry.ledger === invoiceData.party_name)?.ledger_id || '',
+                counter_party: invoiceData.accounting_entries.find(entry => entry.ledger !== invoiceData.party_name)?.ledger || '',
+                counter_id: invoiceData.accounting_entries.find(entry => entry.ledger !== invoiceData.party_name)?.ledger_id || '',
+                narration: invoiceData.narration || '',
+                reference_number: invoiceData.reference_number || '',
+                reference_date: invoiceData.reference_date || '',
+                place_of_supply: invoiceData.place_of_supply || '',
+                accounting: invoiceData.accounting_entries || [],
+                items: invoiceData.inventory.map((item) => ({
+                    _id: item._id || '',
+                    vouchar_id: item.vouchar_id || '',
+                    item: item.item || '',
+                    item_id: item.item_id || '',
+                    quantity: item.quantity || 1,
+                    rate: item.rate || 0.0,
+                    amount: item.amount || 0.0,
+                })),
+            });
+
+
+        }
+    }, [invoiceData]);
 
     return (
         <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -555,12 +618,14 @@ export default function SalePurchaseInvoiceCreation() {
                                                         onChange={(_, newValue) => {
                                                             if (newValue && typeof newValue === 'object') {
                                                                 handleItemChange(index, 'item', newValue.name);
-                                                                handleItemChange(index, 'item_id', newValue.id);
+                                                                handleItemChange(index, 'item_id', newValue.id); 
+                                                                handleItemChange(index, '_id', newValue.id); 
                                                                 if (currentCompanyDetails?.company_settings?.features?.enable_gst)
                                                                     handleItemChange(index, 'gst', newValue.gst);
                                                             } else {
                                                                 handleItemChange(index, 'item', '');
                                                                 handleItemChange(index, 'item_id', '');
+                                                                handleItemChange(index, '_id', '');
                                                             }
                                                         }}
                                                         renderInput={(params) => (
@@ -762,17 +827,18 @@ export default function SalePurchaseInvoiceCreation() {
                                                 <TableCell align="left">
                                                     {data.items.reduce((total, item) => total + (item.quantity || 0), 0)} items
                                                 </TableCell>
+
                                                 <TableCell align="left">
                                                     &#8377; {data.items.reduce((total, item) => total + (item.rate || 0), 0).toFixed(2)}
                                                 </TableCell>
-                                                {currentCompanyDetails?.company_settings?.features?.enable_gst && (
-                                                    <>
+                                                {currentCompanyDetails?.company_settings?.features?.enable_gst &&
+                                                    (<>
                                                         <TableCell align="center"></TableCell>
                                                         <TableCell align="center">
                                                             &#8377; {data.items.reduce((total, item) => total + (item.gst_amount || 0), 0).toFixed(2)}
-                                                        </TableCell>
-                                                    </>
-                                                )}
+                                                        </TableCell></>
+                                                    )}
+
                                                 <TableCell align="center">
                                                     &#8377; {data.items.reduce((total, item) => total + (item.amount || 0), 0).toFixed(2)}
                                                 </TableCell>

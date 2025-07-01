@@ -69,7 +69,7 @@ const Invoices: React.FC = () => {
   const { invoices, loading, pageMeta } = useSelector((state: RootState) => state.invoice);
   // const { accountingGroups } = useSelector((state: RootState) => state.accountingGroup);
   const { currentCompany, user } = useSelector((state: RootState) => state.auth);
-  const currentCompanyDetails = user?.company?.find((c :any)=> c._id === user.user_settings.current_company_id);
+  const currentCompanyDetails = user?.company?.find((c: any) => c._id === user.user_settings.current_company_id);
   const navigate = useNavigate();
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
@@ -591,8 +591,7 @@ const Invoices: React.FC = () => {
                     index={index + 1 + (page - 1) * rowsPerPage}
                     onView={() => handleViewInvoice(inv)}
                     onEdit={() => {
-                      setInvoice(inv);
-                      // setIsCustomerEditing(true);
+                      navigate(`/invoices/update/${inv.voucher_type.toLowerCase()}/${inv._id}`);
                     }}
                     onDelete={async () => {
                       // await deleteCustomer(cred._id);
@@ -607,10 +606,10 @@ const Invoices: React.FC = () => {
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                       <PeopleAlt sx={{ fontSize: '4rem', color: theme.palette.text.disabled }} />
                       <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 600 }}>
-                        No invoices found
+                        No invoices created today
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Try adjusting your search or filter criteria, or create your first invoice
+                        Try adjusting your search or filter criteria, or create your first invoice for today
                       </Typography>
                       <Button
                         variant="contained"

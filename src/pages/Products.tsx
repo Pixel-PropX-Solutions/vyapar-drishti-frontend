@@ -212,7 +212,7 @@ const ProductsListing: React.FC = () => {
   }, [productsData, pageMeta]);
 
   return (
-    <Box sx={{ p: 3, bgcolor: '#f8fafc', minHeight: '100vh', width: '100%' }}>
+    <Box sx={{ p: 3, minHeight: '100vh', width: '100%' }}>
       <Paper
         elevation={0}
         sx={{

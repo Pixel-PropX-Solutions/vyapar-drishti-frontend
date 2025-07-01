@@ -311,6 +311,7 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
 
     useEffect(() => {
         if (open && company) {
+            console.log("Company Fetch Details", company)
             setData({
                 pinCode: company.pinCode || '',
                 state: company.state || '',

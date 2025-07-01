@@ -34,12 +34,10 @@ export const viewInventrory = createAsyncThunk(
 
 
 export const getStockMovement = createAsyncThunk(
-  "view/stockMovement",
+  "view/timeline",
   async (
     {
       search,
-      category,
-      state,
       movement_type,
       page_no,
       limit,
@@ -49,8 +47,6 @@ export const getStockMovement = createAsyncThunk(
       sortOrder
     }: {
       search: string;
-      category: string;
-      state: string;
       startDate: string;
       endDate: string;
       movement_type: string;
@@ -63,9 +59,9 @@ export const getStockMovement = createAsyncThunk(
   ) => {
     try {
       const response = await userApi.get(
-        `stock_movement/?search=${search}&category=${category === 'All-Categories' ? '' : category}&state=${state}&startDate=${startDate}&endDate=${endDate}&movement_type=${movement_type}&page_no=${page_no}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"}`
+        `/user/get/timeline?${search ? `search=${search}&` : ''}${movement_type ? `type=${movement_type}&` : ''}${startDate ? `start_date=${startDate}&` : ''}${endDate ? `end_date=${endDate}&` : ''}page_no=${page_no}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"}`
       );
-      // console.log("getStockMovement response", response.data);
+      console.log("getStockMovement response", response.data);
 
       if (response.data.success === true) {
         const stockMovement = response.data.data.docs;

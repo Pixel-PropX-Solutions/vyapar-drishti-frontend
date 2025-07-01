@@ -22,6 +22,8 @@ import {
     TableSortLabel,
     Tab,
     Tabs,
+    Card,
+    CardContent,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
@@ -208,169 +210,70 @@ const GroupAndTypes: React.FC = () => {
 
 
     return (
-        <Box sx={{ p: 3, bgcolor: '#f8fafc', minHeight: '100vh', width: '100%' }}>
-            <Paper
-                elevation={0}
-                sx={{
-                    px: 4,
-                    py: 2,
-                    mb: 2,
-                    borderRadius: 1,
-                    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                    color: 'white',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        width: '2px',
-                        height: '2px',
-                        background: `radial-gradient(circle, ${alpha('#fff', 0.1)} 0%, transparent 70%)`,
-                    }
-                }}
-            >
-                <Grid container spacing={3} alignItems="center">
-                    <Grid item xs={12} md={8}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                            <InventoryIcon sx={{ fontSize: '2rem', mr: 2 }} />
-                            <Typography variant="h3" sx={{ fontWeight: 700 }}>
-                                Groups & Types
-                            </Typography>
-                        </Box>
-
-                        <Tabs
-                            value={selectedTab}
-                            onChange={handleTabChange}
-                            aria-label="dashboard tabs"
-                            sx={{ mb: 1 }}
-                            TabIndicatorProps={{
-                                sx: {
-                                    display: 'none',
-                                }
-                            }}
-                        >
-                            <Tab
-                                label={`Customer Groups`}
-                                sx={{
-                                    ...(selectedTab === 0 && {
-                                        bgcolor: 'white',
-                                        color: theme.palette.primary.main,
-                                        textTransform: 'none',
-                                        fontWeight: 600,
-                                        borderRadius: 1,
-                                    }),
-                                    textTransform: 'none',
-                                    fontWeight: 600,
-                                    borderRadius: 1,
+        <Box sx={{ p: 3, minHeight: '100vh', width: '100%' }}>
+            <Card sx={{ mb: 3, p: 2, boxShadow: '0 2px 4px rgba(0,0,0,0.05)', borderRadius: '8px' }}>
+                <CardContent>
+                    <Grid container spacing={2} alignItems="center">
+                        <Grid item xs={12} md={8}>
+                            <Box>
+                                <Typography variant="h5" component="h1" fontWeight="700" color="text.primary">
+                                    Groups & Types Overview
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                    Manage your groups and types effectively.
+                                </Typography>
+                            </Box>
+                            <Tabs
+                                value={selectedTab}
+                                onChange={handleTabChange}
+                                aria-label="dashboard tabs"
+                                sx={{ mt: 1 }}
+                            >
+                                <Tab label="Customer Groups" />
+                                <Tab label="Invoice Groups" />
+                                <Tab label="Items Groups" />
+                            </Tabs>
+                        </Grid>
+                        <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
+                            {selectedTab !== 1 && <Button
+                                variant="contained"
+                                color="primary"
+                                startIcon={<AddCircleIcon fontSize="large" />}
+                                onClick={() => {
+                                    if (selectedTab === 0) {
+                                        setOpenCustomerGroupModal(true);
+                                        setSelectedCustomerGroup(null);
+                                    }
+                                    else if (selectedTab === 1) {
+                                        // console.log("Add New Invoice Group");
+                                    }
+                                    else if (selectedTab === 2) {
+                                        setOpenInventoryGroupModal(true);
+                                        setSelectedInventoryGroup(null);
+                                    }
                                 }}
-                            />
-                            <Tab
-                                label="Invoice Groups"
                                 sx={{
-                                    ...(selectedTab === 1 && {
-                                        bgcolor: 'white',
-                                        color: theme.palette.primary.main,
-                                        textTransform: 'none',
-                                        fontWeight: 600,
-                                        borderRadius: 1,
-                                        mx: 1
-                                    }),
-                                    textTransform: 'none',
-                                    fontWeight: 600,
-                                    borderRadius: 1,
-                                    mx: 1
+                                    width: "max-content",
                                 }}
-                            />
-                            <Tab
-                                label="Items Groups"
-                                sx={{
-                                    ...(selectedTab === 2 && {
-                                        bgcolor: 'white',
-                                        color: theme.palette.primary.main,
-                                        textTransform: 'none',
-                                        fontWeight: 600,
-                                        borderRadius: 1,
-                                        mx: 1
-                                    }),
-                                    textTransform: 'none',
-                                    fontWeight: 600,
-                                    borderRadius: 1,
-                                    mx: 1
-                                }}
-                            />
-                            {/* <Tab
-                                label="Units Groups"
-                                sx={{
-                                    ...(selectedTab === 3 && {
-                                        bgcolor: 'white',
-                                        color: theme.palette.primary.main,
-                                        textTransform: 'none',
-                                        fontWeight: 600,
-                                        borderRadius: 1,
-                                        mx: 1
-                                    }),
-                                    textTransform: 'none',
-                                    fontWeight: 600,
-                                    borderRadius: 1,
-                                    mx: 1
-                                }}
-                            /> */}
-                        </Tabs>
+                            >
+                                {selectedTab === 0 && "Add New Customer Group"}
+                                {selectedTab === 1 && "Add New Invoice Group"}
+                                {selectedTab === 2 && "Add New Items Group"}
+                            </Button>}
+                        </Grid>
                     </Grid>
 
-                    <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
-                        {selectedTab !== 1 && <Button
-                            variant="contained"
-                            size="large"
-                            onClick={() => {
-                                if (selectedTab === 0) {
-                                    setOpenCustomerGroupModal(true);
-                                    setSelectedCustomerGroup(null);
-                                }
-                                else if (selectedTab === 1) {
-                                    // console.log("Add New Invoice Group");
-                                }
-                                else if (selectedTab === 2) {
-                                    setOpenInventoryGroupModal(true);
-                                    setSelectedInventoryGroup(null);
-                                }
-                            }}
-                            startIcon={<AddCircleIcon />}
-                            sx={{
-                                bgcolor: 'white',
-                                color: theme.palette.primary.main,
-                                textTransform: 'none',
-                                borderRadius: 1,
-                                px: 4,
-                                py: 1.5,
-                                fontSize: '1rem',
-                                fontWeight: 600,
-                                boxShadow: `0 8px 25px ${alpha('#000', 0.15)}`,
-                                '&:hover': {
-                                    bgcolor: alpha('#fff', 0.95),
-                                    transform: 'translateY(-2px)',
-                                },
-                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                            }}
-                        >
-                            {selectedTab === 0 && "Add New Customer Group"}
-                            {selectedTab === 1 && "Add New Invoice Group"}
-                            {selectedTab === 2 && "Add New Items Group"}
-                        </Button>}
-                    </Grid>
-                </Grid>
-            </Paper>
 
+                </CardContent>
+            </Card>
             {/* Enhanced Search and Filters */}
             <Paper
                 elevation={0}
                 sx={{
-                    p: 3,
-                    mb: 3,
+                    p: 1,
+                    mb: 1,
                     borderRadius: 1,
-                    border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                    border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
                     boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
                 }}
             >
@@ -498,7 +401,10 @@ const GroupAndTypes: React.FC = () => {
                                     width: '100%',
                                     '& .MuiTableCell-head': {
                                         borderBottom: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-                                    }
+                                    },
+                                    "& .MuiTableCell-root": {
+                                        padding: '8px 16px',
+                                    },
                                 }}
                             >
                                 <TableCell sx={{ pl: 3, pr: 1 }}>
@@ -514,7 +420,7 @@ const GroupAndTypes: React.FC = () => {
                                                 }));
                                             }}
                                         >
-                                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary }}>
                                                 Group Information
                                             </Typography>
                                         </TableSortLabel>
@@ -535,7 +441,7 @@ const GroupAndTypes: React.FC = () => {
                                         >
                                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
                                                 {/* <InventoryIcon fontSize="small" /> */}
-                                                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                                                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary }}>
                                                     Under Group
                                                 </Typography>
                                             </Box>
@@ -580,7 +486,7 @@ const GroupAndTypes: React.FC = () => {
                                         </TableSortLabel>
                                     </Tooltip>
                                 </TableCell> */}
-                                <TableCell align="right" sx={{ px: 1 }}>
+                                <TableCell align="right" >
                                     <Tooltip title="Sort by Purchase Price" arrow>
                                         <TableSortLabel
                                             active={sortBy === "purchase_price"}
@@ -593,14 +499,14 @@ const GroupAndTypes: React.FC = () => {
                                                 }));
                                             }}
                                         >
-                                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary }}>
                                                 Created on
                                             </Typography>
                                         </TableSortLabel>
                                     </Tooltip>
                                 </TableCell>
                                 <TableCell align="center" >
-                                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary }}>
                                         Actions
                                     </Typography>
                                 </TableCell>
@@ -732,7 +638,10 @@ const GroupAndTypes: React.FC = () => {
                                     width: '100%',
                                     '& .MuiTableCell-head': {
                                         borderBottom: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-                                    }
+                                    },
+                                    "& .MuiTableCell-root": {
+                                        padding: '8px 16px',
+                                    },
                                 }}
                             >
                                 <TableCell sx={{ pl: 3, pr: 1 }}>
@@ -748,7 +657,7 @@ const GroupAndTypes: React.FC = () => {
                                                 }));
                                             }}
                                         >
-                                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary }}>
                                                 Group Information
                                             </Typography>
                                         </TableSortLabel>
@@ -769,7 +678,7 @@ const GroupAndTypes: React.FC = () => {
                                         >
                                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
                                                 {/* <InventoryIcon fontSize="small" /> */}
-                                                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                                                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary }}>
                                                     Under Group
                                                 </Typography>
                                             </Box>
@@ -827,14 +736,14 @@ const GroupAndTypes: React.FC = () => {
                                                 }));
                                             }}
                                         >
-                                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary }}>
                                                 Created on
                                             </Typography>
                                         </TableSortLabel>
                                     </Tooltip>
                                 </TableCell>
                                 <TableCell align="center" >
-                                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary }}>
                                         Actions
                                     </Typography>
                                 </TableCell>
@@ -899,10 +808,10 @@ const GroupAndTypes: React.FC = () => {
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
-                    p: 3,
-                    mt: 3,
+                    p: 1,
+                    mt: 1,
                     borderRadius: 1,
-                    border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                    border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
                     boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
                 }}
             >

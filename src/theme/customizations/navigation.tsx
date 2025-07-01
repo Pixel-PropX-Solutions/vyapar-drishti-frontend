@@ -184,7 +184,6 @@ export const navigationCustomizations: Components<Theme> = {
     styleOverrides: {
       root: ({ theme }) => ({
         padding: '6px 8px',
-        marginBottom: '8px',
         textTransform: 'none',
         minWidth: 'fit-content',
         minHeight: 'fit-content',
@@ -199,6 +198,7 @@ export const navigationCustomizations: Components<Theme> = {
         },
         [`&.${tabClasses.selected}`]: {
           color: gray[900],
+          fontWeight: 600,
         },
         ...theme.applyStyles('dark', {
           ':hover': {

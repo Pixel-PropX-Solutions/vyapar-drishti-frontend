@@ -52,7 +52,7 @@ const Timeline: React.FC = () => {
         sortOrder: "desc" as SortOrder,
     });
 
-    const { search, category, state, movement_type, page_no, limit, startDate, endDate, sortField, sortOrder } =
+    const { search, movement_type, page_no, limit, startDate, endDate, sortField, sortOrder } =
         data;
 
     const handleSortRequest = (field: SortField) => {
@@ -102,8 +102,6 @@ const Timeline: React.FC = () => {
             dispatch(
                 getStockMovement({
                     search: search,
-                    category: category,
-                    state: state,
                     movement_type: movement_type == 'all' ? '' : movement_type,
                     page_no: page_no,
                     limit: limit,
@@ -116,7 +114,7 @@ const Timeline: React.FC = () => {
         };
 
         fetchMovement();
-    }, [category, dispatch, endDate, limit, movement_type, page_no, search, sortField, sortOrder, startDate, state]);
+    }, [dispatch, endDate, limit, movement_type, page_no, search, sortField, sortOrder, startDate]);
 
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -128,7 +126,7 @@ const Timeline: React.FC = () => {
                                 Inventory Timeline
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                Manage your pharmacy stock, orders, and inventory levels
+                                Manage your stock, orders, and inventory levels
                             </Typography>
                         </Grid>
                     </CardContent>
@@ -203,7 +201,7 @@ const Timeline: React.FC = () => {
                                 />
                             </Grid>
 
-                            <Grid item xs={12} sm={2}>
+                            {/* <Grid item xs={12} sm={2}>
                                 <TextField
                                     size='small'
                                     fullWidth
@@ -229,7 +227,7 @@ const Timeline: React.FC = () => {
                                         </MenuItem>
                                     ))}
                                 </TextField>
-                            </Grid>
+                            </Grid> */}
                             <Grid item xs={12} md={2}>
                                 <TextField
                                     select
@@ -285,40 +283,24 @@ const Timeline: React.FC = () => {
                                             direction={sortField === "product_name" ? sortOrder : "asc"}
                                             onClick={() => handleSortRequest("product_name")}
                                         >
-                                            Product Name / <br /> Product Description
+                                            Product Name
                                         </TableSortLabel>
                                     </Tooltip>
                                 </TableCell>
                                 <TableCell align="center" sx={{ fontWeight: '600', whiteSpace: 'nowrap' }}>
-                                    Stock In
+                                    Purchase
                                 </TableCell>
                                 <TableCell align="center" sx={{ fontWeight: '600', whiteSpace: 'nowrap' }}>
-                                    Stock Out
+                                    Sales
                                 </TableCell>
                                 <TableCell sx={{ fontWeight: '600', whiteSpace: 'nowrap' }}>
                                     Unit Price
                                 </TableCell>
                                 <TableCell sx={{ fontWeight: '600' }}>
-                                    <Tooltip title="Sort by Category" arrow>
-                                        <TableSortLabel
-                                            active={sortField === "category"}
-                                            direction={sortField === "category" ? sortOrder : "asc"}
-                                            onClick={() => handleSortRequest("category")}
-                                        >
-                                            Category
-                                        </TableSortLabel>
-                                    </Tooltip>
+                                    Invoice No.
                                 </TableCell>
                                 <TableCell sx={{ fontWeight: '600', whiteSpace: 'nowrap' }}>
-                                    <Tooltip title="Sort by State" arrow>
-                                        <TableSortLabel
-                                            active={sortField === "state"}
-                                            direction={sortField === "state" ? sortOrder : "asc"}
-                                            onClick={() => handleSortRequest("state")}
-                                        >
-                                            State / <br /> Storage Requirements
-                                        </TableSortLabel>
-                                    </Tooltip>
+                                    Party Name
                                 </TableCell>
                                 <TableCell sx={{ fontWeight: '600' }}>
                                     <Tooltip title="Sort by Date" arrow>
@@ -340,46 +322,31 @@ const Timeline: React.FC = () => {
                                     key={item?._id || `item-${Math.random()}`}
                                     sx={{
                                         '&:hover': { bgcolor: theme.palette.mode === 'dark' ? 'rgba(182, 185, 188, 0.15)' : '#f1f8ff', },
-                                        backgroundColor: item?.movement_type === "OUT" ? 'rgba(244, 67, 54, 0.1)' : 'rgba(76, 175, 80, 0.1)',
+                                        backgroundColor: item?.voucher_type === "Sales" ? 'rgba(244, 67, 54, 0.1)' : 'rgba(76, 175, 80, 0.1)',
                                     }}
                                 >
                                     <TableCell component="th" scope="row">
                                         <Typography variant="body2" fontWeight="500">
-                                            {(item?.productDetails?.product_name || 'Unnamed Product') +
-                                                ` (${item?.productDetails?.measure_of_unit || 'N/A'})`}
-                                        </Typography>
-                                        <Typography variant="caption" color="text.secondary">
-                                            {item?.productDetails?.description ?
-                                                (item.productDetails.description.length > 30 ?
-                                                    item.productDetails.description.substring(0, 30) + '...' :
-                                                    item.productDetails.description) :
-                                                'No description available'}
+                                            {(item?.item || 'Unnamed Product')}
                                         </Typography>
                                     </TableCell>
                                     <TableCell align="center" sx={{
-                                        backgroundColor: item?.movement_type === "IN" ? 'rgba(76, 175, 80, 0.1)' : 'transparent',
-                                        fontWeight: item?.movement_type === "IN" ? '600' : 'normal'
+                                        backgroundColor: item?.voucher_type === "Purchase" ? 'rgba(76, 175, 80, 0.1)' : 'transparent',
+                                        fontWeight: item?.voucher_type === "Purchase" ? '600' : 'normal'
                                     }}>
-                                        {item?.movement_type === "IN" && (item?.quantity || 0)}
+                                        {item?.voucher_type === "Purchase" && (item?.quantity || 0)}
                                     </TableCell>
                                     <TableCell align="center" sx={{
-                                        backgroundColor: item?.movement_type === "OUT" ? 'rgba(244, 67, 54, 0.1)' : 'transparent',
-                                        fontWeight: item?.movement_type === "OUT" ? '600' : 'normal'
+                                        backgroundColor: item?.voucher_type === "Sales" ? 'rgba(244, 67, 54, 0.1)' : 'transparent',
+                                        fontWeight: item?.voucher_type === "Sales" ? '600' : 'normal'
                                     }}>
-                                        {item?.movement_type === "OUT" && (item?.quantity || 0)}
+                                        {item?.voucher_type === "Sales" && (item?.quantity || 0)}
                                     </TableCell>
-                                    <TableCell sx={{ fontWeight: '500' }}>₹ {item?.unit_price || 0}</TableCell>
-                                    <TableCell>{item?.productDetails?.category || 'Uncategorized'}</TableCell>
+                                    <TableCell sx={{ fontWeight: '500' }}>₹ {item?.rate || 0}</TableCell>
+                                    <TableCell>{item?.voucher_number || 'N/A'}</TableCell>
                                     <TableCell>
                                         <Typography variant="body2" fontWeight="500">
-                                            {item?.productDetails?.state || 'N/A'}
-                                        </Typography>
-                                        <Typography variant="caption" color="text.secondary">
-                                            {item?.productDetails?.storage_requirement ?
-                                                (item.productDetails.storage_requirement.length > 30 ?
-                                                    item.productDetails.storage_requirement.substring(0, 30) + '...' :
-                                                    item.productDetails.storage_requirement) :
-                                                'No storage requirements specified'}
+                                            {item?.party_name || 'N/A'}
                                         </Typography>
                                     </TableCell>
                                     <TableCell>
@@ -430,7 +397,7 @@ const Timeline: React.FC = () => {
                         {`Showing ${(pageMeta?.page - 1) * limit + 1}-${Math.min(
                             pageMeta?.page * limit,
                             pageMeta?.total
-                        )} of ${pageMeta?.total} chemists`}
+                        )} of ${pageMeta?.total} items`}
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         <TextField

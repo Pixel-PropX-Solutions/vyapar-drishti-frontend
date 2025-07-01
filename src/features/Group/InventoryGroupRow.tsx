@@ -82,6 +82,9 @@ export const InventoryGroupsRow: React.FC<ProductRowProps> = ({ inventoryGroup, 
                         "&:hover": {
                             bgcolor: alpha(theme.palette.primary.main, 0.02),
                         },
+                        "& .MuiTableCell-root": {
+                            padding: '8px 16px',
+                        },
                         borderLeft: `4px solid ${isHovered ? theme.palette.primary.main : 'transparent'}`,
                     }}
                     onClick={() => onView(inventoryGroup)}
@@ -91,8 +94,8 @@ export const InventoryGroupsRow: React.FC<ProductRowProps> = ({ inventoryGroup, 
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
                             <Avatar
                                 sx={{
-                                    width: 48,
-                                    height: 48,
+                                    width: 36,
+                                    height: 36,
                                     mr: 2,
                                     bgcolor: getAvatarColor(inventoryGroup.inventory_group_name),
                                     fontSize: '1rem',
@@ -107,10 +110,10 @@ export const InventoryGroupsRow: React.FC<ProductRowProps> = ({ inventoryGroup, 
                             </Avatar>
                             <Box sx={{ flex: 1 }}>
                                 <Typography
-                                    variant="subtitle1"
+                                    variant="body1"
                                     sx={{
                                         fontWeight: 600,
-                                        fontSize: '0.95rem',
+                                        // fontSize: '0.95rem',
                                         color: theme.palette.text.primary,
                                         // mb: 0.5,
                                         transition: 'color 0.3s ease',
@@ -136,10 +139,10 @@ export const InventoryGroupsRow: React.FC<ProductRowProps> = ({ inventoryGroup, 
                     <TableCell align="center" sx={{ px: 1 }}>
                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
                             <Typography
-                                variant="h6"
+                                variant="body1"
                                 sx={{
                                     fontWeight: 700,
-                                    fontSize: '1.1rem',
+                                    // fontSize: '1.1rem',
                                     color: theme.palette.text.primary,
                                 }}
                             >
@@ -186,10 +189,10 @@ export const InventoryGroupsRow: React.FC<ProductRowProps> = ({ inventoryGroup, 
                     <TableCell align="right" sx={{ px: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
                             <Typography
-                                variant="h6"
+                                variant="body1"
                                 sx={{
                                     fontWeight: 600,
-                                    fontSize: '1rem',
+                                    // fontSize: '1rem',
                                     color: theme.palette.text.primary,
                                 }}
                             >
@@ -199,10 +202,10 @@ export const InventoryGroupsRow: React.FC<ProductRowProps> = ({ inventoryGroup, 
                     </TableCell>
 
                     {/* Actions */}
-                    <TableCell align="right" sx={{ pr: 3, pl: 1 }}>
+                    <TableCell align="center" >
                         <Zoom in={isHovered} timeout={200}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'flex-end' }}>
-                                <Tooltip title="View Details" arrow>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'center' }}>
+                                {/* <Tooltip title="View Details" arrow>
                                     <IconButton
                                         size="small"
                                         onClick={(e) => {
@@ -221,7 +224,7 @@ export const InventoryGroupsRow: React.FC<ProductRowProps> = ({ inventoryGroup, 
                                     >
                                         <VisibilityIcon fontSize="small" />
                                     </IconButton>
-                                </Tooltip>
+                                </Tooltip> */}
 
                                 <Tooltip title="Edit Product" arrow>
                                     <IconButton

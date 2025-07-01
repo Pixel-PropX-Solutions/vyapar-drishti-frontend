@@ -1,5 +1,5 @@
 import userApi from "@/api/api";
-import { CreateInvoiceData, CreateInvoiceWithGSTData } from "@/utils/types";
+import { CreateInvoiceData, CreateInvoiceWithGSTData, UpdateInvoice } from "@/utils/types";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 
@@ -100,6 +100,63 @@ export const viewAllInvoices = createAsyncThunk(
 );
 
 
+export const viewInvoice = createAsyncThunk(
+    "view/invoices",
+    async (
+        {
+            vouchar_id,
+            company_id,
+        }: {
+            vouchar_id: string;
+            company_id: string;
+        },
+        { rejectWithValue }
+    ) => {
+        try {
+            const response = await userApi.get(
+                `/user/get/vouchar/${vouchar_id}?company_id=${company_id}`
+            );
+
+            console.log("viewInvoice response", response.data);
+
+            if (response.data.success === true) {
+                const invoiceData = response.data.data;
+                return { invoiceData };
+            } else return rejectWithValue("Login Failed: No access token recieved.");
+        } catch (error: any) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Login failed: Invalid credentials or server error."
+            );
+        }
+    }
+);
+
+export const updateInvoice = createAsyncThunk(
+    "update/invoice/vouchar",
+    async (
+        data: UpdateInvoice,
+        { rejectWithValue }
+    ) => {
+        try {
+
+            console.log("updateInvoice data", data);
+            const updateRes = await userApi.put(`/user/update/vouchar/${data.vouchar_id}`, data);
+            console.log("updateInvoice response", updateRes);
+            if (updateRes.data.success === true) {
+                return;
+            } else {
+                return rejectWithValue("Invoice update failed");
+            }
+        } catch (error: any) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Upload or creation failed: Invalid input or server error."
+            );
+        }
+    }
+);
+
 export const printInvoices = createAsyncThunk(
     "print/invoices",
     async (
@@ -122,7 +179,7 @@ export const printInvoices = createAsyncThunk(
 
             if (response.data.success === true) {
                 const invoceHtml = response.data.data;
-                return {invoceHtml};
+                return { invoceHtml };
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
             return rejectWithValue(
@@ -155,7 +212,7 @@ export const printGSTInvoices = createAsyncThunk(
 
             if (response.data.success === true) {
                 const invoceHtml = response.data.data;
-                return {invoceHtml};
+                return { invoceHtml };
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
             return rejectWithValue(
@@ -188,7 +245,7 @@ export const printRecieptInvoices = createAsyncThunk(
 
             if (response.data.success === true) {
                 const invoceHtml = response.data.data;
-                return {invoceHtml};
+                return { invoceHtml };
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
             return rejectWithValue(
@@ -222,7 +279,7 @@ export const printPaymentInvoices = createAsyncThunk(
 
             if (response.data.success === true) {
                 const invoceHtml = response.data.data;
-                return {invoceHtml};
+                return { invoceHtml };
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
             return rejectWithValue(

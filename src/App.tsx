@@ -40,6 +40,7 @@ import CreateInvoice from "./components/Invoice/createInvoice";
 import GroupAndTypes from "./pages/GroupAndTypes";
 import SalePurchaseInvoiceCreation from "./components/Invoice/SalePurchaseInvoiceCreation";
 import PaymentReceiptInvoice from "./components/Invoice/PaymentReceiptInvoice";
+import UpdateSalePurchase from "./components/Invoice/UpdateSalePurchase";
 // import PromptModal from "./common/PromptModal";
 
 const xThemeComponents = {
@@ -165,6 +166,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/invoices/create" element={<CreateInvoice />} />
                 <Route path="/transaction/:type" element={<PaymentReceiptInvoice />} />
                 <Route path="/invoices/create/:type" element={<SalePurchaseInvoiceCreation />} />
+                <Route path="/invoices/update/:type/:voucher_id" element={<UpdateSalePurchase />} />
                 {/* <Route path="/*" element={<Navigate to="/" replace />} /> */}
               </Route>
             )}

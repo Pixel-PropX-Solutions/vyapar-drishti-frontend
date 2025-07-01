@@ -260,6 +260,44 @@ export interface CreateInvoiceData {
   }>
 }
 
+export interface UpdateInvoice {
+  vouchar_id: string,
+  user_id: string,
+  company_id: string,
+  date: string,
+  voucher_type: string,
+  voucher_type_id: string,
+  voucher_number: string,
+  party_name: string,
+  party_name_id: string,
+  narration: string,
+  reference_number: string,
+  reference_date: string,
+  place_of_supply: string,
+  accounting: Array<{
+    entry_id: string,
+    vouchar_id: string,
+    ledger: string,
+    ledger_id: string,
+    amount: number
+  }>,
+  items: Array<{
+    entry_id: string,
+    vouchar_id: string,
+    item: string,
+    item_id: string,
+    quantity: number,
+    rate: number,
+    amount: number,
+    additional_amount: number,
+    discount_amount: number,
+    godown: string,
+    godown_id: string,
+    order_number: string,
+    order_due_date: string
+  }>
+}
+
 export interface CreateInvoiceWithGSTData {
   company_id: string,
   date: string,
@@ -296,6 +334,7 @@ export interface CreateInvoiceWithGSTData {
     gst_amount: number;
   }>
 }
+
 export interface UserData {
   _id: string;
   name: Name;
@@ -406,6 +445,12 @@ export interface GetCompany {
   website: string,
   created_at: string,
   updated_at: string,
+  bank_name?: string,
+  bank_ifsc?: string,
+  bank_branch?: string,
+  account_holder?: string,
+  account_number?: string,
+  qr_code_url?: string
 }
 
 export interface SetCompany {
@@ -522,6 +567,58 @@ export interface ProductUpdate {
 
   low_stock_alert?: number;
 }
+
+export interface GetInvoiceData {
+  _id: string,
+  company_id: string,
+  user_id: string,
+  date: string,
+  voucher_number: string,
+  voucher_type: string,
+  voucher_type_id: string,
+  narration: string,
+  party_name: string,
+  party_name_id: string,
+  reference_date: string,
+  reference_number: string,
+  place_of_supply: string,
+  is_invoice: number,
+  is_accounting_voucher: number,
+  is_inventory_voucher: number,
+  is_order_voucher: number,
+  created_at: string,
+  updated_at: string,
+  inventory: [
+    {
+      _id: string,
+      vouchar_id: string,
+      item: string,
+      item_id: string,
+      quantity: number,
+      rate: number,
+      amount: number,
+      additional_amount: number,
+      discount_amount: number,
+      godown: string,
+      godown_id: string,
+      order_number: string | null,
+      order_due_date: string | null,
+      created_at: string,
+      updated_at: string
+    }
+  ],
+  accounting_entries: [
+    {
+      _id: string,
+      vouchar_id: string,
+      ledger: string,
+      ledger_id: string,
+      amount: number,
+      created_at: string,
+      updated_at: string
+    },
+  ]
+};
 
 export interface GetProduct {
   _id: string;
@@ -877,12 +974,28 @@ export interface SaleProduct {
 
 export interface StockMovement {
   _id: string,
-  product_id: string,
+  user_id: string,
+  company_id: string,
+  vouchar_id: string,
+  voucher_number: string,
+  voucher_type: string,
+  item: string,
+  item_id: string,
   quantity: number,
-  movement_type: string,
-  unit_price: number,
+  rate: number,
+  amount: number,
+  additional_amount: number,
+  discount_amount: number,
+  godown: string,
+  godown_id: string,
+  order_number: string,
+  order_due_date: string,
+  date: string,
+  narration: string,
+  party_name: string,
+  place_of_supply: string,
   created_at: string,
-  productDetails: SaleProduct
+  updated_at: string,
 }
 
 export interface WareHouseProduct {
