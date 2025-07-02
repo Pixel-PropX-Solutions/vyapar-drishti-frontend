@@ -8,7 +8,6 @@ import {
   InputAdornment,
   MenuItem,
   Pagination,
-  useMediaQuery,
   useTheme,
   Tooltip,
   alpha,
@@ -19,7 +18,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Divider,
   TableSortLabel,
   Tab,
   Tabs,
@@ -49,7 +47,6 @@ const ProductsListing: React.FC = () => {
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { productsData, pageMeta } = useSelector((state: RootState) => state.product);
   const { categoryLists, categories } = useSelector((state: RootState) => state.category);
   const [products, setProducts] = useState<GetProduct[]>([]);

@@ -41,7 +41,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { viewAllCustomerWithType } from '@/services/customers';
 import { viewProductsWithId } from '@/services/products';
-import { createInvoiceWithGST, updateInvoice, viewInvoice } from '@/services/invoice';
+import { updateInvoice, viewInvoice } from '@/services/invoice';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { TableRowProps } from "@mui/material";
 
@@ -150,6 +150,7 @@ export default function UpdateSalePurchase() {
 
     const handleAddItem = () => {
         const newItem: InvoiceItems = {
+            _id: '',
             vouchar_id: '',
             item: '',
             item_id: '',

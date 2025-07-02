@@ -21,7 +21,6 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import { GetInventoryGroups } from "@/utils/types";
 import { viewProduct } from "@/services/products";
 import { useDispatch, useSelector } from "react-redux";
