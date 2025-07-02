@@ -23,6 +23,8 @@ import {
   TableSortLabel,
   Tab,
   Tabs,
+  Card,
+  CardContent,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
@@ -213,247 +215,174 @@ const ProductsListing: React.FC = () => {
 
   return (
     <Box sx={{ p: 3, minHeight: '100vh', width: '100%' }}>
-      <Paper
-        elevation={0}
-        sx={{
-          px: 4,
-          py: 2,
-          mb: 2,
-          borderRadius: 1,
-          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-          color: 'white',
-          position: 'relative',
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            width: '2px',
-            height: '2px',
-            background: `radial-gradient(circle, ${alpha('#fff', 0.1)} 0%, transparent 70%)`,
-          }
-        }}
-      >
-        <Grid container spacing={3} alignItems="center">
-          <Grid item xs={12} md={8}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <InventoryIcon sx={{ fontSize: '2rem', mr: 2 }} />
-              <Typography variant="h3" sx={{ fontWeight: 700 }}>
-                Product Inventory
-              </Typography>
-            </Box>
-            <Tabs
-              value={selectedTab}
-              onChange={handleTabChange}
-              aria-label="dashboard tabs"
-              sx={{ mb: 1 }}
-              TabIndicatorProps={{
-                sx: {
-                  display: 'none',
-                }
-              }}
-            >
-              <Tab
-                label={`Items (${products.length})`}
-                sx={{
-                  ...(selectedTab === 0 && {
-                    bgcolor: 'white',
-                    color: theme.palette.primary.main,
-                    textTransform: 'none',
-                    fontWeight: 600,
-                    borderRadius: 1,
-                  }),
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  borderRadius: 1,
+      {/* Header Section */}
+      <Card sx={{ mb: 3, p: 2, boxShadow: '0 2px 4px rgba(0,0,0,0.05)', borderRadius: '8px' }}>
+        <CardContent>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} md={8}>
+              <Box>
+                <Typography variant="h5" component="h1" fontWeight="700" color="text.primary">
+                  {selectedTab === 0 ? 'Products' : 'Categories'}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {selectedTab === 0
+                    ? 'Manage your product inventory, add new items, and track stock levels.'
+                    : 'Organize your products into categories for better management and navigation.'}
+                </Typography>
+              </Box>
+              <Tabs
+                value={selectedTab}
+                onChange={handleTabChange}
+                aria-label="dashboard tabs"
+                sx={{ mt: 1 }}
+              >
+                <Tab label="Products" />
+                <Tab label="Categories" />
+              </Tabs>
+            </Grid>
+            <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<AddCircleIcon fontSize="large" />}
+                onClick={() => {
+                  if (selectedTab === 1) {
+                    setOpenCategoryModal(true);
+                    setSelectedCategory(null);
+                  } else {
+                    setDrawer(true);
+                  }
+
                 }}
-              />
-              <Tab
-                label="Categories"
                 sx={{
-                  ...(selectedTab === 1 && {
-                    bgcolor: 'white',
-                    color: theme.palette.primary.main,
-                    textTransform: 'none',
-                    fontWeight: 600,
-                    borderRadius: 1,
-                    mx: 1
-                  }),
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  borderRadius: 1,
-                  mx: 1
+                  width: "max-content",
                 }}
-              />
-            </Tabs>
+              >
+                {selectedTab === 1 ? ('Add New Category') : ('Add New Items')}
+              </Button>
+            </Grid>
           </Grid>
 
-          <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
-            <Button
-              variant="contained"
-              size="large"
-              onClick={() => {
-                if (selectedTab === 1) {
-                  setOpenCategoryModal(true);
-                  setSelectedCategory(null);
-                } else {
-                  setDrawer(true);
-                }
 
-              }}
-              startIcon={<AddCircleIcon />}
-              sx={{
-                bgcolor: 'white',
-                color: theme.palette.primary.main,
-                textTransform: 'none',
-                borderRadius: 1,
-                px: 4,
-                py: 1.5,
-                fontSize: '1rem',
-                fontWeight: 600,
-                boxShadow: `0 8px 25px ${alpha('#000', 0.15)}`,
-                '&:hover': {
-                  bgcolor: alpha('#fff', 0.95),
-                  transform: 'translateY(-2px)',
-                },
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              }}
-            >
-              {selectedTab === 1 ? ('Add New Category') : ('Add New Items')}
-            </Button>
-          </Grid>
-        </Grid>
-      </Paper>
+        </CardContent>
+      </Card>
 
       {/* Enhanced Search and Filters */}
-      <Paper
-        elevation={0}
-        sx={{
-          p: 3,
-          mb: 3,
-          borderRadius: 1,
-          border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
-          boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
-        }}
-      >
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} sm={7}>
-            <TextField
-              fullWidth
-              size="small"
-              placeholder={selectedTab === 0 ? "Search item name, category, description, barcode..." : "Search category name, description ..."}
-              value={selectedTab === 0 ? searchTerm : searchQuery}
-              onChange={(e) => {
-                if (selectedTab === 0) {
-                  setData((prevState) => ({
-                    ...prevState,
-                    searchTerm: e.target.value,
-                  }));
-                }
-                else {
-                  setData((prevState) => ({
-                    ...prevState,
-                    searchQuery: e.target.value,
-                  }));
-                }
-              }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon sx={{ color: theme.palette.primary.main }} />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 1,
-                  bgcolor: alpha(theme.palette.primary.main, 0.02),
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    bgcolor: alpha(theme.palette.primary.main, 0.04),
-                  },
-                  '&.Mui-focused': {
-                    bgcolor: 'white',
-                    boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.1)}`,
-                  },
+      <Grid container spacing={2} alignItems="center">
+        <Grid item xs={12} sm={7}>
+          <TextField
+            fullWidth
+            size="small"
+            placeholder={selectedTab === 0 ? "Search item name, category, description, barcode..." : "Search category name, description ..."}
+            value={selectedTab === 0 ? searchTerm : searchQuery}
+            onChange={(e) => {
+              if (selectedTab === 0) {
+                setData((prevState) => ({
+                  ...prevState,
+                  searchTerm: e.target.value,
+                }));
+              }
+              else {
+                setData((prevState) => ({
+                  ...prevState,
+                  searchQuery: e.target.value,
+                }));
+              }
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ color: theme.palette.primary.main }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 1,
+                bgcolor: alpha(theme.palette.primary.main, 0.02),
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  bgcolor: alpha(theme.palette.primary.main, 0.04),
                 },
-              }}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={2}>
-            <TextField
-              fullWidth
-              select
-              size="small"
-              label="Category"
-              value={categoryFilter}
-              onChange={(e) => setData((prevState) => ({
-                ...prevState,
-                categoryFilter: e.target.value,
-              }))}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 1,
+                '&.Mui-focused': {
+                  bgcolor: 'white',
+                  boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.1)}`,
                 },
-              }}
-            >
-              <MenuItem value={'All'}>
-                All Categories
-              </MenuItem>
-              {categoryLists?.map((category) => (
-                <MenuItem key={category?._id} value={category?.category_name}>
-                  {category?.category_name}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Grid>
-
-          <Grid item xs={12} sm={1}>
-            <TextField
-              fullWidth
-              select
-              size="small"
-              label="Per Page"
-              value={rowsPerPage.toString()}
-              onChange={(e) => setData((prevState) => ({
-                ...prevState,
-                rowsPerPage: Number(e.target.value),
-                page: 1
-              }))}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 1,
-                },
-              }}
-            >
-              {[10, 25, 50].map((option) => (
-                <MenuItem key={option} value={option.toString()}>
-                  {option}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Grid>
-
-          <Grid item xs={12} sm={2}>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Tooltip title="Refresh Data" arrow>
-                <Button
-                  variant="outlined"
-                  onClick={handleRefresh}
-                  startIcon={<RefreshIcon />}
-                  sx={{
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  Refresh Items
-                </Button>
-              </Tooltip>
-            </Box>
-          </Grid>
+              },
+            }}
+          />
         </Grid>
-      </Paper>
+
+        <Grid item xs={12} sm={2}>
+          <TextField
+            fullWidth
+            select
+            size="small"
+            label="Category"
+            value={categoryFilter}
+            onChange={(e) => setData((prevState) => ({
+              ...prevState,
+              categoryFilter: e.target.value,
+            }))}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 1,
+              },
+            }}
+          >
+            <MenuItem value={'All'}>
+              All Categories
+            </MenuItem>
+            {categoryLists?.map((category) => (
+              <MenuItem key={category?._id} value={category?.category_name}>
+                {category?.category_name}
+              </MenuItem>
+            ))}
+          </TextField>
+        </Grid>
+
+        <Grid item xs={12} sm={1}>
+          <TextField
+            fullWidth
+            select
+            size="small"
+            label="Per Page"
+            value={rowsPerPage.toString()}
+            onChange={(e) => setData((prevState) => ({
+              ...prevState,
+              rowsPerPage: Number(e.target.value),
+              page: 1
+            }))}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 1,
+              },
+            }}
+          >
+            {[10, 25, 50].map((option) => (
+              <MenuItem key={option} value={option.toString()}>
+                {option}
+              </MenuItem>
+            ))}
+          </TextField>
+        </Grid>
+
+        <Grid item xs={12} sm={2}>
+          <Tooltip title="Refresh Data" arrow sx={{ display: 'flex', width: '100%' }}>
+            <Button
+              variant="outlined"
+              onClick={handleRefresh}
+              startIcon={<RefreshIcon />}
+              sx={{
+                whiteSpace: 'nowrap',
+                width: '100%',
+              }}
+            >
+              Refresh Items
+            </Button>
+          </Tooltip>
+        </Grid>
+      </Grid>
 
 
       <TabPanel value={selectedTab} index={0}>
@@ -778,48 +707,23 @@ const ProductsListing: React.FC = () => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          p: 3,
-          mt: 3,
+          p: 1,
+          mt: 1,
           borderRadius: 1,
-          border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+          border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
           boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 0.5 }}>
           {selectedTab !== 1 ?
-            (<Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+            (<Typography variant="body2" sx={{ mr: 2 }}>
               Showing {Math.min((page - 1) * rowsPerPage + 1, products.length)} - {Math.min(page * rowsPerPage, products.length)} of {products.length} products
             </Typography>) : (
-              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+              <Typography variant="body2" sx={{ mr: 2 }}>
                 Showing {Math.min((page - 1) * rowsPerPage + 1, categories?.length)} - {Math.min(page * rowsPerPage, categories?.length)} of {categories?.length} categories
               </Typography>
             )
           }
-
-          <Divider orientation="vertical" flexItem />
-
-          {/* {selectedTab === 0 && (<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Badge badgeContent={lowStockCount} color="warning" showZero={false}>
-              <Chip
-                icon={<TrendingDownIcon />}
-                label="Low Stock Items"
-                size="small"
-                variant="outlined"
-                color="warning"
-              />
-            </Badge>
-
-            <Badge badgeContent={outOfStockCount} color="error" showZero={false}>
-              <Chip
-                icon={<TrendingDownIcon />}
-                label="Out of Stock"
-                size="small"
-                variant="outlined"
-                color="error"
-              />
-            </Badge>
-          </Box>)} */}
         </Box>
 
         {products.length > rowsPerPage && selectedTab !== 1 && (
@@ -828,7 +732,7 @@ const ProductsListing: React.FC = () => {
             page={page}
             onChange={handlePageChange}
             color="primary"
-            size={isMobile ? "small" : "medium"}
+            size={"medium"}
             showFirstButton
             showLastButton
             sx={{
@@ -848,14 +752,13 @@ const ProductsListing: React.FC = () => {
             }}
           />
         )}
-
         {categories?.length > rowsPerPage && selectedTab === 1 && (
           <Pagination
             count={Math.ceil(categories?.length / rowsPerPage)}
             page={page}
             onChange={handlePageChange}
             color="primary"
-            size={isMobile ? "small" : "medium"}
+            size={"medium"}
             showFirstButton
             showLastButton
             sx={{
@@ -875,8 +778,8 @@ const ProductsListing: React.FC = () => {
             }}
           />
         )}
-
       </Paper>
+
       <ProductsSideModal drawer={drawer} setDrawer={setDrawer} setRefreshKey={setRefreshKey} product={selectedProduct} setSelectedProduct={setSelectedProduct} />
       <CategoryCreateModal
         open={openCategoryModal}

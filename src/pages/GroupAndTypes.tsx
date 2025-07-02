@@ -267,117 +267,105 @@ const GroupAndTypes: React.FC = () => {
                 </CardContent>
             </Card>
             {/* Enhanced Search and Filters */}
-            <Paper
-                elevation={0}
-                sx={{
-                    p: 1,
-                    mb: 1,
-                    borderRadius: 1,
-                    border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
-                    boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
-                }}
-            >
-                <Grid container spacing={2} alignItems="center">
-                    <Grid item xs={12} sm={6}>
-                        <TextField
-                            fullWidth
-                            size="small"
-                            placeholder="Search products, category, description, barcode..."
-                            value={searchTerm}
-                            onChange={(e) => setData((prevState) => ({
-                                ...prevState,
-                                searchTerm: e.target.value,
-                            }))}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <SearchIcon sx={{ color: theme.palette.primary.main }} />
-                                    </InputAdornment>
-                                ),
-                            }}
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    borderRadius: 1,
-                                    bgcolor: alpha(theme.palette.primary.main, 0.02),
-                                    transition: 'all 0.3s ease',
-                                    '&:hover': {
-                                        bgcolor: alpha(theme.palette.primary.main, 0.04),
-                                    },
-                                    '&.Mui-focused': {
-                                        bgcolor: 'white',
-                                        boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.1)}`,
-                                    },
+            <Grid container spacing={2} alignItems="center">
+                <Grid item xs={12} sm={7}>
+                    <TextField
+                        fullWidth
+                        size="small"
+                        placeholder="Search products, category, description, barcode..."
+                        value={searchTerm}
+                        onChange={(e) => setData((prevState) => ({
+                            ...prevState,
+                            searchTerm: e.target.value,
+                        }))}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <SearchIcon sx={{ color: theme.palette.primary.main }} />
+                                </InputAdornment>
+                            ),
+                        }}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                borderRadius: 1,
+                                bgcolor: alpha(theme.palette.primary.main, 0.02),
+                                transition: 'all 0.3s ease',
+                                '&:hover': {
+                                    bgcolor: alpha(theme.palette.primary.main, 0.04),
                                 },
-                            }}
-                        />
-                    </Grid>
-
-                    <Grid item xs={12} sm={2}>
-                        <TextField
-                            fullWidth
-                            select
-                            size="small"
-                            label="Sort By"
-                            value={sortBy}
-                            onChange={(e) => setData((prevState) => ({
-                                ...prevState,
-                                sortBy: e.target.value,
-                            }))}
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    borderRadius: 1,
+                                '&.Mui-focused': {
+                                    bgcolor: 'white',
+                                    boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.1)}`,
                                 },
-                            }}
-                        >
-                            <MenuItem value="created_at">Date Created</MenuItem>
-                            <MenuItem value="name">Name</MenuItem>
-                        </TextField>
-                    </Grid>
-
-                    <Grid item xs={12} sm={2}>
-                        <TextField
-                            fullWidth
-                            select
-                            size="small"
-                            label="Per Page"
-                            value={rowsPerPage.toString()}
-                            onChange={(e) => setData((prevState) => ({
-                                ...prevState,
-                                rowsPerPage: Number(e.target.value),
-                                page: 1
-                            }))}
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    borderRadius: 1,
-                                },
-                            }}
-                        >
-                            {[10, 25, 50].map((option) => (
-                                <MenuItem key={option} value={option.toString()}>
-                                    {option}
-                                </MenuItem>
-                            ))}
-                        </TextField>
-                    </Grid>
-
-                    <Grid item xs={12} sm={2}>
-                        <Box sx={{ display: 'flex', gap: 1 }}>
-                            <Tooltip title="Refresh Data" arrow>
-                                <Button
-                                    variant="outlined"
-                                    onClick={handleRefresh}
-                                    startIcon={<RefreshIcon />}
-                                    sx={{
-                                        whiteSpace: 'nowrap',
-                                    }}
-                                >
-                                    Refresh Items
-                                </Button>
-                            </Tooltip>
-                        </Box>
-                    </Grid>
+                            },
+                        }}
+                    />
                 </Grid>
-            </Paper>
+
+                <Grid item xs={12} sm={2}>
+                    <TextField
+                        fullWidth
+                        select
+                        size="small"
+                        label="Sort By"
+                        value={sortBy}
+                        onChange={(e) => setData((prevState) => ({
+                            ...prevState,
+                            sortBy: e.target.value,
+                        }))}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                borderRadius: 1,
+                            },
+                        }}
+                    >
+                        <MenuItem value="created_at">Date Created</MenuItem>
+                        <MenuItem value="name">Name</MenuItem>
+                    </TextField>
+                </Grid>
+
+                <Grid item xs={12} sm={1}>
+                    <TextField
+                        fullWidth
+                        select
+                        size="small"
+                        label="Per Page"
+                        value={rowsPerPage.toString()}
+                        onChange={(e) => setData((prevState) => ({
+                            ...prevState,
+                            rowsPerPage: Number(e.target.value),
+                            page: 1
+                        }))}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                borderRadius: 1,
+                            },
+                        }}
+                    >
+                        {[10, 25, 50].map((option) => (
+                            <MenuItem key={option} value={option.toString()}>
+                                {option}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                </Grid>
+
+                <Grid item xs={12} sm={2}>
+                    <Tooltip title="Refresh Data" arrow sx={{ display: 'flex', width: '100%' }}>
+                        <Button
+                            variant="outlined"
+                            onClick={handleRefresh}
+                            startIcon={<RefreshIcon />}
+                            sx={{
+                                whiteSpace: 'nowrap',
+                                width: '100%',
+                            }}
+                        >
+                            Refresh Items
+                        </Button>
+                    </Tooltip>
+                </Grid>
+            </Grid>
 
 
             <TabPanel value={selectedTab} index={0}>

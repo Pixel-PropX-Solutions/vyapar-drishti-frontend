@@ -28,25 +28,13 @@ import {
   FilterList as FilterIcon,
   AddCircle as AddCircleIcon,
   RefreshOutlined,
-  // ArrowUpwardOutlined,
-  // ArrowDownwardOutlined,
-  // MoreHoriz,
   PeopleAlt,
   Today,
 } from "@mui/icons-material";
-// import {
-//   // alpha,
-//   // useColorScheme,
-// } from "@mui/material/styles";
 import { CustomerSortField, SortOrder, GetAllVouchars } from "@/utils/types";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { useNavigate } from "react-router-dom";
-// import { viewAllCustomers } from "@/services/customersledger";
-// import EditCustomerModal from "@/features/profile/customers/EditCustomerModal";
-import { CustomerRowSkeleton } from "@/common/CustomerRowSkeleton";
-// import { CustomerRow } from "@/features/profile/customers/CustomerRow";
-// import { getAllGroups } from "@/services/group";
 import { printGSTInvoices, printInvoices, printPaymentInvoices, printRecieptInvoices, viewAllInvoices } from "@/services/invoice";
 import { InvoicerRow } from "@/components/Invoice/InvoiceRow";
 import InvoicePrint from "@/components/Invoice/InvoicePrint";
@@ -55,24 +43,21 @@ import { getAllInvoiceGroups } from "@/services/accountingGroup";
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { InvoicesRowSkeleton } from "@/common/InvoicesRowSkeleton";
 
 
 const Invoices: React.FC = () => {
-  // const { mode } = useColorScheme();
-  // const [isCustomerEditing, setIsCustomerEditing] = useState(false);
-  const [_invoice, setInvoice] = useState<GetAllVouchars | null>(null);
+  const navigate = useNavigate();
+  const theme = useTheme();
+  const dispatch = useDispatch<AppDispatch>();
   const [promptModal, setPromptModal] = useState(false);
   const [htmlFromAPI, setHtmlFromAPI] = useState<string>('');
   const [html, setHtml] = useState<boolean>(false);
   const [invoiceId, setInvoiceId] = useState<string>('');
   const { invoiceGroupList } = useSelector((state: RootState) => state.accountingGroup);
   const { invoices, loading, pageMeta } = useSelector((state: RootState) => state.invoice);
-  // const { accountingGroups } = useSelector((state: RootState) => state.accountingGroup);
   const { currentCompany, user } = useSelector((state: RootState) => state.auth);
   const currentCompanyDetails = user?.company?.find((c: any) => c._id === user.user_settings.current_company_id);
-  const navigate = useNavigate();
-  const theme = useTheme();
-  const dispatch = useDispatch<AppDispatch>();
 
   const [state, setState] = useState({
     searchQuery: "",
@@ -110,11 +95,6 @@ const Invoices: React.FC = () => {
     fetchIvoices();
     dispatch(getAllInvoiceGroups(currentCompany?._id || ""));
   }, [searchQuery, page, rowsPerPage, is_deleted, sortField, filterState, sortOrder, dispatch, fetchIvoices, currentCompany?._id]);
-
-  // useEffect(() => {
-  //   dispatch(getAllGroups(currentCompany?._id || ""));
-  // }, [currentCompany?._id, dispatch])
-
 
   // Handle sorting change
   const handleSortRequest = (field: CustomerSortField) => {
@@ -155,7 +135,6 @@ const Invoices: React.FC = () => {
       sortOrder: "asc" as SortOrder,
     });
   }, []);
-
 
   // managing searchQuery, filterState, page, rowsPerPage
   const handleStateChange = (field: string, value: any) => {
@@ -303,7 +282,6 @@ const Invoices: React.FC = () => {
                     startIcon={<AddCircleIcon fontSize="large" />}
                     onClick={() => {
                       setPromptModal(true);
-                      // navigate('/invoices/create');
                     }}
                     sx={{
                       width: "max-content",
@@ -325,6 +303,7 @@ const Invoices: React.FC = () => {
             sx={{ flexGrow: 1, minWidth: "250px" }}
             variant="outlined"
             size="small"
+            label='Search'
             placeholder="Search by name, type..."
             value={searchQuery}
             onChange={(e) => handleStateChange("searchQuery", e.target.value)}
@@ -582,7 +561,7 @@ const Invoices: React.FC = () => {
             <TableBody>
               {loading ? (
                 Array([1, 2, 3, 4, 5])
-                  .map((_, index) => <CustomerRowSkeleton key={`skeleton-${index}`} />)
+                  .map((_, index) => <InvoicesRowSkeleton key={`skeleton-${index}`} />)
               ) : invoices?.length > 0 ? (
                 invoices.map((inv, index) => (
                   <InvoicerRow
@@ -614,7 +593,7 @@ const Invoices: React.FC = () => {
                       <Button
                         variant="contained"
                         onClick={() => {
-                          navigate('/invoices/create');
+                          setPromptModal(true);
                         }}
                         startIcon={<AddCircleIcon />}
                         sx={{
@@ -637,30 +616,56 @@ const Invoices: React.FC = () => {
         </TableContainer>
 
         {/* Pagination Controls */}
-        <Box
+        <Paper
+          elevation={0}
           sx={{
             display: "flex",
-            justifyContent: "flex-end",
+            justifyContent: "space-between",
             alignItems: "center",
-            mt: 2
+            p: 1,
+            mt: 1,
+            borderRadius: 1,
+            border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+            boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
           }}
         >
-          <Typography variant="body2" sx={{ mr: 2 }}>
-            {`Showing ${(pageMeta.page - 1) * rowsPerPage + 1}-${Math.min(
-              pageMeta.page * rowsPerPage,
-              pageMeta.total
-            )} of ${pageMeta.total} customers`}
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 0.5 }}>
+            <Typography variant="body2" sx={{ mr: 2 }}>
+              {`Showing ${(pageMeta.page - 1) * rowsPerPage + 1}-${Math.min(
+                pageMeta.page * rowsPerPage,
+                pageMeta.total
+              )} of ${pageMeta.total} invoices`}
+            </Typography>
+          </Box>
 
-          {pageMeta.total > 1 && <Pagination
-            count={Math.ceil(pageMeta.total / rowsPerPage)}
-            page={pageMeta.page}
-            onChange={handleChangePage}
-            color="primary"
-            showFirstButton
-            showLastButton
-          />}
-        </Box>
+          {pageMeta.total > rowsPerPage && (
+            <Pagination
+              count={Math.ceil(pageMeta.total / rowsPerPage)}
+              page={page}
+              onChange={handleChangePage}
+              color="primary"
+              size={"medium"}
+              showFirstButton
+              showLastButton
+              sx={{
+                "& .MuiPaginationItem-root": {
+                  mx: { xs: 0.25, sm: 0.5 },
+                  borderRadius: 1,
+                  fontWeight: 600,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`,
+                  },
+                  '&.Mui-selected': {
+                    boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`,
+                  },
+                },
+              }}
+            />
+          )}
+        </Paper>
+
         <InvoiceTypeModal
           open={promptModal}
           onClose={() => setPromptModal(false)}

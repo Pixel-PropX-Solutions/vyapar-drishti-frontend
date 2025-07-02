@@ -197,12 +197,12 @@ export default function UpdateSalePurchase() {
         }));
     };
 
-    const calculateTotals = () => {
+    const calculateTotals = React.useCallback(() => {
         const subtotal = data.items.reduce((sum, item) => sum + (item.amount || 0), 0).toFixed(2);
         const gstTotal = data.items.reduce((sum, item) => sum + (item.gst_amount || 0), 0).toFixed(2);
         const grandTotal = (parseFloat(subtotal) + parseFloat(gstTotal)).toFixed(2);
         return { subtotal, grandTotal, gstTotal };
-    };
+    }, [data.items]);
 
     const { grandTotal } = calculateTotals();
 
@@ -268,16 +268,21 @@ export default function UpdateSalePurchase() {
             reference_date: data.reference_date || '',
             place_of_supply: data.place_of_supply || '',
             accounting:
-                data.accounting.map(acc => ({
-                    entry_id: acc._id,
-                    vouchar_id: data._id,
-                    ledger: acc.ledger,
-                    ledger_id: acc.ledger_id,
-                    amount: type === 'purchase' ?
-                        acc.ledger === data.party_name ? Number(grandTotal) : -Number(grandTotal)
-                        : acc.ledger === data.counter_party ? -Number(grandTotal) : Number(grandTotal),
-                })),
-
+                data.accounting.map(acc => {
+                    let amount = 0;
+                    if (type?.toLowerCase() === 'purchase') {
+                        amount = acc.ledger === data.party_name ? Number(grandTotal) : -Number(grandTotal);
+                    } else if (type?.toLowerCase() === 'sales') {
+                        amount = acc.ledger === data.party_name ? -Number(grandTotal) : Number(grandTotal);
+                    }
+                    return {
+                        entry_id: acc._id,
+                        vouchar_id: data._id,
+                        ledger: acc.ledger,
+                        ledger_id: acc.ledger_id,
+                        amount,
+                    };
+                }),
             items: data.items.map(item => ({
                 entry_id: item._id,
                 vouchar_id: data._id,
@@ -293,7 +298,6 @@ export default function UpdateSalePurchase() {
                 order_number: '',
                 order_due_date: '',
             })),
-
         }
 
 
@@ -618,8 +622,8 @@ export default function UpdateSalePurchase() {
                                                         onChange={(_, newValue) => {
                                                             if (newValue && typeof newValue === 'object') {
                                                                 handleItemChange(index, 'item', newValue.name);
-                                                                handleItemChange(index, 'item_id', newValue.id); 
-                                                                handleItemChange(index, '_id', newValue.id); 
+                                                                handleItemChange(index, 'item_id', newValue.id);
+                                                                handleItemChange(index, '_id', newValue.id);
                                                                 if (currentCompanyDetails?.company_settings?.features?.enable_gst)
                                                                     handleItemChange(index, 'gst', newValue.gst);
                                                             } else {
