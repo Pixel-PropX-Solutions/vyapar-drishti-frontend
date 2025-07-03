@@ -198,34 +198,6 @@ const Timeline: React.FC = () => {
                                     }}
                                 />
                             </Grid>
-
-                            {/* <Grid item xs={12} sm={2}>
-                                <TextField
-                                    size='small'
-                                    fullWidth
-                                    variant="outlined"
-                                    label="Category"
-                                    select
-                                    value={category}
-                                    onChange={(event) => {
-                                        handleStateChange("category", event.target.value as string);
-                                    }}
-                                    InputProps={{
-                                        startAdornment: (
-                                            <InputAdornment position="start">
-                                                <FilterListIcon />
-                                            </InputAdornment>
-                                        ),
-                                    }}
-                                >
-                                    <MenuItem value="All-Categories">All Categories</MenuItem>
-                                    {pageMeta?.unique?.map((category) => (
-                                        <MenuItem key={category} value={category}>
-                                            {category}
-                                        </MenuItem>
-                                    ))}
-                                </TextField>
-                            </Grid> */}
                             <Grid item xs={12} md={2}>
                                 <TextField
                                     select
@@ -238,7 +210,6 @@ const Timeline: React.FC = () => {
                                     <MenuItem value="all" sx={{ fontWeight: 600 }}>All </MenuItem>
                                     <MenuItem value="IN">STOCK IN</MenuItem>
                                     <MenuItem value="OUT">STOCK OUT</MenuItem>
-                                    {/* <MenuItem value="RETURN">STOCK RETURN</MenuItem> */}
                                 </TextField>
                             </Grid>
                             <Grid item xs={12} md={2}>
@@ -378,6 +349,16 @@ const Timeline: React.FC = () => {
                                     </TableCell> */}
                                 </TableRow>
                             ))}
+
+                            {(stockMovement?.length ?? 0) < 1 && (
+                                <TableRow>
+                                    <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+                                        <Typography variant="body2" color="text.secondary">
+                                            No records found
+                                        </Typography>
+                                    </TableCell>
+                                </TableRow>
+                            )}
                         </TableBody>
                     </Table>
                 </TableContainer>
@@ -420,26 +401,6 @@ const Timeline: React.FC = () => {
                     </Box>
 
                 </Box>
-                {/* <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Pagination
-                        count={pageMeta?.total}
-                        page={page_no}
-                        onChange={handleChangePage}
-                        color="primary"
-                        shape="rounded"
-                        siblingCount={0}
-                    />
-                    <FormControl size="small" sx={{ width: 80 }}>
-                        <Select
-                            value={limit}
-                            displayEmpty
-                        >
-                            <MenuItem value="10">10</MenuItem>
-                            <MenuItem value="25">25</MenuItem>
-                            <MenuItem value="50">50</MenuItem>
-                        </Select>
-                    </FormControl>
-                </Box> */}
             </Box>
         </LocalizationProvider>
     );
