@@ -17,7 +17,7 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 // import StockistIcon from '@mui/icons-material/Warehouse';
 // import UploadBillIcon from '@mui/icons-material/UploadFile';
 import ProductIcon from '@mui/icons-material/LocalPharmacy';
-import InventoryIcon from "@mui/icons-material/Inventory";
+// import InventoryIcon from "@mui/icons-material/Inventory";
 import ViewTimelineIcon from '@mui/icons-material/ViewTimeline';
 // import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
@@ -38,7 +38,7 @@ interface MenuItem {
 const createMainListItems = (role: string): MenuItem[] => {
   const adminItems: MenuItem[] = [
     // { text: "Dashboard", path: "/dashboard", icon: <DashboardIcon />, requiredRole: 'admin' },
-    { text: "Inventory", path: "/inventory", icon: <InventoryIcon />, requiredRole: 'admin' },
+    // { text: "Inventory", path: "/inventory", icon: <InventoryIcon />, requiredRole: 'admin' },
     { text: "Products", path: "/products", icon: <ProductIcon />, requiredRole: 'admin' },
     // { text: "Stockists", path: "/stockists", icon: <StockistIcon />, requiredRole: 'admin' },
     // { text: "Chemists", path: "/chemists", icon: <ChemistIcon />, requiredRole: 'admin' },
@@ -46,7 +46,7 @@ const createMainListItems = (role: string): MenuItem[] => {
 
   const chemistItems: MenuItem[] = [
     // { text: "Dashboard", path: "/dashboard", icon: <DashboardIcon />, requiredRole: 'user' },
-    { text: "Inventory", path: "/inventory", icon: <InventoryIcon />, requiredRole: 'user' },
+    // { text: "Inventory", path: "/inventory", icon: <InventoryIcon />, requiredRole: 'user' },
     { text: "Timeline", path: "/timeline", icon: <ViewTimelineIcon />, requiredRole: 'user' },
     { text: "Products", path: "/products", icon: <ProductIcon />, requiredRole: 'user' },
     { text: "Groups & Types", path: "/groups", icon: <ProductIcon />, requiredRole: 'user' },
