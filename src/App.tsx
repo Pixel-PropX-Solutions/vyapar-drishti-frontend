@@ -23,7 +23,7 @@ import { getCurrentUser } from "./services/auth";
 import LandingPage from "./components/LandingPage/LandingPage";
 import AboutPage from "./components/About/AboutPage";
 import Timeline from "./features/inventory/timeline";
-import Warehouse from "./features/inventory/warehouse";
+// import Warehouse from "./features/inventory/warehouse";
 import ViewInventory from "./pages/Inventory";
 import ViewItem from "./features/products/ViewItem";
 import { ContactPage } from "@mui/icons-material";
@@ -158,7 +158,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/products/:id" element={<ViewItem />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/groups" element={<GroupAndTypes />} />
-                <Route path="/inventory" element={<Warehouse />} />
+                {/* <Route path="/inventory" element={<Warehouse />} /> */}
                 <Route path="/timeline" element={<Timeline />} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/customers" element={<CustomerLedger />} />
