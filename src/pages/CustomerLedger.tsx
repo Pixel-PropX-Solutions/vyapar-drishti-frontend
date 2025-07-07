@@ -445,7 +445,7 @@ const CustomerLedger: React.FC = () => {
                 if (!cred.ledger_name) {
                   return null;
                 }
-                // if (cred.parent !== 'Sundry Debtors' && cred.parent !== 'Sundry Creditors') {
+                // if (cred.parent !== 'Debtors' && cred.parent !== 'Creditors') {
                 //   return null;
                 // }
                 return (

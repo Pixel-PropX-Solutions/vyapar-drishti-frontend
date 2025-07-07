@@ -263,7 +263,7 @@ const EditCustomerModal: React.FC<EditUserModalProps> = ({
         const type = (selectedTypeOption?.user_id === '' || selectedTypeOption?.user_id === null)
             ? selectedTypeOption?.value?.toLowerCase()
             : selectedTypeOption?.parent?.toLowerCase() || '';
-        if (type === 'sundry debtors' || type === 'sundry creditors') {
+        if (type === 'debtors' || type === 'creditors') {
             return {
                 showAll: true,
                 showBasicDetails: true,

@@ -122,15 +122,18 @@ const InvoiceTypeModal: React.FC<Props> = ({ open, onClose, onSubmit }) => {
                                     display: 'none'
                                 }
                             }}
-                            renderOption={(props, option) => (
-                                <Box component="li" {...props} sx={{ p: 2 }}>
-                                    <Box>
-                                        <Typography variant="subtitle1" fontWeight="500">
-                                            {option.name}
-                                        </Typography>
+                            renderOption={(props, option) => {
+                                const { key, ...rest } = props;
+                                return (
+                                    <Box component="li" key={key} {...rest} sx={{ p: 2 }}>
+                                        <Box>
+                                            <Typography variant="subtitle1" fontWeight="500">
+                                                {option.name}
+                                            </Typography>
+                                        </Box>
                                     </Box>
-                                </Box>
-                            )}
+                                );
+                            }}
                         />
 
                         <Box sx={{ mt: 4, display: 'flex', gap: 2 }}>

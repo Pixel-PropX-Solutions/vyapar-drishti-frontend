@@ -120,9 +120,11 @@ const PaymentReceiptInvoice: React.FC = () => {
 
             const payload = {
                 voucher_type: transactionType,
-                date : date instanceof Date ? date.toISOString().split('T')[0] : date,
+                voucher_type_id: '',
+                date: date instanceof Date ? date.toISOString().split('T')[0] : date,
                 voucher_number: transactionNumber,
                 party_name: partyName,
+                party_name_id: customersList.find(c => c.ledger_name === partyName)?._id,
                 narration: notes,
                 company_id: currentCompany?._id || '',
                 reference_number: "",
@@ -132,7 +134,7 @@ const PaymentReceiptInvoice: React.FC = () => {
                 items: []
             };
 
-            // console.log("Submitting transaction:", payload);
+            console.log("Submitting transaction:", payload);
 
             // Simulate API call
             dispatch(createInvoice(payload)).then(() => {
@@ -266,7 +268,7 @@ const PaymentReceiptInvoice: React.FC = () => {
                                         },
                                     }}
                                 />
-                                
+
                             </Grid>
 
                             <Grid item xs={12} sm={4}>

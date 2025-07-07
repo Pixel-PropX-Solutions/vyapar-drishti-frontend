@@ -12,10 +12,11 @@ export const createInvoice = createAsyncThunk(
         try {
             const createRes = await userApi.post(`user/create/vouchar`, data);
             console.log("createInvoice response", createRes);
+
             if (createRes.data.success === true) {
                 return;
             } else {
-                return rejectWithValue("Product creation failed");
+                return rejectWithValue("Invoice creation failed");
             }
         } catch (error: any) {
             return rejectWithValue(

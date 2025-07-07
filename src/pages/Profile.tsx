@@ -24,6 +24,11 @@ import {
   TableRow,
   TableSortLabel,
   Tooltip,
+  Alert,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
 } from "@mui/material";
 import {
   useColorScheme,
@@ -50,12 +55,13 @@ import {
   Colorize,
   Contacts,
   Tune,
+  Delete,
 } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import EditUserModal from "@/features/profile/EditUserModal";
-import { getCurrentUser } from "@/services/auth";
-import { getAllCompanies } from "@/services/company";
+import { deleteAccount, getCurrentUser } from "@/services/auth";
+import { deleteCompany, getAllCompanies } from "@/services/company";
 import { formatDatewithTime } from "@/utils/functions";
 import CompanyEditingModal from "@/common/CompanyEditingModal";
 import { InfoRow } from "@/common/InfoRow";
@@ -64,6 +70,7 @@ import { ProfileHeader } from "@/common/ProfileHeader";
 import { CompanyRow } from "@/common/CompanyRow";
 import { GetCompany } from "@/utils/types";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 // Main Enhanced Component
 const ProfilePage: React.FC = () => {
@@ -77,6 +84,7 @@ const ProfilePage: React.FC = () => {
 
   const [isUserEditing, setIsUserEditing] = useState(false);
   const [isCompanyEditing, setIsCompanyEditing] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [editingCompany, setEditingCompany] = useState(null as GetCompany | null);
   const [darkMode, setDarkMode] = useState(false);
   // const [notifications, setNotifications] = useState({
@@ -92,18 +100,32 @@ const ProfilePage: React.FC = () => {
     setTabValue(newValue);
   };
 
+  const confirmDelete = () => {
+    handleDeleteAccount();
+    setOpenDeleteDialog(false);
+  };
 
   const handleDelete = (company_id: string) => {
     console.log("Delete company with ID:", company_id);
-    // dispatch(
-    //   deleteProduct(productId)
-    // )
-    //   .unwrap()
-    //   .then(() => {
-    //     setRefreshKey((prev) => prev + 1);
-    //     setLoading(false);
-    //     toast.success('Product deleted successfully')
-    //   });
+    dispatch(
+      deleteCompany(company_id)
+    )
+      .unwrap()
+      .then(() => {
+        fetchCompleteData();
+        toast.success('Company deleted successfully')
+      });
+  };
+
+  const handleDeleteAccount = () => {
+    dispatch(
+      deleteAccount()
+    )
+      .unwrap()
+      .then(() => {
+        // dispatch(getCurrentUser());
+        toast.success('Account deleted successfully')
+      });
   };
 
   const handleEdit = (company: GetCompany) => {
@@ -135,7 +157,7 @@ const ProfilePage: React.FC = () => {
     fetchCompanyData();
   }, [fetchCompanyData]);
 
-  const currentCompanyDetails = user?.company?.find((c:any) => c._id === user.user_settings.current_company_id);
+  const currentCompanyDetails = user?.company?.find((c: any) => c._id === user.user_settings.current_company_id);
 
   return (
     <Box
@@ -347,7 +369,7 @@ const ProfilePage: React.FC = () => {
                             <Button
                               variant="contained"
                               color="error"
-                              // onClick={onEditToggle}
+                              onClick={() => setOpenDeleteDialog(true)}
                               startIcon={<DeleteForever />}
                               sx={{
                                 background: alpha(theme.palette.error.light, 0.5),
@@ -1108,6 +1130,62 @@ const ProfilePage: React.FC = () => {
           fetchCompleteData();
         }}
       />
+
+      <Dialog
+        open={openDeleteDialog}
+        onClose={() => setOpenDeleteDialog(false)}
+        aria-labelledby="delete-dialog-title"
+        PaperProps={{
+          sx: {
+            borderRadius: 1,
+            boxShadow: `0 24px 50px ${alpha(theme.palette.error.main, 0.2)}`,
+          }
+        }}
+      >
+        <DialogTitle
+          id="delete-dialog-title"
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            color: theme.palette.error.main,
+            fontWeight: 600,
+          }}
+        >
+          <Delete />
+          Delete Account
+        </DialogTitle>
+        <DialogContent>
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            This action cannot be undone. All data related to your account will be permanently deleted, including your companies, settings, and preferences.
+            <br />
+            Please ensure you have backed up any important information before proceeding.
+          </Alert>
+          <Typography>
+            Are you sure you want to delete your account? This action cannot be undone.
+            <br />
+            <strong>Note:</strong> You will lose access to all your companies and their data.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 3, gap: 1 }}>
+          <Button
+            onClick={() => setOpenDeleteDialog(false)}
+            variant="outlined"
+            sx={{ borderRadius: 2 }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={confirmDelete}
+            color="error"
+            variant="contained"
+            sx={{ borderRadius: 2 }}
+            startIcon={<Delete />}
+          >
+            Delete Account
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

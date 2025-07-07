@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AuthStates } from "@/utils/enums";
-import { getCurrentCompany, getCurrentUser, login, logout, register } from "@/services/auth";
+import { deleteAccount, getCurrentCompany, getCurrentUser, login, logout, register } from "@/services/auth";
 import { GetCompany } from "@/utils/types";
 
 interface SignupData {
@@ -75,6 +75,20 @@ const authSlice = createSlice({
         state.loading = false;
       })
       .addCase(login.rejected, (state, action) => {
+        state.authState = AuthStates.ERROR;
+        state.error = action.payload as string;
+        state.loading = false;
+      })
+      .addCase(deleteAccount.pending, (state) => {
+        state.authState = AuthStates.INITIALIZING;
+        state.error = null;
+        state.loading = true;
+      })
+      .addCase(deleteAccount.fulfilled, (state,) => {
+        state.authState = AuthStates.IDLE;
+        state.loading = false;
+      })
+      .addCase(deleteAccount.rejected, (state, action) => {
         state.authState = AuthStates.ERROR;
         state.error = action.payload as string;
         state.loading = false;

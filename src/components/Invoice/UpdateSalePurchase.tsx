@@ -321,7 +321,7 @@ export default function UpdateSalePurchase() {
 
         dispatch(viewAllCustomerWithType({
             company_id: user.user_settings.current_company_id || '',
-            customerType: type === 'sales' ? 'Sundry Debtors' : 'Sundry Creditors',
+            customerType: type === 'sales' ? 'Debtors' : 'Creditors',
         })).then((response) => {
             if (response.meta.requestStatus === 'fulfilled') {
                 // console.log('viewAllCustomerWithType response', response);

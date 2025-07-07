@@ -331,7 +331,7 @@ export const CompanyRow: React.FC<ProductRowProps> = ({ com, onDelete, onEdit, o
                 </DialogTitle>
                 <DialogContent>
                     <Alert severity="warning" sx={{ mb: 2 }}>
-                        This action cannot be undone. The company will be permanently removed from your inventory.
+                        This action cannot be undone. All data related to this company will be permanently deleted.
                     </Alert>
                     <Typography>
                         Are you sure you want to delete "<strong>{com.name}</strong>"?
@@ -352,7 +352,7 @@ export const CompanyRow: React.FC<ProductRowProps> = ({ com, onDelete, onEdit, o
                         sx={{ borderRadius: 2 }}
                         startIcon={<DeleteIcon />}
                     >
-                        Delete Product
+                        Delete Compnay
                     </Button>
                 </DialogActions>
             </Dialog>
