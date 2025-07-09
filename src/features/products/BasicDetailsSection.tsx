@@ -12,7 +12,8 @@ import {
     Zoom,
     alpha,
     Autocomplete,
-    Chip
+    Chip,
+    Theme
 } from '@mui/material';
 import {
     CloudUpload as CloudUploadIcon,
@@ -27,10 +28,9 @@ interface BasicDetailsSectionProps {
     data: FormCreateProduct;
     handleChange: (field: keyof FormCreateProduct, value: string | boolean) => void;
     validationErrors: Record<string, string>;
-    theme: any;
+    theme: Theme;
     selectedUnitOption: { label: string; value: string; id: string; } | null;
     setSelectedUnitOption: React.Dispatch<React.SetStateAction<{ label: string; value: string; id: string; } | null>>;
-    setOpenCategoryModal: React.Dispatch<React.SetStateAction<boolean>>;
     imagePreview: string | null;
     setImagePreview: React.Dispatch<React.SetStateAction<string | null>>;
     handleImageChange: (file: File) => void;
@@ -47,7 +47,6 @@ const BasicDetailsSection: React.FC<BasicDetailsSectionProps> = ({
     theme,
     selectedUnitOption,
     setSelectedUnitOption,
-    setOpenCategoryModal,
     imagePreview,
     handleImageChange,
     removeImage,
@@ -59,7 +58,6 @@ const BasicDetailsSection: React.FC<BasicDetailsSectionProps> = ({
 
     const handleUnitChange = (_: React.SyntheticEvent, newValue: { label: string; value: string; id: string; } | null) => {
         if (newValue?.value === '__add_new__') {
-            setOpenCategoryModal(true);
             return;
         }
 
@@ -67,7 +65,7 @@ const BasicDetailsSection: React.FC<BasicDetailsSectionProps> = ({
         handleChange('unit', newValue?.value || '');
         handleChange('unit_id', newValue?.id || '');
     };
-    
+
     const handleDragEnter = (e: React.DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
@@ -124,22 +122,18 @@ const BasicDetailsSection: React.FC<BasicDetailsSectionProps> = ({
                 Basic Product Details
             </Typography>
 
-            <Stack spacing={4}>
+            <Box sx={{ display: 'flex', flexDirection: 'row', gap: 3 }}>
                 {/* Product Image Upload */}
                 <Card
                     sx={{
                         background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.secondary.main, 0.05)} 100%)`,
                         border: `2px dashed ${isDragActive ? theme.palette.primary.main : theme.palette.divider}`,
-                        transition: 'all 0.3s ease',
-                        '&:hover': {
-                            borderColor: theme.palette.primary.light,
-                            transform: 'translateY(-2px)',
-                            boxShadow: `0 8px 25px ${alpha(theme.palette.primary.main, 0.15)}`
-                        }
+                        width: '50%',
+                        alignSelf: 'center',
                     }}
                 >
                     <CardContent>
-                        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+                        <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
                             Product Image
                         </Typography>
 
@@ -158,14 +152,11 @@ const BasicDetailsSection: React.FC<BasicDetailsSectionProps> = ({
                                 justifyContent: 'center',
                                 cursor: 'pointer',
                                 borderRadius: 1,
+                                p: 2,
                                 backgroundColor: isDragActive
                                     ? alpha(theme.palette.primary.main, 0.1)
                                     : alpha(theme.palette.background.paper, 0.5),
                                 border: `2px dashed ${isDragActive ? theme.palette.primary.main : theme.palette.divider}`,
-                                transition: 'all 0.3s ease',
-                                '&:hover': {
-                                    backgroundColor: alpha(theme.palette.primary.main, 0.08)
-                                }
                             }}
                         >
                             {imagePreview ? (
@@ -189,11 +180,6 @@ const BasicDetailsSection: React.FC<BasicDetailsSectionProps> = ({
                                                 right: 8,
                                                 backgroundColor: alpha(theme.palette.error.main, 0.9),
                                                 color: 'white',
-                                                '&:hover': {
-                                                    backgroundColor: theme.palette.error.dark,
-                                                    transform: 'scale(1.1)'
-                                                },
-                                                transition: 'all 0.2s ease'
                                             }}
                                             size="small"
                                         >
@@ -243,11 +229,12 @@ const BasicDetailsSection: React.FC<BasicDetailsSectionProps> = ({
                 {/* Product Information */}
                 <Card sx={{
                     background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.8)} 0%, ${alpha(theme.palette.action.hover, 0.3)} 100%)`,
+                    width: '50%',
                     backdropFilter: 'blur(10px)',
                     boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.1)}`
                 }}>
-                    <CardContent sx={{ p: 3 }}>
-                        <Typography variant="h6" sx={{ mb: 3, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CardContent sx={{ p: 1 }}>
+                        <Typography variant="h6" sx={{ mb: 1, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
                             <ImageIcon color="primary" />
                             Product Information
                         </Typography>
@@ -341,7 +328,8 @@ const BasicDetailsSection: React.FC<BasicDetailsSectionProps> = ({
                         </Stack>
                     </CardContent>
                 </Card>
-            </Stack>
+            </Box>
+
         </Box>
     );
 };

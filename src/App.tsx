@@ -24,7 +24,7 @@ import LandingPage from "./components/LandingPage/LandingPage";
 import AboutPage from "./components/About/AboutPage";
 import Timeline from "./features/inventory/timeline";
 // import Warehouse from "./features/inventory/warehouse";
-import ViewInventory from "./pages/Inventory";
+import AdminInventory from "./pages/AdminInventory";
 import ViewItem from "./features/products/ViewItem";
 import { ContactPage } from "@mui/icons-material";
 import CookiePolicyPage from "./components/Legal/CookiePolicy";
@@ -37,10 +37,12 @@ import ProfilePage from "./pages/Profile";
 import CustomerLedger from "./pages/CustomerLedger";
 import Invoices from "./pages/Invoices";
 import CreateInvoice from "./components/Invoice/createInvoice";
-import GroupAndTypes from "./pages/GroupAndTypes";
+// import GroupAndTypes from "./pages/GroupAndTypes";
 import SalePurchaseInvoiceCreation from "./components/Invoice/SalePurchaseInvoiceCreation";
 import PaymentReceiptInvoice from "./components/Invoice/PaymentReceiptInvoice";
 import UpdateSalePurchase from "./components/Invoice/UpdateSalePurchase";
+import Transactions from "./pages/Transactions";
+import Inventory from "./pages/Inventory";
 // import PromptModal from "./common/PromptModal";
 
 const xThemeComponents = {
@@ -137,7 +139,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/add/product" element={<CreateProduct />} />
                 <Route path="/products/:id" element={<ViewItem />} />
                 <Route path="/products" element={<Products />} />
-                <Route path="/inventory" element={<ViewInventory />} />
+                <Route path="/inventory" element={<AdminInventory />} />
                 {/* <Route path="/upload" element={<UploadDocuments />} /> */}
                 {/* <Route path="/settings" element={<Settings />} /> */}
                 <Route path="/about" element={<AboutPage />} />
@@ -157,12 +159,13 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/add/product" element={<CreateProduct />} />
                 <Route path="/products/:id" element={<ViewItem />} />
                 <Route path="/products" element={<Products />} />
-                <Route path="/groups" element={<GroupAndTypes />} />
-                {/* <Route path="/inventory" element={<Warehouse />} /> */}
+                {/* <Route path="/groups" element={<GroupAndTypes />} /> */}
+                <Route path="/warehouses" element={<Inventory />} />
                 <Route path="/timeline" element={<Timeline />} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/customers" element={<CustomerLedger />} />
                 <Route path="/invoices" element={<Invoices />} />
+                <Route path="/transactions" element={<Transactions />} />
                 <Route path="/invoices/create" element={<CreateInvoice />} />
                 <Route path="/transaction/:type" element={<PaymentReceiptInvoice />} />
                 <Route path="/invoices/create/:type" element={<SalePurchaseInvoiceCreation />} />

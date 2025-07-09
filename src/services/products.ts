@@ -90,6 +90,51 @@ export const viewAllProducts = createAsyncThunk(
   }
 );
 
+export const viewAllStockItems = createAsyncThunk(
+  "view/all/StockItems",
+  async (
+    {
+      searchQuery,
+      company_id,
+      category,
+      pageNumber,
+      limit,
+      sortField,
+      sortOrder,
+      // is_deleted,
+    }: {
+      searchQuery: string;
+      company_id: string;
+      category: string;
+      sortField: string;
+      pageNumber: number;
+      limit: number;
+      sortOrder: string;
+      // is_deleted: boolean;
+    },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await userApi.get(
+        `product/view/all/stock/items?company_id=${company_id}&search=${searchQuery}${category === 'All' ? "" : "&category=" + category}&page_no=${pageNumber}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"
+        }`
+      );
+      console.log("viewAllStockItems response", response.data);
+
+      if (response.data.success === true) {
+        const stockItems = response.data.data.docs;
+        const pageMeta = response.data.data.meta;
+        return { stockItems, pageMeta };
+      } else return rejectWithValue("Login Failed: No access token recieved.");
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+        "Login failed: Invalid credentials or server error."
+      );
+    }
+  }
+);
+
 export const viewProduct = createAsyncThunk(
   "view/product",
   async ({ product_id, company_id }: { product_id: string, company_id: string }, { rejectWithValue }) => {

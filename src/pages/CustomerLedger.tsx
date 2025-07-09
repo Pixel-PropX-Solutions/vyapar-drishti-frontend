@@ -152,6 +152,10 @@ const CustomerLedger: React.FC = () => {
     // navigate(`/customers/${customer._id}`)
   };
 
+  const filteredCustomers = customers?.filter((cred) => {
+    return cred.parent === "Debtors" || cred.parent === "Creditors";
+  });
+
   return (
     <Box sx={{ p: 3, width: "100%" }}>
       {/* Page Title */}
@@ -440,14 +444,9 @@ const CustomerLedger: React.FC = () => {
             {loading ? (
               Array([1, 2, 3, 4, 5])
                 .map((_, index) => <CustomerRowSkeleton key={`skeleton-${index}`} />)
-            ) : customers?.length > 0 ? (
-              customers.map((cred, index) => {
-                if (!cred.ledger_name) {
-                  return null;
-                }
-                // if (cred.parent !== 'Debtors' && cred.parent !== 'Creditors') {
-                //   return null;
-                // }
+            ) : filteredCustomers?.length > 0 ? (
+              filteredCustomers.map((cred, index) => {
+
                 return (
                   <CustomerRow
                     key={cred._id}

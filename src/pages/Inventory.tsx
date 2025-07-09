@@ -1,1294 +1,665 @@
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  Card,
-  Chip,
-  Grid,
-  Stack,
-  useTheme,
-  IconButton,
-  Tooltip,
-  Box,
-  Typography,
-  Divider,
-  alpha,
-  CardContent,
-} from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import LocalPharmacyIcon from "@mui/icons-material/LocalPharmacy";
-import InventoryIcon from "@mui/icons-material/Inventory";
-import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import TrendingDownIcon from "@mui/icons-material/TrendingDown";
-import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { SparkLineChart } from "@mui/x-charts";
-import { areaElementClasses } from "@mui/x-charts/LineChart";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/store/store";
-import { viewInventrory } from "@/services/inventory";
-import { Inventory } from "@/utils/types";
-import { formatDate } from "@/utils/functions";
-import { GridRenderCellParams } from '@mui/x-data-grid';
+    Box,
+    Button,
+    Container,
+    Grid,
+    InputAdornment,
+    Paper,
+    TextField,
+    Typography,
+    Tooltip,
+    MenuItem,
+    Card,
+    CardContent,
+    IconButton,
+    Fade,
+    Tabs,
+    Tab,
+} from '@mui/material';
+import { styled, useTheme } from '@mui/material/styles';
+
+// Icons
+import SearchIcon from '@mui/icons-material/Search';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import RefreshOutlined from '@mui/icons-material/RefreshOutlined';
+import CurrencyRupee from '@mui/icons-material/CurrencyRupee';
+import ClearIcon from '@mui/icons-material/Clear';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import InventoryIcon from '@mui/icons-material/Inventory';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+
+import { useNavigate } from 'react-router-dom';
+import TabPanel from '@/features/upload-documents/components/TabPanel';
+import InventoryTable from '@/features/inventory/InventoryTable';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '@/store/store';
+import { SortField, SortOrder, InventoryItem } from '@/utils/types';
+import { getProductStock } from '@/services/inventory';
+import { WarningOutlined } from '@mui/icons-material';
+
+// Styled Components with enhanced visuals
+const StockCard = styled(Paper)(({ theme }) => ({
+    padding: theme.spacing(3),
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    transition: 'transform 0.2s, box-shadow 0.2s',
+    '&:hover': {
+        transform: 'translateY(-4px)',
+        boxShadow: theme.shadows[4],
+    },
+    borderRadius: 12,
+}));
+
+const ActionButton = styled(Button)(({ theme }) => ({
+    borderRadius: '8px',
+    fontWeight: 600,
+    padding: theme.spacing(1, 2),
+    transition: 'all 0.2s',
+    boxShadow: 'none',
+}));
 
 
-export default function ViewInventory() {
-  const navigate = useNavigate();
-  const theme = useTheme();
-  const dispatch = useDispatch<AppDispatch>();
-  const { inventoryData } = useSelector((state: RootState) => state.inventory);
-  const { user } = useSelector((state: RootState) => state.auth);
+const Inventory: React.FC = () => {
+    const theme = useTheme();
+    const dispatch = useDispatch<AppDispatch>();
+    const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(false);
+    const [currentTab, setCurrentTab] = useState(0);
 
-  const daysInWeek = getDaysInMonth(4, 2024);
-  const [data, setData] = useState<Inventory[]>([]);
-  const [activeFilter, setActiveFilter] = useState("All");
-  // const [searchValue, setSearchValue] = useState("");
+    const { InventoryItems, pageMeta } = useSelector((state: RootState) => state.inventory);
+    const { currentCompany } = useSelector((state: RootState) => state.auth);
 
-  // Count metrics
-  const totalProducts = data.length;
-  const lowStockCount = data.filter((item) => item.quantity <= 10).length;
-  const outOfStockCount = data.filter((item) => item.quantity < 1).length;
-  const totalValue = (data ?? []).reduce(
-    (sum, item) =>
-      sum + (Number(item?.product?.price) || 0) * (Number(item?.quantity) || 0),
-    0
-  );
-
-  // Filter functionality
-  const filteredData = data.filter((item) => {
-    // const matchesSearch =
-    //   !searchValue ||
-    //   item?.product?.product_name
-    //     .toLowerCase()
-    //     .includes(searchValue.toLowerCase());
-
-    // // Then apply category filter
-    // if (!matchesSearch) return false;
-
-    if (activeFilter === "Low Stock")
-      return Number(item?.quantity) >= 1 && Number(item?.quantity) <= 10;
-    if (activeFilter === "Out of Stock") return Number(item?.quantity) < 1;
-    if (activeFilter === "Expiring Soon") {
-      const expiryDate = new Date(item.product.expiry_date);
-      const threeMonthsFromNow = new Date();
-      threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
-      return expiryDate < threeMonthsFromNow;
-    }
-    return true;
-  });
-
-  function AreaGradient({ color, id }: { color: string; id: string }) {
-    return (
-      <defs>
-        <linearGradient id={id} x1="50%" y1="0%" x2="50%" y2="100%">
-          <stop offset="0%" stopColor={color} stopOpacity={0.3} />
-          <stop offset="100%" stopColor={color} stopOpacity={0} />
-        </linearGradient>
-      </defs>
-    );
-  }
-
-  const trendColors = {
-    up: theme.palette.success.main,
-    down: theme.palette.error.main,
-    neutral: theme.palette.grey[400],
-  };
-
-  function getDaysInMonth(month:number, year:number) {
-    const date = new Date(year, month, 0);
-    const monthName = date.toLocaleDateString("en-US", {
-      month: "short",
+    const [data, setData] = useState({
+        search: '',
+        category: 'all',
+        qtyFilter: 'all',
+        state: '',
+        page_no: 1,
+        limit: 10,
+        startDate: new Date('2025-01-01'),
+        endDate: new Date('2025-12-31'),
+        sortField: "created_at" as SortField,
+        sortOrder: "asc" as SortOrder,
     });
-    const daysInMonth = date.getDate();
-    const days = [];
-    let i = 1;
-    while (days.length < daysInMonth) {
-      days.push(`${monthName} ${i}`);
-      i += 1;
-    }
-    return days;
-  }
+    // const { categories } = useSelector((state: RootState) => state.product);
+    const { search, category, qtyFilter, page_no, limit, sortField, sortOrder } = data;
+    const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
+    const handleSortRequest = (field: SortField) => {
+        const isAsc = sortField === field && sortOrder === "asc";
+        setData((prevState) => ({
+            ...prevState,
+            sortOrder: isAsc ? "desc" : "asc",
+            sortField: field,
+        }));
+    };
 
-  const inventoryRows = filteredData?.map((item) => ({
-    id: item?.product_id,
-    name: item?.product?.product_name,
-    buying_price: item?.product?.price,
-    quantity: item?.quantity,
-    last_restock_date: formatDate(item?.last_restock_date),
-    expiry_date: formatDate(item?.product?.expiry_date),
-    availability: item?.quantity,
-  }));
+    const handleResetFilters = useCallback(() => {
+        setData({
+            search: '',
+            category: 'all',
+            qtyFilter: 'all',
+            state: '',
+            page_no: 1,
+            limit: 10,
+            startDate: new Date('2025-01-01'),
+            endDate: new Date('2025-12-31'),
+            sortField: "created_at" as SortField,
+            sortOrder: "asc" as SortOrder,
+        });
+        // setActiveFilters([]);
 
-  // Enhanced columns with visual indicators
-  const inventoryColumns = [
-    {
-      field: "name",
-      headerName: "Product Name",
-      width: 300,
-      renderCell: (params:GridRenderCellParams) => (
-        <Stack direction="row" spacing={1} alignItems="center">
-          <LocalPharmacyIcon fontSize="small" color={"primary"} />
-          <Typography variant="body2">{params.value}</Typography>
-        </Stack>
-      ),
-    },
-    {
-      field: "buying_price",
-      headerName: "Price (₹)",
-      width: 100,
-      renderCell: (params:GridRenderCellParams) => (
-        <Typography variant="body2" align="right">₹{params.value}</Typography>
-      ),
-    },
-    {
-      field: "quantity",
-      headerName: "Quantity",
-      width: 120,
-      renderCell: (params:GridRenderCellParams) => {
-        const belowThreshold = params.row.quantity <= params.row.threshold;
-        return (
-          <Typography
-            variant="body2"
-            sx={{
-              color: belowThreshold ? theme.palette.error.light : "inherit",
-              fontWeight: belowThreshold ? "bold" : "normal",
-            }}
-          >
-            {params.value} units
-          </Typography>
-        );
-      },
-    },
-    {
-      field: "last_restock_date",
-      headerName: "Restock Date",
-      width: 150,
-      renderCell: (params:GridRenderCellParams) => {
-        return (
-          <Typography
-            variant="body2"
-            sx={{
-              fontWeight: "normal",
-            }}
-          >
-            {params.value}
-          </Typography>
-        );
-      },
-    },
-    {
-      field: "expiry_date",
-      headerName: "Expiry Date",
-      width: 150,
-      renderCell: (params:GridRenderCellParams) => {
-        const expiryDate = new Date(params.value);
-        const threeMonthsFromNow = new Date();
-        threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
-        const isExpiringSoon = expiryDate < threeMonthsFromNow;
+        // Show feedback for reset
+        // setNotification({
+        //     open: true,
+        //     message: 'Filters have been reset',
+        //     severity: 'info'
+        // });
+    }, []);
 
-        return (
-          <Typography
-            variant="body2"
-            sx={{
-              color: isExpiringSoon ? theme.palette.warning.main : "inherit",
-              fontWeight: isExpiringSoon ? "bold" : "normal",
-            }}
-          >
-            {params.value}
-            {isExpiringSoon && (
-              <Tooltip title="Expiring soon">
-                <WarningAmberIcon
-                  fontSize="small"
-                  color="warning"
-                  sx={{ ml: 1, verticalAlign: "middle" }}
-                />
-              </Tooltip>
-            )}
-          </Typography>
-        );
-      },
-    },
-    {
-      field: "availability",
-      headerName: "Status",
-      width: 150,
-      renderCell: (params:GridRenderCellParams) => {
-        return (
-          <Chip
-            size="small"
-            sx={{
-              border: "2px solid",
-              p: 1,
-              py: 2,
-              mb: 4,
+    const handleChangePage = (_: React.ChangeEvent<unknown>, newPage: number) => {
+        setData((prevState) => ({
+            ...prevState,
+            page_no: newPage,
+        }));
+    };
 
-              bgcolor:
-                params.value > 10
-                  ? alpha(theme.palette.success.main, 0.4)
-                  : params.value <= 10 && params.value >= 1
-                    ? alpha(theme.palette.warning.main, 0.4)
-                    : params.value < 1
-                      ? alpha(theme.palette.error.main, 0.4)
-                      : alpha(theme.palette.info.main, 0.4),
-              borderColor:
-                params.value > 10
-                  ? theme.palette.success.main
-                  : params.value <= 10 && params.value >= 1
-                    ? theme.palette.warning.main
-                    : params.value < 1
-                      ? theme.palette.error.main
-                      : theme.palette.info.main,
-            }}
-            label={
-              params.value <= 10 && params.value >= 1
-                ? "Low Stock"
-                : params.value < 1
-                  ? "Out of Stock"
-                  : "In Stock"
+    const handleStateChange = (field: string, value: any) => {
+        setData((prevState) => ({
+            ...prevState,
+            [field]: value,
+        }));
+    };
+
+    const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
+        setCurrentTab(newValue);
+        handleResetFilters();
+        // Set appropriate filters based on tab
+        let newQtyFilter = 'all';
+        if (newValue === 1) newQtyFilter = 'low';
+        if (newValue === 2) newQtyFilter = 'postive';
+
+        setData(prev => ({
+            ...prev,
+            qtyFilter: newQtyFilter
+        }));
+    };
+
+    // Bulk operations
+    const handleBulkAction = (action: 'stockIn' | 'stockOut') => {
+        if (action === 'stockIn') {
+            navigate('/orders/create');
+        } else if (action === 'stockOut') {
+            navigate('/sell');
+        }
+    };
+
+    useEffect(() => {
+        const fetchInventoryData = async () => {
+            setIsLoading(true);
+            try {
+                await dispatch(
+                    getProductStock({
+                        company_id: currentCompany?._id || '',
+                        search: search,
+                        category: category === 'all' ? "" : category.toLowerCase(),
+                        page_no: page_no,
+                        limit: limit,
+                        sortField: sortField,
+                        sortOrder: sortOrder,
+                    })
+                );
+            } finally {
+                setIsLoading(false);
             }
-          />
-        );
-      },
-    },
-    {
-      field: "actions",
-      headerName: "Actions",
-      width: 120,
-      renderCell: (params:GridRenderCellParams) => (
-        <Stack direction="row" spacing={1} alignItems="center" justifyContent={"center"}>
-          <Tooltip title="View Details">
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate(`/products/${params.id}`);
-              }}
-            >
-              <InventoryIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          {
-            user?.user_type === 'Chemist' && (
-              <Tooltip title="Order More">
-                <IconButton
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/orders/create`);
-                  }}
-                >
-                  <AddCircleIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )
-          }
-        </Stack>
-      ),
-    },
-  ];
+        };
 
-  useEffect(() => {
-    dispatch(viewInventrory({ chemistId: user?.user_type === 'Chemist' ? user?._id ?? "" : "", productId: "" })).then(() => { });
-  }, [dispatch, user]);
+        fetchInventoryData();
+    }, [category, currentCompany?._id, dispatch, limit, page_no, search, sortField, sortOrder]);
 
-  useEffect(() => {
-    if (inventoryData) {
-      setData(inventoryData);
-    }
-  }, [inventoryData]);
+    useEffect(() => {
+        // dispatch(viewAllCategories());
+    }, [dispatch]);
 
-  // Get trend for metrics (usually from backend data)
-  const totalTrend = "up";
-  const valueTrend = "up";
-  const lowStockTrend = "down";
+    // State to store summary stats that only change on initial load
+    const [summaryStats, setSummaryStats] = useState({
+        zeroStockCount: 0,
+        zeroStockItems: [] as InventoryItem[],
+        lowStockCount: 0,
+        lowStockItems: [] as InventoryItem[],
+        positiveStockCount: 0,
+        positiveStockItems: [] as InventoryItem[],
+        totalStockValue: 0,
+        totalPurchaseValue: 0
+    });
 
-  return (
-    <Box sx={{ width: "100%", p: 3, }}>
-      {/* Title and Search Bar */}
-      <Card sx={{ mb: 3, p: 2, }}>
-        <CardContent>
-          <Grid item xs={12} md={12}>
-            <Typography variant="h5" component="h1" fontWeight="bold">
-              Inventory Management
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Manage your pharmacy stock, orders, and inventory levels
-            </Typography>
-          </Grid>
-        </CardContent>
-      </Card>
+    // Track if initial data is loaded
+    const initialDataLoaded = useRef(false);
 
-      {/* Metric Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} lg={3}>
-          <Card elevation={2} sx={{ p: 2, height: "100%" }}>
-            <Stack spacing={2}>
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <Box>
-                  <Typography
-                    variant="subtitle2"
-                    color="text.secondary"
-                    gutterBottom
-                  >
-                    Total Products
-                  </Typography>
-                  <Typography variant="h4" component="p" fontWeight="bold">
-                    {totalProducts}
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    p: 1,
-                    borderRadius: "50%",
-                    bgcolor: theme.palette.primary.light,
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  <InventoryIcon
-                    fontSize="medium"
-                    sx={{ color: theme.palette.primary.dark }}
-                  />
-                </Box>
-              </Stack>
+    // Calculate summary stats only on initial data load
+    useEffect(() => {
+        if (InventoryItems && InventoryItems.length > 0 && !initialDataLoaded.current) {
+            const zeroItems = InventoryItems.filter(item => item.current_stock <= 0);
+            const lowItems = InventoryItems.filter(item => item.current_stock > 0 && item.current_stock <= (item.low_stock_alert || 10));
+            const positiveItems = InventoryItems.filter(item => item.current_stock > (item.low_stock_alert || 10));
 
-              <Box>
-                <Stack direction="row" alignItems="center" spacing={0.5}>
-                  {totalTrend === "up" ? (
-                    <TrendingUpIcon fontSize="small" color="success" />
-                  ) : (
-                    <TrendingDownIcon fontSize="small" color="error" />
-                  )}
-                  <Typography
-                    variant="body2"
-                    color={totalTrend === "up" ? "success.main" : "error.main"}
-                  >
-                    +12% past week
-                  </Typography>
-                </Stack>
-              </Box>
+            setSummaryStats({
+                zeroStockItems: zeroItems,
+                zeroStockCount: zeroItems.length || 0,
+                lowStockCount: lowItems.length || 0,
+                lowStockItems: lowItems,
+                positiveStockCount: positiveItems.length || 0,
+                positiveStockItems: positiveItems,
+                totalStockValue: lowItems.reduce((acc, item) => acc + (item.sales_value || 0), 0) || 0,
+                totalPurchaseValue: lowItems.reduce((acc, item) => acc + (item.purchase_value || 0), 0) || 0
+            });
 
-              <Box sx={{ width: "100%", height: 50 }}>
-                <SparkLineChart
-                  colors={[trendColors[totalTrend]]}
-                  data={[
-                    500, 400, 510, 530, 520, 600, 530, 520, 510, 730, 520, 510,
-                    530, 620, 510, 530, 520, 410, 530, 520, 610, 530, 520, 610,
-                    530, 420, 510, 430, 520, 510,
-                  ]}
-                  area
-                  showHighlight
-                  showTooltip
-                  xAxis={{
-                    scaleType: "band",
-                    data: daysInWeek,
-                  }}
-                  sx={{
-                    [`& .${areaElementClasses.root}`]: {
-                      fill: `url(#area-gradient-1)`,
-                    },
-                  }}
-                >
-                  <AreaGradient
-                    color={trendColors[totalTrend]}
-                    id="area-gradient-1"
-                  />
-                </SparkLineChart>
-              </Box>
-              <Divider />
+            initialDataLoaded.current = true;
+        }
+    }, [pageMeta, InventoryItems]);
 
-              <Stack spacing={1}>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontStyle: "italic",
-                    cursor: "pointer",
-                    ":hover": {
-                      fontWeight: "bold",
-                    },
-                  }}
-                  onClick={() => setActiveFilter("All")}
-                >
-                  View All Items
-                </Typography>
-              </Stack>
-            </Stack>
-          </Card>
-        </Grid>
+    // Destructure values from summaryStats for use in the component
+    const { zeroStockItems, zeroStockCount, lowStockCount, lowStockItems, positiveStockCount, positiveStockItems, totalStockValue, totalPurchaseValue } = summaryStats;
 
-        <Grid item xs={12} sm={6} lg={3}>
-          <Card elevation={2} sx={{ p: 2, height: "100%" }}>
-            <Stack spacing={2}>
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <Box>
-                  <Typography
-                    variant="subtitle2"
-                    color="text.secondary"
-                    gutterBottom
-                  >
-                    Inventory Value
-                  </Typography>
-                  <Typography variant="h4" component="p" fontWeight="bold">
-                    ₹{totalValue.toLocaleString()}
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    p: 1,
-                    borderRadius: "50%",
-                    bgcolor: theme.palette.success.light,
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  <CurrencyRupeeIcon
-                    fontSize="medium"
-                    sx={{ color: theme.palette.success.dark }}
-                  />
-                </Box>
-              </Stack>
+    return (
+        <Container maxWidth="xl" sx={{ mt: 3 }}>
+            {/* Header Section with enhanced styling */}
+            <Card sx={{ mb: 3, p: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.05)', borderRadius: '12px' }}>
+                <CardContent>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+                        <Box>
+                            <Typography variant="h5" component="h1" fontWeight="700" color="text.primary">
+                                Inventory Management
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                Track and manage your pharmacy inventory in real-time
+                            </Typography>
+                        </Box>
 
-              <Box>
-                <Stack direction="row" alignItems="center" spacing={0.5}>
-                  {valueTrend === "up" ? (
-                    <TrendingUpIcon fontSize="small" color="success" />
-                  ) : (
-                    <TrendingDownIcon fontSize="small" color="error" />
-                  )}
-                  <Typography
-                    variant="body2"
-                    color={valueTrend === "up" ? "success.main" : "error.main"}
-                  >
-                    +5.2% past week
-                  </Typography>
-                </Stack>
-              </Box>
+                        {/* Top Action Buttons with improved styling */}
+                        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                            <ActionButton
+                                variant="contained"
+                                startIcon={<AddCircleOutlineIcon />}
+                                color="success"
+                                onClick={() => navigate('/invoices/create/purchase')}
+                                sx={{
+                                    background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
+                                    color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
+                                    '&:hover': {
+                                        color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                                        background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
+                                    },
+                                }}
+                            >
+                                Add Purchase
+                            </ActionButton>
 
-              <Box sx={{ width: "100%", height: 50 }}>
-                <SparkLineChart
-                  colors={[trendColors[valueTrend]]}
-                  data={[
-                    200, 240, 220, 260, 240, 280, 300, 240, 280, 240, 300, 340,
-                    320, 360, 340, 380, 360, 400, 380, 420, 400, 440, 420, 460,
-                    440, 480, 460, 500, 480, 520,
-                  ]}
-                  area
-                  showHighlight
-                  showTooltip
-                  xAxis={{
-                    scaleType: "band",
-                    data: daysInWeek,
-                  }}
-                  sx={{
-                    [`& .${areaElementClasses.root}`]: {
-                      fill: `url(#area-gradient-2)`,
-                    },
-                  }}
-                >
-                  <AreaGradient
-                    color={trendColors[valueTrend]}
-                    id="area-gradient-2"
-                  />
-                </SparkLineChart>
-              </Box>
-            </Stack>
-          </Card>
-        </Grid>
+                            <ActionButton
+                                variant="contained"
+                                startIcon={<RemoveCircleOutlineIcon />}
+                                color="error"
+                                onClick={() => navigate('/invoices/create/sales')}
+                                sx={{
+                                    background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
+                                    color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
+                                    '&:hover': {
+                                        color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                                        background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
+                                    },
+                                }}
+                            >
+                                Add Sales
+                            </ActionButton>
 
-        <Grid item xs={12} sm={6} lg={3}>
-          <Card
-            elevation={2}
-            sx={{
-              p: 2,
-              height: "100%",
-              borderLeft: `4px solid ${theme.palette.warning.main}`,
-            }}
-          >
-            <Stack spacing={2}>
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <Box>
-                  <Typography
-                    variant="subtitle2"
-                    color="text.secondary"
-                    gutterBottom
-                  >
-                    Low Stock Items
-                  </Typography>
-                  <Typography variant="h4" component="p" fontWeight="bold">
-                    {lowStockCount}
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    p: 1,
-                    borderRadius: "50%",
-                    bgcolor: theme.palette.warning.light,
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  <WarningAmberIcon
-                    fontSize="medium"
-                    sx={{ color: theme.palette.warning.dark }}
-                  />
-                </Box>
-              </Stack>
 
-              <Box>
-                <Stack direction="row" alignItems="center" spacing={0.5}>
-                  {lowStockTrend === "down" ? (
-                    <TrendingDownIcon fontSize="small" color="error" />
-                  ) : (
-                    <TrendingUpIcon fontSize="small" color="success" />
-                  )}
-                  <Typography
-                    variant="body2"
-                    color={
-                      lowStockTrend === "down" ? "error.main" : "success.main"
-                    }
-                  >
-                    -3% past week
-                  </Typography>
-                </Stack>
-              </Box>
-
-              <Box sx={{ width: "100%", height: 50 }}>
-                <SparkLineChart
-                  colors={[trendColors.down]}
-                  data={[
-                    8, 7, 9, 8, 7, 8, 6, 7, 5, 6, 7, 8, 7, 6, 7, 5, 6, 4, 5, 6,
-                    5, 4, 3, 4, 3, 2, 3, 4, 3, 2,
-                  ]}
-                  area
-                  showHighlight
-                  showTooltip
-                  xAxis={{
-                    scaleType: "band",
-                    data: daysInWeek,
-                  }}
-                  sx={{
-                    [`& .${areaElementClasses.root}`]: {
-                      fill: `url(#area-gradient-3)`,
-                    },
-                  }}
-                >
-                  <AreaGradient color={trendColors.down} id="area-gradient-3" />
-                </SparkLineChart>
-              </Box>
-              <Divider />
-
-              <Stack spacing={1}>
-                {data.filter(
-                  (item) => item.quantity <= 10 && item?.quantity >= 1
-                )?.length >= 1 && (
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontStyle: "italic",
-                        cursor: "pointer",
-                        ":hover": {
-                          fontWeight: "bold",
-                        },
-                      }}
-                      onClick={() => setActiveFilter("Low Stock")}
-                    >
-                      View All Low Stock Items
-                    </Typography>
-                  )}
-                {lowStockCount === 0 && (
-                  <Typography variant="body2" sx={{ fontStyle: "italic" }}>
-                    No Low stock items
-                  </Typography>
-                )}
-              </Stack>
-            </Stack>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} sm={6} lg={3}>
-          <Card
-            elevation={2}
-            sx={{
-              p: 2,
-              height: "100%",
-              borderLeft: `4px solid ${theme.palette.error.main}`,
-            }}
-          >
-            <Stack spacing={2}>
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <Box>
-                  <Typography
-                    variant="subtitle2"
-                    color="text.secondary"
-                    gutterBottom
-                  >
-                    Out of Stock Items
-                  </Typography>
-                  <Typography variant="h4" component="p" fontWeight="bold">
-                    {outOfStockCount}
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    p: 1,
-                    borderRadius: "50%",
-                    bgcolor: theme.palette.error.light,
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  <InventoryIcon
-                    fontSize="medium"
-                    sx={{ color: theme.palette.error.dark }}
-                  />
-                </Box>
-              </Stack>
-
-              <Divider />
-
-              <Stack spacing={1}>
-                {data
-                  .filter((item) => item.quantity < 1)
-                  .slice(0, 2)
-                  .map((item) => (
-                    <Box key={item._id}>
-                      <Typography variant="body2" fontWeight="medium">
-                        {item?.product?.product_name}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {formatDate(item?.last_restock_date)}
-                      </Typography>
+                        </Box>
                     </Box>
-                  ))}
-                {data.filter((item) => item.quantity < 1)?.length > 2 && (
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontStyle: "italic",
-                      cursor: "pointer",
-                      ":hover": {
-                        fontWeight: "bold",
-                      },
-                    }}
-                    onClick={() => setActiveFilter("Out of Stock")}
-                  >
-                    View All Out of Stock Items
-                  </Typography>
-                )}
-                {outOfStockCount === 0 && (
-                  <Typography variant="body2" sx={{ fontStyle: "italic" }}>
-                    No items out of stock
-                  </Typography>
-                )}
-              </Stack>
-            </Stack>
-          </Card>
-        </Grid>
-      </Grid>
+                </CardContent>
+            </Card>
 
-      {/* Products Data Grid */}
-      <Card elevation={3}>
-        <Box sx={{ p: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
-          <Typography variant="h6">
-            Products ({data.length} of {totalProducts})
-          </Typography>
-        </Box>
+            {/* Tab Navigation for quick filtering */}
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+                <Tabs
+                    value={currentTab}
+                    onChange={handleTabChange}
+                    variant="scrollable"
+                    scrollButtons="auto"
+                >
+                    <Tab
+                        icon={<InventoryIcon />}
+                        iconPosition="start"
+                        label="All Inventory"
+                    />
+                    <Tab
+                        icon={<WarningOutlined />}
+                        iconPosition="start"
+                        label={`Zero Stock (${zeroStockCount})`}
+                        sx={{ color: zeroStockCount > 0 ? '#f44336' : 'inherit' }}
+                    />
+                    <Tab
+                        icon={<ErrorOutlineIcon />}
+                        iconPosition="start"
+                        label={`Low Stock (${lowStockCount})`}
+                        sx={{ color: lowStockCount > 0 ? theme.palette.warning.main : 'inherit' }}
+                    />
+                    <Tab
+                        icon={<CheckCircleOutlineIcon />}
+                        iconPosition="start"
+                        label={`Available (${positiveStockCount})`}
+                        sx={{ color: positiveStockCount > 0 ? theme.palette.success.main : 'inherit' }}
+                    />
+                </Tabs>
+            </Box>
 
-        <DataGrid
-          checkboxSelection
-          sx={{
-            border: "none",
-            "& .MuiDataGrid-cell": {
-              fontSize: "0.9rem",
-              py: 1,
-            },
-            "& .MuiDataGrid-columnHeaderTitle": {
-              fontSize: "0.95rem",
-              fontWeight: "bold",
-            },
 
-            // Highlight rows based on status
-            "& .row-low-stock": {
-              backgroundColor: alpha(theme.palette.warning.light, 0.4),
-              "&:hover": {
-                backgroundColor: alpha(theme.palette.warning.light, 0.5),
-              },
-            },
-            "& .row-out-of-stock": {
-              backgroundColor: alpha(theme.palette.error.light, 0.4),
-              "&:hover": {
-                backgroundColor: alpha(theme.palette.error.light, 0.5),
-              },
-            },
-          }}
-          onRowClick={(params) => navigate(`/products/${params.id}`)}
-          disableRowSelectionOnClick
-          rows={inventoryRows}
-          columns={inventoryColumns}
-          getRowClassName={(params) => {
-            if (params.row.availability < 1) return "row-out-of-stock";
-            if (params.row.availability <= 10 && params.row.availability > 1)
-              return "row-low-stock";
-            return "";
-          }}
-          initialState={{
-            pagination: { paginationModel: { pageSize: 10 } },
-          }}
-          pageSizeOptions={[5, 10, 20, 50]}
-          density="standard"
-          autoHeight
-          rowHeight={60}
-        />
-      </Card>
-    </Box>
-  );
-}
+            {/* Stock Summary Cards with enhanced visuals */}
+            <Grid container spacing={1} sx={{ mb: 4 }}>
+                <Grid item xs={12} sm={6} md={2.4}>
+                    <StockCard sx={{
+                        bgcolor: '#ffebee',
+                        borderLeft: '5px solid #c62828'
+                    }}>
+                        <Box>
+                            <Typography variant="subtitle2" sx={{ color: theme.palette.grey[600] }} gutterBottom>
+                                Zero Stock Items
+                            </Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: theme.palette.common.black }}>
+                                {zeroStockCount > 0 && <WarningAmberIcon color="error" />}
+                                <Typography variant="h4" component="div" fontWeight="bold">
+                                    {zeroStockCount} Items
+                                </Typography>
+                            </Box>
+                            {zeroStockCount > 0 && (
+                                <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block' }}>
+                                    Some items are out of stock, please restock them
+                                </Typography>
+                            )}
+                        </Box>
+                    </StockCard>
+                </Grid>
+                <Grid item xs={12} sm={6} md={2.4}>
+                    <StockCard sx={{
+                        bgcolor: 'hsl(45, 92%, 90%)',
+                        borderLeft: '5px solid hsl(45, 90%, 40%)'
+                    }}>
+                        <Box>
+                            <Typography variant="subtitle2" sx={{ color: theme.palette.grey[600] }} gutterBottom>
+                                Low Stock Items
+                            </Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: theme.palette.common.black }}>
+                                {lowStockCount > 0 && <WarningAmberIcon color="error" />}
+                                <Typography variant="h4" component="div" fontWeight="bold">
+                                    {lowStockCount} Items
+                                </Typography>
+                            </Box>
+                            {lowStockCount > 0 && (
+                                <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block' }}>
+                                    Attention required! Some items need restocking
+                                </Typography>
+                            )}
+                        </Box>
+                    </StockCard>
+                </Grid>
 
-// import {
-//   Card,
-//   Chip,
-//   FormControl,
-//   Grid,
-//   InputAdornment,
-//   OutlinedInput,
-//   Stack,
-//   useTheme,
-// } from "@mui/material";
-// import Box from "@mui/material/Box";
-// import Typography from "@mui/material/Typography";
-// import { DataGrid, GridRowsProp } from "@mui/x-data-grid";
-// import MenuButton from "@/components/MenuButton";
-// import AddCircleIcon from "@mui/icons-material/AddCircle";
-// import { useNavigate } from "react-router-dom";
-// import { useEffect } from "react";
-// import { inventoryProductColumn } from "@/utils/functions";
-// import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
-// import { SparkLineChart } from "@mui/x-charts";
-// import { areaElementClasses } from "@mui/x-charts/LineChart";
+                <Grid item xs={12} sm={6} md={2.4}>
+                    <StockCard sx={{
+                        bgcolor: '#e8f5e9',
+                        borderLeft: '5px solid #2e7d32'
+                    }}>
+                        <Box>
+                            <Typography variant="subtitle2" sx={{ color: theme.palette.grey[600] }} gutterBottom>
+                                Well Stock
+                            </Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: theme.palette.common.black }}>
+                                <CheckCircleOutlineIcon color="success" />
+                                <Typography variant="h4" component="div" fontWeight="bold">
+                                    {positiveStockCount} Items
+                                </Typography>
+                            </Box>
+                            <Typography variant="caption" color="success.dark" sx={{ mt: 1, display: 'block' }}>
+                                Well stocked items ready for sale
+                            </Typography>
+                        </Box>
+                    </StockCard>
+                </Grid>
 
-// const inventryData = [
-//   {
-//     _id: "b7f3a1d5-41c0-4a69-9a4e-2d6d328a90b1",
-//     name: "Ibuprofen",
-//     buying_price: "15",
-//     quantity: 100,
-//     threshold: 30,
-//     expiry_date: "12 December 2026",
-//     availability: "In Stock",
-//   },
-//   {
-//     _id: "f2d1c8a4-92e7-4c43-9e2d-3d59b4fbb78e",
-//     name: "Amoxicillin",
-//     buying_price: "25",
-//     quantity: 20,
-//     threshold: 15,
-//     expiry_date: "05 March 2025",
-//     availability: "Low Stock",
-//   },
-//   {
-//     _id: "8e97d2fc-3f6b-48cd-8347-12c3d6fa5db2",
-//     name: "Cetirizine",
-//     buying_price: "12",
-//     quantity: 75,
-//     threshold: 25,
-//     expiry_date: "18 July 2026",
-//     availability: "In Stock",
-//   },
-//   {
-//     _id: "3a94d0ea-1e56-469c-90b7-c7c4c36e4fbb",
-//     name: "Metformin",
-//     buying_price: "30",
-//     quantity: 10,
-//     threshold: 10,
-//     expiry_date: "22 November 2024",
-//     availability: "Out of Stock",
-//   },
-//   {
-//     _id: "57c8a1e4-6c3b-4f02-9c9d-5e3a9e7b5f0c",
-//     name: "Aspirin",
-//     buying_price: "18",
-//     quantity: 200,
-//     threshold: 50,
-//     expiry_date: "30 September 2027",
-//     availability: "In Stock",
-//   },
-//   {
-//     _id: "a3d5e8f2-62c9-4f85-b021-d16b3f80e97b",
-//     name: "Dolo 650",
-//     buying_price: "8",
-//     quantity: 35,
-//     threshold: 20,
-//     expiry_date: "15 January 2025",
-//     availability: "Low Stock",
-//   },
-//   {
-//     _id: "c4f8d9b7-2e3a-45d6-87f4-6a2f24f8e5cb",
-//     name: "Azithromycin",
-//     buying_price: "40",
-//     quantity: 60,
-//     threshold: 25,
-//     expiry_date: "10 June 2025",
-//     availability: "In Stock",
-//   },
-//   {
-//     _id: "e0a6b4f9-8c34-4298-8495-57fd24b5df64",
-//     name: "Omeprazole",
-//     buying_price: "22",
-//     quantity: 90,
-//     threshold: 30,
-//     expiry_date: "08 August 2026",
-//     availability: "In Stock",
-//   },
-// ];
+                <Grid item xs={12} sm={6} md={2.4}>
+                    <StockCard sx={{
+                        bgcolor: '#e8f4fd',
+                        borderLeft: '5px solid #1976d2'
+                    }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <Box>
+                                <Typography variant="subtitle2" sx={{ color: theme.palette.grey[600] }} gutterBottom>
+                                    Sales Value
+                                </Typography>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: theme.palette.common.black }}>
+                                    <CurrencyRupee sx={{ color: theme.palette.primary.main }} />
+                                    <Typography variant="h4" component="div" fontWeight="bold">
+                                        {totalStockValue.toLocaleString('en-IN')}
+                                    </Typography>
+                                </Box>
+                                <Typography variant="caption" sx={{ mt: 1, display: 'block', color: theme.palette.primary.main }}>
+                                    Potential revenue at current prices
+                                </Typography>
+                            </Box>
+                            <Tooltip
+                                title="This value is an estimate based on current selling prices without considering discounts or taxes."
+                                arrow
+                                placement="top"
+                            >
+                                <InfoOutlinedIcon fontSize="small" sx={{ cursor: 'pointer', color: theme.palette.primary.main }} />
+                            </Tooltip>
+                        </Box>
+                    </StockCard>
+                </Grid>
 
-// // type TrendType = "up" | "down" | "neutral";
+                <Grid item xs={12} sm={6} md={2.4}>
+                    <StockCard sx={{
+                        bgcolor: '#fff8e1',
+                        borderLeft: '5px solid #ff9800'
+                    }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <Box>
+                                <Typography variant="subtitle2" sx={{ color: theme.palette.grey[600] }} gutterBottom>
+                                    Purchase Value
+                                </Typography>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: theme.palette.common.black }}>
+                                    <CurrencyRupee color="warning" />
+                                    <Typography variant="h4" component="div" fontWeight="bold">
+                                        {totalPurchaseValue.toLocaleString('en-IN')}
+                                    </Typography>
+                                </Box>
+                                <Typography variant="caption" color="warning.dark" sx={{ mt: 1, display: 'block' }}>
+                                    Total investment in current stock
+                                </Typography>
+                            </Box>
+                            <Tooltip
+                                title="This value is calculated based on purchase prices without considering discounts or taxes."
+                                arrow
+                                placement="top"
+                            >
+                                <InfoOutlinedIcon fontSize="small" color="warning" sx={{ cursor: 'pointer' }} />
+                            </Tooltip>
+                        </Box>
+                    </StockCard>
+                </Grid>
+            </Grid>
 
-// export default function Inventory() {
-//   const navigate = useNavigate();
-//   const theme = useTheme();
-//   const daysInWeek = getDaysInMonth(4, 2024);
+            {/* Search and Filter section with enhanced UX */}
+            <Box sx={{ mb: 3 }}>
+                <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
+                        <TextField
+                            placeholder="Search by product name, SKU, or category..."
+                            variant="outlined"
+                            fullWidth
+                            value={search}
+                            onChange={(e) => handleStateChange('search', e.target.value)}
+                            size="small"
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon />
+                                    </InputAdornment>
+                                ),
+                                endAdornment: search && (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => handleStateChange('search', '')}
+                                            aria-label="clear search"
+                                        >
+                                            <ClearIcon fontSize="small" />
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
+                    </Grid>
+                    <Grid item xs={12} md={2}>
+                        <TextField
+                            select
+                            value={category}
+                            fullWidth
+                            label="Category"
+                            size="small"
+                            onChange={(e) => handleStateChange('category', e.target.value)}
+                        >
+                            <MenuItem value="all">All Categories</MenuItem>
+                            {/* {categories?.map((cat, index) => (
+                                <MenuItem key={index} value={cat}>
+                                    {cat}
+                                </MenuItem>
+                            ))} */}
+                        </TextField>
+                    </Grid>
 
-//   function AreaGradient({ color, id }: { color: string; id: string }) {
-//     return (
-//       <defs>
-//         <linearGradient id={id} x1="50%" y1="0%" x2="50%" y2="100%">
-//           <stop offset="0%" stopColor={color} stopOpacity={0.3} />
-//           <stop offset="100%" stopColor={color} stopOpacity={0} />
-//         </linearGradient>
-//       </defs>
-//     );
-//   }
+                    <Grid item xs={12} md={2}>
+                        <TextField
+                            select
+                            value={qtyFilter}
+                            fullWidth
+                            label="Stock Status"
+                            size="small"
+                            onChange={(e) => handleStateChange('qtyFilter', e.target.value)}
+                        >
+                            <MenuItem value="all" sx={{ fontWeight: 600 }}>All Items</MenuItem>
+                            <MenuItem value="negative"
+                                sx={{ color: theme.palette.mode === 'dark' ? 'rgb(255, 0, 0)' : theme.palette.error.main, fontWeight: 600 }}>Negative Stock</MenuItem>
+                            <MenuItem value="zero"
+                                sx={{ color: theme.palette.mode === 'dark' ? 'rgb(255, 255, 255)' : '', fontWeight: 600 }}>Zero Stock</MenuItem>
+                            <MenuItem value="low"
+                                sx={{ color: theme.palette.mode === 'dark' ? theme.palette.warning.light : theme.palette.warning.main, fontWeight: 600 }}
+                            >Low Stock</MenuItem>
+                            <MenuItem value="positive"
+                                sx={{ color: theme.palette.mode === 'dark' ? 'rgb(0, 255, 13)' : theme.palette.success.main, fontWeight: 600 }}>Well Stock</MenuItem>
 
-//   const trendColors = {
-//     up:
-//       theme.palette.mode === "light"
-//         ? theme.palette.success.main
-//         : theme.palette.success.dark,
-//     down:
-//       theme.palette.mode === "light"
-//         ? theme.palette.error.main
-//         : theme.palette.error.dark,
-//     neutral:
-//       theme.palette.mode === "light"
-//         ? theme.palette.grey[400]
-//         : theme.palette.grey[700],
-//   };
+                        </TextField>
+                    </Grid>
 
-//   function getDaysInMonth(month: number, year: number) {
-//     const date = new Date(year, month, 0);
-//     const monthName = date.toLocaleDateString("en-US", {
-//       month: "short",
-//     });
-//     const daysInMonth = date.getDate();
-//     const days = [];
-//     let i = 1;
-//     while (days.length < daysInMonth) {
-//       days.push(`${monthName} ${i}`);
-//       i += 1;
-//     }
-//     return days;
-//   }
+                    <Grid item xs={12} md={2}>
+                        <Button
+                            fullWidth
+                            variant="outlined"
+                            color="error"
+                            size="small"
+                            startIcon={<RefreshOutlined />}
+                            onClick={handleResetFilters}
+                        >
+                            Reset Filters
+                        </Button>
+                    </Grid>
+                </Grid>
+            </Box>
 
-//   const inventoryRow: GridRowsProp = (inventryData || []).map((product) => ({
-//     id: product._id,
-//     name: product.name,
-//     buying_price: product.buying_price,
-//     quantity: product.quantity,
-//     threshold: product.threshold,
-//     expiry_date: product.expiry_date,
-//     availability: product.availability,
-//   }));
 
-//   useEffect(() => {
-//     // dispatch(viewAllStockist());
-//   }, []);
+            {/* Inventory Table with enhanced styling */}
+            <TabPanel value={currentTab} index={0}>
+                <InventoryTable
+                    stockItems={InventoryItems as []}
+                    sortRequest={handleSortRequest}
+                    isLoading={isLoading}
+                    stateChange={handleStateChange}
+                    pageChange={handleChangePage}
+                    limit={limit}
+                    sortField={sortField}
+                    sortOrder={sortOrder}
+                />
+            </TabPanel>
 
-//   const trend = "up"; // Example assignment; ensure this is set correctly in your code
-//   const chartColor = trendColors[trend];
+            {/* Inventory Table with enhanced styling */}
+            <TabPanel value={currentTab} index={1}>
+                <InventoryTable
+                    stockItems={zeroStockItems}
+                    sortRequest={handleSortRequest}
+                    isLoading={isLoading}
+                    stateChange={handleStateChange}
+                    pageChange={handleChangePage}
+                    limit={limit}
+                    sortField={sortField}
+                    sortOrder={sortOrder}
+                />
+            </TabPanel>
+            
 
-//   return (
-//     <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
-//       {/* cards */}
+            {/* Inventory Table with enhanced styling */}
+            <TabPanel value={currentTab} index={2}>
+                <InventoryTable
+                    stockItems={lowStockItems}
+                    sortRequest={handleSortRequest}
+                    isLoading={isLoading}
+                    stateChange={handleStateChange}
+                    pageChange={handleChangePage}
+                    limit={limit}
+                    sortField={sortField}
+                    sortOrder={sortOrder}
+                />
+            </TabPanel>
 
-//       <Grid
-//         container
-//         sx={{
-//           margin: "10px auto 0px auto",
-//           display: "flex",
-//           width: "100%",
-//           alignItems: "center",
-//         }}
-//       >
-//         <Grid
-//           item
-//           sx={{
-//             width: "max-content",
-//           }}
-//         >
-//           <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
-//             Inventory Overview
-//           </Typography>
-//         </Grid>
-//       </Grid>
+            {/* Inventory Table with enhanced styling */}
+            <TabPanel value={currentTab} index={3}>
+                <InventoryTable
+                    stockItems={positiveStockItems}
+                    sortRequest={handleSortRequest}
+                    isLoading={isLoading}
+                    stateChange={handleStateChange}
+                    pageChange={handleChangePage}
+                    limit={limit}
+                    sortField={sortField}
+                    sortOrder={sortOrder}
+                />
+            </TabPanel>
 
-//       <Grid
-//         container
-//         sx={{
-//           margin: "0 auto 30px auto",
-//           display: "flex",
-//           width: "100%",
-//           columnGap: "20px",
-//           alignItems: "center",
-//         }}
-//       >
-//         <Grid item xs={12} sm={6} lg={3}>
-//           <Card sx={{ background: "white" }}>
-//             <Typography component="h2" variant="subtitle2" gutterBottom>
-//               Total Products
-//             </Typography>
-//             <Stack sx={{ justifyContent: "space-between" }}>
-//               <Stack
-//                 direction="row"
-//                 sx={{ justifyContent: "space-between", alignItems: "center" }}
-//               >
-//                 <Typography variant="h4" component="p">
-//                   686
-//                 </Typography>
-//                 <Chip size="small" color={"success"} label={"₹250000"} />
-//               </Stack>
-//               <Stack
-//                 direction="row"
-//                 sx={{ justifyContent: "space-between", alignItems: "center" }}
-//               >
-//                 <Typography
-//                   variant="caption"
-//                   sx={{ color: "text.secondary" }}
-//                   gutterBottom
-//                 >
-//                   Last 7 days
-//                 </Typography>
 
-//                 <Typography
-//                   variant="caption"
-//                   sx={{ color: "text.secondary" }}
-//                   gutterBottom
-//                 >
-//                   Revenue
-//                 </Typography>
-//               </Stack>
-//             </Stack>
+            {/* Bulk Actions Footer */}
+            {selectedRows.length > 0 && (
+                <Fade in={selectedRows.length > 0}>
+                    <Paper
+                        elevation={3}
+                        sx={{
+                            position: 'fixed',
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            p: 2,
+                            zIndex: 1000,
+                            borderRadius: '12px 12px 0 0',
+                            bgcolor: '#f5f5f5',
+                            boxShadow: '0 -4px 20px rgba(0,0,0,0.1)',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <Typography variant="body1">
+                            <strong>{selectedRows.length}</strong> items selected
+                        </Typography>
+                        <Box sx={{ display: 'flex', gap: 2 }}>
+                            <Button
+                                variant="contained"
+                                color="error"
+                                onClick={() => setSelectedRows([])}
+                                sx={{ minWidth: 100 }}
+                            >
+                                Clear
+                            </Button>
 
-//             <Box sx={{ width: "100%", height: 50 }}>
-//               <SparkLineChart
-//                 colors={[chartColor]}
-//                 data={[
-//                   500, 400, 510, 530, 520, 600, 530, 520, 510, 730, 520, 510,
-//                   530, 620, 510, 530, 520, 410, 530, 520, 610, 530, 520, 610,
-//                   530, 420, 510, 430, 520, 510,
-//                 ]}
-//                 area
-//                 showHighlight
-//                 showTooltip
-//                 xAxis={{
-//                   scaleType: "band",
-//                   data: daysInWeek,
-//                 }}
-//                 sx={{
-//                   [`& .${areaElementClasses.root}`]: {
-//                     fill: `url(#area-gradient-${68})`,
-//                   },
-//                 }}
-//               >
-//                 <AreaGradient color={chartColor} id={`area-gradient-${68}`} />
-//               </SparkLineChart>
-//             </Box>
-//           </Card>
-//         </Grid>
+                            <Button
+                                variant="contained"
+                                color="success"
+                                startIcon={<AddCircleOutlineIcon />}
+                                onClick={() => handleBulkAction('stockIn')}
+                                sx={{ minWidth: 120 }}
+                            >
+                                Stock In
+                            </Button>
 
-//         <Grid item xs={12} sm={6} lg={3}>
-//           <Card sx={{ background: "white" }}>
-//             <Typography component="h2" variant="subtitle2" gutterBottom>
-//               Total Products
-//             </Typography>
-//             <Stack sx={{ justifyContent: "space-between" }}>
-//               <Stack
-//                 direction="row"
-//                 sx={{ justifyContent: "space-between", alignItems: "center" }}
-//               >
-//                 <Typography variant="h4" component="p">
-//                   686
-//                 </Typography>
-//                 <Chip size="small" color={"success"} label={"₹250000"} />
-//               </Stack>
-//               <Stack
-//                 direction="row"
-//                 sx={{ justifyContent: "space-between", alignItems: "center" }}
-//               >
-//                 <Typography
-//                   variant="caption"
-//                   sx={{ color: "text.secondary" }}
-//                   gutterBottom
-//                 >
-//                   Last 7 days
-//                 </Typography>
+                            <Button
+                                variant="contained"
+                                color="error"
+                                startIcon={<RemoveCircleOutlineIcon />}
+                                onClick={() => handleBulkAction('stockOut')}
+                                sx={{ minWidth: 120 }}
+                            >
+                                Stock Out
+                            </Button>
+                        </Box>
+                    </Paper>
+                </Fade>
+            )}
 
-//                 <Typography
-//                   variant="caption"
-//                   sx={{ color: "text.secondary" }}
-//                   gutterBottom
-//                 >
-//                   Revenue
-//                 </Typography>
-//               </Stack>
-//             </Stack>
+            {/* Side Modal for Stock In/Out actions */}
+            {/* <SideModal drawer={drawer} setDrawer={setDrawer} /> */}
+        </Container>
+    );
+};
 
-//             <Box sx={{ width: "100%", height: 50 }}>
-//               <SparkLineChart
-//                 colors={[chartColor]}
-//                 data={[
-//                   200, 24, 220, 260, 240, 380, 100, 240, 280, 240, 300, 340,
-//                   320, 360, 340, 380, 360, 400, 380, 420, 400, 640, 340, 460,
-//                   440, 480, 460, 600, 880, 920,
-//                 ]}
-//                 area
-//                 showHighlight
-//                 showTooltip
-//                 xAxis={{
-//                   scaleType: "band",
-//                   data: daysInWeek,
-//                 }}
-//                 sx={{
-//                   [`& .${areaElementClasses.root}`]: {
-//                     fill: `url(#area-gradient-${868})`,
-//                   },
-//                 }}
-//               >
-//                 <AreaGradient color={chartColor} id={`area-gradient-${868}`} />
-//               </SparkLineChart>
-//             </Box>
-//           </Card>
-//         </Grid>
-
-//         <Grid item xs={12} sm={6} lg={3}>
-//           <Card sx={{ background: "white" }}>
-//             <Typography component="h2" variant="subtitle2" gutterBottom>
-//               Total Products
-//             </Typography>
-//             <Stack sx={{ justifyContent: "space-between" }}>
-//               <Stack
-//                 direction="row"
-//                 sx={{ justifyContent: "space-between", alignItems: "center" }}
-//               >
-//                 <Typography variant="h4" component="p">
-//                   686
-//                 </Typography>
-//                 <Chip size="small" color={"success"} label={"₹250000"} />
-//               </Stack>
-//               <Stack
-//                 direction="row"
-//                 sx={{ justifyContent: "space-between", alignItems: "center" }}
-//               >
-//                 <Typography
-//                   variant="caption"
-//                   sx={{ color: "text.secondary" }}
-//                   gutterBottom
-//                 >
-//                   Last 7 days
-//                 </Typography>
-
-//                 <Typography
-//                   variant="caption"
-//                   sx={{ color: "text.secondary" }}
-//                   gutterBottom
-//                 >
-//                   Revenue
-//                 </Typography>
-//               </Stack>
-//             </Stack>
-
-//             <Box sx={{ width: "100%", height: 50 }}>
-//               <SparkLineChart
-//                 colors={[chartColor]}
-//                 data={[
-//                   1640, 1250, 970, 1130, 1050, 900, 720, 1080, 900, 450, 920,
-//                   820, 840, 600, 820, 780, 800, 760, 380, 740, 660, 620, 840,
-//                   500, 520, 480, 400, 360, 300, 220,
-//                 ]}
-//                 area
-//                 showHighlight
-//                 showTooltip
-//                 xAxis={{
-//                   scaleType: "band",
-//                   data: daysInWeek,
-//                 }}
-//                 sx={{
-//                   [`& .${areaElementClasses.root}`]: {
-//                     fill: `url(#area-gradient-${868})`,
-//                   },
-//                 }}
-//               >
-//                 <AreaGradient color={chartColor} id={`area-gradient-${868}`} />
-//               </SparkLineChart>
-//             </Box>
-//           </Card>
-//         </Grid>
-//       </Grid>
-
-//       <Grid
-//         container
-//         sx={{
-//           margin: "10px auto 0px auto",
-//           display: "flex",
-//           width: "100%",
-//           justifyContent: "space-between",
-//           alignItems: "center",
-//           border: "1px solid rgba(194, 201, 214, .4)",
-//           borderBottom: "none",
-//           borderRadius: 1,
-//           borderBottomLeftRadius: 0,
-//           borderBottomRightRadius: 0,
-//           padding: "15px",
-//         }}
-//       >
-//         <Grid
-//           item
-//           sx={{
-//             width: "max-content",
-//             margin: 0,
-//           }}
-//         >
-//           <Typography variant="body1" sx={{ margin: 0 }}>
-//             Products
-//           </Typography>
-//         </Grid>
-//         <Grid
-//           item
-//           sx={{
-//             width: "30%",
-//             display: "flex",
-//             marginRight: 0,
-//             justifyContent: "space-between",
-//             alignItems: "center",
-//           }}
-//         >
-//           <MenuButton
-//             onClick={() => {
-//               navigate("/add/product");
-//             }}
-//             size="small"
-//             sx={{
-//               width: "max-content",
-//               gap: "10px",
-//               margin: "auto 10px",
-//               padding: "0 10px",
-//             }}
-//             aria-label="Add Stockist"
-//             aria-controls={"color-scheme-menu"}
-//           >
-//             <AddCircleIcon fontSize="large" />
-//             <Typography
-//               variant="body1"
-//               sx={{ margin: 0, whiteSpace: "nowrap" }}
-//             >
-//               Add Products
-//             </Typography>
-//           </MenuButton>
-//           <FormControl sx={{ width: "max-content" }} variant="outlined">
-//             <OutlinedInput
-//               size="small"
-//               id="search"
-//               placeholder="Search…"
-//               sx={{ flexGrow: 1 }}
-//               startAdornment={
-//                 <InputAdornment position="start" sx={{ color: "text.primary" }}>
-//                   <SearchRoundedIcon fontSize="small" />
-//                 </InputAdornment>
-//               }
-//               inputProps={{
-//                 "aria-label": "search",
-//               }}
-//             />
-//           </FormControl>
-//         </Grid>
-//       </Grid>
-//       <Grid container spacing={0} columns={0}>
-//         <DataGrid
-//           checkboxSelection
-//           // onRowClick={(event) => {
-//           //   navigate(`/stockists/profile/${event.id}`);
-//           // }}
-//           sx={{
-//             border: "1px solid rgba(194, 201, 214, .4)",
-//             // borderBottom: "none",
-//             borderRadius: 1,
-//             borderTopLeftRadius: 0,
-//             borderTopWidth: "2px",
-//             borderTopRightRadius: 0,
-//             '& .MuiDataGrid-cell': {
-//               fontSize: '0.9rem',
-//             },
-//             '& .MuiDataGrid-columnHeaderTitle': {
-//               fontSize: '1rem',
-//             },
-//           }}
-//           disableRowSelectionOnClick
-//           editMode="row"
-//           rows={inventoryRow}
-//           columns={inventoryProductColumn}
-//           getRowClassName={(params) =>
-//             params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
-//           }
-//           initialState={{
-//             pagination: { paginationModel: { pageSize: 10 } },
-//           }}
-//           pageSizeOptions={[10, 20, 50]}
-//           density="compact"
-//           slotProps={{
-//             filterPanel: {
-//               filterFormProps: {
-//                 logicOperatorInputProps: {
-//                   variant: "outlined",
-//                   size: "small",
-//                 },
-//                 columnInputProps: {
-//                   variant: "outlined",
-//                   size: "small",
-//                   sx: { mt: "auto" },
-//                 },
-//                 operatorInputProps: {
-//                   variant: "outlined",
-//                   size: "small",
-//                   sx: { mt: "auto" },
-//                 },
-//                 valueInputProps: {
-//                   InputComponentProps: {
-//                     variant: "outlined",
-//                     size: "small",
-//                   },
-//                 },
-//               },
-//             },
-//           }}
-//           rowHeight={90}
-//         />
-//       </Grid>
-//     </Box>
-//   );
-// }
+export default Inventory;

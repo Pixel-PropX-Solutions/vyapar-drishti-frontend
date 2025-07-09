@@ -1,4 +1,4 @@
-import { Chip } from "@mui/material";
+import { Button, Chip, styled } from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid-pro";
 import ProductIcon from "@mui/icons-material/LocalPharmacyOutlined";
 import QuantityIcon from "@mui/icons-material/LocalOffer";
@@ -175,6 +175,16 @@ export const getAvatarColor = (name: string): string => {
   const index = safeName.length % colors.length;
   return colors[index];
 };
+
+export const ActionButton = styled(Button)(({ theme }) => ({
+    borderRadius: '8px',
+    fontWeight: 600,
+    padding: theme.spacing(1, 2),
+    transition: 'all 0.2s',
+    boxShadow: 'none',
+}));
+
+
 // // Status chip color mapping
 // export const getStatusColor = (status: OrderStatus) => {
 //   switch (status) {

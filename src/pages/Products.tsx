@@ -28,11 +28,11 @@ import SearchIcon from "@mui/icons-material/Search";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import { deleteProduct, viewAllProducts, viewProduct } from "@/services/products";
+import { deleteProduct, viewAllStockItems, viewProduct } from "@/services/products";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import toast from "react-hot-toast";
-import { CategorySortField, GetCategory, GetProduct, ProductSortField, ProductUpdate, SortOrder, UpdateCategory } from "@/utils/types";
+import { CategorySortField, GetCategory, GetStockItem, ProductSortField, ProductUpdate, SortOrder, UpdateCategory } from "@/utils/types";
 import ProductsSideModal from "@/features/products/ProductsSideModal";
 import { deleteCategory, viewAllCategories, viewAllCategory } from "@/services/category";
 import TabPanel from "@/features/upload-documents/components/TabPanel";
@@ -47,9 +47,10 @@ const ProductsListing: React.FC = () => {
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { productsData, pageMeta } = useSelector((state: RootState) => state.product);
+  const { stockItems, pageMeta } = useSelector((state: RootState) => state.product);
   const { categoryLists, categories } = useSelector((state: RootState) => state.category);
-  const [products, setProducts] = useState<GetProduct[]>([]);
+  const [products, setProducts] = useState<GetStockItem[]>([]);
+
   const [data, setData] = useState({
     searchTerm: '',
     categoryFilter: 'All',
@@ -97,7 +98,7 @@ const ProductsListing: React.FC = () => {
       });
   };
 
-  const handleEdit = async (product: GetProduct) => {
+  const handleEdit = async (product: GetStockItem) => {
     setDrawer(true);
     await dispatch(viewProduct({ product_id: product._id, company_id: currentCompany?._id || '' }))
       .unwrap().then((res) => {
@@ -111,7 +112,7 @@ const ProductsListing: React.FC = () => {
       });
   };
 
-  const handleView = (product: GetProduct) => {
+  const handleView = (product: GetStockItem) => {
     navigate(`/products/${product._id}`);
   };
 
@@ -155,7 +156,7 @@ const ProductsListing: React.FC = () => {
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     dispatch(
-      viewAllProducts({
+      viewAllStockItems({
         company_id: currentCompany?._id || '',
         searchQuery: searchTerm,
         category: categoryFilter,
@@ -205,10 +206,10 @@ const ProductsListing: React.FC = () => {
   }, [fetchCategory, categorySortOrder, currentCompany?._id, parent, limit, pageNumber, searchQuery, sortField]);
 
   useEffect(() => {
-    if (productsData && pageMeta) {
-      setProducts(productsData);
+    if (stockItems && pageMeta) {
+      setProducts(stockItems);
     }
-  }, [productsData, pageMeta]);
+  }, [stockItems, pageMeta]);
 
   return (
     <Box sx={{ p: 3, minHeight: '100vh', width: '100%' }}>
@@ -428,16 +429,13 @@ const ProductsListing: React.FC = () => {
                   <Tooltip title="Sort by Item Quantity" arrow>
                     <TableSortLabel
                     >
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                        <InventoryIcon fontSize="small" />
-                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                          Stock Status
-                        </Typography>
-                      </Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                        Unit
+                      </Typography>
                     </TableSortLabel>
                   </Tooltip>
                 </TableCell>
-                <TableCell align="right" sx={{ px: 1 }}>
+                <TableCell align="center" sx={{ px: 1 }}>
                   <Tooltip title="Sort by Bar-Code" arrow>
                     <TableSortLabel
                       active={sortBy === "gst_hsn_code"}
@@ -456,14 +454,14 @@ const ProductsListing: React.FC = () => {
                     </TableSortLabel>
                   </Tooltip>
                 </TableCell>
-                <TableCell align="right" sx={{ px: 1 }}>
+                <TableCell align="center" sx={{ px: 1 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                    Selling Price
+                    Category
                   </Typography>
                 </TableCell>
-                <TableCell align="right" sx={{ px: 1 }}>
+                <TableCell align="center" sx={{ px: 1 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                    Purchase Price
+                    Group
                   </Typography>
                 </TableCell>
                 <TableCell align="center" >

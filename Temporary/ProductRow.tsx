@@ -14,13 +14,18 @@ import {
     IconButton,
     TableCell,
     TableRow,
+    Chip,
     Fade,
     Zoom,
     Alert,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+// import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+// import TrendingDownIcon from "@mui/icons-material/TrendingDown";
+import CategoryIcon from "@mui/icons-material/Category";
 import { GetStockItem } from "@/utils/types";
 import { viewProduct } from "@/services/products";
 import { useDispatch, useSelector } from "react-redux";
@@ -67,6 +72,16 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
         return colors[index];
     };
 
+    // const getStockStatus = (quantity: number) => {
+    //     if (quantity === 0) return { label: 'Out of Stock', color: 'error' as const, icon: <TrendingDownIcon fontSize="small" /> };
+    //     if (quantity < 10) return { label: 'Low Stock', color: 'warning' as const, icon: <TrendingDownIcon fontSize="small" /> };
+    //     return { label: 'In Stock', color: 'success' as const, icon: <TrendingUpIcon fontSize="small" /> };
+    // };
+
+    // const stockStatus = getStockStatus(product?.current_stock || 0);
+    // const profit = (product.sales_value / product.sales_qty - (product.purchase_value / product.purchase_qty));
+    // const profitMargin = product.purchase_value ? ((profit / (product.sales_value / product.sales_qty)) * 100) : 0;
+
     return (
         <>
             <Fade in timeout={300 + index * 100}>
@@ -83,9 +98,6 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                             bgcolor: alpha(theme.palette.primary.main, 0.02),
                         },
                         borderLeft: `4px solid ${isHovered ? theme.palette.primary.main : 'transparent'}`,
-                        "& .MuiTableCell-root": {
-                            padding: '8px 16px',
-                        },
                     }}
                     onClick={() => onView(product)}
                 >
@@ -94,8 +106,8 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
                             <Avatar
                                 sx={{
-                                    width: 36,
-                                    height: 36,
+                                    width: 48,
+                                    height: 48,
                                     mr: 2,
                                     bgcolor: getAvatarColor(product.stock_item_name),
                                     fontSize: '1rem',
@@ -110,9 +122,10 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                             </Avatar>
                             <Box sx={{ flex: 1 }}>
                                 <Typography
-                                    variant="body1"
+                                    variant="subtitle1"
                                     sx={{
                                         fontWeight: 600,
+                                        fontSize: '0.95rem',
                                         color: theme.palette.text.primary,
                                         mb: 0.5,
                                         transition: 'color 0.3s ease',
@@ -120,79 +133,121 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                                 >
                                     {product.stock_item_name}
                                 </Typography>
-                                {product.description && <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <Typography
-                                        variant="body2"
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Chip
+                                        icon={<CategoryIcon />}
+                                        label={product.description || 'No Description'}
+                                        size="small"
+                                        variant="outlined"
                                         sx={{
-                                            color: theme.palette.text.primary,
-                                            mb: 0.5,
+                                            fontSize: '0.7rem',
+                                            height: '20px',
+                                            borderRadius: '10px',
+                                            bgcolor: alpha(theme.palette.primary.main, 0.08),
+                                            borderColor: alpha(theme.palette.primary.main, 0.2),
+                                            color: theme.palette.primary.main,
                                         }}
-                                    >
-                                        {product.description}
-                                    </Typography>
-                                </Box>}
+                                    />
+                                </Box>
                             </Box>
                         </Box>
                     </TableCell>
 
-                    {/* Product Unit */}
+                    {/* Quantity with Status */}
                     <TableCell align="center" sx={{ px: 1 }}>
                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
                             <Typography
-                                variant="body1"
+                                variant="h6"
                                 sx={{
                                     fontWeight: 700,
+                                    fontSize: '1.1rem',
                                     color: theme.palette.text.primary,
                                 }}
                             >
-                                {product.unit || '-'}
+                                {product.unit || 'No Unit'}
+                            </Typography>
+                            {/* <Chip
+                                icon={stockStatus.icon}
+                                label={stockStatus.label}
+                                color={stockStatus.color}
+                                size="small"
+                                sx={{
+                                    fontSize: '0.7rem',
+                                    height: '22px',
+                                    fontWeight: 600,
+                                }}
+                            /> */}
+                        </Box>
+                    </TableCell>
+
+                    {/* Selling Price */}
+                    <TableCell align="right" sx={{ px: 1 }}>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <Typography
+                                    variant="h6"
+                                    sx={{
+                                        fontWeight: 600,
+                                        fontSize: '1rem',
+                                        color: theme.palette.text.secondary,
+                                    }}
+                                >
+                                    {product.gst_hsn_code ? (`#${product.gst_hsn_code}`) : ('No HSN/SAC Code')}
+                                </Typography>
+                            </Box>
+                        </Box>
+                    </TableCell>
+                    <TableCell align="right" sx={{ px: 1 }}>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <CurrencyRupeeIcon sx={{ fontSize: '1.1rem', mr: 0.5, color: theme.palette.success.main }} />
+                                <Typography
+                                    variant="h6"
+                                    sx={{
+                                        fontWeight: 700,
+                                        fontSize: '1.1rem',
+                                        color: theme.palette.success.main,
+                                    }}
+                                >
+                                    {product.category || 'No Category'}
+                                </Typography>
+                            </Box>
+                            {/* {profitMargin > 0 && (
+                                <Typography
+                                    variant="caption"
+                                    sx={{
+                                        color: profitMargin > 20 ? theme.palette.success.main : theme.palette.warning.main,
+                                        fontSize: '0.7rem',
+                                        fontWeight: 600,
+                                    }}
+                                >
+                                    {profitMargin.toFixed(1)}% margin
+                                </Typography>
+                            )} */}
+                        </Box>
+                    </TableCell>
+
+                    {/* Purchase Price */}
+                    <TableCell align="right" sx={{ px: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                            <CurrencyRupeeIcon sx={{ fontSize: '1rem', mr: 0.5, color: theme.palette.text.secondary }} />
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    fontWeight: 600,
+                                    fontSize: '1rem',
+                                    color: theme.palette.text.primary,
+                                }}
+                            >
+                                {(product?.group || 'No Group')}
                             </Typography>
                         </Box>
                     </TableCell>
 
-                    {/* Product HSN/SAC Code */}
-                    <TableCell align="center" sx={{ px: 1 }}>
-                        <Typography
-                            variant="body1"
-                            sx={{
-                                fontWeight: 600,
-                                color: theme.palette.text.secondary,
-                            }}
-                        >
-                            {product.gst_hsn_code ? (`#${product.gst_hsn_code}`) : ('-')}
-                        </Typography>
-                    </TableCell>
-
-                    {/* Product Category */}
-                    <TableCell align="center" sx={{ px: 1 }}>
-                        <Typography
-                            variant="body1"
-                            sx={{
-                                fontWeight: 700,
-                                color: theme.palette.text.primary,
-                            }}
-                        >
-                            {product.category || '-'}
-                        </Typography>
-                    </TableCell>
-
-                    {/* Product Group */}
-                    <TableCell align="center" sx={{ px: 1 }}>
-                        <Typography
-                            variant="body1"
-                            sx={{
-                                fontWeight: 600,
-                                color: theme.palette.text.primary,
-                            }}
-                        >
-                            {(product?.group || '-')}
-                        </Typography>
-                    </TableCell>
-
                     {/* Actions */}
-                    <TableCell align="center">
+                    <TableCell align="right" sx={{ pr: 3, pl: 1 }}>
                         <Zoom in={isHovered} timeout={200}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'center' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'flex-end' }}>
                                 <Tooltip title="View Details" arrow>
                                     <IconButton
                                         size="small"

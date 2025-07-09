@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
     Box,
     Grid,
@@ -22,14 +22,15 @@ import CurrencyRupee from '@mui/icons-material/CurrencyRupee';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
-import { WareHouseProduct } from '@/utils/types';
-import { formatDate, formatDatewithTime } from '@/utils/functions';
+import { InventoryItem } from '@/utils/types';
+import { formatDatewithTime } from '@/utils/functions';
+import { useNavigate } from 'react-router-dom';
 
 const CustomTableCell = styled(TableCell)(({ theme }) => ({
     padding: theme.spacing(1.5),
 }));
 
-const StockInButton = styled(Button)(({ theme }) => ({
+const AddSalesButton = styled(Button)(({ theme }) => ({
     background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
     color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
     '&:hover': {
@@ -45,7 +46,7 @@ const StockInButton = styled(Button)(({ theme }) => ({
     fontWeight: 600,
 }));
 
-const StockOutButton = styled(Button)(({ theme }) => ({
+const AddPurchaseButton = styled(Button)(({ theme }) => ({
     background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
     color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
     '&:hover': {
@@ -61,18 +62,14 @@ const StockOutButton = styled(Button)(({ theme }) => ({
     fontWeight: 600,
 }));
 
-interface WareHouseRowProps {
-    row: any;
-    setDrawerData?: React.Dispatch<React.SetStateAction<{
-        isOpen: boolean;
-        type: 'stockIn' | 'stockOut' | null;
-        product: WareHouseProduct | null;
-    }>>;
+interface InventoryRowRowProps {
+    row: InventoryItem;
 }
 
-export const WareHouseRow = (props: WareHouseRowProps) => {
+export const InventoryRow = (props: InventoryRowRowProps) => {
     const theme = useTheme();
-    const { row, setDrawerData } = props;
+    const navigate = useNavigate();
+    const { row } = props;
     const [open, setOpen] = useState(false);
 
     return (
@@ -114,30 +111,30 @@ export const WareHouseRow = (props: WareHouseRowProps) => {
                             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
                         </IconButton>
                         <Typography variant="body1" fontWeight="medium">
-                            {row?.productDetails?.product_name}
+                            {row?.stock_item_name}
                         </Typography>
                     </Box>
                 </CustomTableCell>
                 <CustomTableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        {row?.available_quantity <= 0 ? (
+                        {row?.current_stock <= 0 ? (
                             <Chip
                                 size="small"
-                                label={`${row?.available_quantity}`}
+                                label={`${row?.current_stock} ${row?.unit}`}
                                 color="error"
                                 sx={{ fontWeight: 'bold' }}
                             />
-                        ) : row?.available_quantity < 10 ? (
+                        ) : row?.current_stock < (row?.low_stock_alert || 10) ? (
                             <Chip
                                 size="small"
-                                label={`${row?.available_quantity}`}
+                                label={`${row?.current_stock} ${row?.unit}`}
                                 color="warning"
                                 sx={{ fontWeight: 'bold' }}
                             />
                         ) : (
                             <Chip
                                 size="small"
-                                label={`${row?.available_quantity}`}
+                                label={`${row?.current_stock} ${row?.unit}`}
                                 color="success"
                                 sx={{ fontWeight: 'bold' }}
                             />
@@ -147,52 +144,40 @@ export const WareHouseRow = (props: WareHouseRowProps) => {
                 <CustomTableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <CurrencyRupee fontSize="small" color="action" />
-                        <Typography>{Number(row?.purchase_price).toFixed(2)}</Typography>
+                        <Typography>{Number(row?.avg_purchase_rate).toFixed(2)}</Typography>
                     </Box>
                 </CustomTableCell>
                 <CustomTableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <CurrencyRupee fontSize="small" color="action" />
-                        <Typography>{Number(row?.sell_price || row?.purchase_price).toFixed(2)}</Typography>
+                        <Typography>{Number(row?.avg_sale_rate || row?.avg_purchase_rate).toFixed(2)}</Typography>
                     </Box>
                 </CustomTableCell>
                 <CustomTableCell>
-                    <Tooltip title={formatDatewithTime(row?.updated_at)} arrow>
-                        <Typography variant="body2">{formatDatewithTime(row?.updated_at)}</Typography>
-                    </Tooltip>
+                    {row.last_restock_date ?
+                        (<Tooltip title={formatDatewithTime(row.last_restock_date)} arrow placement="top">
+                            <Typography variant="body2">{formatDatewithTime(row.last_restock_date)}</Typography>
+                        </Tooltip>) :
+                        (<Tooltip title='Not Restocked Yet' arrow placement="top">
+                            <Typography variant="body2">Not Restocked Yet</Typography>
+                        </Tooltip>)}
                 </CustomTableCell>
                 <CustomTableCell>
                     <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
-                        <StockInButton
+                        <AddPurchaseButton
                             startIcon={<AddCircleOutlineIcon sx={{ fontSize: 16 }} />}
                             size="small"
-                            onClick={() => {
-                                if (setDrawerData) {
-                                    setDrawerData({
-                                        isOpen: true,
-                                        type: 'stockIn',
-                                        product: row,
-                                    });
-                                }
-                            }}
+                            onClick={() => navigate('/invoices/create/purchase')}
                         >
-                            Stock In
-                        </StockInButton>
-                        <StockOutButton
+                            Add Purchase
+                        </AddPurchaseButton>
+                        <AddSalesButton
                             startIcon={<RemoveCircleOutlineIcon sx={{ fontSize: 16 }} />}
                             size="small"
-                            onClick={() => {
-                                if (setDrawerData) {
-                                    setDrawerData({
-                                        isOpen: true,
-                                        type: 'stockOut',
-                                        product: row,
-                                    });
-                                }
-                            }}
+                            onClick={() => navigate('/invoices/create/sales')}
                         >
-                            Stock Out
-                        </StockOutButton>
+                            Add Sales
+                        </AddSalesButton>
                     </Box>
                 </CustomTableCell>
             </TableRow>
@@ -213,23 +198,23 @@ export const WareHouseRow = (props: WareHouseRowProps) => {
                                             Product Information
                                         </Typography>
                                         <Typography variant="body2">
-                                            <strong>Category:</strong> {row?.productDetails?.category || 'N/A'}
+                                            <strong>Category:</strong> {row?.category || 'N/A'}
                                         </Typography>
                                         <Typography variant="body2">
-                                            <strong>Description:</strong> {row?.productDetails?.description || 'No description available'}
+                                            <strong>Description:</strong> {row?.description || 'No description available'}
                                         </Typography>
                                     </Paper>
                                 </Grid>
                                 <Grid item xs={12} md={6}>
                                     <Paper sx={{ p: 2, bgcolor: theme.palette.divider }}>
                                         <Typography variant="body2">
-                                            <strong>State:</strong> {row?.productDetails?.state || 'N/A'}
+                                            <strong>Group:</strong> {row?.group || 'N/A'}
                                         </Typography>
                                         <Typography variant="body2">
-                                            <strong>Expiry Date:</strong> {formatDate(row?.productDetails?.expiry_date) || 'N/A'}
+                                            <strong>HSN/SAC:</strong> {row?.gst_hsn_code || 'N/A'}
                                         </Typography>
                                         <Typography variant="body2">
-                                            <strong>Storage Requirement:</strong> {row?.productDetails?.storage_requirement || 'No special Storage required'}
+                                            <strong>Alias :</strong> {row?.alias_name || 'No alias available'}
                                         </Typography>
 
                                     </Paper>

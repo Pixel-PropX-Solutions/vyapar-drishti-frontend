@@ -17,7 +17,7 @@
 // import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 // import CloseIcon from '@mui/icons-material/Close';
 // import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-// import { OrderCreate, OrderStatus, StockOutState, WareHouseProduct } from '@/utils/types';
+// import { OrderCreate, OrderStatus, StockOutState, InventoryItem } from '@/utils/types';
 // import { sellProduct } from '@/services/products';
 // import { AppDispatch, RootState } from '@/store/store';
 // import { useDispatch, useSelector } from 'react-redux';
@@ -29,12 +29,12 @@
 //     drawer: {
 //         isOpen: boolean;
 //         type: 'stockIn' | 'stockOut' | null;
-//         product: WareHouseProduct | null;
+//         product: InventoryItem | null;
 //     };
 //     setDrawer: React.Dispatch<React.SetStateAction<{
 //         isOpen: boolean;
 //         type: 'stockIn' | 'stockOut' | null;
-//         product: WareHouseProduct | null;
+//         product: InventoryItem | null;
 //     }>>;
 // }
 

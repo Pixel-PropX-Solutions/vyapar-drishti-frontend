@@ -1,13 +1,13 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AuthStates } from "@/utils/enums";
-import { Inventory, PageMeta, StockMovement, WareHouseProduct } from "@/utils/types";
+import { Inventory, PageMeta, StockMovement, InventoryItem } from "@/utils/types";
 import { getProductStock, getStockMovement, viewInventrory } from "@/services/inventory";
 
 interface InventoryState {
   authState: AuthStates;
   inventoryData: Array<Inventory> | null;
   stockMovement: Array<StockMovement> | null;
-  wareHouseProduct: Array<WareHouseProduct> | null;
+  InventoryItems: Array<InventoryItem> | null;
   pageMeta: PageMeta;
   loading: boolean;
   error: string | null;
@@ -17,7 +17,7 @@ const initialState: InventoryState = {
   authState: AuthStates.INITIALIZING,
   inventoryData: [],
   stockMovement: [],
-  wareHouseProduct: [],
+  InventoryItems: [],
   pageMeta: {
     page: 0,
     limit: 0,
@@ -79,7 +79,7 @@ const inventorySlice = createSlice({
       .addCase(
         getProductStock.fulfilled,
         (state, action: PayloadAction<any>) => {
-          state.wareHouseProduct = action.payload.wareHouseProduct;
+          state.InventoryItems = action.payload.InventoryItems;
           state.pageMeta = action.payload.pageMeta;
           state.loading = false;
         }

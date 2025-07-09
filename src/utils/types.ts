@@ -535,11 +535,11 @@ export interface FormCreateProduct {
   opening_rate?: number;
   opening_value?: number;
   gst_nature_of_goods?: string;
-  gst_hsn_code?: string;
-  gst_taxability?: string;
-  gst_percentage?: string;
+  gst_hsn_code: string;
+  gst_taxability: string;
+  gst_percentage: string;
 
-  low_stock_alert?: number;
+  low_stock_alert: number;
 }
 
 export interface ProductUpdate {
@@ -652,7 +652,23 @@ export interface GetProduct {
   // Additonal Optional fields
   // selling_price: number
   // show_active_stock?: boolean;
+}
 
+export interface GetStockItem {
+  _id: string,
+  stock_item_name: string,
+  user_id: string,
+  company_id: string,
+  unit: string,
+  alias_name: string | null,
+  image: string | null,
+  description: string | null,
+  gst_hsn_code: string | null,
+  low_stock_alert: number | null,
+  created_at: string,
+  updated_at: string,
+  category: string | null,
+  group: string | null
 }
 
 export interface GetItem {
@@ -961,16 +977,6 @@ export interface ProductForOrder {
   unit_price: number
 }
 
-export interface SaleProduct {
-  product_name: string;
-  category: string;
-  state: string;
-  measure_of_unit: string;
-  no_of_tablets_per_pack: number;
-  storage_requirement: string;
-  description: string;
-  expiry_date: string;
-}
 
 export interface StockMovement {
   _id: string,
@@ -998,14 +1004,27 @@ export interface StockMovement {
   updated_at: string,
 }
 
-export interface WareHouseProduct {
+export interface InventoryItem {
   _id: string,
-  product_id: string,
-  available_quantity: number;
+  company_id: string,
+  current_stock: number;
   updated_at: string;
-  purchase_price?: number;
-  sell_price?: number;
-  productDetails: SaleProduct
+  avg_purchase_rate?: number;
+  avg_sale_rate?: number;
+  purchase_qty?: number;
+  sales_qty?: number;
+  purchase_value?: number;
+  sales_value?: number;
+  stock_item_name: string;
+  image?: string | File | null;
+  category?: string;
+  group?: string;
+  unit: string;
+  alias_name?: string;
+  gst_hsn_code?: string;
+  description?: string;
+  low_stock_alert?: number;
+  last_restock_date: string;
 }
 
 export interface Item {

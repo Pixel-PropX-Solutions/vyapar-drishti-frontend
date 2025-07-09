@@ -118,7 +118,7 @@ export default function UpdateSalePurchase() {
     const { type, voucher_id } = useParams();
     const [isLoading, setIsLoading] = useState(false);
     const [parties, setParties] = useState<{ id: string; name: string; }[]>([]);
-    const [counterParties, setCounterParties] = useState<{ id: string; name: string; }[]>([]);
+    // const [counterParties, setCounterParties] = useState<{ id: string; name: string; }[]>([]);
     const [itemsList, setItemsList] = useState<{ id: string; name: string; unit: string, gst: string, hsn_code: string }[]>([]);
     const theme = useTheme();
 
@@ -333,19 +333,19 @@ export default function UpdateSalePurchase() {
             console.error('Error fetching customers:', error);
         });
 
-        dispatch(viewAllCustomerWithType({
-            company_id: user.user_settings.current_company_id || '',
-            customerType: type === 'sales' ? 'Sales Account' : 'Purchase Account',
-        })).then((response) => {
-            if (response.meta.requestStatus === 'fulfilled') {
-                // console.log('viewAllCustomerWithType response for counter parties', response);
-                const ledgersWithType = response.payload;
-                setCounterParties(ledgersWithType.map((part: any) => ({ name: part.ledger_name, id: part._id })));
-            }
-        }
-        ).catch((error) => {
-            console.error('Error fetching customers:', error);
-        });
+        // dispatch(viewAllCustomerWithType({
+        //     company_id: user.user_settings.current_company_id || '',
+        //     customerType: type === 'sales' ? 'Sales Account' : 'Purchase Account',
+        // })).then((response) => {
+        //     if (response.meta.requestStatus === 'fulfilled') {
+        //         // console.log('viewAllCustomerWithType response for counter parties', response);
+        //         const ledgersWithType = response.payload;
+        //         setCounterParties(ledgersWithType.map((part: any) => ({ name: part.ledger_name, id: part._id })));
+        //     }
+        // }
+        // ).catch((error) => {
+        //     console.error('Error fetching customers:', error);
+        // });
 
         dispatch(viewProductsWithId(user.user_settings.current_company_id || '')).then((response) => {
             if (response.meta.requestStatus === 'fulfilled') {
@@ -520,7 +520,7 @@ export default function UpdateSalePurchase() {
                                                         }
                                                     }}
                                                 />
-                                                <Autocomplete
+                                                {/* <Autocomplete
                                                     options={counterParties}
                                                     getOptionLabel={(option) => option.name}
                                                     value={counterParties.find(p => p.id === data.counter_id) || null}
@@ -553,7 +553,7 @@ export default function UpdateSalePurchase() {
                                                             }}
                                                         />
                                                     )}
-                                                />
+                                                /> */}
                                             </Stack>
                                         </CardContent>
                                     </StyledCard>

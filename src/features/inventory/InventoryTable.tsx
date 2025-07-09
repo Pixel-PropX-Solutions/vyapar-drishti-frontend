@@ -26,8 +26,8 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
-import { SortField, SortOrder, WareHouseProduct } from '@/utils/types';
-import { WareHouseRow } from './warehouseRow';
+import { SortField, SortOrder, InventoryItem } from '@/utils/types';
+import { InventoryRow } from './InventoryRow';
 
 // Styled Components with enhanced visuals
 const CustomTableCell = styled(TableCell)(({ theme }) => ({
@@ -35,8 +35,8 @@ const CustomTableCell = styled(TableCell)(({ theme }) => ({
     whiteSpace: 'nowrap'
 }));
 
-interface WareHouseTableProps {
-    stockItems: WareHouseProduct[];
+interface InventoryTableProps {
+    stockItems: InventoryItem[];
     sortRequest: (field: SortField) => void;
     stateChange: (key: string, value: string) => void;
     isLoading?: boolean;
@@ -44,18 +44,13 @@ interface WareHouseTableProps {
     sortField: SortField;
     sortOrder: SortOrder;
     pageChange?: (_: React.ChangeEvent<unknown>, newPage: number) => void;
-    setDrawerData?: React.Dispatch<React.SetStateAction<{
-        isOpen: boolean;
-        type: 'stockIn' | 'stockOut' | null;
-        product: WareHouseProduct | null;
-    }>>;
 }
 
 
-const WareHouseTable = (props: WareHouseTableProps) => {
+const InventoryTable = (props: InventoryTableProps) => {
     const theme = useTheme();
-    const { wareHouseProduct, pageMeta } = useSelector((state: RootState) => state.inventory);
-    const { stockItems, stateChange, isLoading, limit, sortField, sortOrder, setDrawerData, sortRequest, pageChange } = props;
+    const { InventoryItems, pageMeta } = useSelector((state: RootState) => state.inventory);
+    const { stockItems, stateChange, isLoading, limit, sortField, sortOrder, sortRequest, pageChange } = props;
 
 
     return (
@@ -146,12 +141,12 @@ const WareHouseTable = (props: WareHouseTableProps) => {
                                             direction={sortField === "available_product_price" ? sortOrder : "asc"}
                                             onClick={() => sortRequest("available_product_price")}
                                         >
-                                            Purchase Price
+                                            Purchase Rate
                                         </TableSortLabel>
                                     </Tooltip>
                                 </CustomTableCell>
                                 <CustomTableCell sx={{ fontWeight: '600', whiteSpace: 'nowrap' }}>
-                                    Sale Price
+                                    Sale Rate
                                 </CustomTableCell>
                                 <CustomTableCell sx={{ fontWeight: '600' }}>
                                     <Tooltip title="Sort by Last Updated Date" arrow>
@@ -160,7 +155,7 @@ const WareHouseTable = (props: WareHouseTableProps) => {
                                             direction={sortField === "created_at" ? sortOrder : "asc"}
                                             onClick={() => sortRequest("created_at")}
                                         >
-                                            Last Updated
+                                            Last Restocked
                                         </TableSortLabel>
                                     </Tooltip>
                                 </CustomTableCell>
@@ -171,10 +166,9 @@ const WareHouseTable = (props: WareHouseTableProps) => {
                         </TableHead>
                         <TableBody>
                             {stockItems?.map((item) => (
-                                <WareHouseRow
+                                <InventoryRow
                                     key={item._id}
                                     row={item}
-                                    setDrawerData={setDrawerData}
                                 />
                             ))}
                         </TableBody>
@@ -183,7 +177,7 @@ const WareHouseTable = (props: WareHouseTableProps) => {
             </TableContainer>
 
             {/* Enhanced pagination with better information */}
-            {!isLoading && Array.isArray(wareHouseProduct) && wareHouseProduct.length > 0 && (
+            {!isLoading && Array.isArray(InventoryItems) && InventoryItems.length > 0 && (
                 <Box
                     sx={{
                         display: "flex",
@@ -229,4 +223,4 @@ const WareHouseTable = (props: WareHouseTableProps) => {
     );
 };
 
-export default WareHouseTable;
+export default InventoryTable;

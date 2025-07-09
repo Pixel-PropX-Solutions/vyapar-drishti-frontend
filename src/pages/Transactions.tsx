@@ -1,0 +1,703 @@
+import React, { useState, useEffect, useCallback } from "react";
+import {
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Typography,
+    Box,
+    TextField,
+    InputAdornment,
+    Pagination,
+    Tooltip,
+    TableSortLabel,
+    FormControl,
+    MenuItem,
+    alpha,
+    useTheme,
+    Button,
+    Card,
+    CardContent,
+    Grid,
+} from "@mui/material";
+import {
+    Search as SearchIcon,
+    FilterList as FilterIcon,
+    // AddCircle as AddCircleIcon,
+    RefreshOutlined,
+    PeopleAlt,
+    Today,
+} from "@mui/icons-material";
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import { CustomerSortField, SortOrder, GetAllVouchars } from "@/utils/types";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
+import { useNavigate } from "react-router-dom";
+import { printPaymentInvoices, printRecieptInvoices, viewAllInvoices } from "@/services/invoice";
+import { InvoicerRow } from "@/components/Invoice/InvoiceRow";
+import InvoicePrint from "@/components/Invoice/InvoicePrint";
+import InvoiceTypeModal from "@/components/Invoice/InvoiceTypeModal";
+import { getAllInvoiceGroups } from "@/services/accountingGroup";
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { InvoicesRowSkeleton } from "@/common/InvoicesRowSkeleton";
+import { ActionButton } from "@/utils/functions";
+
+
+const Transactions: React.FC = () => {
+    const navigate = useNavigate();
+    const theme = useTheme();
+    const dispatch = useDispatch<AppDispatch>();
+    const [promptModal, setPromptModal] = useState(false);
+    const [htmlFromAPI, setHtmlFromAPI] = useState<string>('');
+    const [html, setHtml] = useState<boolean>(false);
+    const [invoiceId, setInvoiceId] = useState<string>('');
+    const { invoices, loading, pageMeta } = useSelector((state: RootState) => state.invoice);
+    const { currentCompany } = useSelector((state: RootState) => state.auth);
+
+    const [state, setState] = useState({
+        searchQuery: "",
+        filterState: "All-States",
+        is_deleted: false,
+        type: "All",
+        page: 1,
+        startDate: new Date(),
+        endDate: new Date(),
+        rowsPerPage: 10,
+        sortField: "created_at" as CustomerSortField,
+        sortOrder: "asc" as SortOrder,
+    });
+
+    const { searchQuery, filterState, page, is_deleted, rowsPerPage, startDate, endDate, type, sortField, sortOrder } = state;
+
+    const fetchIvoices = useCallback(async () => {
+        dispatch(
+            viewAllInvoices({
+                searchQuery: searchQuery,
+                company_id: currentCompany?._id || "",
+                type: type,
+                start_date: startDate.getFullYear().toString() + '-' + (startDate.getMonth() + 1).toString().padStart(2, '0') + '-' + startDate.getDate().toString().padStart(2, '0'),
+                end_date: endDate.getFullYear().toString() + '-' + (endDate.getMonth() + 1).toString().padStart(2, '0') + '-' + endDate.getDate().toString().padStart(2, '0'),
+                pageNumber: page,
+                limit: rowsPerPage,
+                sortField: sortField,
+                sortOrder: sortOrder,
+            })
+        )
+    }, [dispatch, searchQuery, currentCompany?._id, type, startDate, endDate, page, rowsPerPage, sortField, sortOrder]);
+
+    // Fetch stockists data from API
+    useEffect(() => {
+        fetchIvoices();
+        dispatch(getAllInvoiceGroups(currentCompany?._id || ""));
+    }, [searchQuery, page, rowsPerPage, is_deleted, sortField, filterState, sortOrder, dispatch, fetchIvoices, currentCompany?._id]);
+
+    // Handle sorting change
+    const handleSortRequest = (field: CustomerSortField) => {
+        const isAsc = sortField === field && sortOrder === "asc";
+        setState((prevState) => ({
+            ...prevState,
+            sortOrder: isAsc ? "desc" : "asc",
+            sortField: field
+        }))
+    };
+
+    // Handle pagination change
+    const handleChangePage = (
+        event: React.ChangeEvent<unknown>,
+        newPage: number
+    ) => {
+        console.log(event);
+
+        setState((prevState) => ({
+            ...prevState,
+            page: newPage
+        }))
+        // setPage(newPage);
+    };
+
+    // Reset filters
+    const handleResetFilters = useCallback(() => {
+        setState({
+            searchQuery: "",
+            filterState: "All-States",
+            is_deleted: false,
+            type: "All",
+            page: 1,
+            startDate: new Date(),
+            endDate: new Date(),
+            rowsPerPage: 10,
+            sortField: "created_at" as CustomerSortField,
+            sortOrder: "asc" as SortOrder,
+        });
+    }, []);
+
+    // managing searchQuery, filterState, page, rowsPerPage
+    const handleStateChange = (field: string, value: any) => {
+        setState((prevState) => ({
+            ...prevState,
+            [field]: value
+        }))
+    }
+
+    // Handle view stockist details
+    const handleViewInvoice = (invoice: GetAllVouchars) => {
+        // navigate(`/customers/${customer._id}`)
+        console.log("View Invoice", invoice);
+    };
+
+    const handlePrintInvoice = (invoice: GetAllVouchars) => {
+        console.log("Print Invoice", invoice);
+        if (invoice.voucher_type === 'Receipt') {
+            dispatch(printRecieptInvoices({
+                vouchar_id: invoice._id,
+                company_id: currentCompany?._id || "",
+            })).then((response) => {
+                if (response.meta.requestStatus === 'fulfilled') {
+                    console.log("Print Invoice Response:", response.payload);
+                    const payload = response.payload as { invoceHtml: string };
+                    setHtmlFromAPI(payload.invoceHtml);
+                    setInvoiceId(invoice.voucher_number);
+                    setHtml(true);
+                } else {
+                    console.error("Failed to print invoice:", response.payload);
+                }
+            }
+            ).catch((error) => {
+                console.error("Error printing invoice:", error);
+            }
+            );
+        } else if (invoice.voucher_type === 'Payment') {
+            dispatch(printPaymentInvoices({
+                vouchar_id: invoice._id,
+                company_id: currentCompany?._id || "",
+            })).then((response) => {
+                if (response.meta.requestStatus === 'fulfilled') {
+                    console.log("Print Invoice Response:", response.payload);
+                    const payload = response.payload as { invoceHtml: string };
+                    setHtmlFromAPI(payload.invoceHtml);
+                    setInvoiceId(invoice.voucher_number);
+                    setHtml(true);
+                } else {
+                    console.error("Failed to print invoice:", response.payload);
+                }
+            }
+            ).catch((error) => {
+                console.error("Error printing invoice:", error);
+            }
+            );
+        }
+    };
+
+    const filteredInvoices = invoices?.filter((inv) => inv.voucher_type === 'Payment' || inv.voucher_type === 'Receipt');
+
+    return (
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <Box sx={{ p: 3, width: "100%", position: 'relative' }}>
+                {/* Page Title */}
+                <Card sx={{ mb: 3, p: 2, }}>
+                    <CardContent>
+                        <Paper
+                            sx={{
+                                display: "flex",
+                                width: "100%",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                background: 'transparent'
+                            }}
+                        >
+                            <Grid item sx={{ width: "50%" }}>
+                                <Typography
+                                    variant="h4"
+                                    component="h1"
+                                    gutterBottom
+                                >
+                                    Transactions Directory
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary" >
+                                    {pageMeta.total} Transactions found
+                                </Typography>
+                            </Grid>
+
+                            <Grid
+                                sx={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                }}
+                            >
+                                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                                    <ActionButton
+                                        variant="contained"
+                                        startIcon={<AddCircleOutlineIcon />}
+                                        color="success"
+                                        onClick={() => { navigate('/transaction/receipt') }}
+                                        sx={{
+                                            background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
+                                            color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
+                                            '&:hover': {
+                                                color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                                                background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
+                                            },
+                                        }}
+                                    >
+                                        Reciept
+                                    </ActionButton>
+
+                                    <ActionButton
+                                        variant="contained"
+                                        startIcon={<RemoveCircleOutlineIcon />}
+                                        color="error"
+                                        onClick={() => { navigate('/transaction/payment') }}
+                                        sx={{
+                                            background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
+                                            color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
+                                            '&:hover': {
+                                                color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                                                background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
+                                            },
+                                        }}
+                                    >
+                                        Payment
+                                    </ActionButton>
+                                </Box>
+                            </Grid>
+                        </Paper>
+                    </CardContent>
+                </Card>
+
+                {/* Search and Filter Controls */}
+                <Box sx={{ display: "flex", mb: 3, gap: 2, flexWrap: "wrap" }}>
+                    <TextField
+                        sx={{ flexGrow: 1, minWidth: "250px" }}
+                        variant="outlined"
+                        size="small"
+                        label='Search'
+                        placeholder="Search by name, type..."
+                        value={searchQuery}
+                        onChange={(e) => handleStateChange("searchQuery", e.target.value)}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <SearchIcon />
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
+
+                    <DatePicker
+                        label="Start Date"
+                        value={startDate}
+                        format="dd/MM/yyyy"
+                        views={["year", "month", "day"]}
+                        onChange={(newValue) => handleStateChange("startDate", newValue)}
+                        slotProps={{
+                            textField: {
+
+                                size: "small",
+                                sx: {
+                                    '& .MuiOutlinedInput-root': {
+                                        width: "150px",
+                                        borderRadius: '8px'
+                                    },
+                                    '& .MuiInputAdornment-root .MuiButtonBase-root': {
+                                        border: 'none',
+                                        boxShadow: 'none'
+                                    }
+                                }
+                            },
+                        }}
+                    />
+                    <DatePicker
+                        label="End Date"
+                        value={endDate}
+                        format="dd/MM/yyyy"
+                        views={["year", "month", "day"]}
+                        onChange={(newValue) => handleStateChange("endDate", newValue)}
+                        slotProps={{
+                            textField: {
+                                size: "small",
+                                sx: {
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        width: "150px",
+                                    },
+                                    '& .MuiInputAdornment-root .MuiButtonBase-root': {
+                                        border: 'none',
+                                        boxShadow: 'none'
+                                    }
+                                }
+                            },
+                        }}
+                    />
+
+                    <FormControl sx={{ minWidth: "150px" }}>
+                        <TextField
+                            select
+                            size="small"
+                            value={type}
+                            label="Filter by Transaction Types"
+                            placeholder="Filter by Transaction Types"
+                            onChange={(e) => handleStateChange("type", e.target.value)}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <FilterIcon />
+                                    </InputAdornment>
+                                ),
+                            }}
+                        >
+                            <MenuItem selected value="All">
+                                <em>All</em>
+                            </MenuItem>
+                            <MenuItem value={'Payment'}>
+                                Payment
+                            </MenuItem>
+                            <MenuItem value={'Receipt'}>
+                                Receipt
+                            </MenuItem>
+                        </TextField>
+                    </FormControl>
+
+                    <FormControl>
+                        <TextField
+                            select
+                            size="small"
+                            value={rowsPerPage.toString()}
+                            label="Show"
+                            onChange={(e) => {
+                                handleStateChange("rowsPerPage", parseInt(e.target.value, 10));
+                                handleStateChange("page", 1);
+                            }}
+                        >
+                            {[10, 15, 20].map((option) => (
+                                <MenuItem key={option} value={option.toString()}>
+                                    {option} rows
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    </FormControl>
+
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        size='medium'
+                        startIcon={<RefreshOutlined />}
+                        onClick={handleResetFilters}
+                        sx={{ fontWeight: 'bold', py: 1.5 }}
+                    >
+                        Reset Filters
+                    </Button>
+                </Box>
+
+                {/* Customers Table */}
+                <TableContainer component={Paper}
+                    elevation={0}
+                    sx={{
+                        width: '100%',
+                        borderRadius: 1,
+                        border: `1px solid ${alpha(theme.palette.divider, 1)}`,
+                        boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
+                        // overflow: 'hidden',
+                    }}>
+                    <Table sx={{ width: '100%' }}>
+                        <TableHead>
+                            <TableRow
+                                sx={{
+                                    bgcolor: alpha(theme.palette.grey[50], 0.8),
+                                    width: '100%',
+                                    '& .MuiTableCell-head': {
+                                        borderBottom: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                                    }
+                                }}>
+                                <TableCell sx={{ pl: 3, pr: 1 }}>
+                                    <Tooltip title="Sort by Name">
+                                        <TableSortLabel
+                                            active={sortField === "name"}
+                                            direction={sortField === "name" ? sortOrder : "asc"}
+                                            onClick={() => handleSortRequest("name")}
+                                        >
+                                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                                                Sr. No.
+                                            </Typography>
+                                        </TableSortLabel>
+                                    </Tooltip>
+                                </TableCell>
+                                <TableCell align="center" sx={{ px: 1 }}>
+                                    <Tooltip title="Sort by State" arrow>
+                                        <TableSortLabel
+                                            active={sortField === "state"}
+                                            direction={sortField === "state" ? sortOrder : "asc"}
+                                            onClick={() => handleSortRequest("state")}
+                                        >
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                                                <Today fontSize="small" />
+                                                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                                                    Transaction Date
+                                                </Typography>
+                                            </Box>
+                                        </TableSortLabel>
+                                    </Tooltip>
+                                </TableCell>
+                                <TableCell align="center" sx={{ px: 1 }}>
+                                    <Tooltip title="Sort by Name">
+                                        <TableSortLabel
+                                            active={sortField === "name"}
+                                            direction={sortField === "name" ? sortOrder : "asc"}
+                                            onClick={() => handleSortRequest("name")}
+                                        >
+                                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                                                Sender / Receiver
+                                            </Typography>
+                                        </TableSortLabel>
+                                    </Tooltip>
+                                </TableCell>
+
+                                <TableCell align="center" sx={{ px: 1 }}>
+                                    <Tooltip title="Sort by Item Quantity" arrow>
+                                        <TableSortLabel
+                                        // active={sortField === "name"}
+                                        // direction={sortField === "name" ? sortOrder : "asc"}
+                                        // onClick={() => handleSortRequest("name")}
+                                        >
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                                                {/* <Contacts fontSize="small" /> */}
+                                                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                                                    Transaction Type
+                                                </Typography>
+                                            </Box>
+                                        </TableSortLabel>
+                                    </Tooltip>
+                                </TableCell>
+
+                                <TableCell align="center" sx={{ px: 1 }}>
+                                    <Tooltip title="Sort by State" arrow>
+                                        <TableSortLabel
+                                            active={sortField === "state"}
+                                            direction={sortField === "state" ? sortOrder : "asc"}
+                                            onClick={() => handleSortRequest("state")}
+                                        >
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                                                {/* <LocationOn fontSize="small" /> */}
+                                                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                                                    Transaction No.
+                                                </Typography>
+                                            </Box>
+                                        </TableSortLabel>
+                                    </Tooltip>
+                                </TableCell>
+
+                                <TableCell align="center" sx={{ px: 1 }}>
+                                    <Tooltip title="Sort by State" arrow>
+                                        <TableSortLabel
+                                            active={sortField === "state"}
+                                            direction={sortField === "state" ? sortOrder : "asc"}
+                                            onClick={() => handleSortRequest("state")}
+                                        >
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                                                {/* <LocationOn fontSize="small" /> */}
+                                                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                                                    Debit
+                                                </Typography>
+                                            </Box>
+                                        </TableSortLabel>
+                                    </Tooltip>
+                                </TableCell>
+                                <TableCell align="center" sx={{ px: 1 }}>
+                                    <Tooltip title="Sort by State" arrow>
+                                        <TableSortLabel
+                                            active={sortField === "state"}
+                                            direction={sortField === "state" ? sortOrder : "asc"}
+                                            onClick={() => handleSortRequest("state")}
+                                        >
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                                                {/* <LocationOn fontSize="small" /> */}
+                                                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                                                    Credit
+                                                </Typography>
+                                            </Box>
+                                        </TableSortLabel>
+                                    </Tooltip>
+                                </TableCell>
+
+
+                                <TableCell align="center" >
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                                        Actions
+                                    </Typography>
+                                </TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {loading ? (
+                                Array([1, 2, 3, 4, 5])
+                                    .map((_, index) => <InvoicesRowSkeleton key={`skeleton-${index}`} />)
+                            ) : filteredInvoices?.length > 0 ? (
+                                filteredInvoices.map((inv, index) => (
+                                    <InvoicerRow
+                                        key={inv._id}
+                                        inv={inv}
+                                        index={index + 1 + (page - 1) * rowsPerPage}
+                                        onView={() => handleViewInvoice(inv)}
+                                        onEdit={() => {
+                                            navigate(`/invoices/update/${inv.voucher_type.toLowerCase()}/${inv._id}`);
+                                        }}
+                                        onDelete={async () => {
+                                            // await deleteCustomer(cred._id);
+                                            // fetchCustomers();
+                                        }}
+                                        onPrint={() => handlePrintInvoice(inv)}
+
+                                    />))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={8} sx={{ textAlign: "center", py: 8 }}>
+                                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                                            <PeopleAlt sx={{ fontSize: '4rem', color: theme.palette.text.disabled }} />
+                                            <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 600 }}>
+                                                No transactions today
+                                            </Typography>
+                                            <Typography variant="body2" color="text.secondary">
+                                                Try adjusting your search or filter criteria, or add your first transaction for today
+                                            </Typography>
+                                            <Grid
+                                                sx={{
+                                                    display: "flex",
+                                                    justifyContent: "space-between",
+                                                    alignItems: "center",
+                                                }}
+                                            >
+                                                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                                                    <ActionButton
+                                                        variant="contained"
+                                                        startIcon={<AddCircleOutlineIcon />}
+                                                        color="success"
+                                                        onClick={() => { navigate('/transaction/receipt') }}
+                                                        sx={{
+                                                            background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
+                                                            color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
+                                                            '&:hover': {
+                                                                color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                                                                background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
+                                                            },
+                                                        }}
+                                                    >
+                                                        Reciept
+                                                    </ActionButton>
+
+                                                    <ActionButton
+                                                        variant="contained"
+                                                        startIcon={<RemoveCircleOutlineIcon />}
+                                                        color="error"
+                                                        onClick={() => { navigate('/transaction/payment') }}
+                                                        sx={{
+                                                            background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
+                                                            color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
+                                                            '&:hover': {
+                                                                color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                                                                background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
+                                                            },
+                                                        }}
+                                                    >
+                                                        Payment
+                                                    </ActionButton>
+                                                </Box>
+                                            </Grid>
+                                        </Box>
+                                    </TableCell>
+                                </TableRow>
+                            )}
+
+                        </TableBody>
+                    </Table>
+
+                </TableContainer>
+
+                {/* Pagination Controls */}
+                <Paper
+                    elevation={0}
+                    sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        p: 1,
+                        mt: 1,
+                        borderRadius: 1,
+                        border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+                        boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
+                    }}
+                >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 0.5 }}>
+                        <Typography variant="body2" sx={{ mr: 2 }}>
+                            {`Showing ${(pageMeta.page - 1) * rowsPerPage + 1}-${Math.min(
+                                pageMeta.page * rowsPerPage,
+                                pageMeta.total
+                            )} of ${pageMeta.total} transactions`}
+                        </Typography>
+                    </Box>
+
+                    {pageMeta.total > rowsPerPage && (
+                        <Pagination
+                            count={Math.ceil(pageMeta.total / rowsPerPage)}
+                            page={page}
+                            onChange={handleChangePage}
+                            color="primary"
+                            size={"medium"}
+                            showFirstButton
+                            showLastButton
+                            sx={{
+                                "& .MuiPaginationItem-root": {
+                                    mx: { xs: 0.25, sm: 0.5 },
+                                    borderRadius: 1,
+                                    fontWeight: 600,
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': {
+                                        transform: 'translateY(-2px)',
+                                        boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`,
+                                    },
+                                    '&.Mui-selected': {
+                                        boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`,
+                                    },
+                                },
+                            }}
+                        />
+                    )}
+                </Paper>
+
+                <InvoiceTypeModal
+                    open={promptModal}
+                    onClose={() => setPromptModal(false)}
+                    onSubmit={(voucharTypeValue) => {
+                        console.log("Vouchar Type Value:", voucharTypeValue);
+                        if (voucharTypeValue === 'Sales') {
+                            navigate('/invoices/create/' + voucharTypeValue.toLowerCase());
+                        }
+                        if (voucharTypeValue === 'Purchase') {
+                            navigate('/invoices/create/' + voucharTypeValue.toLowerCase());
+                        }
+                        if (voucharTypeValue === 'Purchase') {
+                            navigate('/invoices/create/' + voucharTypeValue.toLowerCase());
+                        }
+                        if (voucharTypeValue === 'Payment') {
+                            navigate('/transaction/' + voucharTypeValue.toLowerCase());
+                        }
+                        if (voucharTypeValue === 'Receipt') {
+                            navigate('/transaction/' + voucharTypeValue.toLowerCase());
+                        }
+
+                        setPromptModal(false);
+                    }}
+                />
+                {html && <InvoicePrint invoiceHtml={htmlFromAPI} open={html} onClose={() => setHtml(false)} invoiceNumber={invoiceId} />}
+            </Box >
+        </LocalizationProvider>
+
+    );
+};
+
+export default Transactions;

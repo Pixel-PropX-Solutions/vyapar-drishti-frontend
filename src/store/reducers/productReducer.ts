@@ -8,9 +8,10 @@ import {
   viewAllProducts,
   viewProduct,
   getProduct,
+  viewAllStockItems,
   // viewProductsWithId,
 } from "@/services/products";
-import { PageMeta, GetProduct, ProductCreate, UploadData, ProductUpdate, GetItem } from "@/utils/types";
+import { PageMeta, GetProduct, ProductCreate, UploadData, ProductUpdate, GetItem, GetStockItem } from "@/utils/types";
 
 interface ProductState {
   authState: AuthStates;
@@ -20,6 +21,7 @@ interface ProductState {
   uploadData: UploadData | null;
   // productsListing: Array<ProductListing> | null;
   productsData: Array<GetProduct> | null;
+  stockItems: Array<GetStockItem> | null;
   loading: boolean;
   deletionModal: boolean;
   productId: string;
@@ -31,6 +33,7 @@ interface ProductState {
 const initialState: ProductState = {
   authState: AuthStates.INITIALIZING,
   productsData: [],
+  stockItems: [],
   // productsListing: [],
   productData: null,
   product: null,
@@ -115,6 +118,23 @@ const productSlice = createSlice({
         }
       )
       .addCase(viewAllProducts.rejected, (state, action) => {
+        state.error = action.payload as string;
+        state.loading = false;
+      })
+
+      .addCase(viewAllStockItems.pending, (state) => {
+        state.error = null;
+        state.loading = true;
+      })
+      .addCase(
+        viewAllStockItems.fulfilled,
+        (state, action: PayloadAction<any>) => {
+          state.stockItems = action.payload.stockItems;
+          state.pageMeta = action.payload.pageMeta;
+          state.loading = false;
+        }
+      )
+      .addCase(viewAllStockItems.rejected, (state, action) => {
         state.error = action.payload as string;
         state.loading = false;
       })

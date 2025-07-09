@@ -226,7 +226,7 @@ const PrivacyPolicyPage: React.FC = () => {
               
               <Box component="ul" sx={{ pl: 2 }}>
                 <Typography component="li" variant="body1" paragraph>
-                  <strong>Personal Identification Information:</strong> Name, email address, phone number, job title, company name, and other similar contact information when you create an account.
+                  <strong>Personal Identification Information:</strong> Name, email address, phone number, company name, and other similar contact information when you create an account.
                 </Typography>
                 <Typography component="li" variant="body1" paragraph>
                   <strong>Usage Data:</strong> Information about how you use our platform, including features accessed, time spent, actions taken, and other similar metrics.
@@ -392,7 +392,7 @@ const PrivacyPolicyPage: React.FC = () => {
               </Box>
               
               <Typography variant="body1" paragraph>
-                When we no longer need to retain your personal data, we will securely delete or anonymize it. For customer data you upload to our platform, you can delete this data at any time through your account settings.
+                When we no longer need to retain your personal data, we will securely delete it. For customer data you add or upload to our platform, you can delete this data at any time through your account settings.
               </Typography>
             </Box>
             
@@ -495,9 +495,9 @@ const PrivacyPolicyPage: React.FC = () => {
                 <Typography variant="subtitle1" fontWeight="medium" gutterBottom>
                   Our Data Protection Officer
                 </Typography>
-                <Typography variant="body1">Email: privacy@vyapardrishti.in</Typography>
+                <Typography variant="body1">Email: tohidkhan1193407@gmail.com</Typography>
                 <Typography variant="body1">Phone: +91 63670 97548</Typography>
-                <Typography variant="body1">Address: 123 Tech Park, Bangalore 560001, India</Typography>
+                <Typography variant="body1">Address: Near JNV, Rajsamand, Rajasthan, 313324, India</Typography>
               </Box>
               
               <Typography variant="body1" paragraph>

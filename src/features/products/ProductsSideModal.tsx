@@ -25,7 +25,7 @@ import {
     CheckCircle as CheckCircleIcon,
     RadioButtonUnchecked as RadioButtonUncheckedIcon
 } from '@mui/icons-material';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { updateProduct, createProduct } from '@/services/products';
 import { viewAllCategories } from '@/services/category';
 import { AppDispatch, RootState } from '@/store/store';
@@ -79,8 +79,8 @@ const ProductsSideModal = (props: SideModalProps) => {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const { setDrawer, drawer, setRefreshKey, product, setSelectedProduct } = props;
-    const { user } = useSelector((state: RootState) => state.auth);
-    const currentCompanyDetails = user?.company?.find((c :any) => c._id === user.user_settings.current_company_id);
+    const { user, currentCompany } = useSelector((state: RootState) => state.auth);
+    const currentCompanyDetails = user?.company?.find((c: any) => c._id === user.user_settings.current_company_id);
 
     // State management
     const [currentStep, setCurrentStep] = useState(0);
@@ -113,7 +113,6 @@ const ProductsSideModal = (props: SideModalProps) => {
     // Redux selectors
     const { categoryLists } = useSelector((state: RootState) => state.category);
     const { inventoryGroupLists } = useSelector((state: RootState) => state.inventoryGroup);
-    const { currentCompany } = useSelector((state: RootState) => state.auth);
 
     // Form data
     const [data, setData] = useState<FormCreateProduct>({
@@ -157,40 +156,44 @@ const ProductsSideModal = (props: SideModalProps) => {
         const errors: Record<string, string> = {};
         if (!data.stock_item_name.trim()) errors.product_name = 'Product name is required';
         if (!data.unit.trim()) errors.selling_price = 'Product must have a measuring unit';
+        if (currentCompanyDetails?.company_settings?.features?.enable_gst) {
+            if (!data.gst_hsn_code.trim()) errors.gst_hsn_code = 'GST HSN code is required';
+            if (!data.gst_taxability.trim()) errors.gst_taxability = 'GST taxability is required';
+            if (data.gst_taxability === 'Taxable' && !data.gst_percentage.trim()) errors.gst_percentage = 'GST percentage is required';
+        }
         setValidationErrors(errors);
-        return Object.keys(errors).length === 0;
-    }, [data]);
+        return errors;
+    }, [currentCompanyDetails?.company_settings?.features?.enable_gst, data]);
 
     // Check step completion
     const checkStepCompletion = useCallback(() => {
         const newCompletedSteps = new Set<number>();
 
-        // Step 0: Basic Details
         if (data.stock_item_name.trim() && data.unit.trim()) {
             newCompletedSteps.add(0);
         }
 
-        // Step 1: Additional Info (always optional)
-        newCompletedSteps.add(1);
-
-        // Step 2: Stock & Pricing (optional but complete if any data exists)
-        if (data.opening_balance || data.opening_rate) {
-            newCompletedSteps.add(2);
-        } else {
-            newCompletedSteps.add(2); // Consider optional steps as complete
+        if (
+            currentStep > 0 ||
+            data.alias_name || data.category || data.group || data.description
+        ) {
+            newCompletedSteps.add(1);
         }
 
-        // Step 3: Advanced Settings (optional)
-        newCompletedSteps.add(3);
+        if (
+            steps.length > 2 &&
+            (currentStep > 1 || data.gst_hsn_code || data.gst_taxability || data.gst_percentage)
+        ) {
+            newCompletedSteps.add(2);
+        }
 
         setCompletedSteps(newCompletedSteps);
-    }, [data]);
+    }, [data, currentStep, steps.length]);
 
     useEffect(() => {
         checkStepCompletion();
     }, [checkStepCompletion]);
 
-    // Handle form changes
     const handleChange = useCallback((field: keyof FormCreateProduct, value: string | boolean) => {
         setData((prevState: FormCreateProduct) => ({
             ...prevState,
@@ -234,17 +237,15 @@ const ProductsSideModal = (props: SideModalProps) => {
         }
     }, []);
 
-    // Calculate opening stock value
-    const calculateStockValue = useCallback(() => {
-        const quantity = parseFloat(data.opening_balance?.toString() || '0');
-        const price = parseFloat(data.opening_rate?.toString() || '0');
-        return quantity * price;
-    }, [data.opening_balance, data.opening_rate]);
-
     // Form submission
-    const handleSubmit = async () => {
-        if (!validateForm()) {
-            toast.error('Please fix the validation errors before submitting.');
+    const handleSubmit = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+        const errors = validateForm();
+        if (Object.keys(errors).length > 0) {
+            const firstErrorKey = Object.keys(errors)[0];
+            if (firstErrorKey) {
+                toast.error(errors[firstErrorKey]);
+            }
             return;
         }
 
@@ -256,6 +257,10 @@ const ProductsSideModal = (props: SideModalProps) => {
                 unit_id: data.unit_id.trim(),
                 company_id: (currentCompany?._id || '').trim(),
                 is_deleted: data.is_deleted === false,
+                gst_hsn_code: data.gst_hsn_code.trim(),
+                gst_taxability: data.gst_taxability.trim(),
+                gst_percentage: data.gst_percentage.trim(),
+                low_stock_alert: data.low_stock_alert || 0,
             };
 
             // Add optional fields
@@ -278,9 +283,6 @@ const ProductsSideModal = (props: SideModalProps) => {
                 }
             });
 
-            console.log('Submitting Sanitized Data:', sanitizedData);
-            console.log('Form Data Entries:', Array.from(formData.entries()));
-            console.log('Submitting Form Data:', Object.fromEntries(formData.entries()));
             if (product && product._id) {
                 await toast.promise(
                     dispatch(updateProduct({ data: formData, id: product._id }))
@@ -312,24 +314,11 @@ const ProductsSideModal = (props: SideModalProps) => {
                     }
                 );
             }
-
-            setIsLoading(false);
-            setValidationErrors({});
-            setImagePreview(null);
-            setSelectedProduct(null);
-            resetForm();
-            setDrawer(false);
-            setRefreshKey(prev => prev + 1);
         } catch (error) {
             console.error('Error creating/updating product:', error);
+            handleClose();
         } finally {
-            setIsLoading(false);
-            setValidationErrors({});
-            setImagePreview(null);
-            setSelectedProduct(null);
-            resetForm();
-            setDrawer(false);
-            setRefreshKey(prev => prev + 1);
+            handleClose();
         }
     };
 
@@ -355,9 +344,9 @@ const ProductsSideModal = (props: SideModalProps) => {
             gst_hsn_code: '',
             gst_taxability: '',
             low_stock_alert: 0,
+            gst_percentage: '',
         });
         setImagePreview(null);
-        setValidationErrors({});
         setCurrentStep(0);
         setCompletedSteps(new Set());
         if (fileInputRef.current) {
@@ -367,25 +356,15 @@ const ProductsSideModal = (props: SideModalProps) => {
 
     // Handle close
     const handleClose = useCallback(() => {
-        if (data.stock_item_name || data.unit || imagePreview) {
-            if (window.confirm('You have unsaved changes. Are you sure you want to close?')) {
-                resetForm();
-                setDrawer(false);
-                setSelectedProduct(null);
-                setSelectedUnitOption(null);
-                setSelectedCategoryOption(null);
-                setSelectedGroupOption(null);
-                setImagePreview(null);
-            }
-        } else {
-            setDrawer(false);
-            setSelectedProduct(null);
-            setSelectedUnitOption(null);
-            setSelectedCategoryOption(null);
-            setSelectedGroupOption(null);
-            setImagePreview(null);
-        }
-    }, [data.stock_item_name, data.unit, imagePreview, resetForm, setDrawer, setSelectedProduct]);
+        setDrawer(false);
+        setSelectedProduct(null);
+        setSelectedUnitOption(null);
+        setSelectedCategoryOption(null);
+        setSelectedGroupOption(null);
+        setImagePreview(null);
+        setRefreshKey(prev => prev + 1);
+        resetForm();
+    }, [resetForm, setDrawer, setRefreshKey, setSelectedProduct]);
 
     // Load product data for editing
     useEffect(() => {
@@ -410,6 +389,7 @@ const ProductsSideModal = (props: SideModalProps) => {
                 gst_hsn_code: product.gst_hsn_code || '',
                 gst_taxability: product.gst_taxability || '',
                 low_stock_alert: product.low_stock_alert || 0,
+                gst_percentage: '',
             });
             const foundUnit = units
                 ?.find(option => option.value === product.unit && option.id === product.unit_id);
@@ -497,12 +477,14 @@ const ProductsSideModal = (props: SideModalProps) => {
             inventoryGroupLists: inventoryGroupLists || [],
             selectedCategoryOption,
             selectedGroupOption,
-            setSelectedGroupOption,
             setSelectedCategoryOption,
-            selectedUnitOption,
-            setSelectedUnitOption,
+            setSelectedGroupOption,
             setOpenCategoryModal,
             setOpenGroupModal,
+            showGstFields,
+            isHSNRequired: currentCompanyDetails?.company_settings?.features?.enable_gst,
+            selectedUnitOption,
+            setSelectedUnitOption,
             imagePreview,
             setImagePreview,
             handleImageChange,
@@ -510,8 +492,6 @@ const ProductsSideModal = (props: SideModalProps) => {
             isDragActive,
             setIsDragActive,
             fileInputRef,
-            calculateStockValue,
-            showGstFields
         };
 
         switch (currentStep) {
@@ -530,6 +510,20 @@ const ProductsSideModal = (props: SideModalProps) => {
         switch (currentStep) {
             case 0:
                 return data.stock_item_name.trim() && data.unit.trim();
+            case 1:
+                return true;
+            case 2:
+                if (currentCompanyDetails.company_settings.features.enable_gst) {
+                    if (!data.gst_hsn_code.trim() || !data.gst_taxability.trim()) {
+                        return false;
+                    }
+                    if (data.gst_taxability === 'Taxable') {
+                        return !!data.gst_percentage.trim();
+                    }
+                    return true;
+                } else {
+                    return true;
+                }
             default:
                 return true;
         }
@@ -572,7 +566,7 @@ const ProductsSideModal = (props: SideModalProps) => {
 
                 {/* Enhanced Header */}
                 <Box sx={{
-                    p: 3,
+                    p: 2,
                     borderBottom: `1px solid ${theme.palette.divider}`,
                     background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.primary.light, 0.05)} 100%)`,
                     backdropFilter: 'blur(20px)',
@@ -586,8 +580,7 @@ const ProductsSideModal = (props: SideModalProps) => {
                                         backgroundColor: alpha(theme.palette.background.paper, 0.8),
                                         backdropFilter: 'blur(10px)',
                                         '&:hover': {
-                                            backgroundColor: theme.palette.action.hover,
-                                            transform: 'scale(1.1) rotate(90deg)'
+                                            transform: 'rotate(90deg)'
                                         },
                                         transition: 'all 0.3s ease'
                                     }}
@@ -596,7 +589,7 @@ const ProductsSideModal = (props: SideModalProps) => {
                                 </IconButton>
                             </Tooltip>
                             <Box>
-                                <Typography variant="h4" sx={{
+                                <Typography variant="h6" sx={{
                                     fontWeight: 800,
                                     background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
                                     backgroundClip: 'text',
@@ -611,39 +604,7 @@ const ProductsSideModal = (props: SideModalProps) => {
                             </Box>
                         </Stack>
 
-                        <Button
-                            variant="contained"
-                            size="large"
-                            startIcon={<SaveIcon />}
-                            onClick={handleSubmit}
-                            disabled={isLoading || !canProceed()}
-                            sx={{
-                                textTransform: 'none',
-                                px: 4,
-                                py: 1.5,
-                                fontSize: '1.1rem',
-                                fontWeight: 700,
-                                borderRadius: 1,
-                                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                                boxShadow: `0 8px 32px ${alpha(theme.palette.primary.main, 0.4)}`,
-                                '&:hover': {
-                                    transform: 'translateY(-2px)',
-                                    boxShadow: `0 12px 40px ${alpha(theme.palette.primary.main, 0.6)}`,
-                                },
-                                '&:disabled': {
-                                    background: theme.palette.action.disabledBackground,
-                                    color: theme.palette.action.disabled,
-                                    transform: 'none',
-                                    boxShadow: 'none'
-                                },
-                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                            }}
-                        >
-                            {isLoading
-                                ? (product ? 'Updating...' : 'Creating...')
-                                : (product ? 'Update Product' : 'Create Product')
-                            }
-                        </Button>
+
                     </Stack>
                 </Box>
 
@@ -673,8 +634,8 @@ const ProductsSideModal = (props: SideModalProps) => {
                                 <StepLabel
                                     StepIconComponent={({ active, completed }) => (
                                         <Box sx={{
-                                            width: 40,
-                                            height: 40,
+                                            width: 30,
+                                            height: 30,
                                             borderRadius: '50%',
                                             display: 'flex',
                                             alignItems: 'center',
@@ -740,7 +701,7 @@ const ProductsSideModal = (props: SideModalProps) => {
 
                 {/* Enhanced Footer */}
                 <Box sx={{
-                    p: 3,
+                    p: 2,
                     borderTop: `1px solid ${theme.palette.divider}`,
                     background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)} 0%, ${alpha(theme.palette.action.hover, 0.5)} 100%)`,
                     backdropFilter: 'blur(20px)',
@@ -769,7 +730,6 @@ const ProductsSideModal = (props: SideModalProps) => {
                                     sx={{
                                         textTransform: 'none',
                                         borderRadius: 1,
-                                        background: `linear-gradient(135deg, ${theme.palette.secondary.main} 0%, ${theme.palette.secondary.dark} 100%)`,
                                     }}
                                 >
                                     Next
@@ -779,12 +739,35 @@ const ProductsSideModal = (props: SideModalProps) => {
 
                         <Stack direction="row" spacing={2}>
                             <Button
-                                variant="text"
+                                variant="outlined"
                                 onClick={resetForm}
                                 disabled={isLoading}
-                                sx={{ textTransform: 'none' }}
                             >
                                 Reset
+                            </Button>
+                            <Button
+                                variant="contained"
+                                size="large"
+                                startIcon={<SaveIcon />}
+                                onClick={handleSubmit}
+                                disabled={isLoading || !canProceed()}
+                                sx={{
+                                    textTransform: 'none',
+                                    px: 3,
+                                    py: 1,
+                                    fontSize: '1rem',
+                                    fontWeight: 700,
+                                    borderRadius: 1,
+                                    '&:disabled': {
+                                        background: theme.palette.action.disabledBackground,
+                                        color: theme.palette.action.disabled,
+                                    },
+                                }}
+                            >
+                                {isLoading
+                                    ? (product ? 'Updating...' : 'Creating...')
+                                    : (product ? 'Update Product' : 'Create Product')
+                                }
                             </Button>
                         </Stack>
                     </Stack>

@@ -26,35 +26,34 @@ import {
 import {
   Search as SearchIcon,
   FilterList as FilterIcon,
-  AddCircle as AddCircleIcon,
   RefreshOutlined,
   PeopleAlt,
   Today,
 } from "@mui/icons-material";
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import { CustomerSortField, SortOrder, GetAllVouchars } from "@/utils/types";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { useNavigate } from "react-router-dom";
-import { printGSTInvoices, printInvoices, printPaymentInvoices, printRecieptInvoices, viewAllInvoices } from "@/services/invoice";
+import { printGSTInvoices, printInvoices, viewAllInvoices } from "@/services/invoice";
 import { InvoicerRow } from "@/components/Invoice/InvoiceRow";
 import InvoicePrint from "@/components/Invoice/InvoicePrint";
-import InvoiceTypeModal from "@/components/Invoice/InvoiceTypeModal";
 import { getAllInvoiceGroups } from "@/services/accountingGroup";
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { InvoicesRowSkeleton } from "@/common/InvoicesRowSkeleton";
+import { ActionButton } from "@/utils/functions";
 
 
 const Invoices: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
-  const [promptModal, setPromptModal] = useState(false);
   const [htmlFromAPI, setHtmlFromAPI] = useState<string>('');
   const [html, setHtml] = useState<boolean>(false);
   const [invoiceId, setInvoiceId] = useState<string>('');
-  const { invoiceGroupList } = useSelector((state: RootState) => state.accountingGroup);
   const { invoices, loading, pageMeta } = useSelector((state: RootState) => state.invoice);
   const { currentCompany, user } = useSelector((state: RootState) => state.auth);
   const currentCompanyDetails = user?.company?.find((c: any) => c._id === user.user_settings.current_company_id);
@@ -193,49 +192,10 @@ const Invoices: React.FC = () => {
         );
       }
 
-    } else if (invoice.voucher_type === 'Receipt') {
-      dispatch(printRecieptInvoices({
-        vouchar_id: invoice._id,
-        company_id: currentCompany?._id || "",
-      })).then((response) => {
-        if (response.meta.requestStatus === 'fulfilled') {
-          console.log("Print Invoice Response:", response.payload);
-          const payload = response.payload as { invoceHtml: string };
-          setHtmlFromAPI(payload.invoceHtml);
-          setInvoiceId(invoice.voucher_number);
-          setHtml(true);
-        } else {
-          console.error("Failed to print invoice:", response.payload);
-        }
-      }
-      ).catch((error) => {
-        console.error("Error printing invoice:", error);
-      }
-      );
-    } else if (invoice.voucher_type === 'Payment') {
-      dispatch(printPaymentInvoices({
-        vouchar_id: invoice._id,
-        company_id: currentCompany?._id || "",
-      })).then((response) => {
-        if (response.meta.requestStatus === 'fulfilled') {
-          console.log("Print Invoice Response:", response.payload);
-          const payload = response.payload as { invoceHtml: string };
-          setHtmlFromAPI(payload.invoceHtml);
-          setInvoiceId(invoice.voucher_number);
-          setHtml(true);
-        } else {
-          console.error("Failed to print invoice:", response.payload);
-        }
-      }
-      ).catch((error) => {
-        console.error("Error printing invoice:", error);
-      }
-      );
     }
-
-
-
   };
+
+  const filteredInvoices = invoices?.filter((inv) => inv.voucher_type === 'Sales' || inv.voucher_type === 'Purchase');
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -273,25 +233,41 @@ const Invoices: React.FC = () => {
                   alignItems: "center",
                 }}
               >
-                <Grid item xs={12} sm={6} md={12}>
-
-
-                  <Button
+                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                  <ActionButton
                     variant="contained"
-                    color="primary"
-                    startIcon={<AddCircleIcon fontSize="large" />}
-                    onClick={() => {
-                      setPromptModal(true);
-                    }}
+                    startIcon={<AddCircleOutlineIcon />}
+                    color="success"
+                    onClick={() => { navigate('/invoices/create/sales') }}
                     sx={{
-                      width: "max-content",
+                      background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
+                      color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
+                      '&:hover': {
+                        color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                        background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
+                      },
                     }}
                   >
-                    Add Invoices
-                  </Button>
+                    Add Sales
+                  </ActionButton>
 
-
-                </Grid>
+                  <ActionButton
+                    variant="contained"
+                    startIcon={<RemoveCircleOutlineIcon />}
+                    color="error"
+                    onClick={() => { navigate('/invoices/create/purchase') }}
+                    sx={{
+                      background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
+                      color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
+                      '&:hover': {
+                        color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                        background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
+                      },
+                    }}
+                  >
+                    Add Purchase
+                  </ActionButton>
+                </Box>
               </Grid>
             </Paper>
           </CardContent>
@@ -381,11 +357,12 @@ const Invoices: React.FC = () => {
               <MenuItem selected value="All">
                 <em>All</em>
               </MenuItem>
-              {invoiceGroupList?.map((group) => (
-                <MenuItem key={group?._id} value={group?.name}>
-                  {group?.name}
-                </MenuItem>
-              ))}
+              <MenuItem value={'Sales'}>
+                Sales
+              </MenuItem>
+              <MenuItem value={'Purchase'}>
+                Purchase
+              </MenuItem>
             </TextField>
           </FormControl>
 
@@ -562,8 +539,8 @@ const Invoices: React.FC = () => {
               {loading ? (
                 Array([1, 2, 3, 4, 5])
                   .map((_, index) => <InvoicesRowSkeleton key={`skeleton-${index}`} />)
-              ) : invoices?.length > 0 ? (
-                invoices.map((inv, index) => (
+              ) : filteredInvoices?.length > 0 ? (
+                filteredInvoices.map((inv, index) => (
                   <InvoicerRow
                     key={inv._id}
                     inv={inv}
@@ -590,21 +567,49 @@ const Invoices: React.FC = () => {
                       <Typography variant="body2" color="text.secondary">
                         Try adjusting your search or filter criteria, or create your first invoice for today
                       </Typography>
-                      <Button
-                        variant="contained"
-                        onClick={() => {
-                          setPromptModal(true);
-                        }}
-                        startIcon={<AddCircleIcon />}
+                      <Grid
                         sx={{
-                          mt: 2,
-                          borderRadius: 1,
-                          textTransform: 'none',
-                          fontWeight: 600,
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
                         }}
                       >
-                        Create Your First Invoice
-                      </Button>
+                        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                          <ActionButton
+                            variant="contained"
+                            startIcon={<AddCircleOutlineIcon />}
+                            color="success"
+                            onClick={() => { navigate('/invoices/create/sales') }}
+                            sx={{
+                              background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
+                              color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
+                              '&:hover': {
+                                color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                                background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
+                              },
+                            }}
+                          >
+                            Add Sales
+                          </ActionButton>
+
+                          <ActionButton
+                            variant="contained"
+                            startIcon={<RemoveCircleOutlineIcon />}
+                            color="error"
+                            onClick={() => { navigate('/invoices/create/purchase') }}
+                            sx={{
+                              background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
+                              color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
+                              '&:hover': {
+                                color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                                background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
+                              },
+                            }}
+                          >
+                            Add Purchase
+                          </ActionButton>
+                        </Box>
+                      </Grid>
                     </Box>
                   </TableCell>
                 </TableRow>
@@ -666,30 +671,6 @@ const Invoices: React.FC = () => {
           )}
         </Paper>
 
-        <InvoiceTypeModal
-          open={promptModal}
-          onClose={() => setPromptModal(false)}
-          onSubmit={(voucharTypeValue) => {
-            console.log("Vouchar Type Value:", voucharTypeValue);
-            if (voucharTypeValue === 'Sales') {
-              navigate('/invoices/create/' + voucharTypeValue.toLowerCase());
-            }
-            if (voucharTypeValue === 'Purchase') {
-              navigate('/invoices/create/' + voucharTypeValue.toLowerCase());
-            }
-            if (voucharTypeValue === 'Purchase') {
-              navigate('/invoices/create/' + voucharTypeValue.toLowerCase());
-            }
-            if (voucharTypeValue === 'Payment') {
-              navigate('/transaction/' + voucharTypeValue.toLowerCase());
-            }
-            if (voucharTypeValue === 'Receipt') {
-              navigate('/transaction/' + voucharTypeValue.toLowerCase());
-            }
-
-            setPromptModal(false);
-          }}
-        />
         {html && <InvoicePrint invoiceHtml={htmlFromAPI} open={html} onClose={() => setHtml(false)} invoiceNumber={invoiceId} />}
       </Box >
     </LocalizationProvider>
