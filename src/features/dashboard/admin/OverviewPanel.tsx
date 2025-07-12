@@ -4,7 +4,7 @@ import {
 } from '@mui/material';
 
 import {
-    Inventory, AssignmentReturn, CurrencyRupee
+    Inventory, AssignmentReturn
 } from '@mui/icons-material';
 import { BarChart, LineChart } from '@mui/x-charts';
 import { getAdminAnalytics } from '@/services/analytics';
@@ -50,7 +50,6 @@ const OverviewPanel: React.FC = () => {
     const monthName = date.toLocaleDateString('en-US', {
         month: 'long',
     });
-    // console.log("adminAnalyticsData", adminAnalyticsData);
     const colorPalette = [
         theme.palette.primary.dark,
         theme.palette.primary.main,
@@ -101,7 +100,16 @@ const OverviewPanel: React.FC = () => {
                                 Total Sales
                             </Typography>
                             <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, gap: 1 }}>
-                                <CurrencyRupee color="primary" />
+                                <Typography
+                                    variant="h6"
+                                    sx={{
+                                        fontWeight: 700,
+                                        mr: 0.5,
+                                        color: 'primary.main',
+                                    }}
+                                >
+                                    &#8377;
+                                </Typography>
                                 <Typography variant="h4" component="div">
                                     {adminAnalyticsData?.total_sales.toLocaleString()}
                                 </Typography>
@@ -119,7 +127,7 @@ const OverviewPanel: React.FC = () => {
                             <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, gap: 1 }}>
                                 <Inventory color="primary" />
                                 <Typography variant="h4" component="div">
-                                    ₹  {adminAnalyticsData?.total_purchase.toLocaleString()}
+                                    &#8377;  {adminAnalyticsData?.total_purchase.toLocaleString()}
                                 </Typography>
                             </Box>
                         </CardContent>
@@ -136,7 +144,7 @@ const OverviewPanel: React.FC = () => {
                             <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, gap: 1 }}>
                                 <Inventory color="primary" />
                                 <Typography variant="h4" component="div">
-                                    ₹  {adminAnalyticsData?.remaining_stock.toLocaleString()}
+                                    &#8377;  {adminAnalyticsData?.remaining_stock.toLocaleString()}
                                 </Typography>
                             </Box>
                         </CardContent>
@@ -152,7 +160,7 @@ const OverviewPanel: React.FC = () => {
                             <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, gap: 1 }}>
                                 <AssignmentReturn color="primary" />
                                 <Typography variant="h4" component="div">
-                                    ₹   {adminAnalyticsData?.pending_stock.toLocaleString()}
+                                    &#8377;   {adminAnalyticsData?.pending_stock.toLocaleString()}
                                 </Typography>
                             </Box>
                         </CardContent>

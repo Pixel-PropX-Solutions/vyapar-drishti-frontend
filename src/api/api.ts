@@ -29,18 +29,12 @@ userApi.interceptors.response.use(
             originalRequest._retry = true;
 
             try {
-                // const refreshToken = localStorage.getItem("refreshToken");
-                // if(!refreshToken)
-                //     throw new Error("Refresh Token not available. Please log in again.");
-
-                // console.log("Attempting token refresh");
                 const {data} = await axios.post<Token>(
                     // `${import.meta.env.VITE_BACKEND_BASE_URL}/auth/handleRefreshToken`,
                     `${import.meta.env.VITE_LOCAL_BACKEND_BASE_URL}/auth/handleRefreshToken`,
                     {},
                     {withCredentials : true}
                 );
-                // console.log("Token refreshed:", data);
                 localStorage.setItem("accessToken", data.accessToken);
                 localStorage.setItem("refreshToken", data.refreshToken);
 
@@ -59,7 +53,6 @@ userApi.interceptors.response.use(
             }
         }
 
-        console.log("API call error;", error);
         return Promise.reject(error);
     }
 );

@@ -18,7 +18,6 @@ import {
 // Icons
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
-import CurrencyRupee from '@mui/icons-material/CurrencyRupee';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
@@ -143,13 +142,27 @@ export const InventoryRow = (props: InventoryRowRowProps) => {
                 </CustomTableCell>
                 <CustomTableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <CurrencyRupee fontSize="small" color="action" />
+                        <Typography
+                            sx={{
+                                fontSize: '1rem',
+                                mr: 0.5,
+                            }}
+                        >
+                            &#8377;
+                        </Typography>
                         <Typography>{Number(row?.avg_purchase_rate).toFixed(2)}</Typography>
                     </Box>
                 </CustomTableCell>
                 <CustomTableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <CurrencyRupee fontSize="small" color="action" />
+                        <Typography
+                            sx={{
+                                fontSize: '1rem',
+                                mr: 0.5,
+                            }}
+                        >
+                            &#8377;
+                        </Typography>
                         <Typography>{Number(row?.avg_sale_rate || row?.avg_purchase_rate).toFixed(2)}</Typography>
                     </Box>
                 </CustomTableCell>

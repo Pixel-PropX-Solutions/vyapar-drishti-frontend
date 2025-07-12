@@ -43,6 +43,9 @@ import PaymentReceiptInvoice from "./components/Invoice/PaymentReceiptInvoice";
 import UpdateSalePurchase from "./components/Invoice/UpdateSalePurchase";
 import Transactions from "./pages/Transactions";
 import Inventory from "./pages/Inventory";
+import CreateCustomer from "./features/customer/CreateCustomer";
+import EditCustomer from "./features/customer/EditCustomer";
+import CustomerProfile from "./features/customer/CustomerProfile";
 // import PromptModal from "./common/PromptModal";
 
 const xThemeComponents = {
@@ -164,6 +167,9 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/timeline" element={<Timeline />} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/customers" element={<CustomerLedger />} />
+                <Route path="/customers/view/:customer_id" element={<CustomerProfile />} />
+                <Route path="/customers/create/:type" element={<EditCustomer />} />
+                <Route path="/customers/edit/:type" element={<EditCustomer />} />
                 <Route path="/invoices" element={<Invoices />} />
                 <Route path="/transactions" element={<Transactions />} />
                 <Route path="/invoices/create" element={<CreateInvoice />} />
@@ -204,7 +210,6 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
           setShowProfileModal(false);
         }}
         onSubmit={(data) => {
-          console.log("Submitted:", data);
           localStorage.setItem("profilePromptDismissed", "true");
           setShowProfileModal(false);
         }}

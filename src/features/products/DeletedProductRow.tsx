@@ -20,7 +20,6 @@ import {
     Alert,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CategoryIcon from "@mui/icons-material/Category";
 import { GetProduct } from "@/utils/types";
@@ -156,7 +155,7 @@ export const DeletedProductRow: React.FC<DeletedProductRowProps> = ({ product, o
                     <TableCell align="right" sx={{ px: 1 }}>
                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                {product?.sales_value !== 0 && <CurrencyRupeeIcon sx={{ fontSize: '1.1rem', mr: 0.5, color: theme.palette.success.main }} />}
+                                {product?.sales_value !== 0 && <Typography sx={{ fontSize: '1.1rem', mr: 0.5, color: theme.palette.success.main }}>&#8377;</Typography>}
                                 <Typography
                                     variant="h6"
                                     sx={{
@@ -186,7 +185,7 @@ export const DeletedProductRow: React.FC<DeletedProductRowProps> = ({ product, o
                     {/* Purchase Price */}
                     <TableCell align="right" sx={{ px: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                            {product?.purchase_value !== 0 && <CurrencyRupeeIcon sx={{ fontSize: '1rem', mr: 0.5, color: theme.palette.text.secondary }} />}
+                            {product?.purchase_value !== 0 && <Typography sx={{ fontSize: '1rem', mr: 0.5, color: theme.palette.text.secondary }}>&#8377;</Typography>}
                             <Typography
                                 variant="h6"
                                 sx={{

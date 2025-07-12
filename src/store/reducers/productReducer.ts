@@ -56,7 +56,6 @@ const productSlice = createSlice({
   initialState,
   reducers: {
     setProductId(state, action: PayloadAction<any>) {
-      console.log("payload", action.payload);
       state.productId = action.payload.productId;
       state.deletionModal = !state.deletionModal;
     },

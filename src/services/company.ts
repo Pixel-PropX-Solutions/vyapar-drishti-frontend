@@ -11,7 +11,6 @@ export const createCompany = createAsyncThunk(
     try {
       const createRes = await userApi.post(`/user/create/company`, data);
 
-      console.log("createCompany response", createRes);
 
       if (createRes.data.success === true) {
         return createRes.data.data;
@@ -32,7 +31,6 @@ export const getCompany = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await userApi.get('/user/company',);
-      console.log("getCompany response", response.data);
 
       if (response.data.success) {
         const company = response.data.data[0];
@@ -53,7 +51,6 @@ export const getAllCompanies = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await userApi.get('/user/all/company',);
-      console.log("getAllCompanies response", response.data);
 
       if (response.data.success) {
         const companies = response.data.data;
@@ -77,7 +74,6 @@ export const updateCompany = createAsyncThunk(
   ) => {
     try {
       const response = await userApi.put(`/user/update/company/${id}`, data);
-      console.log("updateCompany response", response);
 
       if (response.data.success === true) {
         return;
@@ -99,7 +95,6 @@ export const deleteCompany = createAsyncThunk(
   ) => {
     try {
       const response = await userApi.delete(`/auth/delete/user/company/${id}`);
-      console.log("deleteCompany response", response);
 
       if (response.data.success === true) {
         return;
@@ -122,7 +117,6 @@ export const createCompanyBilling = createAsyncThunk(
     try {
       const createRes = await userApi.post(`/user/create/company/billing`, data);
 
-      console.log("createCompanyBilling response", createRes);
 
       if (createRes.data.success === true) {
         return createRes.data.data;
@@ -146,7 +140,6 @@ export const updateCompanyBilling = createAsyncThunk(
   ) => {
     try {
       const response = await userApi.put(`/user/update/billing/${id}`, data);
-      console.log("updateCompanyBilling response", response);
 
       if (response.data.success === true) {
         return;
@@ -170,8 +163,6 @@ export const createCompanyShipping = createAsyncThunk(
     try {
       const createRes = await userApi.post(`/user/create/shipping`, data);
 
-      console.log("createCompanyShipping response", createRes);
-
       if (createRes.data.success === true) {
         return createRes.data.data;
       } else {
@@ -194,7 +185,6 @@ export const updateCompanyShipping = createAsyncThunk(
   ) => {
     try {
       const response = await userApi.put(`/user/update/shipping/${id}`, data);
-      console.log("updateCompanyShipping response", response);
 
       if (response.data.success === true) {
         return;

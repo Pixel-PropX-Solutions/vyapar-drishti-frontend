@@ -144,7 +144,7 @@ const PricingPage: React.FC = () => {
   // Format price with appropriate currency symbol
   const formatPrice = (price: number, currency: 'INR' | 'USD') => {
     if (currency === 'INR') {
-      return `₹${price.toLocaleString('en-IN')}`;
+      return `&#8377;${price.toLocaleString('en-IN')}`;
     } else {
       return `$${price.toLocaleString('en-US')}`;
     }
@@ -222,14 +222,14 @@ const PricingPage: React.FC = () => {
             }
             label={
               <Typography variant="body1">
-                {currency === 'INR' ? 'INR (₹)' : 'USD ($)'}
+                {currency === 'INR' ? 'INR (&#8377;)' : 'USD ($)'}
               </Typography>
             }
           />
         </Box>
         
         <Typography variant="body2" color="text.secondary">
-          {currency === 'INR' ? '₹1 = $0.012 USD' : '$1 = ₹82.5 INR'}
+          {currency === 'INR' ? '&#8377;1 = $0.012 USD' : '$1 = &#8377;82.5 INR'}
         </Typography>
       </Box>
       

@@ -10,7 +10,6 @@ export const createAccountingGroup = createAsyncThunk(
     ) => {
         try {
             const createRes = await userApi.post(`/user/accounting/create/group`, data);
-            console.log("createAccountingGroup response", createRes);
             if (createRes.data.success === true) {
                 return createRes.data.data;
             } else {
@@ -57,7 +56,6 @@ export const viewAllCustomerGroups = createAsyncThunk(
                 }`
             );
 
-            console.log("view all Customer Groups response", response);
 
             if (response.data.success === true) {
                 const customerGroups = response.data.data.docs;
@@ -78,7 +76,6 @@ export const viewDefaultAccountingGroup = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const response = await userApi.get(`/user/view/default/accounting/groups`);
-            console.log("View Default accounting group response", response.data);
 
             if (response.data.success === true) {
                 const defaultAccountingGroup = response.data.data;
@@ -95,7 +92,7 @@ export const viewDefaultAccountingGroup = createAsyncThunk(
 
 
 export const viewAllAccountingGroups = createAsyncThunk(
-    "view/accounting/groups",
+    "view/all/accounting/groups",
     async (
         company_id: string,
         { rejectWithValue }
@@ -104,7 +101,6 @@ export const viewAllAccountingGroups = createAsyncThunk(
             const response = await userApi.get(
                 `/user/accounting/view/all/groups?company_id=${company_id}`
             );
-            console.log("view/groups response", response);
 
             if (response.data.success === true) {
                 const accountingGroups = response.data.data;
@@ -128,7 +124,6 @@ export const updateAccountingGroup = createAsyncThunk(
     ) => {
         try {
             const response = await userApi.put(`/user/update/group/${id}`, data);
-            console.log("updateInventoryGroup response", response);
 
             if (response.data.success === true) {
                 return;
@@ -147,7 +142,6 @@ export const updateAccountingGroup = createAsyncThunk(
 //     async (id: string, { rejectWithValue }) => {
 //         try {
 //             const response = await userApi.delete(`/category/delete/category/${id}`);
-//             console.log("deleteCategory response", response);
 
 //             if (response.data.success === true) {
 //                 return;
@@ -194,7 +188,6 @@ export const viewAllInvoiceGroups = createAsyncThunk(
                 }`
             );
 
-            console.log("view all Invoice Groups response", response);
 
             if (response.data.success === true) {
                 const invoiceGroups = response.data.data.docs;
@@ -216,7 +209,6 @@ export const getAllInvoiceGroups = createAsyncThunk(
         try {
             const response = await userApi.get(`/user/get/all/vouchar/type?company_id=${company_id}`);
 
-            console.log("getAllInvoiceGroups response", response);
 
             if (response.data.success === true) {
                 const invoiceGroupList = response.data.data;
@@ -281,7 +273,6 @@ export const getAllInvoiceGroups = createAsyncThunk(
 //                 `/customer/create`,
 //                 data
 //             );
-//             // console.log("createCustomer response", response);
 
 //             if (response.data.success === true) {
 //                 return;
@@ -300,13 +291,11 @@ export const getAllInvoiceGroups = createAsyncThunk(
 //     async ({ data, id }: { data: FormData; id: string }, { rejectWithValue }) => {
 //         try {
 
-//             console.log("updateChemist data", data);
 //             const response = await userApi.put(
 //                 `/customer/update/${id}`,
 //                 data
 //             );
 
-//             // console.log("updateCustomer response", response);
 
 //             if (response.data.success === true) {
 //                 return;

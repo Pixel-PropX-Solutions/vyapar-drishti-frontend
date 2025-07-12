@@ -311,7 +311,6 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
 
     useEffect(() => {
         if (open && company) {
-            console.log("Company Fetch Details", company)
             setData({
                 pinCode: company.pinCode || '',
                 state: company.state || '',
@@ -386,8 +385,6 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
         if (data.bank_branch && data.bank_branch !== '') sanitizedData.bank_branch = data.bank_branch.trim();
         if (data.qr_code_url && typeof data.qr_code_url !== 'string') sanitizedData.qr_code_url = data.qr_code_url;
 
-        // console.log("Submitting company data:", sanitizedData);
-        // console.log("Submitting company data:", sanitizedData);
         const formData = new FormData();
         Object.entries(sanitizedData).forEach(([key, value]) => {
             if (typeof value === 'boolean') {

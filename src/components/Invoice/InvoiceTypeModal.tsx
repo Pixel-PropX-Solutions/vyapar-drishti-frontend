@@ -31,8 +31,7 @@ interface Props {
 
 const InvoiceTypeModal: React.FC<Props> = ({ open, onClose, onSubmit }) => {
     const [voucharType, setVoucharType] = useState("");
-    const location = window.location.pathname;
-    console.log("Current location:", location);
+    // const location = window.location.pathname;
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
     const { currentCompany } = useSelector((state: RootState) => state.auth);

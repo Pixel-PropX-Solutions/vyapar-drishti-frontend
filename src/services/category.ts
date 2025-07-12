@@ -9,7 +9,6 @@ export const createCategory = createAsyncThunk(
     ) => {
         try {
             const createRes = await userApi.post(`/category/create/category`, categoryData);
-            console.log("createCategory response", createRes);
             if (createRes.data.success === true) {
                 return createRes.data.data;
             } else {
@@ -28,7 +27,6 @@ export const viewCategory = createAsyncThunk(
     async (category_id: string, { rejectWithValue }) => {
         try {
             const response = await userApi.get(`/category/get/category?category_id=${category_id}`);
-            // console.log("View Category response", response.data);
 
             if (response.data.success === true) {
                 const productData = response.data.data;
@@ -70,7 +68,6 @@ export const viewAllCategory = createAsyncThunk(
                 `/category/view/all/category?company_id=${company_id}${searchQuery !== "" ? '&search=' + searchQuery : ''}${parent === "" || parent === "All" ? "" : '&parent=' + parent}&page_no=${pageNumber}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"
                 }`
             );
-            console.log("viewAllCategory response", response);
 
             if (response.data.success === true) {
                 const categories = response.data.data.docs;
@@ -97,8 +94,6 @@ export const viewAllCategories = createAsyncThunk(
                 `/category/view/categories?company_id=${company_id}`
             );
             
-            console.log("view/categories response", response);
-
             if (response.data.success === true) {
                 const categoryLists = response.data.data;
                 return { categoryLists };
@@ -120,9 +115,7 @@ export const updateCategory = createAsyncThunk(
         { rejectWithValue }
     ) => {
         try {
-            console.log("updateProduct data", data);
             const response = await userApi.put(`/category/update/category/${id}`, data);
-            console.log("updateProduct response", response);
 
             if (response.data.success === true) {
                 return;
@@ -141,7 +134,6 @@ export const deleteCategory = createAsyncThunk(
     async (id: string, { rejectWithValue }) => {
         try {
             const response = await userApi.delete(`/category/delete/category/${id}`);
-            console.log("deleteCategory response", response);
 
             if (response.data.success === true) {
                 return;

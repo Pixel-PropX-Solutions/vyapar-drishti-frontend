@@ -20,7 +20,6 @@ export const createUser = createAsyncThunk(
         email,
         role,
       });
-      console.log("createUser response", response);
 
       if (response.data.success === true) {
         const id = response.data.id;
@@ -44,7 +43,6 @@ export const createBasicUser = createAsyncThunk(
   ) => {
     try {
       const response = await adminApi.post("/create/user", data);
-      console.log("createUser response", response);
 
       if (response.data.success === true) {
         const id = response.data.id;
@@ -69,8 +67,6 @@ export const createBasicUser = createAsyncThunk(
 //     try {
 //       const createRes = await userApi.post(`/user/create/company`, data);
 
-//       console.log("createCompany response", createRes);
-
 //       if (createRes.data.success === true) {
 //         return createRes.data.data;
 //       } else {
@@ -90,7 +86,6 @@ export const createBasicUser = createAsyncThunk(
 //   async (_, { rejectWithValue }) => {
 //     try {
 //       const response = await userApi.get('/user/company',);
-//       console.log("getCompany response", response.data);
 
 //       if (response.data.success) {
 //         const company = response.data.data[0];
@@ -115,7 +110,6 @@ export const updateUser = createAsyncThunk(
   ) => {
     try {
       const response = await userApi.put(`/user/update/${id}`, data);
-      console.log("updateUser response", response);
 
       if (response.data.success === true) {
         return;
@@ -138,7 +132,6 @@ export const updateUserSettings = createAsyncThunk(
   ) => {
     try {
       const response = await userApi.put(`/user/settings/update/${id}`, data);
-      console.log("updateUserSettings response", response);
 
       if (response.data.success === true) {
         const data = response.data.data;
@@ -161,7 +154,6 @@ export const setCurrentCompany = createAsyncThunk(
   ) => {
     try {
       const response = await userApi.put(`/user/set/company/${id}`);
-      console.log("setCurrentCumpnay response", response);
 
       if (response.data.success === true) {
         return;

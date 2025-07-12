@@ -1200,7 +1200,6 @@ export default function Settings() {
 
 //   const handleDeleteAccount = () => {
 //     // Implement account deletion logic here
-//     console.log("Account deletion requested");
 //     setOpenDeleteDialog(false);
 //     // Navigate to login page or home after successful deletion
 //     // navigate("/login");

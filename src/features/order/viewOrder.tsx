@@ -193,7 +193,7 @@
 //                                     {isLoading ? (
 //                                         <Skeleton width={80} />
 //                                     ) : (
-//                                         (`₹ ${orderDetailsData?.order_details?.total_amount || 0}`)
+//                                         (`&#8377; ${orderDetailsData?.order_details?.total_amount || 0}`)
 //                                     )}
 //                                 </Typography>
 //                                 <Typography variant="body2" color="text.secondary">
@@ -335,9 +335,9 @@
 //                                                         <TableCell align="right">Tablets/Pack</TableCell>
 //                                                     </>
 //                                                 )}
-//                                                 <TableCell align="right">Unit Price(₹)</TableCell>
+//                                                 <TableCell align="right">Unit Price(&#8377;)</TableCell>
 //                                                 <TableCell align="right">Quantity</TableCell>
-//                                                 <TableCell align="right">Total(₹)</TableCell>
+//                                                 <TableCell align="right">Total(&#8377;)</TableCell>
 //                                             </TableRow>
 //                                         </TableHead>
 //                                         <TableBody>
@@ -355,9 +355,9 @@
 //                                                             <TableCell align="right">{product?.ProductDetails?.no_of_tablets_per_pack}</TableCell>
 //                                                         </>
 //                                                     )}
-//                                                     <TableCell align="right">{'₹ ' + product?.product_details?.unit_price || 0}</TableCell>
+//                                                     <TableCell align="right">{'&#8377; ' + product?.product_details?.unit_price || 0}</TableCell>
 //                                                     <TableCell align="right">{product?.product_details?.quantity}</TableCell>
-//                                                     <TableCell align="right">{'₹ ' + ((product?.product_details?.unit_price || 0) * (product?.product_details?.quantity || 0))}</TableCell>
+//                                                     <TableCell align="right">{'&#8377; ' + ((product?.product_details?.unit_price || 0) * (product?.product_details?.quantity || 0))}</TableCell>
 //                                                 </TableRow>
 //                                             ))}
 //                                             <TableRow>
@@ -365,7 +365,7 @@
 //                                                     Total:
 //                                                 </TableCell>
 //                                                 <TableCell align="right" sx={{ fontWeight: 'bold' }}>
-//                                                     {'₹ ' + (orderDetailsData?.order_details?.total_amount || 0)}
+//                                                     {'&#8377; ' + (orderDetailsData?.order_details?.total_amount || 0)}
 //                                                 </TableCell>
 //                                             </TableRow>
 //                                         </TableBody>

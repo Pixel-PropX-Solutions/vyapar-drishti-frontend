@@ -22,13 +22,11 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import CategoryIcon from "@mui/icons-material/Category";
 import { GetUserLedgers } from "@/utils/types";
 import { Email, PeopleAlt, Phone, Today } from "@mui/icons-material";
 import { formatDate } from "@/utils/functions";
-// import { GetProduct } from "@/utils/types";
 
-interface ProductRowProps {
+interface CustomerRowProps {
     cus: GetUserLedgers;
     onDelete: (id: string) => void;
     onEdit: (cus: GetUserLedgers) => void;
@@ -37,7 +35,7 @@ interface ProductRowProps {
 }
 
 
-export const CustomerRow: React.FC<ProductRowProps> = ({ cus, onDelete, onEdit, onView, index }) => {
+export const CustomerRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit, onView, index }) => {
     const theme = useTheme();
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
@@ -89,7 +87,7 @@ export const CustomerRow: React.FC<ProductRowProps> = ({ cus, onDelete, onEdit, 
                     }}
                     onClick={() => onView(cus)}
                 >
-                    {/* Product Info */}
+                    {/* Customer Info */}
                     <TableCell sx={{ pl: 3, pr: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
                             <Avatar
@@ -141,9 +139,9 @@ export const CustomerRow: React.FC<ProductRowProps> = ({ cus, onDelete, onEdit, 
                         </Box>
                     </TableCell>
 
-                    {/* Quantity with Status */}
+                    {/* Contact Information */}
                     <TableCell align="center" sx={{ px: 1 }}>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', }}>
 
                             {cus?.phone?.number && (<Typography
                                 variant="body1"
@@ -158,27 +156,28 @@ export const CustomerRow: React.FC<ProductRowProps> = ({ cus, onDelete, onEdit, 
                                     sx={{ verticalAlign: "middle", fontSize: '.9rem', mr: 1 }}
                                 />
                                 {cus.phone?.code}{" "}
-                                {cus?.phone?.number || "N/A"}
+                                {cus?.phone?.number || ""}
                             </Typography>)}
-                            {cus.email && (<Chip
-                                icon={<Email sx={{ mr: 0.5, fontSize: '.9rem', color: theme.palette.text.secondary }} />}
-                                label={cus.email || 'No Email'}
-                                color={'primary'}
+                            {cus.email && (<Typography
+                                variant="body1"
                                 sx={{
-                                    fontSize: '0.7rem',
-                                    height: '22px',
-                                    fontWeight: 600,
+                                    fontWeight: 700,
+                                    fontSize: '.8rem',
+                                    color: theme.palette.text.primary,
                                 }}
-                            />)}
+                            >
+                                <Email sx={{ mr: 0.5, fontSize: '.9rem', color: theme.palette.text.secondary }} />
+                                {cus.email || ''}
+                            </Typography>)}
                             {!cus.email && !cus.phone?.number && (
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                    No contact info available
+                                    No data
                                 </Box>
                             )}
                         </Box>
                     </TableCell>
 
-                    {/* Selling Price */}
+                    {/* Customer Mailing State */}
                     <TableCell align="center" sx={{ px: 1 }}>
                         <Typography
                             variant="body1"
@@ -187,33 +186,27 @@ export const CustomerRow: React.FC<ProductRowProps> = ({ cus, onDelete, onEdit, 
                                 color: theme.palette.text.secondary,
                             }}
                         >
-                            {cus.mailing_state ? `${cus.mailing_state}` : 'No State'}
+                            {cus.mailing_state}
+                            {(cus.mailing_country && cus.mailing_state) && `, ${cus.mailing_country}`}
+                            {(cus.mailing_country && !cus.mailing_state) && `${cus.mailing_country}`}
+                        </Typography>
+                    </TableCell>
+                    {/* Customer Type */}
+                    <TableCell align="center">
+                        <Typography
+                            variant="body1"
+                            sx={{
+                                fontWeight: 700,
+                                color: cus.parent.includes('Debtors') ? theme.palette.error.main : theme.palette.success.main,
+                            }}
+                        >
+                            {cus.parent || "N/A"}
                         </Typography>
                     </TableCell>
 
-                    <TableCell align="left" sx={{ px: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <CategoryIcon
-                                sx={{
-                                    fontSize: '.9rem',
-                                    mr: 0.5,
-                                    color: cus.parent.includes('Debtors') ? theme.palette.error.main : theme.palette.success.main
-                                }} />
-                            <Typography
-                                variant="body1"
-                                sx={{
-                                    fontWeight: 700,
-                                    color: cus.parent.includes('Debtors') ? theme.palette.error.main : theme.palette.success.main,
-                                }}
-                            >
-                                {cus.parent || "N/A"}
-                            </Typography>
-                        </Box>
-                    </TableCell>
-
-                    {/* Purchase Price */}
-                    <TableCell align="right" sx={{ px: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', }}>
+                    {/* Created At Date */}
+                    <TableCell align="center">
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Today sx={{ mr: 0.5, fontSize: '.9rem', color: theme.palette.text.secondary }} />
                             <Typography
                                 variant="body1"
@@ -228,9 +221,9 @@ export const CustomerRow: React.FC<ProductRowProps> = ({ cus, onDelete, onEdit, 
                     </TableCell>
 
                     {/* Actions */}
-                    <TableCell align="right" sx={{ pr: 3, pl: 1 }}>
+                    <TableCell align="center">
                         <Zoom in={isHovered} timeout={200}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'flex-end' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'center' }}>
                                 <Tooltip title="View Details" arrow>
                                     <IconButton
                                         size="small"
@@ -325,7 +318,7 @@ export const CustomerRow: React.FC<ProductRowProps> = ({ cus, onDelete, onEdit, 
                 </DialogTitle>
                 <DialogContent>
                     <Alert severity="warning" sx={{ mb: 2 }}>
-                        This action cannot be undone. The product will be permanently removed from your company database.
+                        This action cannot be undone. This customer will be permanently removed from your company database if it is not attached to any other bills.
                     </Alert>
                     <Typography>
                         Are you sure you want to delete "<strong>{cus.ledger_name}</strong>"?
@@ -346,7 +339,7 @@ export const CustomerRow: React.FC<ProductRowProps> = ({ cus, onDelete, onEdit, 
                         sx={{ borderRadius: 2 }}
                         startIcon={<DeleteIcon />}
                     >
-                        Delete Customer
+                        Delete&#8377;<strong>{cus.ledger_name}</strong>
                     </Button>
                 </DialogActions>
             </Dialog>

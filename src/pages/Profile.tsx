@@ -106,7 +106,6 @@ const ProfilePage: React.FC = () => {
   };
 
   const handleDelete = (company_id: string) => {
-    console.log("Delete company with ID:", company_id);
     dispatch(
       deleteCompany(company_id)
     )

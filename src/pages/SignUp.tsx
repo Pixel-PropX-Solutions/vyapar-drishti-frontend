@@ -123,7 +123,6 @@ const SignUpPage: React.FC = () => {
 
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        console.log("ResizeObserver entry:", entry);
         calculatePaths();
         calculatePath();
       }

@@ -5,7 +5,9 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 interface CustomerState {
     customers: Array<GetUserLedgers>;
     customer: GetUserLedgers | null;
-    customersList: Array<CustomersList>|[];
+    editingCustomer: GetUserLedgers | null;
+    customerType_id: string | null;
+    customersList: Array<CustomersList> | [];
     loading: boolean,
     error: string | null;
     pageMeta: PageMeta
@@ -15,6 +17,8 @@ const initialState: CustomerState = {
     customers: [],
     customersList: [],
     customer: null,
+    editingCustomer: null,
+    customerType_id: null,
     pageMeta: {
         page: 0,
         limit: 0,
@@ -29,7 +33,12 @@ const customerSlice = createSlice({
     name: "customersLedger",
     initialState,
     reducers: {
-
+        setEditingCustomer: (state, action: PayloadAction<GetUserLedgers | null>) => {
+            state.editingCustomer = action.payload;
+        },
+        setCustomerTypeId: (state, action: PayloadAction<string | null>) => {
+            state.customerType_id = action.payload;
+        }
     },
 
     extraReducers: (builder) => {
@@ -61,7 +70,7 @@ const customerSlice = createSlice({
                 state.error = action.payload as string;
                 state.loading = false;
             })
-            
+
             .addCase(viewAllCustomers.pending, (state) => {
                 state.error = null;
                 state.loading = true;
@@ -81,8 +90,8 @@ const customerSlice = createSlice({
                 state.loading = true;
             })
             .addCase(getCustomer.fulfilled,
-                (state, action: PayloadAction<GetUserLedgers>) => {
-                    state.customer = action.payload;
+                (state, action: PayloadAction<any>) => {
+                    state.customer = action.payload.customer;
                     state.loading = false;
                 }
             )
@@ -131,5 +140,7 @@ const customerSlice = createSlice({
             })
     }
 });
+
+export const { setEditingCustomer, setCustomerTypeId } = customerSlice.actions;
 
 export default customerSlice.reducer;

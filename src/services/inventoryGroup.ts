@@ -9,7 +9,6 @@ export const createInventoryGroup = createAsyncThunk(
     ) => {
         try {
             const createRes = await userApi.post(`/user/inventory/create/group`, data);
-            console.log("createInventoryGroup response", createRes);
             if (createRes.data.success === true) {
                 return createRes.data.data;
             } else {
@@ -30,7 +29,6 @@ export const viewInventoryGroup = createAsyncThunk(
     async (group_id: string, { rejectWithValue }) => {
         try {
             const response = await userApi.get(`/user/inventory/view/group/${group_id}`);
-            console.log("View inventory group response", response.data);
 
             if (response.data.success === true) {
                 const productData = response.data.data;
@@ -72,7 +70,6 @@ export const viewAllInventoryGroup = createAsyncThunk(
                 `/user/inventory/group/view/all?company_id=${company_id}${searchQuery !== "" ? '&search=' + searchQuery : ''}${parent === "" || parent === "All" ? "" : '&parent=' + parent}&page_no=${pageNumber}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"
                 }`
             );
-            console.log("viewAllInventoryGroup response", response);
 
             if (response.data.success === true) {
                 const inventoryGroups = response.data.data.docs;
@@ -98,7 +95,6 @@ export const viewAllInventoryGroups = createAsyncThunk(
             const response = await userApi.get(
                 `/user/inventory/view/all/groups?company_id=${company_id}`
             );
-            console.log("view/groups response", response);
 
             if (response.data.success === true) {
                 const inventoryGroupLists = response.data.data;
@@ -122,7 +118,6 @@ export const updateInventoryGroup = createAsyncThunk(
     ) => {
         try {
             const response = await userApi.put(`/user/update/group/${id}`, data);
-            console.log("updateInventoryGroup response", response);
 
             if (response.data.success === true) {
                 return;
@@ -141,7 +136,6 @@ export const deleteInventoryGroup = createAsyncThunk(
     async (id: string, { rejectWithValue }) => {
         try {
             const response = await userApi.delete(`/category/delete/category/${id}`);
-            console.log("deleteCategory response", response);
 
             if (response.data.success === true) {
                 return;

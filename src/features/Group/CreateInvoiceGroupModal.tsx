@@ -302,7 +302,6 @@
 //                 dispatch(createInventoryGroup(formData))
 //                     .unwrap()
 //                     .then((response) => {
-//                         console.log("Inventory Group created:", response);
 //                         const newGroup = {
 //                             name: response.inventory_group_name,
 //                             _id: response._id

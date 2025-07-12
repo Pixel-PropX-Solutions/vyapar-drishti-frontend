@@ -17,7 +17,6 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import LocalPharmacyIcon from "@mui/icons-material/LocalPharmacy";
 import InventoryIcon from "@mui/icons-material/Inventory";
-import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import { useNavigate } from "react-router-dom";
@@ -135,10 +134,10 @@ export default function AdminInventory() {
     },
     {
       field: "buying_price",
-      headerName: "Price (₹)",
+      headerName: "Price (&#8377;)",
       width: 100,
       renderCell: (params:GridRenderCellParams) => (
-        <Typography variant="body2" align="right">₹{params.value}</Typography>
+        <Typography variant="body2" align="right">&#8377;{params.value}</Typography>
       ),
     },
     {
@@ -438,7 +437,7 @@ export default function AdminInventory() {
                     Inventory Value
                   </Typography>
                   <Typography variant="h4" component="p" fontWeight="bold">
-                    ₹{totalValue.toLocaleString()}
+                    &#8377;{totalValue.toLocaleString()}
                   </Typography>
                 </Box>
                 <Box
@@ -450,10 +449,9 @@ export default function AdminInventory() {
                     alignItems: "center",
                   }}
                 >
-                  <CurrencyRupeeIcon
-                    fontSize="medium"
-                    sx={{ color: theme.palette.success.dark }}
-                  />
+                  <Typography variant="h6" sx={{ color: theme.palette.success.dark }}>
+                    &#8377;
+                  </Typography>
                 </Box>
               </Stack>
 
@@ -971,7 +969,7 @@ export default function AdminInventory() {
 //                 <Typography variant="h4" component="p">
 //                   686
 //                 </Typography>
-//                 <Chip size="small" color={"success"} label={"₹250000"} />
+//                 <Chip size="small" color={"success"} label={"&#8377;250000"} />
 //               </Stack>
 //               <Stack
 //                 direction="row"
@@ -1035,7 +1033,7 @@ export default function AdminInventory() {
 //                 <Typography variant="h4" component="p">
 //                   686
 //                 </Typography>
-//                 <Chip size="small" color={"success"} label={"₹250000"} />
+//                 <Chip size="small" color={"success"} label={"&#8377;250000"} />
 //               </Stack>
 //               <Stack
 //                 direction="row"
@@ -1099,7 +1097,7 @@ export default function AdminInventory() {
 //                 <Typography variant="h4" component="p">
 //                   686
 //                 </Typography>
-//                 <Chip size="small" color={"success"} label={"₹250000"} />
+//                 <Chip size="small" color={"success"} label={"&#8377;250000"} />
 //               </Stack>
 //               <Stack
 //                 direction="row"

@@ -37,10 +37,9 @@ export type CategorySortField =
 export type CustomerSortField =
   | "name"
   | 'company_name'
-  // | 'credit_limit'
-  // | 'balance_type'
-  | 'city'
+  | 'country'
   | 'state'
+  | 'type'
   | "created_at";
 
 

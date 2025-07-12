@@ -23,7 +23,6 @@ import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 // import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 // import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 // import { createProduct } from "@/services/products";
@@ -244,7 +243,9 @@ export default function CreateProduct() {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <CurrencyRupeeIcon />
+                          <Typography>
+                            &#8377;
+                          </Typography>
                         </InputAdornment>
                       ),
                     }}

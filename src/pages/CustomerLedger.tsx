@@ -26,38 +26,29 @@ import {
 import {
   Search as SearchIcon,
   FilterList as FilterIcon,
-  AddCircle as AddCircleIcon,
   RefreshOutlined,
-  // ArrowUpwardOutlined,
-  // ArrowDownwardOutlined,
-  // MoreHoriz,
   PeopleAlt,
   Contacts,
   LocationOn,
   Today,
+  AddCircleOutline,
 } from "@mui/icons-material";
-// import {
-//   // alpha,
-//   // useColorScheme,
-// } from "@mui/material/styles";
 import { CustomerSortField, SortOrder, GetUserLedgers } from "@/utils/types";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { viewAllCustomer } from "@/services/customers";
-import EditCustomerModal from "@/features/profile/customers/EditCustomerModal";
 import { CustomerRowSkeleton } from "@/common/CustomerRowSkeleton";
-import { CustomerRow } from "@/features/profile/customers/CustomerRow";
+import { CustomerRow } from "@/features/customer/CustomerRow";
 import { viewAllAccountingGroups } from "@/services/accountingGroup";
+import { ActionButton } from "@/common/ActionButton";
+import { setCustomerTypeId, setEditingCustomer } from "@/store/reducers/customersReducer";
 
 const CustomerLedger: React.FC = () => {
-  // const { mode } = useColorScheme();
-  const [isCustomerEditing, setIsCustomerEditing] = useState(false);
-  const [cred, setCred] = useState<GetUserLedgers | null>(null);
   const { customers, pageMeta, loading } = useSelector((state: RootState) => state.customersLedger);
   const { accountingGroups } = useSelector((state: RootState) => state.accountingGroup);
   const { currentCompany } = useSelector((state: RootState) => state.auth);
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
 
@@ -115,7 +106,6 @@ const CustomerLedger: React.FC = () => {
     event: React.ChangeEvent<unknown>,
     newPage: number
   ) => {
-    console.log(event);
 
     setState((prevState) => ({
       ...prevState,
@@ -148,8 +138,8 @@ const CustomerLedger: React.FC = () => {
   }
 
   // Handle view stockist details
-  const handleViewCustomer = (_customer: GetUserLedgers) => {
-    // navigate(`/customers/${customer._id}`)
+  const handleViewCustomer = (cus: GetUserLedgers) => {
+    navigate(`/customers/view/${cus._id}`)
   };
 
   const filteredCustomers = customers?.filter((cred) => {
@@ -191,26 +181,47 @@ const CustomerLedger: React.FC = () => {
                 alignItems: "center",
               }}
             >
-              <Grid item xs={12} sm={6} md={12}>
-
-
-                <Button
+              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                <ActionButton
                   variant="contained"
-                  color="primary"
-                  startIcon={<AddCircleIcon fontSize="large" />}
+                  startIcon={<AddCircleOutline />}
+                  color="success"
                   onClick={() => {
-                    setCred(null);
-                    setIsCustomerEditing(true);
+                    navigate('/customers/create/debtors');
+                    dispatch(setCustomerTypeId(accountingGroups.find((group) => group.name.includes('Debtors'))?._id || ''))
                   }}
                   sx={{
-                    width: "max-content",
+                    background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
+                    color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
+                    '&:hover': {
+                      color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                      background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
+                    },
                   }}
                 >
-                  Add Customers
-                </Button>
+                  Add Debtors
+                </ActionButton>
 
-
-              </Grid>
+                <ActionButton
+                  variant="contained"
+                  startIcon={<AddCircleOutline />}
+                  color="error"
+                  onClick={() => {
+                    navigate('/customers/create/creditors');
+                    dispatch(setCustomerTypeId(accountingGroups.find((group) => group.name.includes('Creditors'))?._id || ''))
+                  }}
+                  sx={{
+                    background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
+                    color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
+                    '&:hover': {
+                      color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                      background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
+                    },
+                  }}
+                >
+                  Add Creditors
+                </ActionButton>
+              </Box>
             </Grid>
           </Paper>
         </CardContent>
@@ -355,31 +366,14 @@ const CustomerLedger: React.FC = () => {
                   </TableSortLabel>
                 </Tooltip>
               </TableCell>
-              {/* <TableCell>
-                  <Tooltip title="Sort by Company Name">
-                    <TableSortLabel
-                      active={sortField === "company_name"}
-                      direction={sortField === "company_name" ? sortOrder : "asc"}
-                      onClick={() => handleSortRequest("company_name")}
-                    >
-                      Company Name
-                    </TableSortLabel>
-                  </Tooltip>
-                </TableCell> */}
               <TableCell align="center" sx={{ px: 1 }}>
-                <Tooltip title="Sort by Item Quantity" arrow>
-                  <TableSortLabel
-                  // active={sortField === "name"}
-                  // direction={sortField === "name" ? sortOrder : "asc"}
-                  // onClick={() => handleSortRequest("name")}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                      <Contacts fontSize="small" />
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                        Contact Information
-                      </Typography>
-                    </Box>
-                  </TableSortLabel>
+                <Tooltip title="Contact Information" arrow>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                    <Contacts fontSize="small" />
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                      Contact Information
+                    </Typography>
+                  </Box>
                 </Tooltip>
               </TableCell>
 
@@ -393,7 +387,7 @@ const CustomerLedger: React.FC = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
                       <LocationOn fontSize="small" />
                       <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                        State
+                        State / Country
                       </Typography>
                     </Box>
                   </TableSortLabel>
@@ -401,14 +395,13 @@ const CustomerLedger: React.FC = () => {
               </TableCell>
 
               <TableCell align="center" sx={{ px: 1 }}>
-                <Tooltip title="Sort by State" arrow>
+                <Tooltip title="Sort by Customer Type" arrow>
                   <TableSortLabel
-                    active={sortField === "state"}
-                    direction={sortField === "state" ? sortOrder : "asc"}
-                    onClick={() => handleSortRequest("state")}
+                    active={sortField === "type"}
+                    direction={sortField === "type" ? sortOrder : "asc"}
+                    onClick={() => handleSortRequest("type")}
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                      {/* <LocationOn fontSize="small" /> */}
                       <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
                         Customer Type
                       </Typography>
@@ -418,11 +411,11 @@ const CustomerLedger: React.FC = () => {
               </TableCell>
 
               <TableCell align="center" sx={{ px: 1 }}>
-                <Tooltip title="Sort by State" arrow>
+                <Tooltip title="Sort by Date" arrow>
                   <TableSortLabel
-                    active={sortField === "state"}
-                    direction={sortField === "state" ? sortOrder : "asc"}
-                    onClick={() => handleSortRequest("state")}
+                    active={sortField === "created_at"}
+                    direction={sortField === "created_at" ? sortOrder : "asc"}
+                    onClick={() => handleSortRequest("created_at")}
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
                       <Today fontSize="small" />
@@ -446,7 +439,6 @@ const CustomerLedger: React.FC = () => {
                 .map((_, index) => <CustomerRowSkeleton key={`skeleton-${index}`} />)
             ) : filteredCustomers?.length > 0 ? (
               filteredCustomers.map((cred, index) => {
-
                 return (
                   <CustomerRow
                     key={cred._id}
@@ -454,8 +446,8 @@ const CustomerLedger: React.FC = () => {
                     index={index + 1 + (page - 1) * rowsPerPage}
                     onView={() => handleViewCustomer(cred)}
                     onEdit={() => {
-                      setCred(cred);
-                      setIsCustomerEditing(true);
+                      dispatch(setEditingCustomer(cred));
+                      navigate(`/customers/edit/${cred.parent.toLowerCase()}`);
                     }}
                     onDelete={async () => {
                       // await deleteCustomer(cred._id);
@@ -476,22 +468,55 @@ const CustomerLedger: React.FC = () => {
                     <Typography variant="body2" color="text.secondary">
                       Try adjusting your search or filter criteria, or add your first customer
                     </Typography>
-                    <Button
-                      variant="contained"
-                      onClick={() => {
-                        // setDrawer(true);
-                        // setSelectedProduct(null);
-                      }}
-                      startIcon={<AddCircleIcon />}
+                    <Grid
                       sx={{
-                        mt: 2,
-                        borderRadius: 1,
-                        textTransform: 'none',
-                        fontWeight: 600,
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
                       }}
                     >
-                      Add Your First Customer
-                    </Button>
+                      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                        <ActionButton
+                          variant="contained"
+                          startIcon={<AddCircleOutline />}
+                          color="success"
+                          onClick={() => {
+                            navigate('/customers/create/debtors');
+                            dispatch(setCustomerTypeId(accountingGroups.find((group) => group.name.includes('Debtors'))?._id || ''))
+                          }}
+                          sx={{
+                            background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
+                            color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
+                            '&:hover': {
+                              color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                              background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
+                            },
+                          }}
+                        >
+                          Add Debtors
+                        </ActionButton>
+
+                        <ActionButton
+                          variant="contained"
+                          startIcon={<AddCircleOutline />}
+                          color="error"
+                          onClick={() => {
+                            navigate('/customers/create/creditors');
+                            dispatch(setCustomerTypeId(accountingGroups.find((group) => group.name.includes('Creditors'))?._id || ''))
+                          }}
+                          sx={{
+                            background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
+                            color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
+                            '&:hover': {
+                              color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                              background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
+                            },
+                          }}
+                        >
+                          Add Creditors
+                        </ActionButton>
+                      </Box>
+                    </Grid>
                   </Box>
                 </TableCell>
               </TableRow>
@@ -527,18 +552,6 @@ const CustomerLedger: React.FC = () => {
           showLastButton
         />}
       </Box>
-      <EditCustomerModal
-        open={isCustomerEditing}
-        onClose={() => {
-          setIsCustomerEditing(false);
-        }}
-        cred={cred}
-        onUpdated={async () => {
-          fetchCustomers();
-        }}
-        onCreated={async () => {
-          fetchCustomers();
-        }} />
     </Box >
   );
 };

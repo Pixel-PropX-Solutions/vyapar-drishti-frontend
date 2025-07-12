@@ -315,9 +315,11 @@ const ProductsSideModal = (props: SideModalProps) => {
                 );
             }
         } catch (error) {
+            setIsLoading(false);
             console.error('Error creating/updating product:', error);
             handleClose();
         } finally {
+            setIsLoading(false);
             handleClose();
         }
     };
@@ -357,6 +359,7 @@ const ProductsSideModal = (props: SideModalProps) => {
     // Handle close
     const handleClose = useCallback(() => {
         setDrawer(false);
+        setIsLoading(false);
         setSelectedProduct(null);
         setSelectedUnitOption(null);
         setSelectedCategoryOption(null);
@@ -779,7 +782,6 @@ const ProductsSideModal = (props: SideModalProps) => {
                 open={openCategoryModal}
                 onClose={() => setOpenCategoryModal(false)}
                 onCreated={async (newCategory) => {
-                    // console.log("New Category Created:", newCategory);
                     dispatch(viewAllCategories(currentCompany?._id ?? ""));
                     setSelectedCategoryOption({
                         label: newCategory.name,
@@ -798,7 +800,6 @@ const ProductsSideModal = (props: SideModalProps) => {
                 open={openGroupModal}
                 onClose={() => setOpenGroupModal(false)}
                 onCreated={async (newGroup) => {
-                    // console.log("New Group Created:", newGroup);
                     dispatch(viewAllInventoryGroups(currentCompany?._id ?? ""));
                     setSelectedGroupOption({
                         label: newGroup.name,

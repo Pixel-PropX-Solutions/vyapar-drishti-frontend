@@ -46,7 +46,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { InvoicesRowSkeleton } from "@/common/InvoicesRowSkeleton";
-import { ActionButton } from "@/utils/functions";
+import { ActionButton } from "@/common/ActionButton";
 
 
 const Transactions: React.FC = () => {
@@ -112,7 +112,6 @@ const Transactions: React.FC = () => {
         event: React.ChangeEvent<unknown>,
         newPage: number
     ) => {
-        console.log(event);
 
         setState((prevState) => ({
             ...prevState,
@@ -148,18 +147,15 @@ const Transactions: React.FC = () => {
     // Handle view stockist details
     const handleViewInvoice = (invoice: GetAllVouchars) => {
         // navigate(`/customers/${customer._id}`)
-        console.log("View Invoice", invoice);
     };
 
     const handlePrintInvoice = (invoice: GetAllVouchars) => {
-        console.log("Print Invoice", invoice);
         if (invoice.voucher_type === 'Receipt') {
             dispatch(printRecieptInvoices({
                 vouchar_id: invoice._id,
                 company_id: currentCompany?._id || "",
             })).then((response) => {
                 if (response.meta.requestStatus === 'fulfilled') {
-                    console.log("Print Invoice Response:", response.payload);
                     const payload = response.payload as { invoceHtml: string };
                     setHtmlFromAPI(payload.invoceHtml);
                     setInvoiceId(invoice.voucher_number);
@@ -178,7 +174,6 @@ const Transactions: React.FC = () => {
                 company_id: currentCompany?._id || "",
             })).then((response) => {
                 if (response.meta.requestStatus === 'fulfilled') {
-                    console.log("Print Invoice Response:", response.payload);
                     const payload = response.payload as { invoceHtml: string };
                     setHtmlFromAPI(payload.invoceHtml);
                     setInvoiceId(invoice.voucher_number);
@@ -673,7 +668,6 @@ const Transactions: React.FC = () => {
                     open={promptModal}
                     onClose={() => setPromptModal(false)}
                     onSubmit={(voucharTypeValue) => {
-                        console.log("Vouchar Type Value:", voucharTypeValue);
                         if (voucharTypeValue === 'Sales') {
                             navigate('/invoices/create/' + voucharTypeValue.toLowerCase());
                         }

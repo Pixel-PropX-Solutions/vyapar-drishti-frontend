@@ -118,7 +118,6 @@ const authSlice = createSlice({
         state.loading = true;
       })
       .addCase(getCurrentCompany.fulfilled, (state, action: PayloadAction<any>) => {
-        console.log('action.payload in auth Reducer', action.payload)
         state.currentCompany = action.payload.currentCompany;
         state.loading = false;
       })

@@ -1,9 +1,8 @@
-import { Button, Chip, styled } from "@mui/material";
+import { Chip, Typography } from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid-pro";
 import ProductIcon from "@mui/icons-material/LocalPharmacyOutlined";
 import QuantityIcon from "@mui/icons-material/LocalOffer";
 import ExpiryIcon from "@mui/icons-material/CalendarToday";
-import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 import { ProductSortField, SortOrder } from "./types";
 // import { LocalShipping, Cancel, CheckCircle, ReceiptLong } from '@mui/icons-material';
 import ImageIcon from '@mui/icons-material/Image';
@@ -69,7 +68,9 @@ export const inventoryProductColumn: GridColDef[] = [
     minWidth: 50,
     renderCell: (params) => (
       <div style={{ display: "flex", alignItems: "center" }}>
-        <CurrencyRupeeIcon sx={{ fontSize: "1.2rem" }} />
+        <Typography sx={{ fontSize: "1.2rem", marginRight: 0.5 }}>
+          &#8377;
+        </Typography>
         <span>{params.value}</span>
       </div>
     ),
@@ -176,14 +177,13 @@ export const getAvatarColor = (name: string): string => {
   return colors[index];
 };
 
-export const ActionButton = styled(Button)(({ theme }) => ({
-    borderRadius: '8px',
-    fontWeight: 600,
-    padding: theme.spacing(1, 2),
-    transition: 'all 0.2s',
-    boxShadow: 'none',
-}));
-
+export function capitalizeInput(value: string, mode: 'off' | 'sentences' | 'words' | 'characters'): string {
+  if (mode === 'off') return value;
+  if (mode === 'characters') return value.toUpperCase();
+  if (mode === 'words') return value.replace(/\b\w/g, c => c.toUpperCase());
+  if (mode === 'sentences') return value.replace(/(^|[.!?]\s+)([a-z])/g, (m, p1, p2) => p1 + p2.toUpperCase());
+  return value;
+};
 
 // // Status chip color mapping
 // export const getStatusColor = (status: OrderStatus) => {

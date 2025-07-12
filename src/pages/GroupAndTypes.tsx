@@ -110,23 +110,19 @@ const GroupAndTypes: React.FC = () => {
     };
 
     const handleCustomerGroupEdit = (cusGroup: GetAllAccountingGroups) => {
-        // console.log("Editing Customer Group:", cusGroup);
         setOpenCustomerGroupModal(true);
         setSelectedCustomerGroup(cusGroup);
     };
     const handleCustomerGroupView = (cusGroup: GetAllAccountingGroups) => {
-        // console.log("Editing Customer Group:", cusGroup);
         setOpenCustomerGroupModal(true);
         setSelectedCustomerGroup(cusGroup);
     };
 
     const handleInventoryGroupEdit = (inventoryGroup: GetInventoryGroups) => {
-        // console.log("Editing Inventory Group:", inventoryGroup);
         setOpenInventoryGroupModal(true);
         setSelectedInventoryGroup(inventoryGroup);
     };
     const handleInventoryGroupView = (inventoryGroup: GetInventoryGroups) => {
-        // console.log("Editing Inventory Group:", inventoryGroup);
         setOpenInventoryGroupModal(true);
         setSelectedInventoryGroup(inventoryGroup);
     };
@@ -245,7 +241,7 @@ const GroupAndTypes: React.FC = () => {
                                         setSelectedCustomerGroup(null);
                                     }
                                     else if (selectedTab === 1) {
-                                        // console.log("Add New Invoice Group");
+                                        // do nothing
                                     }
                                     else if (selectedTab === 2) {
                                         setOpenInventoryGroupModal(true);
@@ -576,18 +572,14 @@ const GroupAndTypes: React.FC = () => {
                                 md={4}
                                 lg={3}
                                 key={invGroup._id}
-                                onClick={() => {
-                                    // console.log("Clicked Invoice Group", invGroup);
-                                }}
+                                onClick={() => { }}
                             >
                                 <InvoiceTypesCard
                                     invGroup={invGroup}
                                     onDelete={(id: string) => {
-                                        console.log("Delete Invoice Group", id);
                                     }}
 
                                     onEdit={(invGroup: GetAllInvoiceGroups) => {
-                                        console.log("Edit Invoice Group", invGroup);
                                     }}
                                     index={index}
                                 />
@@ -908,7 +900,7 @@ const GroupAndTypes: React.FC = () => {
                 }}
                 onUpdated={() => fetchInventoryGroups()}
                 inventoryGroup={selectedInventoryGroup}
-                onCreated={function (inventoryGroup: { name: string; _id: string; }): void { console.log("inventoryGroup", inventoryGroup) }} />
+                onCreated={function (inventoryGroup: { name: string; _id: string; }): void {  }} />
 
             <CreateCustomerGroupModal
                 open={openCustomerGroupModal}
@@ -919,7 +911,7 @@ const GroupAndTypes: React.FC = () => {
                 onUpdated={() => fetchCustomerGroups()}
                 accountingGroup={selectedCustomerGroup}
                 onCreated={function (accountingGroup: { name: string; _id: string; }): void {
-                    setOpenCustomerGroupModal(false); console.log("accountingGroup", accountingGroup)
+                    setOpenCustomerGroupModal(false);
                 }} />
         </Box>
     );

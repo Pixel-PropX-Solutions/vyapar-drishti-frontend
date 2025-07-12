@@ -10,11 +10,9 @@ import {
     DialogTitle,
     DialogContent,
     Button,
-    // Avatar,
     IconButton,
     TableCell,
     TableRow,
-    // Chip,
     Fade,
     Zoom,
     Alert,
@@ -22,16 +20,12 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-// import CategoryIcon from "@mui/icons-material/Category";
 import { GetAllVouchars } from "@/utils/types";
 import {
-    CurrencyRupee,
     Print,
-    // Email, PeopleAlt, Phone, 
     Today
 } from "@mui/icons-material";
 import { formatDate } from "@/utils/functions";
-// import { GetProduct } from "@/utils/types";
 
 interface ProductRowProps {
     inv: GetAllVouchars;
@@ -53,24 +47,6 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
         setOpenDeleteDialog(false);
     };
 
-    // const getInitials = (name: string): string => {
-    //     return name
-    //         .split(' ')
-    //         .map(word => word.charAt(0))
-    //         .join('')
-    //         .toUpperCase()
-    //         .slice(0, 2);
-    // };
-
-    // const getAvatarColor = (name: string): string => {
-    //     const colors = [
-    //         '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-    //         '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
-    //     ];
-    //     const index = name.length % colors.length;
-    //     return colors[index];
-    // };
-
     return (
         <>
             <Fade in timeout={300 + index * 100}>
@@ -90,7 +66,7 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                     }}
                     onClick={() => onView(inv)}
                 >
-                    {/* Product Info */}
+                    {/* Serial No */}
                     <TableCell sx={{ pl: 3, }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Typography
@@ -107,6 +83,8 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                             </Typography>
                         </Box>
                     </TableCell>
+
+                    {/* Invoice Creation Date */}
                     <TableCell align="right" sx={{ px: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Today sx={{ fontSize: '1rem', mr: 0.5, color: theme.palette.text.secondary }} />
@@ -122,6 +100,8 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                             </Typography>
                         </Box>
                     </TableCell>
+
+                    {/* Party Information */}
                     <TableCell sx={{ pl: 3, pr: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
                             <Box sx={{ flex: 1 }}>
@@ -137,26 +117,11 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                                 >
                                     {inv.party_name}
                                 </Typography>
-                                {/* {inv.alias && <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <Chip
-                                        icon={<PeopleAlt />}
-                                        label={inv.alias}
-                                        size="small"
-                                        variant="outlined"
-                                        sx={{
-                                            fontSize: '0.7rem',
-                                            height: '20px',
-                                            borderRadius: '10px',
-                                            bgcolor: alpha(theme.palette.primary.main, 0.08),
-                                            borderColor: alpha(theme.palette.primary.main, 0.2),
-                                            color: theme.palette.primary.main,
-                                        }}
-                                    />
-                                </Box>} */}
                             </Box>
                         </Box>
                     </TableCell>
 
+                    {/* Invoice Type */}
                     <TableCell align="center" sx={{ px: 1 }}>
                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
 
@@ -168,28 +133,12 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                                     color: theme.palette.text.primary,
                                 }}
                             >
-                                {/* <Phone
-                                    fontSize="small"
-                                    sx={{ verticalAlign: "middle", mr: 1 }}
-                                /> */}
-                                {inv.voucher_type}{" "}
-                                {/* {inv?.phone?.number || "N/A"} */}
+                                {inv.voucher_type}
                             </Typography>
-                            {/* <Chip
-                                icon={<Email />}
-                                label={inv.email || 'No Email'}
-                                color={'primary'}
-                                size="medium"
-                                sx={{
-                                    fontSize: '0.7rem',
-                                    height: '22px',
-                                    fontWeight: 600,
-                                }}
-                            /> */}
                         </Box>
                     </TableCell>
 
-                    {/* Selling Price */}
+                    {/* Invoice Number */}
                     <TableCell align="right" sx={{ px: 1 }}>
                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -207,15 +156,21 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                         </Box>
                     </TableCell>
 
+                    {/* Debit Invoice amount */}
                     <TableCell align="left" sx={{ px: 1 }}>
                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                {inv.is_deemed_positive && <CurrencyRupee
+                                {inv.is_deemed_positive && <Typography
+                                    variant="h6"
                                     sx={{
+                                        fontWeight: 700,
                                         fontSize: '1.1rem',
                                         mr: 0.5,
                                         color: !inv.is_deemed_positive ? theme.palette.error.main : theme.palette.success.main,
-                                    }} />}
+                                    }}
+                                >
+                                    &#8377;
+                                </Typography>}
                                 <Typography
                                     variant="h6"
                                     sx={{
@@ -229,15 +184,22 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                             </Box>
                         </Box>
                     </TableCell>
+
+                    {/* Credit Invoice amount */}
                     <TableCell align="left" sx={{ px: 1 }}>
                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                {!inv.is_deemed_positive && <CurrencyRupee
+                                {!inv.is_deemed_positive && <Typography
+                                    variant="h6"
                                     sx={{
+                                        fontWeight: 700,
                                         fontSize: '1.1rem',
                                         mr: 0.5,
                                         color: inv.is_deemed_positive ? theme.palette.success.main : theme.palette.error.main,
-                                    }} />}
+                                    }}
+                                >
+                                    &#8377;
+                                </Typography>}
                                 <Typography
                                     variant="h6"
                                     sx={{

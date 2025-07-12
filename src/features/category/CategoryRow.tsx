@@ -20,7 +20,6 @@ import {
     Alert,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-// import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CategoryIcon from "@mui/icons-material/Category";

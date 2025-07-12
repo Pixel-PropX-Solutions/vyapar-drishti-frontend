@@ -113,7 +113,6 @@
 //         field: keyof ShippingAddress,
 //         value: string
 //     ) => {
-//         console.log(`Field changed: ${field}, Value: ${value}`);
 //         setData(prev => {
 //             const newData = { ...prev, [field]: value };
 //             validateForm(newData);

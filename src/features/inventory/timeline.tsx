@@ -311,7 +311,7 @@ const Timeline: React.FC = () => {
                                     }}>
                                         {item?.voucher_type === "Sales" && (item?.quantity || 0)}
                                     </TableCell>
-                                    <TableCell sx={{ fontWeight: '500' }}>₹ {item?.rate || 0}</TableCell>
+                                    <TableCell sx={{ fontWeight: '500' }}>&#8377; {item?.rate || 0}</TableCell>
                                     <TableCell>{item?.voucher_number || 'N/A'}</TableCell>
                                     <TableCell>
                                         <Typography variant="body2" fontWeight="500">

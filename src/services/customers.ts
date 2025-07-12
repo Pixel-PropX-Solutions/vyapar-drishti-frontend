@@ -33,8 +33,6 @@ export const viewAllCustomer = createAsyncThunk(
                 }`
             );
 
-            console.log("view all ledger response", response);
-
             if (response.data.success === true) {
                 const customers = response.data.data.docs;
                 const pageMeta = response.data.data.meta;
@@ -66,7 +64,6 @@ export const viewAllCustomerWithType = createAsyncThunk(
                 `/ledger/view/ledgers/with/type?company_id=${company_id}&type=${customerType}`
             );
 
-            console.log("viewAllCustomerWithType response", response);
 
             if (response.data.success === true) {
                 const ledgersWithType = response.data.data;
@@ -92,11 +89,10 @@ export const viewAllCustomers = createAsyncThunk(
                 `ledger/view/all/ledgers?company_id=${company_id}`
             );
 
-            console.log("viewAllCustomers response", response);
 
             if (response.data.success === true) {
                 const customersList = response.data.data;
-                return {customersList};
+                return { customersList };
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
             return rejectWithValue(
@@ -107,14 +103,62 @@ export const viewAllCustomers = createAsyncThunk(
     }
 );
 
+export const createCustomer = createAsyncThunk(
+    "create/customer",
+    async (data: FormData, { rejectWithValue }) => {
+        try {
+            const response = await userApi.post(
+                `/ledger/create`,
+                data
+            );
+
+            if (response.data.success === true) {
+                return;
+            } else return rejectWithValue("Login Failed: No access token recieved.");
+        } catch (error: any) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Login failed: Invalid credentials or server error."
+            );
+        }
+    }
+);
+
+export const updateCustomer = createAsyncThunk(
+    "update/customer",
+    async ({ data, id }: { data: FormData; id: string }, { rejectWithValue }) => {
+        try {
+
+            const response = await userApi.put(
+                `/ledger/update/${id}`,
+                data
+            );
+
+
+            if (response.data.success === true) {
+                return;
+            } else return rejectWithValue("Login Failed: No access token recieved.");
+        } catch (error: any) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Login failed: Invalid credentials or server error."
+            );
+        }
+    }
+);
+
+
 export const getCustomer = createAsyncThunk(
     "get/customer",
     async (customer_id: string, { rejectWithValue }) => {
         try {
-            const response = await userApi.get(`/customer/view/${customer_id}`);
+            const response = await userApi.get(`/ledger/view/${customer_id}`);
+
+            console.log("Get Customer API Response", response);
 
             if (response.data.success === true) {
-                return response.data.data[0];
+                const customer = response.data.data[0];
+                return { customer };
             }
             else
                 return rejectWithValue("Failed to fetch Customer profile");
@@ -162,53 +206,6 @@ export const restoreCustomer = createAsyncThunk(
             return rejectWithValue(
                 error.response?.data?.message ||
                 "Failed: Unable to fetch chemist profile"
-            );
-        }
-    }
-);
-
-export const createCustomer = createAsyncThunk(
-    "create/customer",
-    async (data: FormData, { rejectWithValue }) => {
-        try {
-            const response = await userApi.post(
-                `/ledger/create`,
-                data
-            );
-            console.log("createCustomer response", response);
-
-            if (response.data.success === true) {
-                return;
-            } else return rejectWithValue("Login Failed: No access token recieved.");
-        } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
-        }
-    }
-);
-
-export const updateCustomer = createAsyncThunk(
-    "update/customer",
-    async ({ data, id }: { data: FormData; id: string }, { rejectWithValue }) => {
-        try {
-
-            console.log("updateChemist data", data);
-            const response = await userApi.put(
-                `/customer/update/${id}`,
-                data
-            );
-
-            // console.log("updateCustomer response", response);
-
-            if (response.data.success === true) {
-                return;
-            } else return rejectWithValue("Login Failed: No access token recieved.");
-        } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
             );
         }
     }

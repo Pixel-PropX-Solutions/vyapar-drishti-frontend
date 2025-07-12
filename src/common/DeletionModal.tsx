@@ -25,7 +25,6 @@ import {
   Description as DescriptionIcon,
   // WaterDrop as StateIcon,
   // Today as TodayIcon,
-  CurrencyRupee as CurrencyIcon,
   ProductionQuantityLimits as QuantityIcon,
 } from "@mui/icons-material";
 
@@ -345,7 +344,17 @@ export default function DeletionModal({ id }: { id: string }) {
                   />
                   <InfoRow
                     theme={theme}
-                    icon={<CurrencyIcon />}
+                    icon={<Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '1rem',
+                        mr: 0.5,
+                        color: theme.palette.success.main,
+                      }}
+                    >
+                      &#8377;
+                    </Typography>}
                     label="Price"
                     value={productData?.selling_price.toString() || "N/A"}
                   />

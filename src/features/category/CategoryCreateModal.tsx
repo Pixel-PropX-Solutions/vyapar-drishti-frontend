@@ -302,7 +302,6 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
                 dispatch(createCategory({ categoryData: formData }))
                     .unwrap()
                     .then((response) => {
-                        // console.log("Category created:", response);
                         const newCategory = {
                             name: response.category_name,
                             _id: response._id

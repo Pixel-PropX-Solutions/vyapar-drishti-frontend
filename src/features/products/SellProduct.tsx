@@ -267,7 +267,7 @@
 //                                 }
 //                               }}
 //                               InputProps={{
-//                                 startAdornment: <Typography sx={{ mr: 0.5 }}>₹</Typography>
+//                                 startAdornment: <Typography sx={{ mr: 0.5 }}>&#8377;</Typography>
 //                               }}
 //                               onChange={(e) => {
 //                                 const newItems = [...billItems];
@@ -278,7 +278,7 @@
 //                           </TableCell>
 //                           <TableCell align="right">
 //                             <Typography fontWeight="medium">
-//                               ₹{(item.unit_price * item?.quantity).toFixed(2)}
+//                               &#8377;{(item.unit_price * item?.quantity).toFixed(2)}
 //                             </Typography>
 //                           </TableCell>
 //                           <TableCell>
@@ -325,7 +325,7 @@
 //                       Grand Total:
 //                     </Typography>
 //                     <Typography variant="h5" fontWeight="bold" color="primary.dark">
-//                       ₹{calculateTotal().toFixed(2)}
+//                       &#8377;{calculateTotal().toFixed(2)}
 //                     </Typography>
 //                   </Box>
 //                 </Box>

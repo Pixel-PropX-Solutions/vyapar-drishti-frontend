@@ -34,7 +34,6 @@ import {
   ListItemText,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
-import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
 import DeleteIcon from "@mui/icons-material/Delete";
 import MedicationIcon from "@mui/icons-material/Medication";
 import CategoryIcon from "@mui/icons-material/Category";
@@ -134,7 +133,7 @@ export default function ViewItem() {
     {
       date: "2025-02-15",
       action: "Price Change",
-      details: "Price updated from ₹65 to ₹70",
+      details: "Price updated from &#8377;65 to &#8377;70",
       user: "Sarah Smith",
       type: "price",
     },
@@ -202,7 +201,6 @@ export default function ViewItem() {
   }, [item]);
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    // console.log(event);
     setActiveTab(newValue);
   };
 
@@ -453,7 +451,7 @@ export default function ViewItem() {
                     alignItems: "center",
                   }}
                 >{data.sales_qty > 0 ? <>
-                  <CurrencyRupeeIcon /> {data.sales_value}
+                  <Typography variant="h6" sx={{ color: "success.main" }}>&#8377; {data.sales_value}</Typography>
                 </> : 'No Sale Yet'}
                 </Typography>
               </Box>
@@ -463,7 +461,7 @@ export default function ViewItem() {
                 </Typography>
                 <Typography variant="h6" color="text.primary">
                   {data.purchase_qty > 0 ? <>
-                    ₹{data.purchase_value}
+                    &#8377; {data.purchase_value}
                   </> : "No Purchase Yet"}
                 </Typography>
               </Box>
@@ -623,12 +621,12 @@ export default function ViewItem() {
                       <TrendingUpIcon color="success" sx={{ mb: 1 }} />
                       <Typography variant="h6" color="success.main">
                         {data.sales_qty > 0 ? <>
-                          ₹{" "}
+                          &#8377;{" "}
                           {(
                             ((data.sales_value ?? 0 - (data?.purchase_value ?? 0)) /
                               (data?.purchase_value ?? 1)) *
                             100
-                          ).toFixed(1)}
+                          ).toFixed(2)}
                           %
                         </> : "No Sale yet"}
 
@@ -651,7 +649,7 @@ export default function ViewItem() {
                       <ShoppingCartIcon color="primary" sx={{ mb: 1 }} />
                       <Typography variant="h6" color="primary.main">
                         {data.purchase_qty > 0
-                          ? <> ₹ {(data.current_stock ?? 0) * (data.avg_purchase_rate ?? 1)}</>
+                          ? <> &#8377; {((data.current_stock ?? 0) * (data.avg_purchase_rate ?? 1)).toFixed(2)}</>
                           : "No Purchase Yet"
                         }
 
@@ -675,7 +673,6 @@ export default function ViewItem() {
                         setDrawer(true);
                         await dispatch(viewProduct({ product_id: data._id, company_id: currentCompany?._id || '' }))
                           .unwrap().then((res) => {
-                            // console.log("Product details fetched successfully", res);
                             setSelectedProduct(res.product);
                             setDrawer(true);
                           }
@@ -881,7 +878,7 @@ export default function ViewItem() {
                                 fontWeight={700}
                                 color="text.primary"
                               >{data.purchase_qty > 0
-                                ? <>₹{data.purchase_value}</>
+                                ? <>&#8377; {data.purchase_value}</>
                                 : 'No Purchase Yet'}
                               </Typography>
                             </Grid>
@@ -898,7 +895,7 @@ export default function ViewItem() {
                                 fontWeight={700}
                                 color="success.main"
                               >{data.purchase_qty > 0
-                                ? <> ₹{data.sales_value}</>
+                                ? <> &#8377; {data.sales_value}</>
                                 : 'No Sale Yet'}
                               </Typography>
                             </Grid>
@@ -1221,12 +1218,12 @@ export default function ViewItem() {
                   <Typography
                     variant="h6"
                     color="primary.main"
-                    sx={{ display: "flex", alignItems: "center", mb: 3 }}
+                    sx={{ display: "flex", alignItems: "center", mb: 2 }}
                   >
                     <BarChartIcon sx={{ mr: 1 }} /> Product Analytics
                   </Typography>
 
-                  <Grid container spacing={3}>
+                  <Grid container spacing={2}>
                     {/* Key Metrics */}
                     <Grid item xs={12}>
                       <Typography
@@ -1236,12 +1233,12 @@ export default function ViewItem() {
                       >
                         Key Metrics
                       </Typography>
-                      <Grid container spacing={2}>
+                      <Grid container spacing={1}>
                         <Grid item xs={6} sm={3}>
                           <Paper
                             elevation={0}
                             sx={{
-                              p: 2,
+                              p: 1,
                               textAlign: "center",
                               bgcolor: "success.light",
                               color: "success.contrastText",
@@ -1249,7 +1246,7 @@ export default function ViewItem() {
                             }}
                           >
                             <Typography variant="h5" fontWeight={700}>
-                              ₹{" "}
+                              &#8377;{" "}
                               {data.sales_value ?? 0 - (data?.purchase_value ?? 0)}
                             </Typography>
                             <Typography variant="caption">
@@ -1261,7 +1258,7 @@ export default function ViewItem() {
                           <Paper
                             elevation={0}
                             sx={{
-                              p: 2,
+                              p: 1,
                               textAlign: "center",
                               bgcolor: "primary.light",
                               color: "primary.contrastText",
@@ -1275,7 +1272,7 @@ export default function ViewItem() {
                                     (data?.purchase_value ?? 0)) /
                                     (data?.purchase_value ?? 1)) *
                                   100
-                                ).toFixed(1)}
+                                ).toFixed(2)}
                                   %</>
                                 : "No Sale"}
 
@@ -1289,7 +1286,7 @@ export default function ViewItem() {
                           <Paper
                             elevation={0}
                             sx={{
-                              p: 2,
+                              p: 1,
                               textAlign: "center",
                               bgcolor: "warning.light",
                               color: "warning.contrastText",
@@ -1311,7 +1308,7 @@ export default function ViewItem() {
                           <Paper
                             elevation={0}
                             sx={{
-                              p: 2,
+                              p: 1,
                               textAlign: "center",
                               bgcolor: "info.light",
                               color: "info.contrastText",
@@ -1319,7 +1316,7 @@ export default function ViewItem() {
                             }}
                           >
                             <Typography variant="h5" fontWeight={700}>
-                              ₹{" "}{(data.current_stock ?? 0) * (data.sales_value ?? data.avg_purchase_rate)}
+                              &#8377;{" "}{((data.current_stock ?? 0) * (data.sales_value ?? data.avg_purchase_rate)).toFixed(2)}
                             </Typography>
                             <Typography variant="caption">
                               Total Stock Value

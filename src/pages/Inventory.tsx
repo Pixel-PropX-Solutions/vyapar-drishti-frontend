@@ -25,7 +25,6 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import RefreshOutlined from '@mui/icons-material/RefreshOutlined';
-import CurrencyRupee from '@mui/icons-material/CurrencyRupee';
 import ClearIcon from '@mui/icons-material/Clear';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import InventoryIcon from '@mui/icons-material/Inventory';
@@ -40,6 +39,7 @@ import { AppDispatch, RootState } from '@/store/store';
 import { SortField, SortOrder, InventoryItem } from '@/utils/types';
 import { getProductStock } from '@/services/inventory';
 import { WarningOutlined } from '@mui/icons-material';
+import { ActionButton } from "@/common/ActionButton";
 
 // Styled Components with enhanced visuals
 const StockCard = styled(Paper)(({ theme }) => ({
@@ -56,13 +56,6 @@ const StockCard = styled(Paper)(({ theme }) => ({
     borderRadius: 12,
 }));
 
-const ActionButton = styled(Button)(({ theme }) => ({
-    borderRadius: '8px',
-    fontWeight: 600,
-    padding: theme.spacing(1, 2),
-    transition: 'all 0.2s',
-    boxShadow: 'none',
-}));
 
 
 const Inventory: React.FC = () => {
@@ -401,7 +394,9 @@ const Inventory: React.FC = () => {
                                     Sales Value
                                 </Typography>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: theme.palette.common.black }}>
-                                    <CurrencyRupee sx={{ color: theme.palette.primary.main }} />
+                                    <Typography variant="h6" sx={{ color: theme.palette.primary.main }}>
+                                        &#8377;
+                                    </Typography>
                                     <Typography variant="h4" component="div" fontWeight="bold">
                                         {totalStockValue.toLocaleString('en-IN')}
                                     </Typography>
@@ -432,7 +427,9 @@ const Inventory: React.FC = () => {
                                     Purchase Value
                                 </Typography>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: theme.palette.common.black }}>
-                                    <CurrencyRupee color="warning" />
+                                    <Typography variant="h6" sx={{ color: theme.palette.warning.main }}>
+                                        &#8377;
+                                    </Typography>
                                     <Typography variant="h4" component="div" fontWeight="bold">
                                         {totalPurchaseValue.toLocaleString('en-IN')}
                                     </Typography>

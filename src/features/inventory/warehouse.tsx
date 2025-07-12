@@ -25,7 +25,6 @@
 // import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 // import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 // import RefreshOutlined from '@mui/icons-material/RefreshOutlined';
-// import CurrencyRupee from '@mui/icons-material/CurrencyRupee';
 // import ClearIcon from '@mui/icons-material/Clear';
 // import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 // import InventoryIcon from '@mui/icons-material/Inventory';
@@ -376,7 +375,9 @@
 //                                     Sales Value
 //                                 </Typography>
 //                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: theme.palette.common.black }}>
-//                                     <CurrencyRupee sx={{ color: theme.palette.primary.main }} />
+//                                     <Typography variant="h6" sx={{ color: theme.palette.primary.main }}>
+//                                         &#8377;
+//                                     </Typography>
 //                                     <Typography variant="h4" component="div" fontWeight="bold">
 //                                         {totalStockValue.toLocaleString('en-IN')}
 //                                     </Typography>
@@ -407,7 +408,9 @@
 //                                     Purchase Value
 //                                 </Typography>
 //                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: theme.palette.common.black }}>
-//                                     <CurrencyRupee color="warning" />
+//                                     <Typography variant="h6" sx={{ color: theme.palette.warning.main }}>
+//                                         &#8377;
+//                                     </Typography>
 //                                     <Typography variant="h4" component="div" fontWeight="bold">
 //                                         {totalPurchaseValue.toLocaleString('en-IN')}
 //                                     </Typography>

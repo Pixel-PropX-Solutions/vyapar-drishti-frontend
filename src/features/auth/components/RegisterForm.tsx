@@ -46,7 +46,6 @@ const RegistrationForm: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // console.log("Form submitted with data:", data);
     const userData = {
       name: {
         first: data.first,

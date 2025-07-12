@@ -20,7 +20,6 @@ import {
     Alert,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-// import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
 import EditIcon from "@mui/icons-material/Edit";
 // import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 // import TrendingDownIcon from "@mui/icons-material/TrendingDown";
@@ -197,7 +196,17 @@ export const CustomerGroupsRow: React.FC<ProductRowProps> = ({ cusGroup, onDelet
                     {/* <TableCell align="right" sx={{ px: 1 }}>
                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                <CurrencyRupeeIcon sx={{ fontSize: '1.1rem', mr: 0.5, color: theme.palette.success.main }} />
+                            <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '1.1rem',
+                        mr: 0.5,
+                        color: theme.palette.success.main,
+                      }}
+                    >
+                      &#8377;
+                    </Typography>
                                 <Typography
                                     variant="h6"
                                     sx={{
@@ -227,7 +236,6 @@ export const CustomerGroupsRow: React.FC<ProductRowProps> = ({ cusGroup, onDelet
                     {/* Purchase Price */}
                     <TableCell align="center" sx={{ px: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                            {/* <CurrencyRupeeIcon sx={{ fontSize: '1rem', mr: 0.5, color: theme.palette.text.secondary }} /> */}
                             <Typography
                                 variant="body1"
                                 sx={{

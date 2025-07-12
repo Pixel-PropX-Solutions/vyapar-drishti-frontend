@@ -50,7 +50,6 @@ const LoginForm: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // console.log("Form submitted with data:", data);
     const formData = new FormData();
     formData.append("username", data.username);
     formData.append("password", data.password);
@@ -59,7 +58,6 @@ const LoginForm: React.FC = () => {
       dispatch(login(formData))
         .unwrap()
         .then((response) => {
-          console.log("Login response:", response);
           dispatch(getCurrentUser());
           dispatch(getCompany());
 

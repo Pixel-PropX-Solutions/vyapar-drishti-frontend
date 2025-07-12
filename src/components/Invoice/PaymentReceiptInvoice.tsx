@@ -99,14 +99,14 @@ const PaymentReceiptInvoice: React.FC = () => {
             const accounting = [
                 {
                     vouchar_id: '',
-                    ledger: singleEntry.customer,
-                    ledger_id: customersList.find(c => c.ledger_name === singleEntry.customer)?._id || '',
+                    ledger: partyName,
+                    ledger_id: customersList.find(c => c.ledger_name === partyName)?._id || '',
                     amount: transactionType === "Payment" ? -singleEntry.amount : singleEntry.amount,
                 },
                 {
                     vouchar_id: '',
-                    ledger: partyName,
-                    ledger_id: customersList.find(c => c.ledger_name === partyName)?._id || '',
+                    ledger: singleEntry.customer,
+                    ledger_id: customersList.find(c => c.ledger_name === singleEntry.customer)?._id || '',
                     amount: transactionType === "Payment" ? singleEntry.amount : -singleEntry.amount,
                 },
             ];
@@ -134,7 +134,6 @@ const PaymentReceiptInvoice: React.FC = () => {
                 items: []
             };
 
-            console.log("Submitting transaction:", payload);
 
             // Simulate API call
             dispatch(createInvoice(payload)).then(() => {
@@ -380,7 +379,7 @@ const PaymentReceiptInvoice: React.FC = () => {
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">
-                                                ₹
+                                                &#8377;
                                             </InputAdornment>
                                         ),
                                     }}
@@ -427,7 +426,7 @@ const PaymentReceiptInvoice: React.FC = () => {
 
                             {total > 0 && (
                                 <Alert severity="info" >
-                                    This {transactionType.toLowerCase()} will be recorded with a total amount of ₹ {total.toFixed(2)}
+                                    This {transactionType.toLowerCase()} will be recorded with a total amount of &#8377; {total.toFixed(2)}
                                 </Alert>
                             )}
                         </Stack>
@@ -440,7 +439,7 @@ const PaymentReceiptInvoice: React.FC = () => {
                             sx={{ mb: 1 }}
                         >
                             <Chip
-                                label={`Total: ₹ ${total.toFixed(2)}`}
+                                label={`Total: &#8377; ${total.toFixed(2)}`}
                                 color="primary"
                                 variant="outlined"
                                 sx={{ fontSize: '1.1rem', width: 'fit-content', mx: 'auto', fontWeight: 600, px: 2, py: 1 }}

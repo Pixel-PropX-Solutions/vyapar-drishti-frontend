@@ -1213,10 +1213,10 @@ export default AboutPage;
 //   const [speedDialOpen, setSpeedDialOpen] = useState(false);
 
 //   const speedDialActions = [
-//     { icon: <Download />, name: 'Download Profile', action: () => console.log('Download') },
-//     { icon: <Share />, name: 'Share Profile', action: () => console.log('Share') },
-//     { icon: <Refresh />, name: 'Refresh Data', action: () => console.log('Refresh') },
-//     { icon: <ContactSupport />, name: 'Get Help', action: () => console.log('Help') },
+//     { icon: <Download />, name: 'Download Profile', action: () => {} },
+//     { icon: <Share />, name: 'Share Profile', action: () => {} },
+//     { icon: <Refresh />, name: 'Refresh Data', action: () =>{} },
+//     { icon: <ContactSupport />, name: 'Get Help', action: () => {} },
 //   ];
 
 //   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {

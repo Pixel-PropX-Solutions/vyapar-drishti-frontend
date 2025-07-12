@@ -324,7 +324,6 @@ export default function UpdateSalePurchase() {
             customerType: type === 'sales' ? 'Debtors' : 'Creditors',
         })).then((response) => {
             if (response.meta.requestStatus === 'fulfilled') {
-                // console.log('viewAllCustomerWithType response', response);
                 const ledgersWithType = response.payload;
                 setParties(ledgersWithType.map((part: any) => ({ name: part.ledger_name, id: part._id })));
             }
@@ -338,7 +337,6 @@ export default function UpdateSalePurchase() {
         //     customerType: type === 'sales' ? 'Sales Account' : 'Purchase Account',
         // })).then((response) => {
         //     if (response.meta.requestStatus === 'fulfilled') {
-        //         // console.log('viewAllCustomerWithType response for counter parties', response);
         //         const ledgersWithType = response.payload;
         //         setCounterParties(ledgersWithType.map((part: any) => ({ name: part.ledger_name, id: part._id })));
         //     }
@@ -349,7 +347,6 @@ export default function UpdateSalePurchase() {
 
         dispatch(viewProductsWithId(user.user_settings.current_company_id || '')).then((response) => {
             if (response.meta.requestStatus === 'fulfilled') {
-                // console.log('viewProductsWithId response', response);
                 const products = response.payload;
                 setItemsList(
                     products.map((product: any) => ({

@@ -113,7 +113,6 @@
 //         handleFieldChange(`items.${index}.amount`, amount);
 //     };
 
-//     console.log(dataItems)
 
 //     return (
 //         <Box p={2}>
@@ -178,12 +177,12 @@
 //                                 size="small"
 //                             />
 //                             <Chip
-//                                 label={`GST Amount: ₹${totalGST}`}
+//                                 label={`GST Amount: &#8377;${totalGST}`}
 //                                 color="info"
 //                                 size="small"
 //                             />
 //                             <Chip
-//                                 label={`Total Amount: ₹${totalAmount}`}
+//                                 label={`Total Amount: &#8377;${totalAmount}`}
 //                                 color="success"
 //                                 size="small"
 //                                 sx={{ fontWeight: "500" }}
@@ -316,7 +315,7 @@
 //                                             px: 0.75
 //                                         }}
 //                                     >
-//                                         MRP (₹)
+//                                         MRP (&#8377;)
 //                                     </TableCell>
 //                                     <TableCell
 //                                         sx={{
@@ -328,7 +327,7 @@
 //                                             px: 0.75
 //                                         }}
 //                                     >
-//                                         Rate (₹)
+//                                         Rate (&#8377;)
 //                                     </TableCell>
 //                                     <TableCell
 //                                         sx={{
@@ -651,7 +650,7 @@
 //                                                     InputProps={{
 //                                                         startAdornment: (
 //                                                             <InputAdornment position="start" sx={{ mr: 0 }}>
-//                                                                 ₹
+//                                                                 &#8377;
 //                                                             </InputAdornment>
 //                                                         ),
 //                                                     }}
@@ -701,7 +700,7 @@
 //                                                     InputProps={{
 //                                                         startAdornment: (
 //                                                             <InputAdornment position="start" sx={{ mr: 0 }}>
-//                                                                 ₹
+//                                                                 &#8377;
 //                                                             </InputAdornment>
 //                                                         ),
 //                                                     }}
@@ -778,7 +777,7 @@
 //                                                     InputProps={{
 //                                                         startAdornment: (
 //                                                             <InputAdornment position="start" sx={{ mr: 0 }}>
-//                                                                 ₹
+//                                                                 &#8377;
 //                                                             </InputAdornment>
 //                                                         ),
 //                                                     }}

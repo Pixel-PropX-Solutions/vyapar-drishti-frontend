@@ -135,7 +135,6 @@
 //   };
 
 //   const handleSave = async () => {
-//     console.log("Saving invoice data to backend:", data);
 //     setLoading(true);
 //     setError(null);
 
@@ -148,7 +147,6 @@
 //         }
 //       );
 
-//       console.log("handleSave response", response.data);
 //       if (response.data.success === true) {
 //         setError("");
 //         setTimeout(() => {
@@ -164,7 +162,6 @@
 
 //   const handleChange = (name: string, value: any) => {
 //     if (!name) return;
-//     console.log("handleChange", name, value);
 //     const parts = name.split(".");
 //     if (parts[0] === "items" && parts.length >= 3) {
 //       const index = parseInt(parts[1]);
@@ -372,13 +369,13 @@
 //                                   {item?.quantity}
 //                                 </TableCell>
 //                                 <TableCell align="right">
-//                                   ₹{parseFloat(item?.MRP || "0").toFixed(2)}
+//                                   &#8377;{parseFloat(item?.MRP || "0").toFixed(2)}
 //                                 </TableCell>
 //                                 <TableCell align="right">
-//                                   ₹{parseFloat(item?.rate || "0").toFixed(2)}
+//                                   &#8377;{parseFloat(item?.rate || "0").toFixed(2)}
 //                                 </TableCell>
 //                                 <TableCell align="right">
-//                                   ₹{parseFloat(item?.amount || "0").toFixed(2)}
+//                                   &#8377;{parseFloat(item?.amount || "0").toFixed(2)}
 //                                 </TableCell>
 //                               </AnimatedTableRow>
 //                             ))}
@@ -712,7 +709,7 @@
 //                             margin="normal"
 //                             size="small"
 //                             InputProps={{
-//                               startAdornment: "₹",
+//                               startAdornment: "&#8377;",
 //                               sx: {
 //                                 borderRadius: 1,
 //                                 "& .MuiInputBase-input": {
@@ -748,7 +745,7 @@
 //                             margin="normal"
 //                             size="small"
 //                             InputProps={{
-//                               startAdornment: "₹",
+//                               startAdornment: "&#8377;",
 //                               sx: {
 //                                 borderRadius: 1,
 //                                 "& .MuiInputBase-input": {
@@ -774,7 +771,7 @@
 //                             margin="normal"
 //                             size="small"
 //                             InputProps={{
-//                               startAdornment: "₹",
+//                               startAdornment: "&#8377;",
 //                               sx: {
 //                                 borderRadius: 1,
 //                                 "& .MuiInputBase-input": {
@@ -800,7 +797,7 @@
 //                             margin="normal"
 //                             size="small"
 //                             InputProps={{
-//                               startAdornment: "₹",
+//                               startAdornment: "&#8377;",
 //                               sx: {
 //                                 borderRadius: 1,
 //                                 "& .MuiInputBase-input": {
@@ -834,7 +831,7 @@
 //                                 : ""
 //                             }
 //                             InputProps={{
-//                               startAdornment: "₹",
+//                               startAdornment: "&#8377;",
 //                               sx: {
 //                                 borderRadius: 1,
 //                                 "& .MuiInputBase-input": {
@@ -874,7 +871,7 @@
 //                             Sub-Total:
 //                           </Typography>
 //                           <Typography variant="body1" fontWeight="500">
-//                             {(invoice?.totals?.subtotal ?? 0).toFixed(2)} ₹
+//                             {(invoice?.totals?.subtotal ?? 0).toFixed(2)} &#8377;
 //                           </Typography>
 //                         </Box>
 //                         <Box
@@ -890,7 +887,7 @@
 //                             fontWeight="500"
 //                             color="error"
 //                           >
-//                             - {(invoice?.totals?.discount ?? 0).toFixed(2)} ₹
+//                             - {(invoice?.totals?.discount ?? 0).toFixed(2)} &#8377;
 //                           </Typography>
 //                         </Box>
 //                         <Box
@@ -906,7 +903,7 @@
 //                             fontWeight="500"
 //                             color="#2e7d32"
 //                           >
-//                             {`+ ${(Number(invoice?.totals?.GST_total || 0)).toFixed(2)} ₹`}
+//                             {`+ ${(Number(invoice?.totals?.GST_total || 0)).toFixed(2)} &#8377;`}
 //                           </Typography>
 //                         </Box>
 
@@ -918,7 +915,7 @@
 //                         >
 //                           <Typography variant="h6">Grand Total:</Typography>
 //                           <Typography variant="h6" color="primary">
-//                             {Number(invoice?.totals?.grand_total ?? 0).toFixed(2)} ₹
+//                             {Number(invoice?.totals?.grand_total ?? 0).toFixed(2)} &#8377;
 //                           </Typography>
 //                         </Box>
 
@@ -940,7 +937,7 @@
 //                                 {(
 //                                   (invoice?.totals?.grand_total || 0) -
 //                                   (invoice?.totals?.outstanding_amount || 0)
-//                                 ).toFixed(2)} ₹
+//                                 ).toFixed(2)} &#8377;
 //                               </Typography>
 //                             </Box>
 //                             <Box
@@ -958,7 +955,7 @@
 //                               >
 //                                 {(
 //                                   invoice?.totals?.outstanding_amount || 0
-//                                 ).toFixed(2)} ₹
+//                                 ).toFixed(2)} &#8377;
 //                               </Typography>
 //                             </Box>
 //                           </>
@@ -1052,7 +1049,7 @@
 //                                 }
 //                                 margin="dense"
 //                                 InputProps={{
-//                                   startAdornment: "₹",
+//                                   startAdornment: "&#8377;",
 //                                   sx: { borderRadius: 2 },
 //                                 }}
 //                                 helperText="Enter the amount still pending"
@@ -1083,7 +1080,7 @@
 //                                 color="text.secondary"
 //                                 ml={2}
 //                               >
-//                                 Outstanding: ₹
+//                                 Outstanding: &#8377;
 //                                 {(
 //                                   invoice?.totals?.outstanding_amount || 0
 //                                 ).toFixed(2)}

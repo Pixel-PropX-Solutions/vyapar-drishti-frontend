@@ -11,7 +11,6 @@ export const createInvoice = createAsyncThunk(
     ) => {
         try {
             const createRes = await userApi.post(`user/create/vouchar`, data);
-            console.log("createInvoice response", createRes);
 
             if (createRes.data.success === true) {
                 return;
@@ -35,9 +34,8 @@ export const createInvoiceWithGST = createAsyncThunk(
         { rejectWithValue }
     ) => {
         try {
-            console.log("createInvoiceWithGST data", data);
             const createRes = await userApi.post(`user/create/vouchar/gst`, data);
-            console.log("createInvoice response", createRes);
+
             if (createRes.data.success === true) {
                 return;
             } else {
@@ -84,7 +82,6 @@ export const viewAllInvoices = createAsyncThunk(
                 `user/view/all/vouchar?company_id=${company_id}${searchQuery !== '' ? '&search=' + searchQuery : ''}${type !== 'All' ? '&type=' + type : ''}&start_date=${start_date}&end_date=${end_date}&page_no=${pageNumber}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"
                 }`
             );
-            console.log("viewAllInvoices response", response.data);
 
             if (response.data.success === true) {
                 const invoices = response.data.data.docs;
@@ -118,11 +115,38 @@ export const viewInvoice = createAsyncThunk(
                 `/user/get/vouchar/${vouchar_id}?company_id=${company_id}`
             );
 
-            console.log("viewInvoice response", response.data);
-
             if (response.data.success === true) {
                 const invoiceData = response.data.data;
                 return { invoiceData };
+            } else return rejectWithValue("Login Failed: No access token recieved.");
+        } catch (error: any) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Login failed: Invalid credentials or server error."
+            );
+        }
+    }
+);
+
+export const getInvoiceCounter = createAsyncThunk(
+    "view/invoices",
+    async (
+        {
+            voucher_type,
+            company_id,
+        }: {
+            voucher_type: string;
+            company_id: string;
+        },
+        { rejectWithValue }
+    ) => {
+        try {
+            const response = await userApi.get(
+                `user/serial-number/get/current/${voucher_type}${company_id !== '' ? '?company_id=' + company_id : ''}`
+            );
+
+            if (response.data.success === true) {
+                return response.data.data;
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
             return rejectWithValue(
@@ -141,9 +165,8 @@ export const updateInvoice = createAsyncThunk(
     ) => {
         try {
 
-            console.log("updateInvoice data", data);
             const updateRes = await userApi.put(`/user/update/vouchar/${data.vouchar_id}`, data);
-            console.log("updateInvoice response", updateRes);
+
             if (updateRes.data.success === true) {
                 return;
             } else {
@@ -176,7 +199,6 @@ export const printInvoices = createAsyncThunk(
             const response = await userApi.get(
                 `/user/print/vouchar?vouchar_id=${vouchar_id}&company_id=${company_id}`
             );
-            console.log("printInvoices response", response.data);
 
             if (response.data.success === true) {
                 const invoceHtml = response.data.data;
@@ -209,7 +231,6 @@ export const printGSTInvoices = createAsyncThunk(
             const response = await userApi.get(
                 `/user/print/vouchar/gst?vouchar_id=${vouchar_id}&company_id=${company_id}`
             );
-            console.log("printInvoices response", response.data);
 
             if (response.data.success === true) {
                 const invoceHtml = response.data.data;
@@ -242,7 +263,6 @@ export const printRecieptInvoices = createAsyncThunk(
             const response = await userApi.get(
                 `/user/print/vouchar/receipt?vouchar_id=${vouchar_id}&company_id=${company_id}`
             );
-            console.log("printInvoices response", response.data);
 
             if (response.data.success === true) {
                 const invoceHtml = response.data.data;
@@ -276,7 +296,6 @@ export const printPaymentInvoices = createAsyncThunk(
             const response = await userApi.get(
                 `/user/print/vouchar/payment?vouchar_id=${vouchar_id}&company_id=${company_id}`
             );
-            console.log("printInvoices response", response.data);
 
             if (response.data.success === true) {
                 const invoceHtml = response.data.data;
@@ -299,7 +318,6 @@ export const uploadBill = createAsyncThunk(
         { rejectWithValue }
     ) => {
         try {
-            // console.log("uploadBill formData", formData);
             const response = await userApi.post(
                 `/extraction/file/upload`,
                 formData,

@@ -109,7 +109,6 @@
 //         field: keyof GetBilling,
 //         value: string
 //     ) => {
-//         console.log(`Field changed: ${field}, Value: ${value}`);
 //         setData(prev => {
 //             const newData = { ...prev, [field]: value };
 //             validateForm(newData);

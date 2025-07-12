@@ -247,13 +247,13 @@ const OpeningStockSection: React.FC<OpeningStockSectionProps> = ({
                                                     gap: 0.5
                                                 }}>
                                                     <TrendingUpIcon fontSize="small" />
-                                                    ₹{stockValue.toLocaleString('en-IN', {
+                                                    &#8377;{stockValue.toLocaleString('en-IN', {
                                                         minimumFractionDigits: 2,
                                                         maximumFractionDigits: 2
                                                     })}
                                                 </Typography>
                                                 <Typography variant="body2" color="text.secondary">
-                                                    {data.opening_balance || 0} × ₹{data.opening_rate || 0}
+                                                    {data.opening_balance || 0} × &#8377;{data.opening_rate || 0}
                                                 </Typography>
                                             </Box>
                                         </Stack>

@@ -380,7 +380,6 @@ export default function EditInvoice() {
       ],
     }
 
-    console.log('Submitting Invoice Data:', dataToSend);
     dispatch(createInvoice(dataToSend)).then(() => {
       setIsLoading(false);
       navigate('/invoices', { replace: true });
@@ -408,7 +407,6 @@ export default function EditInvoice() {
       customerType: voucharType === 'Sales' ? 'Debtors' : 'Customers',
     })).then((response) => {
       if (response.meta.requestStatus === 'fulfilled') {
-        // console.log('viewAllCustomerWithType response', response);
         const ledgersWithType = response.payload;
         setParties(ledgersWithType.map((part: any) => ({ name: part.name, id: part._id })));
       }
@@ -422,7 +420,6 @@ export default function EditInvoice() {
       customerType: voucharType === 'Sales' ? 'Sales Account' : 'Purchase Account',
     })).then((response) => {
       if (response.meta.requestStatus === 'fulfilled') {
-        // console.log('viewAllCustomerWithType response for counter parties', response);
         const ledgersWithType = response.payload;
         setCounterParties(ledgersWithType.map((part: any) => ({ name: part.name, id: part._id })));
       }
@@ -433,7 +430,6 @@ export default function EditInvoice() {
 
     dispatch(viewProductsWithId(currentCompany?._id || '')).then((response) => {
       if (response.meta.requestStatus === 'fulfilled') {
-        // console.log('viewProductsWithId response', response);
         const products = response.payload;
         setItemsList(
           products.map((product: any) => ({
@@ -676,8 +672,8 @@ export default function EditInvoice() {
                       <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1) }}>
                         <TableCell width={'50%'} sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Product Name</TableCell>
                         <TableCell width={'12%'} sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Quantity</TableCell>
-                        <TableCell width={'12%'} sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Rate (₹)</TableCell>
-                        <TableCell width={'12%'} sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Amount (₹)</TableCell>
+                        <TableCell width={'12%'} sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Rate (&#8377;)</TableCell>
+                        <TableCell width={'12%'} sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Amount (&#8377;)</TableCell>
                         <TableCell width={'12%'} sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Action</TableCell>
                       </TableRow>
                     </TableHead>
@@ -748,7 +744,7 @@ export default function EditInvoice() {
                               fullWidth
                               inputProps={{ min: 0, step: 0.01 }}
                               InputProps={{
-                                startAdornment: <InputAdornment position="start">₹</InputAdornment>,
+                                startAdornment: <InputAdornment position="start">&#8377;</InputAdornment>,
                               }}
                               sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1, maxWidth: 90 } }}
                             />
@@ -766,7 +762,7 @@ export default function EditInvoice() {
                                 maxWidth: 100
                               }}
                             >
-                              ₹{item.amount.toFixed(2)}
+                              &#8377;{item.amount.toFixed(2)}
                             </Box>
                           </TableCell>
                           <TableCell>
@@ -926,7 +922,7 @@ export default function EditInvoice() {
                               Grand Total:
                             </Typography>
                             <Typography variant="h6" color="primary.main" fontWeight="700">
-                              ₹{grandTotal.toFixed(2)}
+                              &#8377;{grandTotal.toFixed(2)}
                             </Typography>
                           </Box>
                           <Divider sx={{ my: 2 }} />

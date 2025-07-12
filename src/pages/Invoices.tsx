@@ -44,7 +44,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { InvoicesRowSkeleton } from "@/common/InvoicesRowSkeleton";
-import { ActionButton } from "@/utils/functions";
+import { ActionButton } from "@/common/ActionButton";
 
 
 const Invoices: React.FC = () => {
@@ -110,7 +110,6 @@ const Invoices: React.FC = () => {
     event: React.ChangeEvent<unknown>,
     newPage: number
   ) => {
-    console.log(event);
 
     setState((prevState) => ({
       ...prevState,
@@ -146,11 +145,9 @@ const Invoices: React.FC = () => {
   // Handle view stockist details
   const handleViewInvoice = (invoice: GetAllVouchars) => {
     // navigate(`/customers/${customer._id}`)
-    console.log("View Invoice", invoice);
   };
 
   const handlePrintInvoice = (invoice: GetAllVouchars) => {
-    console.log("Print Invoice", invoice);
     if (invoice.voucher_type === 'Sales' || invoice.voucher_type === 'Purchase') {
       if (currentCompanyDetails?.company_settings?.features?.enable_gst) {
         dispatch(printGSTInvoices({
@@ -158,7 +155,6 @@ const Invoices: React.FC = () => {
           company_id: currentCompany?._id || "",
         })).then((response) => {
           if (response.meta.requestStatus === 'fulfilled') {
-            console.log("Print Invoice Response:", response.payload);
             const payload = response.payload as { invoceHtml: string };
             setHtmlFromAPI(payload.invoceHtml);
             setInvoiceId(invoice.voucher_number);
@@ -177,7 +173,6 @@ const Invoices: React.FC = () => {
           company_id: currentCompany?._id || "",
         })).then((response) => {
           if (response.meta.requestStatus === 'fulfilled') {
-            console.log("Print Invoice Response:", response.payload);
             const payload = response.payload as { invoceHtml: string };
             setHtmlFromAPI(payload.invoceHtml);
             setInvoiceId(invoice.voucher_number);

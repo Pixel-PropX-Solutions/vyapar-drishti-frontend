@@ -31,7 +31,6 @@
 //   stockist,
 //   onClose,
 // }) => {
-//   // console.log("StockistEdit stockist", stockist);
 //   const theme = useTheme();
 //   const [formData, setFormData] = useState<Stockist>({} as Stockist);
 //   const [errors, setErrors] = useState<Record<string, string>>({});

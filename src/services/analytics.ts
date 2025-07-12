@@ -6,7 +6,6 @@ export const getUserAnalytics = createAsyncThunk(
     async ({ month, year }: { month: string, year: string }, { rejectWithValue }) => {
         try {
             const response = await adminApi.get(`/get/analytics?month=${month}&year=${year}`);
-            // console.log("getUserAnalytics response", response);
 
             if (response.data.success === true) {
                 const userAnalyticsData = response.data.data;
@@ -27,7 +26,6 @@ export const getAdminAnalytics = createAsyncThunk(
     async ({ month, year }: { month: string, year: string }, { rejectWithValue }) => {
         try {
             const response = await adminApi.get(`/get/analytics/admin?month=${month}&year=${year}`);
-            // console.log("getAdminAnalytics response", response);
 
             if (response.data.success === true) {
                 const adminAnalyticsData = response.data.data;

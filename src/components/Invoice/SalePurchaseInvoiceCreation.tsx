@@ -44,7 +44,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { viewAllCustomerWithType } from '@/services/customers';
 import { viewProductsWithId } from '@/services/products';
-import { createInvoice, createInvoiceWithGST } from '@/services/invoice';
+import { createInvoice, createInvoiceWithGST, getInvoiceCounter } from '@/services/invoice';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { TableRowProps } from "@mui/material";
 
@@ -118,6 +118,7 @@ export default function SalePurchaseInvoiceCreation() {
     const [isLoading, setIsLoading] = useState(false);
     const [parties, setParties] = useState<{ id: string; name: string; }[]>([]);
     const [date, setDate] = useState(new Date());
+    const invoiceType = type === "sales" ? "Sales" : type === "purchase" ? "Purchase" : "";
     // const [counterParties, setCounterParties] = useState<{ id: string; name: string; }[]>([]);
     const [itemsList, setItemsList] = useState<{ id: string; name: string; unit: string, gst: string, hsn_code: string }[]>([]);
     const theme = useTheme();
@@ -133,7 +134,7 @@ export default function SalePurchaseInvoiceCreation() {
         company_id: "",
         date: new Date().toISOString().split('T')[0],
         voucher_type: "",
-        voucher_number: "INV-" + Date.now().toString().slice(-6),
+        voucher_number: '',
         party_name: "",
         party_id: "",
         counter_party: "",
@@ -305,16 +306,15 @@ export default function SalePurchaseInvoiceCreation() {
             setData(prev => ({
                 ...prev,
                 company_id: user.user_settings.current_company_id,
-                voucher_type: type ? type.charAt(0).toUpperCase() + type.slice(1) : '',
+                voucher_type: invoiceType,
             }));
         }
 
         dispatch(viewAllCustomerWithType({
             company_id: user.user_settings.current_company_id || '',
-            customerType: type === 'sales' ? 'Debtors' : 'Creditors',
+            customerType: invoiceType === 'Sales' ? 'Debtors' : 'Creditors',
         })).then((response) => {
             if (response.meta.requestStatus === 'fulfilled') {
-                // console.log('viewAllCustomerWithType response', response);
                 const ledgersWithType = response.payload;
                 setParties(ledgersWithType.map((part: any) => ({ name: part.ledger_name, id: part._id })));
             }
@@ -323,23 +323,23 @@ export default function SalePurchaseInvoiceCreation() {
             console.error('Error fetching customers:', error);
         });
 
-        // dispatch(viewAllCustomerWithType({
-        //     company_id: user.user_settings.current_company_id || '',
-        //     customerType: type === 'sales' ? 'Sales Account' : 'Purchase Account',
-        // })).then((response) => {
-        //     if (response.meta.requestStatus === 'fulfilled') {
-        //         // console.log('viewAllCustomerWithType response for counter parties', response);
-        //         const ledgersWithType = response.payload;
-        //         setCounterParties(ledgersWithType.map((part: any) => ({ name: part.ledger_name, id: part._id })));
-        //     }
-        // }
-        // ).catch((error) => {
-        //     console.error('Error fetching customers:', error);
-        // });
+        dispatch(getInvoiceCounter({
+            company_id: user.user_settings.current_company_id || '',
+            voucher_type: invoiceType,
+        })).then((response) => {
+            if (response.meta.requestStatus === 'fulfilled') {
+                setData(prev => ({
+                    ...prev,
+                    voucher_number: response.payload.current_number,
+                }));
+            }
+        }
+        ).catch((error) => {
+            console.error('Error fetching customers:', error);
+        });
 
         dispatch(viewProductsWithId(user.user_settings.current_company_id || '')).then((response) => {
             if (response.meta.requestStatus === 'fulfilled') {
-                // console.log('viewProductsWithId response', response);
                 const products = response.payload;
                 setItemsList(
                     products.map((product: any) => ({
@@ -353,7 +353,7 @@ export default function SalePurchaseInvoiceCreation() {
             }
             return response;
         });
-    }, [dispatch, type, user.user_settings.current_company_id, user]);
+    }, [dispatch, user.user_settings.current_company_id, user, invoiceType]);
 
 
     return (

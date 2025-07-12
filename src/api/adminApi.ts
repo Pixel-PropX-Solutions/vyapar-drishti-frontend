@@ -29,17 +29,11 @@ adminApi.interceptors.response.use(
             originalRequest._retry = true;
 
             try {
-                // const adminRefreshToken = localStorage.getItem("adminRefreshToken");
-                // if(!adminRefreshToken)
-                //     throw new Error("Refresh Token not available. Please log in again.");
-
-                // console.log("Attempting token refresh");
                 const {data} = await axios.post<Token>(
                     `${import.meta.env.VITE_LOCAL_BACKEND_ADMIN_URL}/auth/handleadminRefreshToken`,
                     {},
                     {withCredentials : true}
                 );
-                // console.log("Token refreshed:", data);
                 localStorage.setItem("accessToken", data.adminAccessToken);
                 localStorage.setItem("refreshToken", data.adminRefreshToken);
 
@@ -58,7 +52,6 @@ adminApi.interceptors.response.use(
             }
         }
 
-        console.log("API call error;", error);
         return Promise.reject(error);
     }
 );

@@ -303,7 +303,6 @@ export default function UploadDocuments() {
         }
       });
 
-      console.log("Upload response", response.data);
       if (response.data.success === true) {
         setUploadComplete(true);
         setError("");

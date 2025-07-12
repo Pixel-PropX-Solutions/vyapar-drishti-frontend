@@ -11,9 +11,6 @@ export const login = createAsyncThunk(
         formData
       );
 
-      console.log("Login response", response.data);
-
-
       if (response.data.ok) {
         const accessToken = response.data.accessToken;
         localStorage.setItem("accessToken", accessToken);
@@ -34,7 +31,6 @@ export const getCurrentUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await userApi.get('/auth/current/user',);
-      console.log("Current user response", response.data);
       const user = response.data.data[0];
 
       if (user) {
@@ -55,7 +51,6 @@ export const getCurrentCompany = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await userApi.get(`user/company`,);
-      console.log("getCurrentCompany api response", response.data);
 
       if (response.data.success === true) {
         const currentCompany = response.data.data[0];
@@ -76,7 +71,6 @@ export const deleteAccount = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await userApi.delete(`auth/delete/user`);
-      console.log("deleteAccount api response", response.data);
 
       if (response.data.success === true) {
         localStorage.clear();
@@ -99,7 +93,6 @@ export const register = createAsyncThunk(
   ) => {
     try {
       const response = await userApi.post(`/auth/register`, userData);
-      console.log("register response", response.data);
 
       const accessToken = response.data.accessToken;
 
@@ -129,7 +122,6 @@ export const forgetPassword = createAsyncThunk(
       });
 
       if (response.data.sucess === true) {
-        console.log("reset link share on registered mailID");
         return 1;
       } else {
         return rejectWithValue(
@@ -161,9 +153,7 @@ export const resetPassword = createAsyncThunk(
         token,
       });
 
-      console.log("reset Password res", response);
       if (response.data.sucess === true) {
-        console.log("reset link share on registered mailID");
         return 1;
       } else {
         return rejectWithValue("Password not updated.");
@@ -182,7 +172,6 @@ export const logout = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await userApi.post("/auth/logout");
-      console.log("Response logout", response);
 
       if (response.status === 200) {
         localStorage.removeItem("accessToken");

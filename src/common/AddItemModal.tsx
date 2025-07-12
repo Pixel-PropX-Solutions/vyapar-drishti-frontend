@@ -42,7 +42,6 @@
 //   }, [productsListing, formData.product_id]);
 
 //   const handleChange = (field: keyof BillItem, value: string | number) => {
-//     console.log("Field changed:", field, value);
 //     setFormData({
 //       ...formData,
 //       [field]: value
@@ -243,7 +242,7 @@
 //                 fullWidth
 //                 size="small"
 //                 disabled
-//                 value={selectedProduct?.price ? `₹${selectedProduct.price}` : '₹0.00'}
+//                 value={selectedProduct?.price ? `&#8377;${selectedProduct.price}` : '&#8377;0.00'}
 //                 InputProps={{
 //                   sx: {
 //                     borderRadius: 1.5,
@@ -292,7 +291,7 @@
 //                   type="number"
 //                   InputProps={{
 //                     startAdornment: (
-//                       <InputAdornment position="start">₹</InputAdornment>
+//                       <InputAdornment position="start">&#8377;</InputAdornment>
 //                     ),
 //                     sx: {
 //                       borderRadius: 1.5,
@@ -348,8 +347,8 @@
 //                   disabled
 //                   value={
 //                     formData.unit_price && formData.quantity
-//                       ? `₹${(formData.unit_price * formData.quantity).toFixed(2)}`
-//                       : '₹0.00'
+//                       ? `&#8377;${(formData.unit_price * formData.quantity).toFixed(2)}`
+//                       : '&#8377;0.00'
 //                   }
 //                   InputProps={{
 //                     sx: {

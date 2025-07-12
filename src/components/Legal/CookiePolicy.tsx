@@ -105,7 +105,6 @@ const CookiePolicyPage: React.FC = () => {
 
   const handleSavePreferences = () => {
     // In a real implementation, this would save the cookie preferences
-    // console.log('Saving cookie preferences:', cookieConsent);
     setSnackbarOpen(true);
   };
 

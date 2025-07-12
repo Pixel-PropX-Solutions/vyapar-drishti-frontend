@@ -102,7 +102,6 @@ const ProductsListing: React.FC = () => {
     setDrawer(true);
     await dispatch(viewProduct({ product_id: product._id, company_id: currentCompany?._id || '' }))
       .unwrap().then((res) => {
-        console.log("Product details fetched successfully", res);
         setSelectedProduct(res.product);
       }
       ).catch((error) => {
@@ -647,13 +646,11 @@ const ProductsListing: React.FC = () => {
                         });
                     }}
                     onEdit={(category: GetCategory) => {
-                      console.log("Edit Category", category);
                       setOpenCategoryModal(true);
                       setSelectedCategory(category);
                     }}
                     onView={(category: GetCategory) => {
                       setOpenCategoryModal(true);
-                      console.log("Edit Category", category);
                       setSelectedCategory(category);
                     }}
                     index={index}
@@ -784,7 +781,7 @@ const ProductsListing: React.FC = () => {
         }}
         onUpdated={() => fetchCategory()}
         category={selectedCategory}
-        onCreated={function (category: { name: string; _id: string; }): void { console.log("category", category) }} />
+        onCreated={function (category: { name: string; _id: string; }): void { }} />
     </Box>
   );
 };

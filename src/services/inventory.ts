@@ -17,7 +17,6 @@ export const viewInventrory = createAsyncThunk(
       const response = await userApi.get(
         `inventory/inventory/product?chemist_id=${chemistId}&product_id=${productId}`
       );
-      //   console.log("viewInventrory response", response.data);
 
       if (response.data.success === true) {
         const inventoryData = response.data.data;
@@ -61,7 +60,6 @@ export const getStockMovement = createAsyncThunk(
       const response = await userApi.get(
         `/user/get/timeline?${search ? `search=${search}&` : ''}${movement_type ? `type=${movement_type}&` : ''}${startDate ? `start_date=${startDate}&` : ''}${endDate ? `end_date=${endDate}&` : ''}page_no=${page_no}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"}`
       );
-      console.log("getStockMovement response", response.data);
 
       if (response.data.success === true) {
         const stockMovement = response.data.data.docs;
@@ -106,7 +104,6 @@ export const getProductStock = createAsyncThunk(
         `/product/view/all/product?company_id=${company_id}&search=${search}${category === 'All' ? "" : "&category=" + category}&page_no=${page_no}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"
         }`
       );
-      // console.log("getProductStock response", response.data);
 
       if (response.data.success === true) {
         const InventoryItems = response.data.data.docs;

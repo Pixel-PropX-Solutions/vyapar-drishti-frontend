@@ -326,7 +326,7 @@
 //                                             <TableCell>Chemist</TableCell>
 //                                             <TableCell>Date</TableCell>
 //                                             <TableCell>Status</TableCell>
-//                                             <TableCell align="right">Total Amount(₹)</TableCell>
+//                                             <TableCell align="right">Total Amount(&#8377;)</TableCell>
 //                                             <TableCell align="center">Actions</TableCell>
 //                                         </TableRow>
 //                                     </TableHead>
@@ -374,7 +374,7 @@
 //                                                         </TableCell>
 //                                                         <TableCell align="right">
 //                                                             <Typography fontWeight="medium">
-//                                                                 ₹ {order.total_amount.toFixed(2)}
+//                                                                 &#8377; {order.total_amount.toFixed(2)}
 //                                                             </Typography>
 //                                                         </TableCell>
 //                                                         <TableCell align="center">

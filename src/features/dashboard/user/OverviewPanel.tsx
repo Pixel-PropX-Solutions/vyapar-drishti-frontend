@@ -5,7 +5,6 @@ import {
 
 import {
     Inventory, AssignmentReturn,
-    CurrencyRupee
 } from '@mui/icons-material';
 import { BarChart, LineChart } from '@mui/x-charts';
 import { RootState, AppDispatch } from '@/store/store';
@@ -104,7 +103,16 @@ const UserOverviewPanel: React.FC = () => {
                                 Total Sales
                             </Typography>
                             <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, gap: 1 }}>
-                                <CurrencyRupee color="primary" />
+                                <Typography
+                                    variant="h6"
+                                    sx={{
+                                        fontWeight: 700,
+                                        mr: 0.5,
+                                        color: 'primary.main',
+                                    }}
+                                >
+                                    &#8377;
+                                </Typography>
                                 <Typography variant="h4" component="div">
                                     {userAnalyticsData?.total_sales.toLocaleString()}
                                 </Typography>
@@ -122,7 +130,7 @@ const UserOverviewPanel: React.FC = () => {
                             <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, gap: 1 }}>
                                 <Inventory color="primary" />
                                 <Typography variant="h4" component="div">
-                                    ₹  {userAnalyticsData?.total_purchased.toLocaleString()}
+                                    &#8377;  {userAnalyticsData?.total_purchased.toLocaleString()}
                                 </Typography>
                             </Box>
                         </CardContent>
@@ -139,7 +147,7 @@ const UserOverviewPanel: React.FC = () => {
                             <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, gap: 1 }}>
                                 <Inventory color="primary" />
                                 <Typography variant="h4" component="div">
-                                    ₹  {userAnalyticsData?.remaining_stock.toLocaleString()}
+                                    &#8377;  {userAnalyticsData?.remaining_stock.toLocaleString()}
                                 </Typography>
                             </Box>
                         </CardContent>
@@ -155,7 +163,7 @@ const UserOverviewPanel: React.FC = () => {
                             <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, gap: 1 }}>
                                 <AssignmentReturn color="primary" />
                                 <Typography variant="h4" component="div">
-                                    ₹   {userAnalyticsData?.pending_returns.toLocaleString()}
+                                    &#8377;   {userAnalyticsData?.pending_returns.toLocaleString()}
                                 </Typography>
                             </Box>
                         </CardContent>
