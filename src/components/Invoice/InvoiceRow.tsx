@@ -96,7 +96,7 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                                     color: theme.palette.text.primary,
                                 }}
                             >
-                                {formatDate(inv.created_at) || "N/A"}
+                                {formatDate(inv.date) || "N/A"}
                             </Typography>
                         </Box>
                     </TableCell>

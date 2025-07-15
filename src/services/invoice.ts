@@ -10,7 +10,7 @@ export const createInvoice = createAsyncThunk(
         { rejectWithValue }
     ) => {
         try {
-            const createRes = await userApi.post(`user/create/vouchar`, data);
+            const createRes = await userApi.post(`/invoices/create/vouchar`, data);
 
             if (createRes.data.success === true) {
                 return;
@@ -34,7 +34,7 @@ export const createInvoiceWithGST = createAsyncThunk(
         { rejectWithValue }
     ) => {
         try {
-            const createRes = await userApi.post(`user/create/vouchar/gst`, data);
+            const createRes = await userApi.post(`/invoices/create/vouchar/gst`, data);
 
             if (createRes.data.success === true) {
                 return;
@@ -79,7 +79,7 @@ export const viewAllInvoices = createAsyncThunk(
     ) => {
         try {
             const response = await userApi.get(
-                `user/view/all/vouchar?company_id=${company_id}${searchQuery !== '' ? '&search=' + searchQuery : ''}${type !== 'All' ? '&type=' + type : ''}&start_date=${start_date}&end_date=${end_date}&page_no=${pageNumber}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"
+                `/invoices/view/all/vouchar?company_id=${company_id}${searchQuery !== '' ? '&search=' + searchQuery : ''}${type !== 'All' ? '&type=' + type : ''}&start_date=${start_date}&end_date=${end_date}&page_no=${pageNumber}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"
                 }`
             );
 
@@ -112,7 +112,7 @@ export const viewInvoice = createAsyncThunk(
     ) => {
         try {
             const response = await userApi.get(
-                `/user/get/vouchar/${vouchar_id}?company_id=${company_id}`
+                `/invoices/get/vouchar/${vouchar_id}?company_id=${company_id}`
             );
 
             if (response.data.success === true) {
@@ -142,7 +142,7 @@ export const getInvoiceCounter = createAsyncThunk(
     ) => {
         try {
             const response = await userApi.get(
-                `user/serial-number/get/current/${voucher_type}${company_id !== '' ? '?company_id=' + company_id : ''}`
+                `/invoices/serial-number/get/current/${voucher_type}${company_id !== '' ? '?company_id=' + company_id : ''}`
             );
 
             if (response.data.success === true) {
@@ -157,6 +157,78 @@ export const getInvoiceCounter = createAsyncThunk(
     }
 );
 
+
+export const viewAllInvoiceGroups = createAsyncThunk(
+    "view/all/onvoice/groups",
+    async (
+        {
+            searchQuery,
+            company_id,
+            // filterState,
+            pageNumber,
+            // type,
+            is_deleted,
+            limit,
+            sortField,
+            sortOrder,
+        }: {
+            searchQuery: string;
+            // filterState: string;
+            company_id: string;
+            sortField: string;
+            // type: string;
+            is_deleted: boolean;
+            pageNumber: number;
+            limit: number;
+            sortOrder: string;
+        },
+        { rejectWithValue }
+    ) => {
+        try {
+            const response = await userApi.get(
+                `/invoices/view/all/vouchar/type?${company_id !== "" ? 'company_id=' + company_id : ''}&${searchQuery !== "" ? 'search=' + searchQuery : ''}&is_deleted=${is_deleted}&page_no=${pageNumber}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"
+                }`
+            );
+
+
+            if (response.data.success === true) {
+                const invoiceGroups = response.data.data.docs;
+                const invoiceGroupPageMeta = response.data.data.meta;
+                return { invoiceGroups, invoiceGroupPageMeta };
+            } else return rejectWithValue("Login Failed: No access token recieved.");
+        } catch (error: any) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Login failed: Invalid credentials or server error."
+            );
+        }
+    }
+);
+
+
+export const getAllInvoiceGroups = createAsyncThunk(
+    "get/all/invoice/groups",
+    async (company_id: string, { rejectWithValue }) => {
+        try {
+            const response = await userApi.get(`/invoices/get/all/vouchar/type?company_id=${company_id}`);
+
+            console.log("Response from getAllInvoiceGroups:", response);
+
+            if (response.data.success === true) {
+                const invoiceGroups = response.data.data;
+                return { invoiceGroups };
+            }
+            else
+                return rejectWithValue("Failed to fetch Customer profile");
+        } catch (error: any) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Failed: Unable to fetch chemist profile"
+            );
+        }
+    }
+);
+
 export const updateInvoice = createAsyncThunk(
     "update/invoice/vouchar",
     async (
@@ -165,7 +237,7 @@ export const updateInvoice = createAsyncThunk(
     ) => {
         try {
 
-            const updateRes = await userApi.put(`/user/update/vouchar/${data.vouchar_id}`, data);
+            const updateRes = await userApi.put(`/invoices/update/vouchar/${data.vouchar_id}`, data);
 
             if (updateRes.data.success === true) {
                 return;
@@ -197,12 +269,12 @@ export const printInvoices = createAsyncThunk(
     ) => {
         try {
             const response = await userApi.get(
-                `/user/print/vouchar?vouchar_id=${vouchar_id}&company_id=${company_id}`
+                `/invoices/print/vouchar?vouchar_id=${vouchar_id}&company_id=${company_id}`
             );
 
             if (response.data.success === true) {
-                const invoceHtml = response.data.data;
-                return { invoceHtml };
+                 const data = response.data.data;
+                return data;
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
             return rejectWithValue(
@@ -229,12 +301,14 @@ export const printGSTInvoices = createAsyncThunk(
     ) => {
         try {
             const response = await userApi.get(
-                `/user/print/vouchar/gst?vouchar_id=${vouchar_id}&company_id=${company_id}`
+                `/invoices/print/vouchar/gst?vouchar_id=${vouchar_id}&company_id=${company_id}`
             );
 
+            console.log("Response from printGSTInvoices:", response);
+
             if (response.data.success === true) {
-                const invoceHtml = response.data.data;
-                return { invoceHtml };
+                const data = response.data.data;
+                return data;
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
             return rejectWithValue(
@@ -261,7 +335,7 @@ export const printRecieptInvoices = createAsyncThunk(
     ) => {
         try {
             const response = await userApi.get(
-                `/user/print/vouchar/receipt?vouchar_id=${vouchar_id}&company_id=${company_id}`
+                `/invoices/print/vouchar/receipt?vouchar_id=${vouchar_id}&company_id=${company_id}`
             );
 
             if (response.data.success === true) {
@@ -294,7 +368,7 @@ export const printPaymentInvoices = createAsyncThunk(
     ) => {
         try {
             const response = await userApi.get(
-                `/user/print/vouchar/payment?vouchar_id=${vouchar_id}&company_id=${company_id}`
+                `/invoices/print/vouchar/payment?vouchar_id=${vouchar_id}&company_id=${company_id}`
             );
 
             if (response.data.success === true) {
@@ -331,6 +405,65 @@ export const uploadBill = createAsyncThunk(
             return rejectWithValue(
                 error.response?.data?.message ||
                 "File upload failed: Server error."
+            );
+        }
+    }
+);
+
+export const deleteInvoice = createAsyncThunk(
+    "delete/invoice",
+    async (
+        {
+            vouchar_id,
+            company_id,
+        }: {
+            vouchar_id: string;
+            company_id: string;
+        },
+        { rejectWithValue }
+    ) => {
+        try {
+            const response = await userApi.delete(
+                `/invoices/delete/${vouchar_id}?company_id=${company_id}`
+            );
+
+            if (response.data.success === true) {
+                return ;
+            } else return rejectWithValue("Login Failed: No access token recieved.");
+        } catch (error: any) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Login failed: Invalid credentials or server error."
+            );
+        }
+    }
+);
+
+
+export const deleteGSTInvoice = createAsyncThunk(
+    "delete/gst/invoice",
+    async (
+        {
+            vouchar_id,
+            company_id,
+        }: {
+            vouchar_id: string;
+            company_id: string;
+        },
+        { rejectWithValue }
+    ) => {
+        try {
+            const response = await userApi.delete(
+                `/invoices/gst/delete/${vouchar_id}?company_id=${company_id}`
+            );
+
+            if (response.data.success === true) {
+                return ;
+            } else return rejectWithValue("Login Failed: No access token recieved.");
+        } catch (error: any) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                "Login failed: Invalid credentials or server error."
             );
         }
     }

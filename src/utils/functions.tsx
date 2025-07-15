@@ -181,7 +181,7 @@ export function capitalizeInput(value: string, mode: 'off' | 'sentences' | 'word
   if (mode === 'off') return value;
   if (mode === 'characters') return value.toUpperCase();
   if (mode === 'words') return value.replace(/\b\w/g, c => c.toUpperCase());
-  if (mode === 'sentences') return value.replace(/(^|[.!?]\s+)([a-z])/g, (m, p1, p2) => p1 + p2.toUpperCase());
+  if (mode === 'sentences') return value.replace(/(^|[.!?]\s+)([a-z])/g, (_m, p1, p2) => p1 + p2.toUpperCase());
   return value;
 };
 

@@ -54,27 +54,29 @@ const LoginForm: React.FC = () => {
     formData.append("username", data.username);
     formData.append("password", data.password);
     formData.append("user_type", data.user_type);
-    toast.promise(
-      dispatch(login(formData))
-        .unwrap()
-        .then((response) => {
-          dispatch(getCurrentUser());
-          dispatch(getCompany());
 
-          navigate("/");
-        }).catch((error) => {
-          if (error.response && error.response.status === 401) {
-            throw new Error("Invalid credentials. Please try again.");
-          } else {
-            throw new Error("An unexpected error occurred. Please try again later.");
-          }
-        }),
-      {
-        loading: "Login with the credentials ...",
-        success: <b>Login Successfully!</b>,
-        error: <b>Could not Login.</b>,
-      }
-    );
+    dispatch(login(formData))
+      .unwrap()
+      .then(() => {
+        dispatch(getCurrentUser());
+        dispatch(getCompany());
+        navigate("/");
+      }).catch((error) => {
+        if (error.response && error.response.status === 401) {
+          console.log("Login error 401:", error);
+          toast.error(error || "Invalid credentials. Please try again.");
+        } else if (error.response && error.response.status === 403) {
+          console.log("Login error 403:", error);
+          toast.error(error || "Access denied. You do not have permission to access this resource.");
+        } else if (error.response && error.response.status === 500) {
+          console.log("Login error 500:", error);
+          toast.error(error || "Internal server error. Please try again later.");
+        } else {
+          console.log("Login error:", error);
+          toast.error(error || "An unexpected error occurred. Please try again later.");
+        }
+      });
+
   };
 
   return (

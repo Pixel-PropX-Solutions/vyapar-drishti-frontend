@@ -36,25 +36,30 @@ import { CustomerSortField, SortOrder, GetAllVouchars } from "@/utils/types";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { useNavigate } from "react-router-dom";
-import { printGSTInvoices, printInvoices, viewAllInvoices } from "@/services/invoice";
+import { deleteGSTInvoice, deleteInvoice, printGSTInvoices, printInvoices, viewAllInvoices } from "@/services/invoice";
 import { InvoicerRow } from "@/components/Invoice/InvoiceRow";
 import InvoicePrint from "@/components/Invoice/InvoicePrint";
-import { getAllInvoiceGroups } from "@/services/accountingGroup";
+import { getAllInvoiceGroups } from "@/services/invoice";
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { InvoicesRowSkeleton } from "@/common/InvoicesRowSkeleton";
 import { ActionButton } from "@/common/ActionButton";
+import { setInvoiceTypeId } from "@/store/reducers/invoiceReducer";
+import toast from "react-hot-toast";
 
 
 const Invoices: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
-  const [htmlFromAPI, setHtmlFromAPI] = useState<string>('');
+  const [htmlFromAPI, setHtmlFromAPI] = useState<Array<{ html: string, page_number: number }>>([]);
   const [html, setHtml] = useState<boolean>(false);
   const [invoiceId, setInvoiceId] = useState<string>('');
-  const { invoices, loading, pageMeta } = useSelector((state: RootState) => state.invoice);
+  const [fullHtml, setFullHtml] = useState<string>('');
+  const [downloadHtml, setDownloadHtml] = useState<string>('');
+  const [customerName, setCustomerName] = useState<string>('');
+  const { invoices, loading, pageMeta, invoiceGroups } = useSelector((state: RootState) => state.invoice);
   const { currentCompany, user } = useSelector((state: RootState) => state.auth);
   const currentCompanyDetails = user?.company?.find((c: any) => c._id === user.user_settings.current_company_id);
 
@@ -62,7 +67,7 @@ const Invoices: React.FC = () => {
     searchQuery: "",
     filterState: "All-States",
     is_deleted: false,
-    type: "All",
+    type: "Invoices",
     page: 1,
     startDate: new Date(),
     endDate: new Date(),
@@ -89,11 +94,14 @@ const Invoices: React.FC = () => {
     )
   }, [dispatch, searchQuery, currentCompany?._id, type, startDate, endDate, page, rowsPerPage, sortField, sortOrder]);
 
-  // Fetch stockists data from API
+  // Fetch Invoices
   useEffect(() => {
     fetchIvoices();
-    dispatch(getAllInvoiceGroups(currentCompany?._id || ""));
   }, [searchQuery, page, rowsPerPage, is_deleted, sortField, filterState, sortOrder, dispatch, fetchIvoices, currentCompany?._id]);
+
+  useEffect(() => {
+    dispatch(getAllInvoiceGroups(currentCompany?._id || ""));
+  }, [currentCompany?._id, dispatch]);
 
   // Handle sorting change
   const handleSortRequest = (field: CustomerSortField) => {
@@ -107,7 +115,7 @@ const Invoices: React.FC = () => {
 
   // Handle pagination change
   const handleChangePage = (
-    event: React.ChangeEvent<unknown>,
+    _: React.ChangeEvent<unknown>,
     newPage: number
   ) => {
 
@@ -142,9 +150,20 @@ const Invoices: React.FC = () => {
     }))
   }
 
-  // Handle view stockist details
-  const handleViewInvoice = (invoice: GetAllVouchars) => {
-    // navigate(`/customers/${customer._id}`)
+  // Handle view invoice details
+  const handleViewInvoice = (inv: GetAllVouchars) => {
+    toast.success(`Viewing ${inv.voucher_type} invoice Cooming Soon`);
+  };
+
+  // Handle Delete Invoice details
+  const handleDeleteInvoice = (inv: GetAllVouchars) => {
+    if (currentCompanyDetails?.company_settings?.features?.enable_gst) {
+      dispatch(deleteGSTInvoice({ vouchar_id: inv._id, company_id: currentCompanyDetails._id }));
+      fetchIvoices();
+    } else {
+      dispatch(deleteInvoice({ vouchar_id: inv._id, company_id: currentCompanyDetails._id }));
+      fetchIvoices();
+    }
   };
 
   const handlePrintInvoice = (invoice: GetAllVouchars) => {
@@ -155,16 +174,25 @@ const Invoices: React.FC = () => {
           company_id: currentCompany?._id || "",
         })).then((response) => {
           if (response.meta.requestStatus === 'fulfilled') {
-            const payload = response.payload as { invoceHtml: string };
-            setHtmlFromAPI(payload.invoceHtml);
+            console.log("GST Invoice printed successfully:", response.payload);
+            const payload = response.payload as { paginated_data: Array<{ html: string, page_number: number }>, complete_data: string, download_data: string };
+            console.log("GST Invoice payload printed successfully:", payload);
+            const paginated_html = payload.paginated_data;
+            const fullHtml = payload.complete_data;
+            const download_html = payload.download_data;
+
+            setHtmlFromAPI(paginated_html);
+            setDownloadHtml(download_html);
             setInvoiceId(invoice.voucher_number);
+            setCustomerName(invoice?.party_name)
+            setFullHtml(fullHtml);
             setHtml(true);
           } else {
-            console.error("Failed to print invoice:", response.payload);
+            console.error("Failed to print GST invoice:", response.payload);
           }
         }
         ).catch((error) => {
-          console.error("Error printing invoice:", error);
+          console.error("Error printing GST invoice:", error);
         }
         );
       } else {
@@ -173,9 +201,18 @@ const Invoices: React.FC = () => {
           company_id: currentCompany?._id || "",
         })).then((response) => {
           if (response.meta.requestStatus === 'fulfilled') {
-            const payload = response.payload as { invoceHtml: string };
-            setHtmlFromAPI(payload.invoceHtml);
+            console.log("Invoice printed successfully:", response.payload);
+            const payload = response.payload as { paginated_data: Array<{ html: string, page_number: number }>, complete_data: string, download_data: string };
+            console.log("Invoice payload printed successfully:", payload);
+            const paginated_html = payload.paginated_data;
+            const fullHtml = payload.complete_data;
+            const download_html = payload.download_data;
+
+            setHtmlFromAPI(paginated_html);
+            setDownloadHtml(download_html);
             setInvoiceId(invoice.voucher_number);
+            setCustomerName(invoice?.party_name)
+            setFullHtml(fullHtml);
             setHtml(true);
           } else {
             console.error("Failed to print invoice:", response.payload);
@@ -233,7 +270,10 @@ const Invoices: React.FC = () => {
                     variant="contained"
                     startIcon={<AddCircleOutlineIcon />}
                     color="success"
-                    onClick={() => { navigate('/invoices/create/sales') }}
+                    onClick={() => {
+                      dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Sales'))?._id || ''));
+                      navigate('/invoices/create/sales')
+                    }}
                     sx={{
                       background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
                       color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
@@ -250,7 +290,10 @@ const Invoices: React.FC = () => {
                     variant="contained"
                     startIcon={<RemoveCircleOutlineIcon />}
                     color="error"
-                    onClick={() => { navigate('/invoices/create/purchase') }}
+                    onClick={() => {
+                      dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Purchase'))?._id || ''));
+                      navigate('/invoices/create/purchase');
+                    }}
                     sx={{
                       background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
                       color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
@@ -392,7 +435,7 @@ const Invoices: React.FC = () => {
           </Button>
         </Box>
 
-        {/* Customers Table */}
+        {/* Invoices Table */}
         <TableContainer component={Paper}
           elevation={0}
           sx={{
@@ -544,10 +587,7 @@ const Invoices: React.FC = () => {
                     onEdit={() => {
                       navigate(`/invoices/update/${inv.voucher_type.toLowerCase()}/${inv._id}`);
                     }}
-                    onDelete={async () => {
-                      // await deleteCustomer(cred._id);
-                      // fetchCustomers();
-                    }}
+                    onDelete={() => handleDeleteInvoice(inv)}
                     onPrint={() => handlePrintInvoice(inv)}
 
                   />))
@@ -666,7 +706,7 @@ const Invoices: React.FC = () => {
           )}
         </Paper>
 
-        {html && <InvoicePrint invoiceHtml={htmlFromAPI} open={html} onClose={() => setHtml(false)} invoiceNumber={invoiceId} />}
+        {html && <InvoicePrint invoiceHtml={htmlFromAPI} downloadHtml={downloadHtml} customerName={customerName} fullHtml={fullHtml} open={html} onClose={() => setHtml(false)} invoiceNumber={invoiceId} />}
       </Box >
     </LocalizationProvider>
 

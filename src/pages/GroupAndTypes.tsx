@@ -33,9 +33,9 @@ import { deleteProduct } from "@/services/products";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import toast from "react-hot-toast";
-import { GetAllAccountingGroups, GetAllInvoiceGroups, GetInventoryGroups, SortOrder, UpdateAccountingGroup, UpdateInventoryGroup, } from "@/utils/types";
+import { GetAllAccountingGroups, GetInventoryGroups, SortOrder, UpdateAccountingGroup, UpdateInventoryGroup, } from "@/utils/types";
 import TabPanel from "@/features/upload-documents/components/TabPanel";
-import { viewAllCustomerGroups, viewAllInvoiceGroups } from "@/services/accountingGroup";
+import { viewAllCustomerGroups } from "@/services/accountingGroup";
 import { CustomerGroupsRow } from "@/components/GroupsAndTypes/CustomerGroupsRow";
 import InvoiceTypeCardSkeleton from "@/components/GroupsAndTypes/InvoiceTypeCardSkeleton";
 import InvoiceTypesCard from "@/components/GroupsAndTypes/InvoiceTypesCard";
@@ -45,13 +45,15 @@ import { InventoryGroupRowSkeleton } from "@/features/Group/InventoryGroupRowSke
 import CreateInventoryGroupModal from "@/features/Group/CreateInventoryGroupModal";
 import CreateCustomerGroupModal from "@/features/Group/CreateCustomerGroupModal";
 import { CustomerGroupRowSkeleton } from "@/features/Group/CustomerGroupRowSkeleton";
+import { viewAllInvoiceGroups } from "@/services/invoice";
 
 const GroupAndTypes: React.FC = () => {
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-    const { customerGroups, accountingGroupPageMeta, invoiceGroups, invoiceGroupPageMeta } = useSelector((state: RootState) => state.accountingGroup);
+    const { customerGroups, accountingGroupPageMeta, } = useSelector((state: RootState) => state.accountingGroup);
     const { inventoryGroups, inventoryGroupPageMeta } = useSelector((state: RootState) => state.inventoryGroup);
+    const { invoiceGroups, invoiceGroupPageMeta } = useSelector((state: RootState) => state.invoice);
     const [openInventoryGroupModal, setOpenInventoryGroupModal] = useState<boolean>(false);
     const [selectedInventoryGroup, setSelectedInventoryGroup] = useState<UpdateInventoryGroup | null>(null);
     const [openCustomerGroupModal, setOpenCustomerGroupModal] = useState<boolean>(false);
@@ -576,10 +578,10 @@ const GroupAndTypes: React.FC = () => {
                             >
                                 <InvoiceTypesCard
                                     invGroup={invGroup}
-                                    onDelete={(id: string) => {
+                                    onDelete={() => {
                                     }}
 
-                                    onEdit={(invGroup: GetAllInvoiceGroups) => {
+                                    onEdit={() => {
                                     }}
                                     index={index}
                                 />
@@ -900,7 +902,7 @@ const GroupAndTypes: React.FC = () => {
                 }}
                 onUpdated={() => fetchInventoryGroups()}
                 inventoryGroup={selectedInventoryGroup}
-                onCreated={function (inventoryGroup: { name: string; _id: string; }): void {  }} />
+                onCreated={function (inventoryGroup: { name: string; _id: string; }): void { console.log("Inventory group created:", inventoryGroup.name); }} />
 
             <CreateCustomerGroupModal
                 open={openCustomerGroupModal}
@@ -911,6 +913,7 @@ const GroupAndTypes: React.FC = () => {
                 onUpdated={() => fetchCustomerGroups()}
                 accountingGroup={selectedCustomerGroup}
                 onCreated={function (accountingGroup: { name: string; _id: string; }): void {
+                    console.log("Customer group created:", accountingGroup.name);
                     setOpenCustomerGroupModal(false);
                 }} />
         </Box>

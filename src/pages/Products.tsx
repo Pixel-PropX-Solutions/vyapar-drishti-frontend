@@ -781,7 +781,7 @@ const ProductsListing: React.FC = () => {
         }}
         onUpdated={() => fetchCategory()}
         category={selectedCategory}
-        onCreated={function (category: { name: string; _id: string; }): void { }} />
+        onCreated={function (category: { name: string; _id: string; }): void { console.log("Category created:", category); }} />
     </Box>
   );
 };

@@ -11,14 +11,48 @@ export const login = createAsyncThunk(
         formData
       );
 
+      console.log("Login response:", response);
+
       if (response.data.ok) {
         const accessToken = response.data.accessToken;
         localStorage.setItem("accessToken", accessToken);
         return { accessToken };
-      } else return rejectWithValue("Login Failed: No access token recieved.");
-    } catch (error: any) {
+      } else if (response.data.ok === false) {
+        return rejectWithValue(response.data.message);
+      } else {
+        return rejectWithValue("Login failed: Unknown error.");
+      }
+
+    } catch (error) {
+
+      console.log("Login error API:", error);
+
+      const err = error as { message?: string, response?: { data?: { detail?: unknown; message?: string }, statusText?: string } };
+
+      if (err.response?.data?.detail) {
+        const details = err.response.data.detail;
+        const messages = Array.isArray(details)
+          ? details.map((d: Record<string, unknown>) => {
+            if (typeof d === 'string') return d;
+            if (typeof d.msg === 'string' && d.type === 'missing') {
+              const loc = Array.isArray((d as any).loc) ? (d as any).loc : [];
+              return `${loc[1] ?? ''} is required`;
+            }
+            return (typeof d.msg === 'string' ? d.msg : JSON.stringify(d))
+          }).join("; ")
+          : JSON.stringify(details);
+        return rejectWithValue(messages);
+      }
+      if (err.response?.data?.message) {
+        return rejectWithValue(err.response.data.message);
+      }
+      if (err.message) {
+        return rejectWithValue(err.message);
+      }
+      if (err.response?.statusText) {
+        return rejectWithValue(err.response.statusText);
+      }
       return rejectWithValue(
-        error.response?.data?.message ||
         "Login failed: Invalid credentials or server error."
       );
     }

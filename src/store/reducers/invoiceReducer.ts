@@ -1,12 +1,21 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AuthStates } from "@/utils/enums";
-import { GetAllVouchars, GetInvoiceData, PageMeta } from "@/utils/types";
-import { updateInvoice, viewAllInvoices, viewInvoice } from "@/services/invoice";
+import { GetAllInvoiceGroups, GetAllVouchars, GetInvoiceData, PageMeta } from "@/utils/types";
+import { deleteGSTInvoice, deleteInvoice, updateInvoice, viewAllInvoiceGroups, viewAllInvoices, viewInvoice } from "@/services/invoice";
+import { getAllInvoiceGroups } from "@/services/invoice";
 
 interface InvoiceState {
     authState: AuthStates;
     invoices: Array<GetAllVouchars> | [];
     invoiceData: GetInvoiceData | null;
+    editingInvoice: GetInvoiceData | null;
+    invoiceType_id: string | null;
+    invoiceGroups: Array<{
+        _id: string;
+        name: string;
+    }>;
+    viewInvoiceGroups: Array<GetAllInvoiceGroups>;
+    invoiceGroupPageMeta: PageMeta
     pageMeta: PageMeta;
     loading: boolean;
     error: string | null;
@@ -16,6 +25,16 @@ const initialState: InvoiceState = {
     authState: AuthStates.INITIALIZING,
     invoices: [],
     invoiceData: null,
+    editingInvoice: null,
+    invoiceType_id: null,
+    invoiceGroups: [],
+    viewInvoiceGroups: [],
+    invoiceGroupPageMeta: {
+        page: 0,
+        limit: 0,
+        total: 0,
+        unique: [],
+    },
     pageMeta: {
         page: 0,
         limit: 0,
@@ -30,9 +49,12 @@ const invoiceSlice = createSlice({
     name: "invoice",
     initialState,
     reducers: {
-        // setInvoiceData: (state, action: PayloadAction<InvoiceData>) => {
-        //     state.invoiceData = action.payload;
-        // }
+        setEditingInvoice: (state, action: PayloadAction<GetInvoiceData | null>) => {
+            state.editingInvoice = action.payload;
+        },
+        setInvoiceTypeId: (state, action: PayloadAction<string | null>) => {
+            state.invoiceType_id = action.payload;
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -82,8 +104,60 @@ const invoiceSlice = createSlice({
                 state.loading = false;
             })
 
+
+            .addCase(viewAllInvoiceGroups.pending, (state) => {
+                state.error = null;
+                state.loading = true;
+            })
+            .addCase(viewAllInvoiceGroups.fulfilled, (state, action: PayloadAction<any>) => {
+                state.viewInvoiceGroups = action.payload.invoiceGroups;
+                state.invoiceGroupPageMeta = action.payload.invoiceGroupPageMeta;
+                state.loading = false;
+            })
+            .addCase(viewAllInvoiceGroups.rejected, (state, action) => {
+                state.error = action.payload as string;
+                state.loading = false;
+            })
+
+            .addCase(getAllInvoiceGroups.pending, (state) => {
+                state.error = null;
+                state.loading = true;
+            })
+            .addCase(getAllInvoiceGroups.fulfilled, (state, action: PayloadAction<any>) => {
+                state.invoiceGroups = action.payload.invoiceGroups;
+                state.loading = false;
+            })
+            .addCase(getAllInvoiceGroups.rejected, (state, action) => {
+                state.error = action.payload as string;
+                state.loading = false;
+            })
+
+            .addCase(deleteInvoice.pending, (state) => {
+                state.error = null;
+                state.loading = true;
+            })
+            .addCase(deleteInvoice.fulfilled, (state) => {
+                state.loading = false;
+            })
+            .addCase(deleteInvoice.rejected, (state, action) => {
+                state.error = action.payload as string;
+                state.loading = false;
+            })
+            
+            .addCase(deleteGSTInvoice.pending, (state) => {
+                state.error = null;
+                state.loading = true;
+            })
+            .addCase(deleteGSTInvoice.fulfilled, (state) => {
+                state.loading = false;
+            })
+            .addCase(deleteGSTInvoice.rejected, (state, action) => {
+                state.error = action.payload as string;
+                state.loading = false;
+            })
+
     },
 });
 
-// export const { setInvoiceData } = invoiceSlice.actions;
+export const { setEditingInvoice, setInvoiceTypeId } = invoiceSlice.actions;
 export default invoiceSlice.reducer;

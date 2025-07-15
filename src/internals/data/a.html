@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Vyapar Drishti Sales Invoice</title>
+    <style>
+        * {
+            box-sizing: border-box !important;
+        }
+
+        body {
+            margin: 0 !important;
+            padding: 0 !important;
+            font-family: Arial, sans-serif !important;
+        }
+
+        .page {
+            width: 200mm !important;
+            height: 290mm !important;
+            padding: 0mm 0mm !important;
+            position: relative !important;
+            border: 1px solid #000 !important;
+            border-right: 1px solid #000 !important;
+            overflow: hidden !important;
+            page-break-after: always !important;
+        }
+
+        .header,
+        .footer {
+            position: absolute !important;
+            width: 100% !important;
+            text-align: center !important;
+            left: 0 !important;
+            right: 0 !important;
+        }
+
+        .header {
+            top: 0 !important;
+        }
+
+        .footer {
+            bottom: 0 !important;
+        }
+
+        .content {
+            margin-top: 85mm !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            margin-bottom: 25mm !important;
+            border-right: 1px solid #000 !important;
+        }
+
+        .item-row {
+            margin-bottom: 6px !important;
+            page-break-inside: avoid !important;
+        }
+
+        .total-section {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            margin-top: 10px !important;
+            text-align: right !important;
+        }
+    </style>
+</head>
+
+<body>
+    
+    
+    <div class="page">
+        <div class="header">
+            <!-- Company and Party Details, Invoice Header -->
+            <div style="text-align: center !important; position: relative !important;  border-bottom: 1px solid #000 !important; border-right: 1px solid #000 !important; padding: 0px 10px !important;"
+                colspan="2">
+                <div
+                    style="display: flex !important; justify-content: space-between !important; align-items: flex-start !important;">
+                    <p><strong>GSTIN :</strong> 08AUVPK0732E1ZK</p>
+                    <p><em>Original Copy</em></p>
+                </div>
+                <div
+                    style="font-size: 16px !important; height: min-content !important; width:min-content !important; white-space: nowrap !important; position: absolute !important; top: 15px !important; left: 50% !important; font-weight: bold !important; text-decoration: underline !important; transform: translate(-50%, 0) !important;">
+                    TAX INVOICE
+                </div>
+                <div
+                    style="font-size: 24px !important; font-weight: bold !important; transform: translateY(-5px) !important;">
+                    New Quality Marble
+                </div>
+                <div
+                    style="margin-bottom: 3px !important; font-size: 14px !important; transform: translateY(-5px) !important;">
+                    123 123 Main street, Main Suite,
+                    Apartment 34B, Rajsamand</div>
+                <div
+                    style="margin-bottom: 3px !important; font-size: 14px !important; transform: translateY(-10px) !important;">
+                    Rajasthan,
+                    India
+                    -
+                    313324</div>
+                <div style=" transform: translateY(-10px) !important;"><strong>Phone :</strong> 91
+                    9867543829,
+                    <strong>Email
+                        :</strong>newqualitymarble@gmail.com
+                </div>
+            </div>
+
+            <div
+                style="padding: 0 12px  !important; border-bottom: 1px solid #000 !important; border-right: 1px solid #000 !important;">
+                <div style="width: 100% !important; display: flex !important;">
+                    <!-- Party Details -->
+                    <div
+                        style="width: 50% !important; text-align: left !important; vertical-align: top !important; padding: 12px 0 !important;">
+                        <div
+                            style="font-size: 18px !important; font-weight: bold !important; margin-bottom: 3px !important;">
+                            Ganpati Motors
+                        </div>
+                        <div style="margin-bottom: 3px !important; font-size: 14px !important;">
+                             </div>
+                        <div style="margin-bottom: 3px !important; font-size: 14px !important;"> Gujarat, India
+                            -
+                            None</div>
+                        <div style="margin-bottom: 3px !important; font-size: 14px !important;"><strong>Phone :</strong>
+                            &nbsp;
+                        </div>
+                        <div style="margin-bottom: 3px !important; font-size: 14px !important;">
+                            <strong>Email
+                                :</strong>
+                        </div>
+                        <div style="margin:10px 0px !important; font-size: 16px !important;"><strong>GSTIN :</strong> 04AUVPK0732E1ZK
+                        </div>
+                    </div>
+
+                    <!-- Invoice Details -->
+                    <div
+                        style="width: 50% !important; vertical-align: top !important; text-align: left !important; padding: 12px !important; border-left: 1px solid #000 !important;">
+                        <div
+                            style="display: grid !important; grid-template-columns: 2fr 1fr 2fr !important;  font-size: 14px !important;">
+                            <div><strong>Invoice No</strong></div>
+                            <div>:</div>
+                            <div>SAL-0003</div>
+                            <div><strong>Invoice Date</strong></div>
+                            <div>:</div>
+                            <div>2025-07-12</div>
+                            <div><strong>Place of Supply</strong></div>
+                            <div>:</div>
+                            <div></div>
+                            <div>
+                                <strong>Mode of Transport</strong>
+                            </div>
+                            <div>:</div>
+                            <div>By Road</div>
+                            <div><strong>Vehicle No</strong></div>
+                            <div>:</div>
+                            <div>KA-01-AB-1234</div>
+                            <div><strong>Reverse Charge</strong></div>
+                            <div>:</div>
+                            <div>No</div>
+                            <div><strong>Payment Status</strong></div>
+                            <div>:</div>
+                            <div>Paid</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoice Header -->
+            <div
+                style="text-align: center !important; padding: 8px !important; background-color: #f2f2f2 !important; border-bottom: 1px solid #000 !important; border-right: 1px solid #000 !important; font-size: 16px !important; font-weight: bold !important;">
+                Sales&nbsp;Invoice
+            </div>
+        </div>
+
+        <div class="content" style="border-right: 1px solid #000 !important;">
+            <table style="width: 100% !important; margin-top:10px !important; border-collapse: collapse !important;"
+                cellpadding="4" cellspacing="0">
+                <tr style="background-color: #f2f2f2 !important;">
+                    <th
+                        style="border: 1px solid #000 !important; font-size: 10px !important; font-weight: bold !important; text-align: center !important; padding: 4px !important;">
+                        SN</th>
+                    <th
+                        style="border: 1px solid #000 !important; font-size: 10px !important; font-weight: bold !important; text-align: center !important; padding: 4px !important; width: 16% !important;">
+                        Description of Goods</th>
+                    <th
+                        style="border: 1px solid #000 !important; font-size: 10px !important; font-weight: bold !important; text-align: center !important; padding: 4px !important;">
+                        HSN</th>
+                    <th
+                        style="border: 1px solid #000 !important; font-size: 10px !important; font-weight: bold !important; text-align: center !important; padding: 4px !important;">
+                        Qty.</th>
+                    <th
+                        style="border: 1px solid #000 !important; font-size: 10px !important; font-weight: bold !important; text-align: center !important; padding: 4px !important;">
+                        Units</th>
+                    <th
+                        style="border: 1px solid #000 !important; font-size: 10px !important; font-weight: bold !important; text-align: center !important; padding: 4px !important;">
+                        RATE</th>
+                    <th
+                        style="border: 1px solid #000 !important; font-size: 10px !important; font-weight: bold !important; text-align: center !important; padding: 4px !important;">
+                        Price</th>
+                    <th
+                        style="border: 1px solid #000 !important; font-size: 10px !important; font-weight: bold !important; text-align: center !important; padding: 4px !important;">
+                        GST&nbsp;(&#37;)</th>
+                    <th
+                        style="border: 1px solid #000 !important; font-size: 10px !important; font-weight: bold !important; text-align: center !important; padding: 4px !important;">
+                        GST&nbsp;(&#8377;)</th>
+                    <th
+                        style="border: 1px solid #000 !important; font-size: 10px !important; font-weight: bold !important; text-align: center !important; padding: 4px !important;">
+                        AMOUNT</th>
+                </tr>
+                
+                
+                
+                
+                
+                <tr >
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; border-left:none !important; text-align: center !important; padding: 4px !important;">
+                        1</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: left !important; text-wrap-mode: nowrap !important; padding: 4px !important;">
+                        Castrol Active Continous Protection
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        OIL
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        PAC
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        28&nbsp;&#37;
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        0.28</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size:  10px !important; border-right:none !important; text-align: center !important; padding: 4px !important; font-weight: bold !important;">
+                        1.28</td>
+                </tr>
+
+                
+                
+                
+                <tr style="background-color: #f9f9f9 !important;" >
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; border-left:none !important; text-align: center !important; padding: 4px !important;">
+                        2</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: left !important; text-wrap-mode: nowrap !important; padding: 4px !important;">
+                        Castrol Active Continous Protection
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        OIL
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        PAC
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        28&nbsp;&#37;
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        0.28</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size:  10px !important; border-right:none !important; text-align: center !important; padding: 4px !important; font-weight: bold !important;">
+                        1.28</td>
+                </tr>
+
+                
+                
+                
+                <tr >
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; border-left:none !important; text-align: center !important; padding: 4px !important;">
+                        3</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: left !important; text-wrap-mode: nowrap !important; padding: 4px !important;">
+                        Castrol Active Continous Protection
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        OIL
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        PAC
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        28&nbsp;&#37;
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        0.28</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size:  10px !important; border-right:none !important; text-align: center !important; padding: 4px !important; font-weight: bold !important;">
+                        1.28</td>
+                </tr>
+
+                
+                
+                
+                <tr style="background-color: #f9f9f9 !important;" >
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; border-left:none !important; text-align: center !important; padding: 4px !important;">
+                        4</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: left !important; text-wrap-mode: nowrap !important; padding: 4px !important;">
+                        Castrol Active Continous Protection
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        OIL
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        PAC
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        28&nbsp;&#37;
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        0.28</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size:  10px !important; border-right:none !important; text-align: center !important; padding: 4px !important; font-weight: bold !important;">
+                        1.28</td>
+                </tr>
+
+                
+                
+                
+                <tr >
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; border-left:none !important; text-align: center !important; padding: 4px !important;">
+                        5</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: left !important; text-wrap-mode: nowrap !important; padding: 4px !important;">
+                        Castrol Active Continous Protection
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        OIL
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        PAC
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        28&nbsp;&#37;
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        0.28</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size:  10px !important; border-right:none !important; text-align: center !important; padding: 4px !important; font-weight: bold !important;">
+                        1.28</td>
+                </tr>
+
+                
+                
+                
+                <tr style="background-color: #f9f9f9 !important;" >
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; border-left:none !important; text-align: center !important; padding: 4px !important;">
+                        6</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: left !important; text-wrap-mode: nowrap !important; padding: 4px !important;">
+                        Castrol Active Continous Protection
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        OIL
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        PAC
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        28&nbsp;&#37;
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        0.28</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size:  10px !important; border-right:none !important; text-align: center !important; padding: 4px !important; font-weight: bold !important;">
+                        1.28</td>
+                </tr>
+
+                
+                
+                
+                <tr >
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; border-left:none !important; text-align: center !important; padding: 4px !important;">
+                        7</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: left !important; text-wrap-mode: nowrap !important; padding: 4px !important;">
+                        Castrol Active Continous Protection
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        OIL
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        PAC
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        28&nbsp;&#37;
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        0.28</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size:  10px !important; border-right:none !important; text-align: center !important; padding: 4px !important; font-weight: bold !important;">
+                        1.28</td>
+                </tr>
+
+                
+                
+                
+                <tr style="background-color: #f9f9f9 !important;" >
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; border-left:none !important; text-align: center !important; padding: 4px !important;">
+                        8</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: left !important; text-wrap-mode: nowrap !important; padding: 4px !important;">
+                        Head Light SPL
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        HED
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        NOS
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        16&nbsp;&#37;
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        0.16</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size:  10px !important; border-right:none !important; text-align: center !important; padding: 4px !important; font-weight: bold !important;">
+                        1.16</td>
+                </tr>
+
+                
+                
+                
+                <tr >
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; border-left:none !important; text-align: center !important; padding: 4px !important;">
+                        9</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: left !important; text-wrap-mode: nowrap !important; padding: 4px !important;">
+                        Head Light SPL
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        HED
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        NOS
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        16&nbsp;&#37;
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        0.16</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size:  10px !important; border-right:none !important; text-align: center !important; padding: 4px !important; font-weight: bold !important;">
+                        1.16</td>
+                </tr>
+
+                
+                
+                
+                <tr style="background-color: #f9f9f9 !important;" >
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; border-left:none !important; text-align: center !important; padding: 4px !important;">
+                        10</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: left !important; text-wrap-mode: nowrap !important; padding: 4px !important;">
+                        Head Light SPL
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        HED
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        NOS
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        16&nbsp;&#37;
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        0.16</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size:  10px !important; border-right:none !important; text-align: center !important; padding: 4px !important; font-weight: bold !important;">
+                        1.16</td>
+                </tr>
+
+                
+                
+                
+                <tr >
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; border-left:none !important; text-align: center !important; padding: 4px !important;">
+                        11</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: left !important; text-wrap-mode: nowrap !important; padding: 4px !important;">
+                        Head Light SPL
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        HED
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        NOS
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        16&nbsp;&#37;
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        0.16</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size:  10px !important; border-right:none !important; text-align: center !important; padding: 4px !important; font-weight: bold !important;">
+                        1.16</td>
+                </tr>
+
+                
+                
+                
+                <tr style="background-color: #f9f9f9 !important;" >
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; border-left:none !important; text-align: center !important; padding: 4px !important;">
+                        12</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: left !important; text-wrap-mode: nowrap !important; padding: 4px !important;">
+                        Head Light SPL
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        HED
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        NOS
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        16&nbsp;&#37;
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        0.16</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size:  10px !important; border-right:none !important; text-align: center !important; padding: 4px !important; font-weight: bold !important;">
+                        1.16</td>
+                </tr>
+
+                
+                
+                
+                <tr >
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; border-left:none !important; text-align: center !important; padding: 4px !important;">
+                        13</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: left !important; text-wrap-mode: nowrap !important; padding: 4px !important;">
+                        Head Light SPL
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        HED
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        NOS
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        16&nbsp;&#37;
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        0.16</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size:  10px !important; border-right:none !important; text-align: center !important; padding: 4px !important; font-weight: bold !important;">
+                        1.16</td>
+                </tr>
+
+                
+                
+                
+                <tr style="background-color: #f9f9f9 !important;" >
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; border-left:none !important; text-align: center !important; padding: 4px !important;">
+                        14</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: left !important; text-wrap-mode: nowrap !important; padding: 4px !important;">
+                        Tyre 27-18
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        12321
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        NOS
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        18&nbsp;&#37;
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        0.18</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size:  10px !important; border-right:none !important; text-align: center !important; padding: 4px !important; font-weight: bold !important;">
+                        1.18</td>
+                </tr>
+
+                
+                
+                
+                <tr >
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; border-left:none !important; text-align: center !important; padding: 4px !important;">
+                        15</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: left !important; text-wrap-mode: nowrap !important; padding: 4px !important;">
+                        Tyre 27-18
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        12321
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        NOS
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        18&nbsp;&#37;
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        0.18</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size:  10px !important; border-right:none !important; text-align: center !important; padding: 4px !important; font-weight: bold !important;">
+                        1.18</td>
+                </tr>
+
+                
+                
+                
+                <tr style="background-color: #f9f9f9 !important;" >
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; border-left:none !important; text-align: center !important; padding: 4px !important;">
+                        16</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: left !important; text-wrap-mode: nowrap !important; padding: 4px !important;">
+                        Tyre 27-18
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        12321
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        NOS
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        18&nbsp;&#37;
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        0.18</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size:  10px !important; border-right:none !important; text-align: center !important; padding: 4px !important; font-weight: bold !important;">
+                        1.18</td>
+                </tr>
+
+                
+                
+                
+                <tr >
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; border-left:none !important; text-align: center !important; padding: 4px !important;">
+                        17</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: left !important; text-wrap-mode: nowrap !important; padding: 4px !important;">
+                        Tyre 27-18
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        12321
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        NOS
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        18&nbsp;&#37;
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        0.18</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size:  10px !important; border-right:none !important; text-align: center !important; padding: 4px !important; font-weight: bold !important;">
+                        1.18</td>
+                </tr>
+
+                
+                
+
+                
+                
+                <tr>
+                    <td colspan="10"
+                        style="text-align: center !important; font-size: 12px !important; padding: 10px !important;">
+                        Continue...
+                    </td>
+                </tr>
+                
+                
+
+            </table>
+        </div>
+
+        <div class="footer">
+            <div
+                style="display: flex !important; border-top: 1px solid #000 !important; border-right: 1px solid #000 !important; justify-content: space-between !important; align-items: center !important;">
+                <div
+                    style="font-size: 11px !important; line-height: 1.4 !important; padding-left: 10px !important; text-align: left !important; padding-top: 10px !important;">
+                    <div style="font-weight: bold !important; margin-bottom: 5px !important;">Terms & Conditions :</div>
+                    <div style="margin-bottom: 8px !important;">
+                        <span>1. This is to certify that we have a valid GST Registration and the above
+                            information is true.</span><br>
+                        <span>2. Interest @ 18% per annum will be charged on payments due after 15 days from
+                            the date of billing.</span><br>
+                        <span>3. Please accept goods in proper condition only.<br></span>
+                        <span>4. All Disputes & claims will be referred to the court at Udaipur
+                            jurisdiction.<br></span>
+                        <span>5. Do not make payment without the printed receipt. Please keep the receipt
+                            safe.</span>
+                    </div>
+                    <div style="font-weight: bold !important; margin-bottom: 5px !important;">Additional Terms and
+                        Conditions :</div>
+                    <div
+                        style="border-bottom: 1px solid #000 !important; height: 10px !important; margin-bottom: 5px !important;">
+                    </div>
+                    <div
+                        style="border-bottom: 1px solid #000 !important; height: 10px !important; margin-bottom: 5px !important;">
+                    </div>
+                </div>
+                <div
+                    style="border-left: 1px solid #000 !important; display: flex !important; justify-content: center !important; align-items: center !important;">
+                    <div style="width: 200px !important; height: auto !important;">
+                        <div
+                            style="display: flex !important; justify-content: center !important; align-items: center !important; width: 100% !important; height: 100% !important; padding: 10px !important; align-self: center !important;">
+
+                            
+                            <div
+                                style="width: 150px !important; height: 150px !important; border: 1px dashed #ccc !important; display: flex !important; justify-content: center !important; align-items: center !important;">
+                                Add QR Code Here</div>
+                            
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div
+                style="display: flex !important; border-top: 1px solid #000 !important; justify-content: space-between !important; padding-top: 10px !important; align-items: center !important;">
+                <div style="width: 40% !important; text-align: center !important; vertical-align: top !important;">
+                    <div
+                        style="border-top: 1px solid #000 !important; width: 200px !important; margin: 15px auto 5px auto !important;">
+                    </div>
+                    <div style="font-weight: bold !important; font-size: 12px !important;">Driver / Receiver's Signature
+                    </div>
+                </div>
+                <div style="width: 20% !important;">&nbsp;</div>
+                <div style="width: 40% !important; text-align: center !important; vertical-align: top !important;">
+                    <div
+                        style="border-top: 1px solid #000 !important; width: 200px !important; margin: 15px auto 5px auto !important;">
+                    </div>
+                    <div style="font-weight: bold !important; font-size: 12px !important;">New Quality Marble
+                    </div>
+                </div>
+            </div>
+            <div
+                style="text-align: center !important; padding: 0 0 10px 0 !important; font-size: 14px !important; font-weight: bold !important; color: #C04000 !important; text-decoration: underline !important;">
+                LIFE'S A JOURNEY, KEEP SMILING
+            </div>
+        </div>
+    </div>
+    
+    <div class="page">
+        <div class="header">
+            <!-- Company and Party Details, Invoice Header -->
+            <div style="text-align: center !important; position: relative !important;  border-bottom: 1px solid #000 !important; border-right: 1px solid #000 !important; padding: 0px 10px !important;"
+                colspan="2">
+                <div
+                    style="display: flex !important; justify-content: space-between !important; align-items: flex-start !important;">
+                    <p><strong>GSTIN :</strong> 08AUVPK0732E1ZK</p>
+                    <p><em>Original Copy</em></p>
+                </div>
+                <div
+                    style="font-size: 16px !important; height: min-content !important; width:min-content !important; white-space: nowrap !important; position: absolute !important; top: 15px !important; left: 50% !important; font-weight: bold !important; text-decoration: underline !important; transform: translate(-50%, 0) !important;">
+                    TAX INVOICE
+                </div>
+                <div
+                    style="font-size: 24px !important; font-weight: bold !important; transform: translateY(-5px) !important;">
+                    New Quality Marble
+                </div>
+                <div
+                    style="margin-bottom: 3px !important; font-size: 14px !important; transform: translateY(-5px) !important;">
+                    123 123 Main street, Main Suite,
+                    Apartment 34B, Rajsamand</div>
+                <div
+                    style="margin-bottom: 3px !important; font-size: 14px !important; transform: translateY(-10px) !important;">
+                    Rajasthan,
+                    India
+                    -
+                    313324</div>
+                <div style=" transform: translateY(-10px) !important;"><strong>Phone :</strong> 91
+                    9867543829,
+                    <strong>Email
+                        :</strong>newqualitymarble@gmail.com
+                </div>
+            </div>
+
+            <div
+                style="padding: 0 12px  !important; border-bottom: 1px solid #000 !important; border-right: 1px solid #000 !important;">
+                <div style="width: 100% !important; display: flex !important;">
+                    <!-- Party Details -->
+                    <div
+                        style="width: 50% !important; text-align: left !important; vertical-align: top !important; padding: 12px 0 !important;">
+                        <div
+                            style="font-size: 18px !important; font-weight: bold !important; margin-bottom: 3px !important;">
+                            Ganpati Motors
+                        </div>
+                        <div style="margin-bottom: 3px !important; font-size: 14px !important;">
+                             </div>
+                        <div style="margin-bottom: 3px !important; font-size: 14px !important;"> Gujarat, India
+                            -
+                            None</div>
+                        <div style="margin-bottom: 3px !important; font-size: 14px !important;"><strong>Phone :</strong>
+                            &nbsp;
+                        </div>
+                        <div style="margin-bottom: 3px !important; font-size: 14px !important;">
+                            <strong>Email
+                                :</strong>
+                        </div>
+                        <div style="margin:10px 0px !important; font-size: 16px !important;"><strong>GSTIN :</strong> 04AUVPK0732E1ZK
+                        </div>
+                    </div>
+
+                    <!-- Invoice Details -->
+                    <div
+                        style="width: 50% !important; vertical-align: top !important; text-align: left !important; padding: 12px !important; border-left: 1px solid #000 !important;">
+                        <div
+                            style="display: grid !important; grid-template-columns: 2fr 1fr 2fr !important;  font-size: 14px !important;">
+                            <div><strong>Invoice No</strong></div>
+                            <div>:</div>
+                            <div>SAL-0003</div>
+                            <div><strong>Invoice Date</strong></div>
+                            <div>:</div>
+                            <div>2025-07-12</div>
+                            <div><strong>Place of Supply</strong></div>
+                            <div>:</div>
+                            <div></div>
+                            <div>
+                                <strong>Mode of Transport</strong>
+                            </div>
+                            <div>:</div>
+                            <div>By Road</div>
+                            <div><strong>Vehicle No</strong></div>
+                            <div>:</div>
+                            <div>KA-01-AB-1234</div>
+                            <div><strong>Reverse Charge</strong></div>
+                            <div>:</div>
+                            <div>No</div>
+                            <div><strong>Payment Status</strong></div>
+                            <div>:</div>
+                            <div>Paid</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoice Header -->
+            <div
+                style="text-align: center !important; padding: 8px !important; background-color: #f2f2f2 !important; border-bottom: 1px solid #000 !important; border-right: 1px solid #000 !important; font-size: 16px !important; font-weight: bold !important;">
+                Sales&nbsp;Invoice
+            </div>
+        </div>
+
+        <div class="content" style="border-right: 1px solid #000 !important;">
+            <table style="width: 100% !important; margin-top:10px !important; border-collapse: collapse !important;"
+                cellpadding="4" cellspacing="0">
+                <tr style="background-color: #f2f2f2 !important;">
+                    <th
+                        style="border: 1px solid #000 !important; font-size: 10px !important; font-weight: bold !important; text-align: center !important; padding: 4px !important;">
+                        SN</th>
+                    <th
+                        style="border: 1px solid #000 !important; font-size: 10px !important; font-weight: bold !important; text-align: center !important; padding: 4px !important; width: 16% !important;">
+                        Description of Goods</th>
+                    <th
+                        style="border: 1px solid #000 !important; font-size: 10px !important; font-weight: bold !important; text-align: center !important; padding: 4px !important;">
+                        HSN</th>
+                    <th
+                        style="border: 1px solid #000 !important; font-size: 10px !important; font-weight: bold !important; text-align: center !important; padding: 4px !important;">
+                        Qty.</th>
+                    <th
+                        style="border: 1px solid #000 !important; font-size: 10px !important; font-weight: bold !important; text-align: center !important; padding: 4px !important;">
+                        Units</th>
+                    <th
+                        style="border: 1px solid #000 !important; font-size: 10px !important; font-weight: bold !important; text-align: center !important; padding: 4px !important;">
+                        RATE</th>
+                    <th
+                        style="border: 1px solid #000 !important; font-size: 10px !important; font-weight: bold !important; text-align: center !important; padding: 4px !important;">
+                        Price</th>
+                    <th
+                        style="border: 1px solid #000 !important; font-size: 10px !important; font-weight: bold !important; text-align: center !important; padding: 4px !important;">
+                        GST&nbsp;(&#37;)</th>
+                    <th
+                        style="border: 1px solid #000 !important; font-size: 10px !important; font-weight: bold !important; text-align: center !important; padding: 4px !important;">
+                        GST&nbsp;(&#8377;)</th>
+                    <th
+                        style="border: 1px solid #000 !important; font-size: 10px !important; font-weight: bold !important; text-align: center !important; padding: 4px !important;">
+                        AMOUNT</th>
+                </tr>
+                
+                
+                
+                
+                
+                <tr >
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; border-left:none !important; text-align: center !important; padding: 4px !important;">
+                        18</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: left !important; text-wrap-mode: nowrap !important; padding: 4px !important;">
+                        Tyre 27-18
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        12321
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        NOS
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        18&nbsp;&#37;
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        0.18</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size:  10px !important; border-right:none !important; text-align: center !important; padding: 4px !important; font-weight: bold !important;">
+                        1.18</td>
+                </tr>
+
+                
+                
+                
+                <tr style="background-color: #f9f9f9 !important;" >
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; border-left:none !important; text-align: center !important; padding: 4px !important;">
+                        19</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: left !important; text-wrap-mode: nowrap !important; padding: 4px !important;">
+                        Tyre 27-18
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        12321
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        NOS
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        18&nbsp;&#37;
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        0.18</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size:  10px !important; border-right:none !important; text-align: center !important; padding: 4px !important; font-weight: bold !important;">
+                        1.18</td>
+                </tr>
+
+                
+                
+                
+                <tr >
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; border-left:none !important; text-align: center !important; padding: 4px !important;">
+                        20</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: left !important; text-wrap-mode: nowrap !important; padding: 4px !important;">
+                        Tyre 27-18
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        12321
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        NOS
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        1.0</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        18&nbsp;&#37;
+                    </td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                        0.18</td>
+                    <td
+                        style="border: 1px solid #000 !important; font-size:  10px !important; border-right:none !important; text-align: center !important; padding: 4px !important; font-weight: bold !important;">
+                        1.18</td>
+                </tr>
+
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+
+                
+                
+                <tr>
+                    <td colspan="10">
+                        <div class="total-section">
+                            <div class="no-break">
+                                <div
+                                    style="display: flex  !important; text-align: left !important; margin: 0 10px !important;">
+                                    <div
+                                        style="flex: auto !important; vertical-align: top !important; padding-right: 10px !important;">
+                                        <table
+                                            style="width: 100% !important; border-collapse: collapse !important; border: 1px solid #000 !important;"
+                                            cellpadding="4" cellspacing="0">
+                                            <tr style="background-color: #f2f2f2 !important;">
+                                                <th
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                                                    GST(&#37;)</th>
+                                                <th
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                                                    Taxable Amt.</th>
+                                                <th
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                                                    IGST</th>
+                                                <th
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                                                    CGST</th>
+                                                <th
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                                                    SGST</th>
+                                                <th
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                                                    GST Amt.</th>
+                                            </tr>
+                                            
+                                            <tr>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                                                    18.0&#37;</td>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                                                    7.0</td>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                                                    1.26</td>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                                                    0.0</td>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                                                    0.0</td>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                                                    1.26</td>
+                                            </tr>
+                                            
+                                            <tr>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                                                    16.0&#37;</td>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                                                    6.0</td>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                                                    0.96</td>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                                                    0.0</td>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                                                    0.0</td>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                                                    0.96</td>
+                                            </tr>
+                                            
+                                            <tr>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                                                    28.0&#37;</td>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                                                    7.0</td>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                                                    1.96</td>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                                                    0.0</td>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                                                    0.0</td>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important;">
+                                                    1.96</td>
+                                            </tr>
+                                            
+
+                                            <tr style="background-color: #f2f2f2 !important;">
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important; font-weight: bold;">
+                                                    TOTAL</td>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important; font-weight: bold;">
+                                                    20.0</td>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important; font-weight: bold;">
+                                                    4.18</td>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important; font-weight: bold;">
+                                                    0.0</td>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important; font-weight: bold;">
+                                                    0.0</td>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; text-align: center !important; padding: 4px !important; font-weight: bold;">
+                                                    4.18</td>
+                                            </tr>
+                                        </table>
+                                        <div style="margin-top: 10px !important; font-size: 12px !important;">
+                                            <div><strong>Bank Details</strong></div>
+                                            
+                                            <div style="margin-top: 5px !important;">Add Bank Details to Company Profile
+                                            </div>
+                                            
+
+                                        </div>
+                                    </div>
+                                    <div
+                                        style="width: 30% !important; vertical-align: top !important;  padding-left: 10px !important;">
+                                        <table
+                                            style="width: 100% !important; border-collapse: collapse !important; border: 1px solid #000 !important;"
+                                            cellpadding="4" cellspacing="0">
+                                            <tr>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; padding: 4px !important; font-weight: bold;">
+                                                    SUB TOTAL</td>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; padding: 4px !important; text-align: right !important;">
+                                                    20.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; padding: 4px !important; font-weight: bold;">
+                                                    DISCOUNT</td>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; padding: 4px !important; text-align: right !important;">
+                                                    </td>
+                                            </tr>
+                                            <tr>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; padding: 4px !important; font-weight: bold;">
+                                                    TOTAL</td>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; padding: 4px !important; text-align: right !important;">
+                                                    20.00</td>
+                                            </tr>
+                                            <tr>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; padding: 4px !important; font-weight: bold;">
+                                                    Total Tax</td>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; padding: 4px !important; text-align: right !important;">
+                                                    4.18</td>
+                                            </tr>
+                                            <tr>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; padding: 4px !important; font-weight: bold;">
+                                                    Additional Charges</td>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 10px !important; padding: 4px !important; text-align: right !important;">
+                                                    12.34</td>
+                                            </tr>
+                                        </table>
+                                        <table
+                                            style="width: 100% !important; border-collapse: collapse !important; border: 1px solid #000 !important; background-color: #f2f2f2 !important; margin-top: 8px !important;"
+                                            cellpadding="4" cellspacing="0">
+                                            <tr>
+                                                <td
+                                                    style="border: 1px solid #000 !important; font-size: 14px !important; padding: 8px !important; text-align: center !important; font-weight: bold;">
+                                                    GRAND TOTAL: &#8377; 24.18</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                
+                
+
+            </table>
+        </div>
+
+        <div class="footer">
+            <div
+                style="display: flex !important; border-top: 1px solid #000 !important; border-right: 1px solid #000 !important; justify-content: space-between !important; align-items: center !important;">
+                <div
+                    style="font-size: 11px !important; line-height: 1.4 !important; padding-left: 10px !important; text-align: left !important; padding-top: 10px !important;">
+                    <div style="font-weight: bold !important; margin-bottom: 5px !important;">Terms & Conditions :</div>
+                    <div style="margin-bottom: 8px !important;">
+                        <span>1. This is to certify that we have a valid GST Registration and the above
+                            information is true.</span><br>
+                        <span>2. Interest @ 18% per annum will be charged on payments due after 15 days from
+                            the date of billing.</span><br>
+                        <span>3. Please accept goods in proper condition only.<br></span>
+                        <span>4. All Disputes & claims will be referred to the court at Udaipur
+                            jurisdiction.<br></span>
+                        <span>5. Do not make payment without the printed receipt. Please keep the receipt
+                            safe.</span>
+                    </div>
+                    <div style="font-weight: bold !important; margin-bottom: 5px !important;">Additional Terms and
+                        Conditions :</div>
+                    <div
+                        style="border-bottom: 1px solid #000 !important; height: 10px !important; margin-bottom: 5px !important;">
+                    </div>
+                    <div
+                        style="border-bottom: 1px solid #000 !important; height: 10px !important; margin-bottom: 5px !important;">
+                    </div>
+                </div>
+                <div
+                    style="border-left: 1px solid #000 !important; display: flex !important; justify-content: center !important; align-items: center !important;">
+                    <div style="width: 200px !important; height: auto !important;">
+                        <div
+                            style="display: flex !important; justify-content: center !important; align-items: center !important; width: 100% !important; height: 100% !important; padding: 10px !important; align-self: center !important;">
+
+                            
+                            <div
+                                style="width: 150px !important; height: 150px !important; border: 1px dashed #ccc !important; display: flex !important; justify-content: center !important; align-items: center !important;">
+                                Add QR Code Here</div>
+                            
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div
+                style="display: flex !important; border-top: 1px solid #000 !important; justify-content: space-between !important; padding-top: 10px !important; align-items: center !important;">
+                <div style="width: 40% !important; text-align: center !important; vertical-align: top !important;">
+                    <div
+                        style="border-top: 1px solid #000 !important; width: 200px !important; margin: 15px auto 5px auto !important;">
+                    </div>
+                    <div style="font-weight: bold !important; font-size: 12px !important;">Driver / Receiver's Signature
+                    </div>
+                </div>
+                <div style="width: 20% !important;">&nbsp;</div>
+                <div style="width: 40% !important; text-align: center !important; vertical-align: top !important;">
+                    <div
+                        style="border-top: 1px solid #000 !important; width: 200px !important; margin: 15px auto 5px auto !important;">
+                    </div>
+                    <div style="font-weight: bold !important; font-size: 12px !important;">New Quality Marble
+                    </div>
+                </div>
+            </div>
+            <div
+                style="text-align: center !important; padding: 0 0 10px 0 !important; font-size: 14px !important; font-weight: bold !important; color: #C04000 !important; text-decoration: underline !important;">
+                LIFE'S A JOURNEY, KEEP SMILING
+            </div>
+        </div>
+    </div>
+    
+
+</body>
+
+</html>

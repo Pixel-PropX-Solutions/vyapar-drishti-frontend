@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
-    Button,
     Typography,
     Box,
     Grid,
@@ -13,25 +12,19 @@ import {
     TableCell,
     TableHead,
     TableContainer,
-    TableBody,
     TableRow,
     Table,
     Paper,
     TablePagination,
 } from "@mui/material";
 import {
-    Phone as PhoneIcon,
-    Email as EmailIcon,
-    LocationOn as LocationIcon,
-    Store as StoreIcon,
-    FileCopy as LicenceIcon,
     Edit as EditIcon,
 } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { getCustomer } from "@/services/customers";
 import { useNavigate, useParams } from "react-router-dom";
-import { formatDate, getInitials } from "@/utils/functions";
+import { getInitials } from "@/utils/functions";
 import { ActionButton } from "@/common/ActionButton";
 import { setEditingCustomer } from "@/store/reducers/customersReducer";
 
@@ -58,7 +51,7 @@ const CustomerProfile: React.FC = () => {
     // }, [chemist, dispatch])
 
     // Handle pagination
-    const handleChangePage = useCallback((event: unknown, newPage: number) => {
+    const handleChangePage = useCallback((_: unknown, newPage: number) => {
         setPage(newPage);
     }, []);
 

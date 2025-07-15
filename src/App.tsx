@@ -36,16 +36,15 @@ import SignUpPage from "./pages/SignUp";
 import ProfilePage from "./pages/Profile";
 import CustomerLedger from "./pages/CustomerLedger";
 import Invoices from "./pages/Invoices";
-import CreateInvoice from "./components/Invoice/createInvoice";
 // import GroupAndTypes from "./pages/GroupAndTypes";
 import SalePurchaseInvoiceCreation from "./components/Invoice/SalePurchaseInvoiceCreation";
 import PaymentReceiptInvoice from "./components/Invoice/PaymentReceiptInvoice";
 import UpdateSalePurchase from "./components/Invoice/UpdateSalePurchase";
 import Transactions from "./pages/Transactions";
 import Inventory from "./pages/Inventory";
-import CreateCustomer from "./features/customer/CreateCustomer";
 import EditCustomer from "./features/customer/EditCustomer";
 import CustomerProfile from "./features/customer/CustomerProfile";
+import Xyz from "./pages/xyz";
 // import PromptModal from "./common/PromptModal";
 
 const xThemeComponents = {
@@ -171,8 +170,8 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/customers/create/:type" element={<EditCustomer />} />
                 <Route path="/customers/edit/:type" element={<EditCustomer />} />
                 <Route path="/invoices" element={<Invoices />} />
+                <Route path="/xyz" element={<Xyz />} />
                 <Route path="/transactions" element={<Transactions />} />
-                <Route path="/invoices/create" element={<CreateInvoice />} />
                 <Route path="/transaction/:type" element={<PaymentReceiptInvoice />} />
                 <Route path="/invoices/create/:type" element={<SalePurchaseInvoiceCreation />} />
                 <Route path="/invoices/update/:type/:voucher_id" element={<UpdateSalePurchase />} />

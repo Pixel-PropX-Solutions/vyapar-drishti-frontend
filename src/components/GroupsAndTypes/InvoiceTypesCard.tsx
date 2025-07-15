@@ -20,7 +20,7 @@ import { GetAllInvoiceGroups } from "@/utils/types";
 import { Edit, TypeSpecimen } from "@mui/icons-material";
 
 const InvoiceTypesCard: React.FC<{
-    invGroup: GetAllInvoiceGroups;
+    invGroup: any;
     onDelete: (id: string) => void;
     onEdit: (invGroup: GetAllInvoiceGroups) => void;
     // onView: (invGroup: GetAllInvoiceGroups) => void;

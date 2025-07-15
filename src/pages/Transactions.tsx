@@ -37,11 +37,12 @@ import { CustomerSortField, SortOrder, GetAllVouchars } from "@/utils/types";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { useNavigate } from "react-router-dom";
-import { printPaymentInvoices, printRecieptInvoices, viewAllInvoices } from "@/services/invoice";
+import { 
+    // printPaymentInvoices, printRecieptInvoices, 
+    viewAllInvoices } from "@/services/invoice";
 import { InvoicerRow } from "@/components/Invoice/InvoiceRow";
-import InvoicePrint from "@/components/Invoice/InvoicePrint";
-import InvoiceTypeModal from "@/components/Invoice/InvoiceTypeModal";
-import { getAllInvoiceGroups } from "@/services/accountingGroup";
+// import InvoicePrint from "@/components/Invoice/InvoicePrint";
+import { getAllInvoiceGroups } from "@/services/invoice";
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -53,10 +54,9 @@ const Transactions: React.FC = () => {
     const navigate = useNavigate();
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
-    const [promptModal, setPromptModal] = useState(false);
-    const [htmlFromAPI, setHtmlFromAPI] = useState<string>('');
-    const [html, setHtml] = useState<boolean>(false);
-    const [invoiceId, setInvoiceId] = useState<string>('');
+    // const [htmlFromAPI, setHtmlFromAPI] = useState<string>('');
+    // const [html, setHtml] = useState<boolean>(false);
+    // const [invoiceId, setInvoiceId] = useState<string>('');
     const { invoices, loading, pageMeta } = useSelector((state: RootState) => state.invoice);
     const { currentCompany } = useSelector((state: RootState) => state.auth);
 
@@ -64,7 +64,7 @@ const Transactions: React.FC = () => {
         searchQuery: "",
         filterState: "All-States",
         is_deleted: false,
-        type: "All",
+        type: "Transactions",
         page: 1,
         startDate: new Date(),
         endDate: new Date(),
@@ -109,7 +109,7 @@ const Transactions: React.FC = () => {
 
     // Handle pagination change
     const handleChangePage = (
-        event: React.ChangeEvent<unknown>,
+        _: React.ChangeEvent<unknown>,
         newPage: number
     ) => {
 
@@ -145,49 +145,49 @@ const Transactions: React.FC = () => {
     }
 
     // Handle view stockist details
-    const handleViewInvoice = (invoice: GetAllVouchars) => {
+    const handleViewInvoice = (_invoice: GetAllVouchars) => {
         // navigate(`/customers/${customer._id}`)
     };
 
-    const handlePrintInvoice = (invoice: GetAllVouchars) => {
-        if (invoice.voucher_type === 'Receipt') {
-            dispatch(printRecieptInvoices({
-                vouchar_id: invoice._id,
-                company_id: currentCompany?._id || "",
-            })).then((response) => {
-                if (response.meta.requestStatus === 'fulfilled') {
-                    const payload = response.payload as { invoceHtml: string };
-                    setHtmlFromAPI(payload.invoceHtml);
-                    setInvoiceId(invoice.voucher_number);
-                    setHtml(true);
-                } else {
-                    console.error("Failed to print invoice:", response.payload);
-                }
-            }
-            ).catch((error) => {
-                console.error("Error printing invoice:", error);
-            }
-            );
-        } else if (invoice.voucher_type === 'Payment') {
-            dispatch(printPaymentInvoices({
-                vouchar_id: invoice._id,
-                company_id: currentCompany?._id || "",
-            })).then((response) => {
-                if (response.meta.requestStatus === 'fulfilled') {
-                    const payload = response.payload as { invoceHtml: string };
-                    setHtmlFromAPI(payload.invoceHtml);
-                    setInvoiceId(invoice.voucher_number);
-                    setHtml(true);
-                } else {
-                    console.error("Failed to print invoice:", response.payload);
-                }
-            }
-            ).catch((error) => {
-                console.error("Error printing invoice:", error);
-            }
-            );
-        }
-    };
+    // const handlePrintInvoice = (invoice: GetAllVouchars) => {
+    //     if (invoice.voucher_type === 'Receipt') {
+    //         dispatch(printRecieptInvoices({
+    //             vouchar_id: invoice._id,
+    //             company_id: currentCompany?._id || "",
+    //         })).then((response) => {
+    //             if (response.meta.requestStatus === 'fulfilled') {
+    //                 const payload = response.payload as { invoceHtml: string };
+    //                 setHtmlFromAPI(payload.invoceHtml);
+    //                 setInvoiceId(invoice.voucher_number);
+    //                 setHtml(true);
+    //             } else {
+    //                 console.error("Failed to print invoice:", response.payload);
+    //             }
+    //         }
+    //         ).catch((error) => {
+    //             console.error("Error printing invoice:", error);
+    //         }
+    //         );
+    //     } else if (invoice.voucher_type === 'Payment') {
+    //         dispatch(printPaymentInvoices({
+    //             vouchar_id: invoice._id,
+    //             company_id: currentCompany?._id || "",
+    //         })).then((response) => {
+    //             if (response.meta.requestStatus === 'fulfilled') {
+    //                 const payload = response.payload as { invoceHtml: string };
+    //                 setHtmlFromAPI(payload.invoceHtml);
+    //                 setInvoiceId(invoice.voucher_number);
+    //                 setHtml(true);
+    //             } else {
+    //                 console.error("Failed to print invoice:", response.payload);
+    //             }
+    //         }
+    //         ).catch((error) => {
+    //             console.error("Error printing invoice:", error);
+    //         }
+    //         );
+    //     }
+    // };
 
     const filteredInvoices = invoices?.filter((inv) => inv.voucher_type === 'Payment' || inv.voucher_type === 'Receipt');
 
@@ -546,7 +546,7 @@ const Transactions: React.FC = () => {
                                             // await deleteCustomer(cred._id);
                                             // fetchCustomers();
                                         }}
-                                        onPrint={() => handlePrintInvoice(inv)}
+                                        onPrint={() => {}}
 
                                     />))
                             ) : (
@@ -664,30 +664,7 @@ const Transactions: React.FC = () => {
                     )}
                 </Paper>
 
-                <InvoiceTypeModal
-                    open={promptModal}
-                    onClose={() => setPromptModal(false)}
-                    onSubmit={(voucharTypeValue) => {
-                        if (voucharTypeValue === 'Sales') {
-                            navigate('/invoices/create/' + voucharTypeValue.toLowerCase());
-                        }
-                        if (voucharTypeValue === 'Purchase') {
-                            navigate('/invoices/create/' + voucharTypeValue.toLowerCase());
-                        }
-                        if (voucharTypeValue === 'Purchase') {
-                            navigate('/invoices/create/' + voucharTypeValue.toLowerCase());
-                        }
-                        if (voucharTypeValue === 'Payment') {
-                            navigate('/transaction/' + voucharTypeValue.toLowerCase());
-                        }
-                        if (voucharTypeValue === 'Receipt') {
-                            navigate('/transaction/' + voucharTypeValue.toLowerCase());
-                        }
-
-                        setPromptModal(false);
-                    }}
-                />
-                {html && <InvoicePrint invoiceHtml={htmlFromAPI} open={html} onClose={() => setHtml(false)} invoiceNumber={invoiceId} />}
+                {/* {html && <InvoicePrint invoiceHtml={htmlFromAPI} open={html} onClose={() => setHtml(false)} invoiceNumber={invoiceId} />} */}
             </Box >
         </LocalizationProvider>
 

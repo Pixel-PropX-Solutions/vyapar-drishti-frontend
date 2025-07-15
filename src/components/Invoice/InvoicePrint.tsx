@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import html2pdf from "html2pdf.js";
 import theme from "@/theme";
 import {
@@ -26,11 +26,16 @@ import {
     ZoomOut as ZoomOutIcon,
     Fullscreen as FullscreenIcon,
     FullscreenExit as FullscreenExitIcon,
+    NavigateBeforeOutlined,
+    NavigateNextOutlined,
 } from "@mui/icons-material";
 import toast from "react-hot-toast";
+import IframeRenderer from "@/common/IframeRenderer";
 
 type Props = {
-    invoiceHtml: string;
+    invoiceHtml: Array<{ html: string, page_number: number }>;
+    fullHtml: string;
+    downloadHtml: string;
     open: boolean;
     onClose: () => void;
     invoiceNumber?: string;
@@ -39,52 +44,52 @@ type Props = {
 
 const InvoicePrint: React.FC<Props> = ({
     invoiceHtml,
+    fullHtml,
+    downloadHtml,
     onClose,
     open,
-    invoiceNumber = "INV-001",
-    customerName = "Customer"
+    invoiceNumber = "",
+    customerName = ""
 }) => {
-    const invoiceRef = useRef<HTMLDivElement>(null);
     const muiTheme = useTheme();
     const isMobile = useMediaQuery(muiTheme.breakpoints.down('md'));
-
     const [isGenerating, setIsGenerating] = useState(false);
     const [zoom, setZoom] = useState(1);
+    const [pageNumber, setPageNumber] = useState(1);
     const [isFullscreen, setIsFullscreen] = useState(false);
 
     const generatePDF = async (): Promise<Blob> => {
-        if (!invoiceRef.current) throw new Error('Invoice content not found');
+        if (!downloadHtml) throw new Error('Invoice content not found');
 
-        const element = invoiceRef.current;
+        // const element = invoiceRef.current;
         try {
             const pdf = await html2pdf()
                 .set({
-                    margin: [10, 10, 10, 10],
+                    margin: 0,
                     filename: `${invoiceNumber}-vyapar-drishti.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: {
-                        scale: 2,
+                        scale: 3,
                         useCORS: true,
-                        allowTaint: true,
+                        allowTaint: false,
                         backgroundColor: '#ffffff'
                     },
                     jsPDF: {
                         unit: 'mm',
-                        format: 'a4',
+                        format: 'A4',
                         orientation: 'portrait',
-                        compress: true
+                        compress: false
                     },
                 })
-                .from(element)
+                .from(downloadHtml)
                 .outputPdf('blob');
-
-
 
             return pdf;
         } finally {
             // document.body.removeChild(element);
         }
     };
+
+
 
     const handleDownload = async () => {
         try {
@@ -93,7 +98,7 @@ const InvoicePrint: React.FC<Props> = ({
             const url = URL.createObjectURL(pdfBlob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `invoice-${invoiceNumber}.pdf`;
+            link.download = `${invoiceNumber}-vyapar-drishti.pdf`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -109,7 +114,7 @@ const InvoicePrint: React.FC<Props> = ({
     };
 
     const handlePrint = () => {
-        if (!invoiceRef.current) return;
+        if (!fullHtml) return;
 
         const printWindow = window.open('', '_blank');
         if (!printWindow) {
@@ -123,7 +128,7 @@ const InvoicePrint: React.FC<Props> = ({
                 <head>
                     <title>Invoice ${invoiceNumber}</title>
                     <style>
-                        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+                        body { margin: 0; padding: 0px; font-family: Arial, sans-serif; }
                         @media print {
                             body { margin: 0; padding: 0; }
                             .no-print { display: none !important; }
@@ -131,7 +136,7 @@ const InvoicePrint: React.FC<Props> = ({
                     </style>
                 </head>
                 <body>
-                    ${invoiceHtml}
+                    ${fullHtml}
                 </body>
             </html>
         `;
@@ -150,7 +155,7 @@ const InvoicePrint: React.FC<Props> = ({
             if (navigator.share) {
                 setIsGenerating(true);
                 const pdfBlob = await generatePDF();
-                const file = new File([pdfBlob], `invoice-${invoiceNumber}.pdf`, { type: 'application/pdf' });
+                const file = new File([pdfBlob], `${invoiceNumber}-vyapar-drishti.pdf`, { type: 'application/pdf' });
 
                 toast.promise(navigator.share({
                     title: `Invoice ${invoiceNumber}`,
@@ -244,6 +249,33 @@ const InvoicePrint: React.FC<Props> = ({
                             </Typography>
                         </Box>
 
+                        {/* Page Controls */}
+                        <Stack direction="row" spacing={1} sx={{ mr: 2 }}>
+                            <IconButton
+                                onClick={() => setPageNumber(prev => Math.max(prev - 1, 1))}
+                                disabled={pageNumber <= 1}
+                            >
+                                <NavigateBeforeOutlined />
+                            </IconButton>
+
+                            <Typography variant="body2" sx={{
+                                minWidth: 40,
+                                textAlign: 'center',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: theme.palette.text.secondary
+                            }}>
+                                Page {pageNumber} of {invoiceHtml?.length}
+                            </Typography>
+                            <IconButton
+                                onClick={() => setPageNumber(prev => Math.min(prev + 1, invoiceHtml?.length))}
+                                disabled={pageNumber >= invoiceHtml?.length}
+                            >
+                                <NavigateNextOutlined />
+                            </IconButton>
+                        </Stack>
+
                         {/* Zoom Controls */}
                         <Stack direction="row" spacing={1} sx={{ mr: 2 }}>
                             <Tooltip title="Zoom Out">
@@ -315,7 +347,7 @@ const InvoicePrint: React.FC<Props> = ({
                     }
                 }}>
                     <Box sx={{
-                        p: { xs: 2, md: 4 },
+                        p: 2,
                         display: 'flex',
                         justifyContent: 'center',
                         minHeight: '100%'
@@ -333,13 +365,17 @@ const InvoicePrint: React.FC<Props> = ({
                                 boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
                                 maxWidth: '210mm',
                                 width: '100%',
-                                minHeight: '297mm', // A4 height
+                                minHeight: '300mm',
                             }}
                         >
-                            <div
-                                ref={invoiceRef}
-                                dangerouslySetInnerHTML={{ __html: invoiceHtml }}
-                            />
+                            {/* Render Invoice HTML of page {page} */}
+                            {invoiceHtml?.length > 0 ? (
+                                <IframeRenderer htmlString={invoiceHtml.find(page => page.page_number === pageNumber)?.html ?? ''} />
+                            ) : (
+                                <Typography variant="body2" color="text.secondary">
+                                    No invoice data available.
+                                </Typography>
+                            )}
                         </Paper>
                     </Box>
                 </Box>
@@ -461,7 +497,7 @@ const InvoicePrint: React.FC<Props> = ({
                         </Stack>
                     )}
                 </Paper>
-            </Drawer>
+            </Drawer >
         </>
     );
 };

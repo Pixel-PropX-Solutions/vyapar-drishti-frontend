@@ -232,13 +232,13 @@ const EditCustomer: React.FC = () => {
     }, []);
 
     const validateField = (field: keyof CustomerFormData, value: string): string => {
-        if (field === 'name' && !value.trim()) return 'Legal Name or Trade Name is required';
+        if (field === 'name' && !value.trim()) return 'Billing Name is required. This name is used for invoicing and legal purposes.';
         if (!data.mailing_country && field === 'mailing_state' && !value.trim()) return 'Please select country first.';
-        if (field === 'mailing_state' && !value.trim()) return 'Mailing state is required';
-        if (field === 'mailing_country' && !value.trim()) return 'Mailing country is required';
-        if (isGSTINRequired && field === 'gstin' && !value.trim()) return 'GSTIN is required';
+        if (field === 'mailing_country' && !value.trim()) return 'Billing country is required. This is used for address formatting.';
+        if (field === 'mailing_state' && !value.trim()) return 'Billing state is required. This is used for address formatting.';
+        if (isGSTINRequired && field === 'gstin' && !value.trim()) return 'GSTIN is required.';
 
-        if (field === 'mailing_address' && !value.trim()) return '';
+        // if (field === 'mailing_address' && !value.trim()) return '';
         if (field === 'mailing_pincode' && value && !/^\d{1,6}$/.test(value)) return 'Invalid pincode format';
         if (field === 'code' && value && !/^\+\d{1,4}$/.test(value)) return 'Invalid phone code format';
         if (field === 'number' && value && !/^\d{10}$/.test(value)) return 'Invalid phone number format';
@@ -348,15 +348,15 @@ const EditCustomer: React.FC = () => {
                     ).unwrap(),
                 {
                     loading: (
-                        <b>{!editingCustomer ? "Creating" : "Updating"} customer... ⏳</b>
+                        <b>{!editingCustomer ? "Creating" : "Updating"} {customerType}... ⏳</b>
                     ),
                     success: (
                         <b>
-                            Group {!editingCustomer ? "created" : "updated"} successfully! 🎉
+                            {customerType} {!editingCustomer ? "created" : "updated"} successfully! 🎉
                         </b>
                     ),
                     error: (
-                        <b>Failed to {!editingCustomer ? "create" : "update"} customer. 🚫</b>
+                        <b>Failed to {!editingCustomer ? "create" : "update"} {customerType}. 🚫</b>
                     ),
                 }
             );
@@ -538,18 +538,18 @@ const EditCustomer: React.FC = () => {
                     <FormControl fullWidth sx={{ my: 2 }}>
                         <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Person fontSize="small" color="primary" />
-                            Full Name
+                            Billing Name
                             <Chip label={"Required"} size="small" color={"primary"} variant="outlined" />
                         </Typography>
                         <TextField
                             fullWidth
                             size="small"
-                            placeholder="John Doe"
+                            placeholder="The Acme Corporation Ltd."
                             value={data.name || ''}
                             required
                             onChange={(e) => handleInputChange('name', capitalizeInput(e.target.value, 'words'))}
                             error={!!validationErrors.name}
-                            helperText={validationErrors.name || "Legal name of the customer"}
+                            helperText={validationErrors.name || "This name is used for invoicing and legal purposes."}
                             InputProps={{
                                 sx: {
                                     borderRadius: 1,

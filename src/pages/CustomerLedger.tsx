@@ -103,7 +103,7 @@ const CustomerLedger: React.FC = () => {
 
   // Handle pagination change
   const handleChangePage = (
-    event: React.ChangeEvent<unknown>,
+    _: React.ChangeEvent<unknown>,
     newPage: number
   ) => {
 
@@ -169,7 +169,7 @@ const CustomerLedger: React.FC = () => {
                 Customers Directory
               </Typography>
               <Typography variant="body2" color="text.secondary" >
-                {pageMeta.total} Customers available in your database after applying
+                {pageMeta.total - 2} Customers available in your database after applying
                 filters
               </Typography>
             </Grid>
@@ -539,12 +539,12 @@ const CustomerLedger: React.FC = () => {
         <Typography variant="body2" sx={{ mr: 2 }}>
           {`Showing ${(pageMeta.page - 1) * rowsPerPage + 1}-${Math.min(
             pageMeta.page * rowsPerPage,
-            pageMeta.total
-          )} of ${pageMeta.total} customers`}
+            (pageMeta.total - 2)
+          )} of ${pageMeta.total - 2} customers`}
         </Typography>
 
-        {pageMeta.total > 1 && <Pagination
-          count={Math.ceil(pageMeta.total / rowsPerPage)}
+        {(pageMeta.total - 2) > 1 && <Pagination
+          count={Math.ceil((pageMeta.total - 2) / rowsPerPage)}
           page={pageMeta.page}
           onChange={handleChangePage}
           color="primary"

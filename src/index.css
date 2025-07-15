@@ -18,6 +18,20 @@
     }
 } 
 
+@media print {
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  .your-main-container {
+    page-break-inside: avoid;
+    page-break-after: auto;
+    page-break-before: auto;
+  }
+}
 
 body {
     margin: 0;

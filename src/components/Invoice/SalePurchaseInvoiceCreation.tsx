@@ -119,14 +119,13 @@ export default function SalePurchaseInvoiceCreation() {
     const [parties, setParties] = useState<{ id: string; name: string; }[]>([]);
     const [date, setDate] = useState(new Date());
     const invoiceType = type === "sales" ? "Sales" : type === "purchase" ? "Purchase" : "";
-    // const [counterParties, setCounterParties] = useState<{ id: string; name: string; }[]>([]);
     const [itemsList, setItemsList] = useState<{ id: string; name: string; unit: string, gst: string, hsn_code: string }[]>([]);
     const theme = useTheme();
 
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
-    const { currentCompany } = useSelector((state: RootState) => state.auth);
-    const { user } = useSelector((state: RootState) => state.auth);
+    const { currentCompany, user } = useSelector((state: RootState) => state.auth);
+    const { invoiceType_id } = useSelector((state: RootState) => state.invoice);
     const currentCompanyDetails = user?.company?.find((c: any) => c._id === user.user_settings.current_company_id);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -164,7 +163,7 @@ export default function SalePurchaseInvoiceCreation() {
             item: '',
             item_id: '',
             quantity: 1,
-            rate: 0.0,
+            rate: 0,
             amount: 0.0
         };
         setData(prev => ({
@@ -188,8 +187,8 @@ export default function SalePurchaseInvoiceCreation() {
                     const updatedItem = { ...item, [field]: value };
                     // Auto-calculate amount
                     if (field === 'quantity' || field === 'rate') {
-                        updatedItem.amount = updatedItem.quantity * updatedItem.rate;
-                        updatedItem.gst_amount = updatedItem.amount * (updatedItem.gst || 0) / 100;
+                        updatedItem.amount = Number((updatedItem.quantity * updatedItem.rate).toFixed(2));
+                        updatedItem.gst_amount = Number((updatedItem.amount * (updatedItem.gst || 0) / 100).toFixed(2));
                     }
 
                     return updatedItem;
@@ -226,15 +225,15 @@ export default function SalePurchaseInvoiceCreation() {
         if (currentCompanyDetails?.company_settings?.features?.enable_gst) {
             const dataToSend = {
                 ...data,
-                date: date instanceof Date ? date.toISOString().split('T')[0] : date,
+                date: date.toISOString().split('T')[0],
                 company_id: currentCompany?._id || '',
-                voucher_type_id: '',
-                party_name_id: '',
+                voucher_type_id: invoiceType_id || '',
+                party_name_id: data.party_id,
                 items: data.items.map(item => ({
                     ...item,
                     vouchar_id: '',
                     gst_rate: item.gst?.toString() || '0',
-                    gst_amount: item.gst_amount || 0,
+                    gst_amount: Number(item.gst_amount?.toFixed(2)) || 0,
                     additional_amount: 0,
                     discount_amount: 0,
                     godown: '',
@@ -271,8 +270,8 @@ export default function SalePurchaseInvoiceCreation() {
                 ...data,
                 date: date instanceof Date ? date.toISOString().split('T')[0] : date,
                 company_id: currentCompany?._id || '',
-                voucher_type_id: '',
-                party_name_id: '',
+                voucher_type_id: invoiceType_id || '',
+                party_name_id: data.party_id,
                 items: data.items.map(item => ({
                     ...item,
                     vouchar_id: '',
@@ -632,7 +631,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                         <TextField
                                                             type="number"
                                                             value={item.quantity}
-                                                            onChange={(e) => handleItemChange(index, 'quantity', parseFloat(e.target.value) || 0)}
+                                                            onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
                                                             variant="outlined"
                                                             size="small"
                                                             fullWidth
@@ -670,7 +669,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                         <TextField
                                                             type="number"
                                                             value={item.rate}
-                                                            onChange={(e) => handleItemChange(index, 'rate', parseFloat(e.target.value) || 0)}
+                                                            onChange={(e) => handleItemChange(index, 'rate', e.target.value)}
                                                             variant="outlined"
                                                             size="small"
                                                             fullWidth
