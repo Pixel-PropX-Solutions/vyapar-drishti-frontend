@@ -108,6 +108,8 @@ const GroupAndTypes: React.FC = () => {
                 setRefreshKey((prev) => prev + 1);
                 setLoading(false);
                 toast.success('Product deleted successfully')
+            }).catch((error)=>{
+                toast.error(error || 'An unexpected error occurred. Please try again later.');
             });
     };
 

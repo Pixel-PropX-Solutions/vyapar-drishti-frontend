@@ -103,7 +103,7 @@ const ProductsSideModal = (props: SideModalProps) => {
     } | null>(null);
 
     const [selectedUnitOption, setSelectedUnitOption] = useState<{
-        label: string;
+        unit_name: string;
         value: string;
         id: string;
     } | null>(null);
@@ -284,35 +284,27 @@ const ProductsSideModal = (props: SideModalProps) => {
             });
 
             if (product && product._id) {
-                await toast.promise(
-                    dispatch(updateProduct({ data: formData, id: product._id }))
-                        .unwrap()
-                        .then(() => {
-                            navigate(`/products`);
-                            setRefreshKey(prev => prev + 1);
-                            setSelectedProduct(null);
-                        }),
-                    {
-                        loading: "Updating your product...",
-                        success: <b>Product successfully updated! 🎉</b>,
-                        error: <b>Failed to update product. Please try again.</b>,
-                    }
-                );
+                await dispatch(updateProduct({ data: formData, id: product._id }))
+                    .unwrap()
+                    .then(() => {
+                        navigate(`/products`);
+                        setRefreshKey(prev => prev + 1);
+                        setSelectedProduct(null);
+                        toast.success("Product successfully updated! 🎉")
+                    }).catch((error) => {
+                        toast.error(error || "An unexpected error occurred. Please try again later.")
+                    });
             } else {
-                await toast.promise(
-                    dispatch(createProduct({ productData: formData }))
-                        .unwrap()
-                        .then(() => {
-                            navigate(`/products`);
-                            setRefreshKey(prev => prev + 1);
-                            setSelectedProduct(null);
-                        }),
-                    {
-                        loading: "Creating your product...",
-                        success: <b>Product successfully created! 🎉</b>,
-                        error: <b>Failed to create product. Please try again.</b>,
-                    }
-                );
+                await dispatch(createProduct({ productData: formData }))
+                    .unwrap()
+                    .then(() => {
+                        navigate(`/products`);
+                        setRefreshKey(prev => prev + 1);
+                        setSelectedProduct(null);
+                        toast.success("Product successfully created! 🎉")
+                    }).catch((error) => {
+                        toast.error(error || "An unexpected error occurred. Please try again later.")
+                    });
             }
         } catch (error) {
             setIsLoading(false);
@@ -398,7 +390,7 @@ const ProductsSideModal = (props: SideModalProps) => {
                 ?.find(option => option.value === product.unit && option.id === product.unit_id);
             setSelectedUnitOption(
                 foundUnit
-                    ? { label: foundUnit.label, value: foundUnit.value, id: foundUnit.id }
+                    ? { unit_name: foundUnit.unit_name, value: foundUnit.value, id: foundUnit.id }
                     : null
             );
 
@@ -422,6 +414,9 @@ const ProductsSideModal = (props: SideModalProps) => {
     // Fetch categories
     useEffect(() => {
         dispatch(viewAllCategories(currentCompany?._id ?? ''));
+    }, [currentCompany?._id, dispatch]);
+
+    useEffect(() => {
         dispatch(viewAllInventoryGroups(currentCompany?._id ?? ''));
     }, [currentCompany?._id, dispatch]);
 
@@ -445,6 +440,10 @@ const ProductsSideModal = (props: SideModalProps) => {
                 setSelectedCategoryOption(null);
             }
         }
+    }, [categoryLists, data.category, selectedCategoryOption, data.category_id]);
+
+    // Handle category selection
+    useEffect(() => {
         if (inventoryGroupLists && data.group) {
             if (selectedGroupOption && selectedGroupOption.value === data.group) {
                 return;
@@ -463,7 +462,7 @@ const ProductsSideModal = (props: SideModalProps) => {
                 setSelectedGroupOption(null);
             }
         }
-    }, [categoryLists, inventoryGroupLists, data.category, selectedCategoryOption, data.group, selectedGroupOption, data.category_id, data.group_id]);
+    }, [inventoryGroupLists, data.group, selectedGroupOption, data.group_id]);
 
     useEffect(() => {
         setShowGstFields(!!data.gst_hsn_code);

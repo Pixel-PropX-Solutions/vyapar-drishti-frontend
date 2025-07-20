@@ -8,7 +8,6 @@ import {
     CardContent,
     Grid,
     Paper,
-    IconButton,
     Table,
     TableBody,
     TableCell,
@@ -32,10 +31,15 @@ import {
     Receipt,
     Save,
     AddCircleOutline,
-    BusinessCenter,
     LocalOffer,
     PeopleAlt,
-    Info
+    Info,
+    LocationOn,
+    Commute,
+    LocalShipping,
+    AddCard,
+    Edit,
+    AttachMoney,
 } from "@mui/icons-material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -46,7 +50,9 @@ import { viewAllCustomerWithType } from '@/services/customers';
 import { viewProductsWithId } from '@/services/products';
 import { createInvoice, createInvoiceWithGST, getInvoiceCounter } from '@/services/invoice';
 import { useNavigate, useParams } from 'react-router-dom';
-import type { TableRowProps } from "@mui/material";
+import toast from 'react-hot-toast';
+import AddItemModal from '@/common/modals/AddItemModal';
+import { ActionButton } from '@/common/buttons/ActionButton';
 
 // Interfaces
 interface InvoiceItems {
@@ -67,6 +73,20 @@ interface InvoiceAccounting {
     ledger_id: string;
     amount: number;
 }
+
+// Mode of Transport Options
+const modeOfTransportOptions = [
+    { label: 'By Road', value: 'By Road' },
+    { label: 'By Rail', value: 'By Rail' },
+    { label: 'By Air', value: 'By Air' },
+    { label: 'By Sea', value: 'By Sea' },
+];
+
+const paymentStatusOptions = [
+    { label: 'Paid', value: 'Paid' },
+    { label: 'Unpaid', value: 'Unpaid' },
+    { label: 'Partially Paid', value: 'Partially Paid' },
+];
 
 // Styled Components
 const StyledCard = ({
@@ -95,23 +115,6 @@ const StyledCard = ({
     );
 };
 
-const AnimatedTableRow = ({ children, ...props }: React.PropsWithChildren<TableRowProps>) => (
-    <TableRow
-        sx={{
-            transition: 'all 0.2s ease-in-out',
-            '&:hover': {
-                backgroundColor: alpha('#1976d2', 0.04),
-            },
-            '& .MuiTableCell-root': {
-                padding: '8px 8px',
-            },
-            ...props.sx
-        }}
-        {...props}
-    >
-        {children}
-    </TableRow>
-);
 // Main Component
 export default function SalePurchaseInvoiceCreation() {
     const { type } = useParams();
@@ -125,9 +128,12 @@ export default function SalePurchaseInvoiceCreation() {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const { currentCompany, user } = useSelector((state: RootState) => state.auth);
-    const { invoiceType_id } = useSelector((state: RootState) => state.invoice);
     const currentCompanyDetails = user?.company?.find((c: any) => c._id === user.user_settings.current_company_id);
+    const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
+    const { invoiceType_id } = useSelector((state: RootState) => state.invoice);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [isAddItemModalOpen, setAddItemModalOpen] = useState(false);
+    const [item, setItem] = useState<InvoiceItems | null>(null);
 
     const [data, setData] = useState({
         company_id: "",
@@ -142,6 +148,10 @@ export default function SalePurchaseInvoiceCreation() {
         reference_number: "",
         reference_date: "",
         place_of_supply: "",
+        mode_of_transport: "",
+        vehicle_number: "",
+        status: "",
+        due_date: "",
         accounting: [] as InvoiceAccounting[],
         items: [] as InvoiceItems[],
     });
@@ -158,43 +168,14 @@ export default function SalePurchaseInvoiceCreation() {
     };
 
     const handleAddItem = () => {
-        const newItem: InvoiceItems = {
-            vouchar_id: '',
-            item: '',
-            item_id: '',
-            quantity: 1,
-            rate: 0,
-            amount: 0.0
-        };
-        setData(prev => ({
-            ...prev,
-            items: [...prev.items, newItem]
-        }));
+        setItem(null);
+        setAddItemModalOpen(true);
     };
 
     const handleRemoveItem = (index: number) => {
         setData(prev => ({
             ...prev,
             items: prev.items.filter((_, i) => i !== index)
-        }));
-    };
-
-    const handleItemChange = (index: number, field: keyof InvoiceItems, value: string | number | undefined) => {
-        setData(prev => ({
-            ...prev,
-            items: prev.items.map((item, i) => {
-                if (i === index) {
-                    const updatedItem = { ...item, [field]: value };
-                    // Auto-calculate amount
-                    if (field === 'quantity' || field === 'rate') {
-                        updatedItem.amount = Number((updatedItem.quantity * updatedItem.rate).toFixed(2));
-                        updatedItem.gst_amount = Number((updatedItem.amount * (updatedItem.gst || 0) / 100).toFixed(2));
-                    }
-
-                    return updatedItem;
-                }
-                return item;
-            })
         }));
     };
 
@@ -229,6 +210,11 @@ export default function SalePurchaseInvoiceCreation() {
                 company_id: currentCompany?._id || '',
                 voucher_type_id: invoiceType_id || '',
                 party_name_id: data.party_id,
+                mode_of_transport: data.mode_of_transport,
+                vehicle_number: data.vehicle_number,
+                place_of_supply: data.place_of_supply,
+                status: data.status,
+                due_date: data.due_date,
                 items: data.items.map(item => ({
                     ...item,
                     vouchar_id: '',
@@ -258,12 +244,14 @@ export default function SalePurchaseInvoiceCreation() {
                 ],
             }
 
-
-
             dispatch(createInvoiceWithGST(dataToSend)).then(() => {
                 setIsLoading(false);
+                toast.success("Invoice created successfully!");
                 navigate('/invoices', { replace: true });
-            })
+            }).catch((error) => {
+                setIsLoading(false);
+                toast.error(error || "An unexpected error occurred. Please try again later.");
+            });
         }
         else {
             const dataToSend = {
@@ -272,6 +260,11 @@ export default function SalePurchaseInvoiceCreation() {
                 company_id: currentCompany?._id || '',
                 voucher_type_id: invoiceType_id || '',
                 party_name_id: data.party_id,
+                mode_of_transport: data.mode_of_transport,
+                vehicle_number: data.vehicle_number,
+                place_of_supply: data.place_of_supply,
+                status: data.status,
+                due_date: data.due_date,
                 items: data.items.map(item => ({
                     ...item,
                     vouchar_id: '',
@@ -294,8 +287,12 @@ export default function SalePurchaseInvoiceCreation() {
 
             dispatch(createInvoice(dataToSend)).then(() => {
                 setIsLoading(false);
+                toast.success("Invoice created successfully!");
                 navigate('/invoices', { replace: true });
-            })
+            }).catch((error) => {
+                setIsLoading(false);
+                toast.error(error || "An unexpected error occurred. Please try again later.");
+            });
         }
 
     };
@@ -319,7 +316,8 @@ export default function SalePurchaseInvoiceCreation() {
             }
         }
         ).catch((error) => {
-            console.error('Error fetching customers:', error);
+            // console.error('Error fetching customers:', error);
+            toast.error(error || "An unexpected error occurred. Please try again later.");
         });
 
         dispatch(getInvoiceCounter({
@@ -334,7 +332,8 @@ export default function SalePurchaseInvoiceCreation() {
             }
         }
         ).catch((error) => {
-            console.error('Error fetching customers:', error);
+            // console.error('Error fetching customers:', error);
+            toast.error(error || "An unexpected error occurred. Please try again later.");
         });
 
         dispatch(viewProductsWithId(user.user_settings.current_company_id || '')).then((response) => {
@@ -351,6 +350,8 @@ export default function SalePurchaseInvoiceCreation() {
                 );
             }
             return response;
+        }).catch((error) => {
+            toast.error(error || "An unexpected error occurred. Please try again later.");
         });
     }, [dispatch, user.user_settings.current_company_id, user, invoiceType]);
 
@@ -385,18 +386,19 @@ export default function SalePurchaseInvoiceCreation() {
                 {/* Main Form */}
                 <StyledCard>
                     <CardContent sx={{ p: 2 }}>
+                        <Box display="flex" alignItems="center" mb={3}>
+                            <Receipt color="primary" sx={{ mr: 1 }} />
+                            <Typography variant="h6">Invoice Details {(type ? type.charAt(0).toUpperCase() + type.slice(1) : '')}</Typography>
+                        </Box>
                         <Box component="form" onSubmit={handleSubmit}>
                             <Box>
                                 <Grid container spacing={3}>
                                     <Grid item xs={12} md={6}>
                                         <StyledCard>
                                             <CardContent>
-                                                <Box display="flex" alignItems="center" mb={3}>
-                                                    <Receipt color="primary" sx={{ mr: 1 }} />
-                                                    <Typography variant="h6">Invoice Details {(type ? type.charAt(0).toUpperCase() + type.slice(1) : '')}</Typography>
-                                                </Box>
 
-                                                <Stack spacing={2}>
+
+                                                <Stack direction={'row'} spacing={2}>
                                                     <TextField
                                                         label="Invoice Number"
                                                         fullWidth
@@ -417,6 +419,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                         label="Date"
                                                         value={date}
                                                         format="dd/MM/yyyy"
+                                                        maxDate={new Date()}
                                                         views={["year", "month", "day"]}
                                                         onChange={(value) => {
                                                             setDate(value || new Date());
@@ -451,6 +454,62 @@ export default function SalePurchaseInvoiceCreation() {
                                                         }}
                                                     />
                                                 </Stack>
+
+                                                {gst_enable && <Stack direction={'row'} spacing={2} sx={{ mt: 2 }}>
+                                                    <TextField
+                                                        label="Place of Supply"
+                                                        fullWidth
+                                                        value={data.place_of_supply}
+                                                        onChange={handleChange}
+                                                        name="place_of_supply"
+                                                        variant="outlined"
+                                                        InputProps={{
+                                                            startAdornment: (
+                                                                <InputAdornment position="start">
+                                                                    <LocationOn color="action" />
+                                                                </InputAdornment>
+                                                            ),
+                                                        }}
+                                                        sx={{ maxWidth: '50%' }}
+                                                    />
+
+                                                    <Autocomplete
+                                                        options={modeOfTransportOptions}
+                                                        getOptionLabel={(option) => option.label}
+                                                        value={modeOfTransportOptions.find(option => option.value === data.mode_of_transport) || null}
+                                                        onChange={(_, newValue) =>
+                                                            setData(prev => ({
+                                                                ...prev,
+                                                                mode_of_transport: newValue ? newValue.value : ''
+                                                            }))
+                                                        }
+                                                        renderInput={(params) => (
+                                                            <TextField
+                                                                {...params}
+                                                                label="Mode of Transport"
+                                                                variant="outlined"
+                                                                fullWidth
+                                                                InputProps={{
+                                                                    ...params.InputProps,
+                                                                    startAdornment: (
+                                                                        <InputAdornment position="start">
+                                                                            <Commute color="primary" />
+                                                                        </InputAdornment>
+                                                                    ),
+                                                                }}
+                                                            />
+                                                        )}
+                                                        sx={{ width: '100%', }}
+                                                        componentsProps={{
+                                                            paper: {
+                                                                sx: {
+                                                                    border: '1px solid #000',
+                                                                    borderRadius: 1,
+                                                                },
+                                                            },
+                                                        }}
+                                                    />
+                                                </Stack>}
                                             </CardContent>
                                         </StyledCard>
                                     </Grid>
@@ -458,11 +517,6 @@ export default function SalePurchaseInvoiceCreation() {
                                     <Grid item xs={12} md={6}>
                                         <StyledCard>
                                             <CardContent>
-                                                <Box display="flex" alignItems="center" mb={3}>
-                                                    <PeopleAlt color="primary" sx={{ mr: 1 }} />
-                                                    <Typography variant="h6">{type === 'sales' ? "Customer" : "Supplier"} Information</Typography>
-                                                </Box>
-
                                                 <Stack spacing={2}>
                                                     <Autocomplete
                                                         options={parties}
@@ -486,7 +540,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                                     ...params.InputProps,
                                                                     startAdornment: (
                                                                         <InputAdornment position="start">
-                                                                            <BusinessCenter color="primary" />
+                                                                            <PeopleAlt color="primary" />
                                                                         </InputAdornment>
                                                                     ),
                                                                 }}
@@ -498,41 +552,62 @@ export default function SalePurchaseInvoiceCreation() {
                                                             }
                                                         }}
                                                     />
-                                                    {/* <Autocomplete
-                                                    options={counterParties}
-                                                    getOptionLabel={(option) => option.name}
-                                                    value={counterParties.find(p => p.id === data.counter_id) || null}
-                                                    onChange={(_, newValue) =>
-                                                        setData(prev => ({
-                                                            ...prev,
-                                                            counter_party: newValue ? newValue.name : '',
-                                                            counter_id: newValue ? newValue.id : ''
-                                                        }))
-                                                    }
-                                                    renderInput={(params) => (
-                                                        <TextField
-                                                            {...params}
-                                                            label={type === 'sales' ? "Select Sales Account" : "Select Purchase Account"}
-                                                            placeholder={type === 'sales' ? "Start typing for sales account suggestions..." : "Start typing for purchase account suggestions..."}
-                                                            variant="outlined"
-                                                            fullWidth
-                                                            InputProps={{
-                                                                ...params.InputProps,
-                                                                startAdornment: (
-                                                                    <InputAdornment position="start">
-                                                                        <BusinessCenter color="primary" />
-                                                                    </InputAdornment>
-                                                                ),
-                                                            }}
-                                                            sx={{
-                                                                '& .MuiAutocomplete-endAdornment': {
-                                                                    display: 'none'
-                                                                }
-                                                            }}
-                                                        />
-                                                    )}
-                                                /> */}
                                                 </Stack>
+
+                                                {gst_enable && <Stack direction={'row'} spacing={2} sx={{ mt: 2 }}>
+                                                    <TextField
+                                                        label={data.mode_of_transport === 'By Road' ? "Vehicle Number" : data.mode_of_transport === 'By Rail' ? "Train Number" : data.mode_of_transport === 'By Air' ? "Flight Number" : data.mode_of_transport === 'By Sea' ? "Container Number" : 'Vehicle Number'}
+                                                        fullWidth
+                                                        value={data.vehicle_number}
+                                                        onChange={handleChange}
+                                                        name="vehicle_number"
+                                                        variant="outlined"
+                                                        InputProps={{
+                                                            startAdornment: (
+                                                                <InputAdornment position="start">
+                                                                    <LocalShipping color="action" />
+                                                                </InputAdornment>
+                                                            ),
+                                                        }}
+                                                    />
+
+                                                    <Autocomplete
+                                                        options={paymentStatusOptions}
+                                                        getOptionLabel={(option) => option.label}
+                                                        value={paymentStatusOptions.find(option => option.value === data.status) || null}
+                                                        onChange={(_, newValue) =>
+                                                            setData(prev => ({
+                                                                ...prev,
+                                                                status: newValue ? newValue.value : ''
+                                                            }))
+                                                        }
+                                                        renderInput={(params) => (
+                                                            <TextField
+                                                                {...params}
+                                                                label="Payment Status"
+                                                                variant="outlined"
+                                                                fullWidth
+                                                                InputProps={{
+                                                                    ...params.InputProps,
+                                                                    startAdornment: (
+                                                                        <InputAdornment position="start">
+                                                                            <AddCard color="action" />
+                                                                        </InputAdornment>
+                                                                    ),
+                                                                }}
+                                                            />
+                                                        )}
+                                                        sx={{ width: '100%' }}
+                                                        componentsProps={{
+                                                            paper: {
+                                                                sx: {
+                                                                    border: '1px solid #000',
+                                                                    borderRadius: 1,
+                                                                },
+                                                            },
+                                                        }}
+                                                    />
+                                                </Stack>}
                                             </CardContent>
                                         </StyledCard>
                                     </Grid>
@@ -551,7 +626,7 @@ export default function SalePurchaseInvoiceCreation() {
                                         onClick={handleAddItem}
                                         sx={{ borderRadius: 1 }}
                                     >
-                                        Add Item Row
+                                        Add Items
                                     </Button>
                                 </Box>
 
@@ -567,260 +642,98 @@ export default function SalePurchaseInvoiceCreation() {
                                     <Table>
                                         <TableHead>
                                             <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1) }}>
-                                                <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem', width: '30%' }}>Product Name</TableCell>
-                                                <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }}>QTY</TableCell>
-                                                <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Rate (&#8377;)</TableCell>
+                                                <TableCell align="left" >
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                        <Inventory />
+                                                        <Typography variant="body1" fontWeight="bold">
+                                                            Item
+                                                        </Typography>
+                                                    </Box>
+                                                </TableCell>
+                                                <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '1rem' }}>
+                                                    <Typography variant="body1" fontWeight="bold">
+                                                        Quantity
+                                                    </Typography>
+                                                </TableCell>
+                                                <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '1rem' }}>
+                                                    <Typography variant="body1" fontWeight="bold">
+                                                        Rate (&#8377;)
+                                                    </Typography>
+                                                </TableCell>
                                                 {currentCompanyDetails?.company_settings?.features?.enable_gst && (
                                                     <>
-                                                        <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }}>GST (%)</TableCell>
-                                                        <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }}>GST (&#8377;)</TableCell>
+                                                        <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '1rem' }}>
+                                                            <Typography variant="body1" fontWeight="bold">
+                                                                GST (%)
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '1rem' }}>
+                                                            <Typography variant="body1" fontWeight="bold">
+                                                                GST (&#8377;)
+                                                            </Typography>
+                                                        </TableCell>
                                                     </>
                                                 )}
-                                                <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Amount (&#8377;)</TableCell>
+                                                <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '1rem' }}>
+                                                    <Typography variant="body1" fontWeight="bold">
+                                                        Amount (&#8377;)
+                                                    </Typography>
+                                                </TableCell>
                                                 {currentCompanyDetails?.company_settings?.features?.enable_gst && (
-                                                    <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Total (&#8377;)</TableCell>
+                                                    <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '1rem' }}>
+                                                        <Typography variant="body1" fontWeight="bold">
+                                                            Total (&#8377;)
+                                                        </Typography>
+                                                    </TableCell>
                                                 )}
-                                                <TableCell sx={{ fontWeight: 'bold', fontSize: '1rem' }}>Action</TableCell>
+                                                <TableCell align="right" sx={{ fontWeight: 'bold', fontSize: '1rem' }}>
+                                                    <Typography variant="body1" fontWeight="bold">
+                                                        Actions
+                                                    </Typography>
+                                                </TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
                                             {data.items.map((item, index) => (
-                                                <AnimatedTableRow key={index}>
-                                                    <TableCell>
-                                                        <Autocomplete
-                                                            options={itemsList}
-                                                            getOptionLabel={(option) =>
-                                                                typeof option === 'string'
-                                                                    ? option
-                                                                    : option?.name || ''
-                                                            }
-                                                            value={
-                                                                itemsList.find((p) => p.id === item.item_id) ||
-                                                                (item.item ? { id: '', name: item.item, unit: '', gst: '', hsn_code: '' } : null)
-                                                            }
-                                                            onChange={(_, newValue) => {
-                                                                if (newValue && typeof newValue === 'object') {
-                                                                    handleItemChange(index, 'item', newValue.name);
-                                                                    handleItemChange(index, 'item_id', newValue.id);
-                                                                    if (currentCompanyDetails?.company_settings?.features?.enable_gst)
-                                                                        handleItemChange(index, 'gst', newValue.gst);
-                                                                } else {
-                                                                    handleItemChange(index, 'item', '');
-                                                                    handleItemChange(index, 'item_id', '');
-                                                                }
-                                                            }}
-                                                            renderInput={(params) => (
-                                                                <TextField
-                                                                    {...params}
-                                                                    placeholder="Start typing for items suggestions..."
-                                                                    variant="outlined"
-                                                                    fullWidth
-                                                                    size="small"
-                                                                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1, width: '100%' } }}
-                                                                />
-                                                            )}
-                                                            sx={{
-                                                                '& .MuiAutocomplete-endAdornment': {
-                                                                    display: 'none'
-                                                                }
-                                                            }}
-                                                            isOptionEqualToValue={(option, value) => option.id === value.id}
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <TextField
-                                                            type="number"
-                                                            value={item.quantity}
-                                                            onChange={(e) => handleItemChange(index, 'quantity', e.target.value)}
-                                                            variant="outlined"
-                                                            size="small"
-                                                            fullWidth
-                                                            inputProps={{
-                                                                min: 0,
-                                                                step: 1,
-                                                                style: {
-                                                                    MozAppearance: 'textfield',
-                                                                },
-                                                            }}
-                                                            InputProps={{
-                                                                startAdornment: null,
-                                                                endAdornment: null,
-                                                                inputProps: {
-                                                                    min: 0,
-                                                                    step: 1,
-                                                                    style: {
-                                                                        MozAppearance: 'textfield',
-                                                                    },
-                                                                },
-                                                            }}
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': { borderRadius: 1, maxWidth: 70 },
-                                                                '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
-                                                                    WebkitAppearance: 'none',
-                                                                    margin: 0,
-                                                                },
-                                                                '& input[type=number]': {
-                                                                    MozAppearance: 'textfield',
-                                                                },
-                                                            }}
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <TextField
-                                                            type="number"
-                                                            value={item.rate}
-                                                            onChange={(e) => handleItemChange(index, 'rate', e.target.value)}
-                                                            variant="outlined"
-                                                            size="small"
-                                                            fullWidth
-                                                            inputProps={{
-                                                                min: 0,
-                                                                step: 0.01,
-                                                                style: {
-                                                                    MozAppearance: 'textfield',
-                                                                },
-                                                            }}
-                                                            InputProps={{
-                                                                startAdornment: <InputAdornment position="start">&#8377;</InputAdornment>,
-                                                                endAdornment: null,
-                                                                inputProps: {
-                                                                    min: 0,
-                                                                    step: 0.01,
-                                                                    style: {
-                                                                        MozAppearance: 'textfield',
-                                                                    },
-                                                                },
-                                                            }}
-                                                            sx={{
-                                                                '& .MuiOutlinedInput-root': { borderRadius: 1, maxWidth: 70 },
-                                                                '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
-                                                                    WebkitAppearance: 'none',
-                                                                    margin: 0,
-                                                                },
-                                                                '& input[type=number]': {
-                                                                    MozAppearance: 'textfield',
-                                                                },
-                                                            }}
-                                                        />
-                                                    </TableCell>
-                                                    {currentCompanyDetails?.company_settings?.features?.enable_gst && (
-                                                        <>
-                                                            <TableCell>
-                                                                <Box
-                                                                    sx={{
-                                                                        py: 1,
-                                                                        // bgcolor: alpha(theme.palette.success.main, 0.1),
-                                                                        borderRadius: 1,
-                                                                        border: `1px solid ${alpha(theme.palette.success.main, 0.5)}`,
-                                                                        textAlign: 'center',
-                                                                        fontWeight: 'bold',
-                                                                        color: 'success.main',
-                                                                        maxWidth: 70
-                                                                    }}
-                                                                >
-                                                                    {itemsList.find((p) => p.id === item.item_id)?.gst || 0} %
-                                                                </Box>
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <Box
-                                                                    sx={{
-                                                                        py: 1,
-                                                                        bgcolor: alpha(theme.palette.success.main, 0.1),
-                                                                        borderRadius: 1,
-                                                                        border: `1px solid ${alpha(theme.palette.success.main, 0.5)}`,
-                                                                        textAlign: 'center',
-                                                                        fontWeight: 'bold',
-                                                                        color: 'success.main',
-                                                                        // maxWidth: 100
-                                                                    }}
-                                                                >
-                                                                    &#8377; {(item.gst_amount ?? 0).toFixed(2)}
-                                                                </Box>
-                                                            </TableCell>
-                                                        </>
-                                                    )}
-
-                                                    <TableCell>
-                                                        <Box
-                                                            sx={{
-                                                                py: 1,
-                                                                bgcolor: alpha(theme.palette.success.main, 0.1),
-                                                                borderRadius: 1,
-                                                                border: `1px solid ${alpha(theme.palette.success.main, 0.5)}`,
-                                                                textAlign: 'center',
-                                                                fontWeight: 'bold',
-                                                                color: 'success.main',
-                                                                // maxWidth: 100
-                                                            }}
-                                                        >
-                                                            &#8377; {item.amount.toFixed(2)}
-                                                        </Box>
-                                                    </TableCell>
-                                                    {currentCompanyDetails?.company_settings?.features?.enable_gst && (
-                                                        <TableCell>
-                                                            <Box
-                                                                sx={{
-                                                                    py: 1,
-                                                                    bgcolor: alpha(theme.palette.success.main, 0.1),
-                                                                    borderRadius: 1,
-                                                                    border: `1px solid ${alpha(theme.palette.success.main, 0.5)}`,
-                                                                    textAlign: 'center',
-                                                                    fontWeight: 'bold',
-                                                                    color: 'success.main',
-                                                                    // maxWidth: 100
-                                                                }}
-                                                            >
-                                                                &#8377; {(Number(item.amount) + Number(item.gst_amount ?? 0)).toFixed(2)}
-                                                            </Box>
-                                                        </TableCell>
-                                                    )}
-                                                    <TableCell align="center">
-                                                        <Tooltip title="Remove Item">
-                                                            <IconButton
-                                                                color="error"
-                                                                onClick={() => handleRemoveItem(index)}
-                                                                sx={{
-                                                                    '&:hover': {
-                                                                        backgroundColor: alpha(theme.palette.error.main, 0.1)
-                                                                    }
-                                                                }}
-                                                            >
-                                                                <Delete />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                    </TableCell>
-                                                </AnimatedTableRow>
-                                            ))}
-
-                                            {data.items.length > 0 && (
                                                 <TableRow sx={{
-                                                    fontWeight: 'bold',
-                                                    borderTop: `2px solid ${theme.palette.primary.main}`,
-                                                    '& .MuiTableCell-root': {
-                                                        padding: '8px 8px',
+                                                    "& .MuiTableCell-root": {
+                                                        padding: '8px 16px',
                                                     },
-                                                }}>
+                                                }} key={index}>
                                                     <TableCell align="left">
-                                                        <Typography variant="h6" color="text.secondary" gutterBottom marginLeft={1}>
-                                                            Sub-Totals
+                                                        <Typography variant="body2" color="text.primary" gutterBottom>
+                                                            {itemsList.find((p) => p.id === item.item_id)?.name || item.item}
                                                         </Typography>
                                                     </TableCell>
-                                                    <TableCell align="left">
-                                                        {data.items.reduce((total, item) => total + (item.quantity || 0), 0)} items
+                                                    <TableCell align="center">
+                                                        <Typography variant="body2" color="text.primary" gutterBottom>
+                                                            {item.quantity}
+                                                        </Typography>
                                                     </TableCell>
-                                                    <TableCell align="left">
-                                                        &#8377; {data.items.reduce((total, item) => total + (item.rate || 0), 0).toFixed(2)}
+                                                    <TableCell align="center">
+                                                        <Typography variant="body2" color="text.primary" gutterBottom>
+                                                            {item.rate}
+                                                        </Typography>
                                                     </TableCell>
                                                     {currentCompanyDetails?.company_settings?.features?.enable_gst && (
                                                         <>
-                                                            <TableCell align="center"></TableCell>
                                                             <TableCell align="center">
-                                                                &#8377; {data.items.reduce((total, item) => total + (item.gst_amount || 0), 0).toFixed(2)}
+                                                                <Typography variant="body2" color="text.primary" gutterBottom>
+                                                                    {itemsList.find((p) => p.id === item.item_id)?.gst || 0} %
+                                                                </Typography>
+                                                            </TableCell>
+                                                            <TableCell align="center">
+                                                                <Typography variant="body2" color="text.primary" gutterBottom>
+                                                                    &#8377; {item.gst_amount?.toFixed(2) || '0.00'}
+                                                                </Typography>
                                                             </TableCell>
                                                         </>
                                                     )}
+
                                                     <TableCell align="center">
-                                                        &#8377; {data.items.reduce((total, item) => total + (item.amount || 0), 0).toFixed(2)}
+                                                        <Typography variant="body2" color="text.primary" gutterBottom>
+                                                            &#8377; {item.amount?.toFixed(2) || '0.00'}
+                                                        </Typography>
                                                     </TableCell>
                                                     {currentCompanyDetails?.company_settings?.features?.enable_gst && (
                                                         <TableCell align="center">
@@ -835,11 +748,185 @@ export default function SalePurchaseInvoiceCreation() {
                                                                     color: 'success.main',
                                                                 }}
                                                             >
-                                                                &#8377; {(data.items.reduce((total, item) => total + (item.amount || 0), 0) + data.items.reduce((total, item) => total + (item.gst_amount || 0), 0)).toFixed(2)}
+                                                                <Typography variant="body2" color="text.primary" gutterBottom>
+                                                                    &#8377; {(Number(item.amount) + Number(item.gst_amount ?? 0)).toFixed(2)}
+                                                                </Typography>
                                                             </Box>
                                                         </TableCell>
                                                     )}
+                                                    <TableCell align="right">
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1 }}>
+                                                            <Tooltip title="Edit Item">
+                                                                <ActionButton
+                                                                    variant="contained"
+                                                                    color="success"
+                                                                    onClick={() => {
+                                                                        setItem(item);
+                                                                        setAddItemModalOpen(true);
+                                                                    }}
+                                                                    sx={{
+                                                                        background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
+                                                                        color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
+                                                                        border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
+                                                                        '&:hover': {
+                                                                            color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                                                                            background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
+                                                                        },
+                                                                    }}
+                                                                >
+                                                                    <Edit />
+                                                                </ActionButton>
+                                                            </Tooltip>
+
+                                                            <Tooltip title="Remove Item">
+                                                                <ActionButton
+                                                                    variant="contained"
+                                                                    color="error"
+                                                                    onClick={() => handleRemoveItem(index)}
+                                                                    sx={{
+                                                                        background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
+                                                                        color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
+                                                                        border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#c62828'}`,
+                                                                        '&:hover': {
+                                                                            color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                                                                            background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
+                                                                        },
+                                                                    }}
+                                                                >
+                                                                    <Delete />
+                                                                </ActionButton>
+                                                            </Tooltip>
+                                                        </Box>
+                                                    </TableCell>
                                                 </TableRow>
+                                            ))}
+
+                                            {data.items.length > 0 && (
+                                                <>
+                                                    <TableRow sx={{
+                                                        fontWeight: 'bold',
+                                                        borderTop: `2px solid ${theme.palette.primary.main}`,
+                                                        '& .MuiTableCell-root': {
+                                                            padding: '8px 8px',
+                                                        },
+                                                    }}>
+                                                        <TableCell align="left">
+                                                            <Typography variant="h6" color="text.secondary" gutterBottom marginLeft={1}>
+                                                                Sub-Totals
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell align="center">
+                                                            {data.items.reduce((total, item) => total + (Number(item.quantity) || 0), 0)} units
+                                                        </TableCell>
+                                                        <TableCell align="center">
+
+                                                        </TableCell>
+                                                        {currentCompanyDetails?.company_settings?.features?.enable_gst && (
+                                                            <>
+                                                                <TableCell align="center"></TableCell>
+                                                                <TableCell align="center">
+                                                                    &#8377; {Number(data.items.reduce((total, item) => total + (item.gst_amount || 0), 0)).toFixed(2)}
+                                                                </TableCell>
+                                                            </>
+                                                        )}
+                                                        <TableCell align="center">
+                                                            &#8377; {Number(data.items.reduce((total, item) => total + (item.amount || 0), 0)).toFixed(2)}
+                                                        </TableCell>
+                                                        {currentCompanyDetails?.company_settings?.features?.enable_gst && (
+                                                            <TableCell align="center">
+                                                                <Box
+                                                                    sx={{
+                                                                        py: 1,
+                                                                        bgcolor: alpha(theme.palette.success.main, 0.1),
+                                                                        borderRadius: 1,
+                                                                        border: `1px solid ${alpha(theme.palette.success.main, 0.5)}`,
+                                                                        textAlign: 'center',
+                                                                        fontWeight: 'bold',
+                                                                        color: 'success.main',
+                                                                    }}
+                                                                >
+                                                                    &#8377; {(data.items.reduce((total, item) => total + (item.amount || 0), 0) + data.items.reduce((total, item) => total + (item.gst_amount || 0), 0)).toFixed(2)}
+                                                                </Box>
+                                                            </TableCell>
+                                                        )}
+                                                        <TableCell align="right">
+                                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1 }}>
+                                                                <Tooltip title="Add Item">
+                                                                    <Button
+                                                                        variant="contained"
+                                                                        startIcon={<AddCircleOutline />}
+                                                                        onClick={handleAddItem}
+                                                                        sx={{ borderRadius: 1 }}
+                                                                    >
+                                                                        Add more Items
+                                                                    </Button>
+                                                                </Tooltip>
+                                                            </Box>
+                                                        </TableCell>
+                                                    </TableRow>
+
+                                                    {/* <TableRow sx={{
+                                                        fontWeight: 'bold',
+                                                        borderTop: `2px solid ${theme.palette.primary.main}`,
+                                                        '& .MuiTableCell-root': {
+                                                            padding: '8px 8px',
+                                                        },
+                                                    }}>
+                                                        <TableCell align="left">
+                                                            <Typography variant="h6" color="text.secondary" gutterBottom marginLeft={1}>
+                                                                Sub-Totals
+                                                            </Typography>
+                                                        </TableCell>
+                                                        <TableCell align="center">
+                                                            {data.items.reduce((total, item) => total + (Number(item.quantity) || 0), 0)} units
+                                                        </TableCell>
+                                                        <TableCell align="center">
+
+                                                        </TableCell>
+                                                        {currentCompanyDetails?.company_settings?.features?.enable_gst && (
+                                                            <>
+                                                                <TableCell align="center"></TableCell>
+                                                                <TableCell align="center">
+                                                                    &#8377; {Number(data.items.reduce((total, item) => total + (item.gst_amount || 0), 0)).toFixed(2)}
+                                                                </TableCell>
+                                                            </>
+                                                        )}
+                                                        <TableCell align="center">
+                                                            &#8377; {Number(data.items.reduce((total, item) => total + (item.amount || 0), 0)).toFixed(2)}
+                                                        </TableCell>
+                                                        {currentCompanyDetails?.company_settings?.features?.enable_gst && (
+                                                            <TableCell align="center">
+                                                                <Box
+                                                                    sx={{
+                                                                        py: 1,
+                                                                        bgcolor: alpha(theme.palette.success.main, 0.1),
+                                                                        borderRadius: 1,
+                                                                        border: `1px solid ${alpha(theme.palette.success.main, 0.5)}`,
+                                                                        textAlign: 'center',
+                                                                        fontWeight: 'bold',
+                                                                        color: 'success.main',
+                                                                    }}
+                                                                >
+                                                                    &#8377; {(data.items.reduce((total, item) => total + (item.amount || 0), 0) + data.items.reduce((total, item) => total + (item.gst_amount || 0), 0)).toFixed(2)}
+                                                                </Box>
+                                                            </TableCell>
+                                                        )}
+                                                        <TableCell align="right">
+                                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1 }}>
+                                                                <Tooltip title="Add Item">
+                                                                    <Button
+                                                                        variant="contained"
+                                                                        startIcon={<AddCircleOutline />}
+                                                                        onClick={handleAddItem}
+                                                                        sx={{ borderRadius: 1 }}
+                                                                    >
+                                                                        Add more Items
+                                                                    </Button>
+                                                                </Tooltip>
+                                                            </Box>
+                                                        </TableCell>
+                                                    </TableRow> */}
+                                                </>
                                             )}
                                             {data.items.length === 0 && (
                                                 <TableRow>
@@ -850,7 +937,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                                 No items added yet
                                                             </Typography>
                                                             <Typography variant="body2" color="text.secondary" mb={2}>
-                                                                Click "Add Item Row" to start building your invoice
+                                                                Click "Add Items" to start building your invoice
                                                             </Typography>
                                                             <Button
                                                                 variant="contained"
@@ -858,7 +945,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                                 onClick={handleAddItem}
                                                                 sx={{ borderRadius: 1 }}
                                                             >
-                                                                Add First Item
+                                                                Add Items to the invoice
                                                             </Button>
                                                         </Box>
                                                     </TableCell>
@@ -868,27 +955,139 @@ export default function SalePurchaseInvoiceCreation() {
                                     </Table>
                                 </TableContainer>
 
-                                <Box sx={{ my: 4, display: 'flex', justifyContent: 'space-between' }}>
+                                <Box sx={{ my: 2, display: 'flex', justifyContent: 'space-between' }}>
                                     <TextField
-                                        label="Remarks"
+                                        label="Additional Charges"
                                         fullWidth
                                         size='small'
-                                        value={data.narration}
+                                        value={'data.additional_charges'}
                                         onChange={handleChange}
-                                        name="narration"
+                                        name="additional_charges"
                                         variant="outlined"
+                                        type="number"
                                         InputProps={{
                                             startAdornment: (
                                                 <InputAdornment position="start">
-                                                    <Info color="action" />
+                                                    <AttachMoney color="action" />
                                                 </InputAdornment>
                                             ),
                                         }}
+                                        sx={{ maxWidth: '200px' }}
                                     />
+                                    <TextField
+                                        label="Discount"
+                                        fullWidth
+                                        size='small'
+                                        value={'data.discount'}
+                                        onChange={handleChange}
+                                        name="discount"
+                                        variant="outlined"
+                                        type="number"
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <AttachMoney color="action" />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        sx={{ maxWidth: '200px' }}
+                                    />
+
+                                    <TextField
+                                        label="Round Off"
+                                        fullWidth
+                                        size='small'
+                                        value={'data.round_off'}
+                                        onChange={handleChange}
+                                        name="round_off"
+                                        variant="outlined"
+                                        type="number"
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <AttachMoney color="action" />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        sx={{ maxWidth: '200px' }}
+                                    />
+                                   
+                                    <TextField
+                                        label="Amount Paid"
+                                        fullWidth
+                                        size='small'
+                                        value={'data.amount_paid'}
+                                        onChange={handleChange}
+                                        name="amount_paid"
+                                        variant="outlined"
+                                        type="number"
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <AttachMoney color="action" />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        sx={{ maxWidth: '200px' }}
+                                    />
+                                    
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                        <Typography variant="h6" sx={{ mr: 1 }}>
+                                            Total GST
+                                        </Typography>
+                                        <Box sx={{
+                                            py: 1,
+                                            px: 2,
+                                            bgcolor: alpha(theme.palette.warning.main, 0.1),
+                                            borderRadius: 1,
+                                            border: `1px solid ${alpha(theme.palette.warning.main, 0.5)}`,
+                                            textAlign: 'center',
+                                            fontWeight: 'bold',
+                                            color: 'warning.main',
+                                        }}>
+                                            &#8377; {data.items.reduce((total, item) => total + (item.gst_amount || 0), 0).toFixed(2)}
+                                        </Box>
+                                    </Box>
+
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                        <Typography variant="h6" sx={{ mr: 1 }}>
+                                            Total Invoice Amount
+                                        </Typography>
+                                        <Box sx={{
+                                            py: 1,
+                                            px: 2,
+                                            bgcolor: alpha(theme.palette.primary.main, 0.1),
+                                            borderRadius: 1,
+                                            border: `1px solid ${alpha(theme.palette.primary.main, 0.5)}`,
+                                            textAlign: 'center',
+                                            fontWeight: 'bold',
+                                            color: 'primary.main',
+                                        }}>
+                                            &#8377; {(data.items.reduce((total, item) => total + (item.amount || 0), 0) + data.items.reduce((total, item) => total + (item.gst_amount || 0), 0)).toFixed(2)}
+                                        </Box>
+                                    </Box>
+
                                 </Box>
+                                <TextField
+                                    label="Remarks"
+                                    fullWidth
+                                    size='small'
+                                    value={data.narration}
+                                    onChange={handleChange}
+                                    name="narration"
+                                    variant="outlined"
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <Info color="action" />
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                    sx={{ my: 2, }}
+                                />
                             </Box>
 
-                            <Box sx={{ my: 2, width: '100%', display: 'flex', justifyContent: 'flex-end' }}>
+                            <Box sx={{ my: 1, width: '100%', display: 'flex', justifyContent: 'flex-end' }}>
                                 <Button
                                     type="submit"
                                     variant="contained"
@@ -906,6 +1105,26 @@ export default function SalePurchaseInvoiceCreation() {
                         </Box>
                     </CardContent>
                 </StyledCard>
+
+                <AddItemModal
+                    open={isAddItemModalOpen}
+                    onClose={() => setAddItemModalOpen(false)}
+                    onCreated={(item) => {
+                        setData(prev => ({
+                            ...prev,
+                            items: [...prev.items, item]
+                        }));
+                        setAddItemModalOpen(false);
+                    }}
+                    onUpdated={(updatedItem) => {
+                        setData(prev => ({
+                            ...prev,
+                            items: prev.items.map(item => item.item_id === updatedItem.item_id ? updatedItem : item)
+                        }));
+                        setAddItemModalOpen(false);
+                    }}
+                    item={item}
+                />
             </Container>
         </LocalizationProvider>
     );

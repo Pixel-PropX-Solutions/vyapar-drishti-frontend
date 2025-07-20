@@ -102,19 +102,15 @@ export default function DeletionModal({ id }: { id: string }) {
   }, [id, productId, dispatch, currentCompany?._id]);
 
   const handleDelete = () => {
-    toast.promise(
-      dispatch(deleteProduct({ id: id ?? "", company_id: currentCompany?._id ?? '' }))
-        .unwrap()
-        .then(() => {
-          dispatch(setProductId({ productId: "" }));
-          navigate(`/products`);
-        }),
-      {
-        loading: "Deleting product data ...",
-        success: <b>Product Deleted!</b>,
-        error: <b>Could not Delete.</b>,
-      }
-    );
+    dispatch(deleteProduct({ id: id ?? "", company_id: currentCompany?._id ?? '' }))
+      .unwrap()
+      .then(() => {
+        dispatch(setProductId({ productId: "" }));
+        toast.success("Product deleted successfully. ✅");
+        navigate(`/products`);
+      }).catch((error) => {
+        toast.error(error || "An unexpected error occurred. Please try again later.");
+      });
   };
 
   return (

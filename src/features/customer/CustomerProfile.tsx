@@ -3,11 +3,8 @@ import {
     Typography,
     Box,
     Grid,
-    Card,
-    CardContent,
     Avatar,
     Chip,
-    Divider,
     useTheme,
     TableCell,
     TableHead,
@@ -15,28 +12,65 @@ import {
     TableRow,
     Table,
     Paper,
-    TablePagination,
+    alpha,
+    TableBody,
+    TableSortLabel,
+    Tooltip,
+    Button,
+    FormControl,
+    InputAdornment,
+    MenuItem,
+    TextField,
+    Card,
+    CardContent,
 } from "@mui/material";
 import {
     Edit as EditIcon,
+    FilterListOutlined,
+    PeopleAlt,
+    RefreshOutlined,
+    SearchOutlined,
+    Today,
 } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
-import { getCustomer } from "@/services/customers";
+import { getCustomer, getCustomerInvoices } from "@/services/customers";
 import { useNavigate, useParams } from "react-router-dom";
 import { getInitials } from "@/utils/functions";
-import { ActionButton } from "@/common/ActionButton";
+import { ActionButton } from "@/common/buttons/ActionButton";
 import { setEditingCustomer } from "@/store/reducers/customersReducer";
+import { CustomerInvoicesRow } from "./CustomerInvoicesRow";
+import { SortOrder } from "@/utils/types";
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { BottomPagination } from "@/common/BottomPagination";
+import { CustomerInvoicesRowSkeleton } from "@/common/skeletons/CustomerInvoicesRowSkeleton";
+import { deleteGSTInvoice, deleteInvoice } from "@/services/invoice";
+import toast from "react-hot-toast";
 
 const CustomerProfile: React.FC = () => {
-    const { customer } = useSelector((state: RootState) => state.customersLedger);
-    console.log("Customer in CustomerProfile", customer);
+    const { customer, loading, customerInvoices, customerInvoicesMeta } = useSelector((state: RootState) => state.customersLedger);
+    const { currentCompany, user } = useSelector((state: RootState) => state.auth);
+    const currentCompanyDetails = user?.company?.find((c: any) => c._id === user.user_settings.current_company_id);
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
-    const [page, setPage] = useState<number>(0);
-    const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const { customer_id } = useParams();
     const theme = useTheme();
+
+    const [state, setState] = useState({
+        searchQuery: "",
+        type: "all",
+        page: 1,
+        startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+        endDate: new Date(),
+        rowsPerPage: 10,
+        sortField: "date",
+        sortOrder: "asc" as SortOrder,
+    });
+
+    const { searchQuery, page, rowsPerPage, startDate, endDate, type, sortField, sortOrder } = state;
+
 
     useEffect(() => {
         if (customer_id) {
@@ -44,20 +78,85 @@ const CustomerProfile: React.FC = () => {
         }
     }, [dispatch, customer_id]);
 
-    // useEffect(() => {
-    //     if (chemist) {
-    //         dispatch(viewOrders(chemist?.ChemistData?._id))
-    //     }
-    // }, [chemist, dispatch])
+    useEffect(() => {
+        if (customer_id) {
+            dispatch(getCustomerInvoices({
+                searchQuery,
+                company_id: currentCompany?._id || "",
+                customer_id,
+                pageNumber: page,
+                type,
+                limit: rowsPerPage,
+                sortField,
+                sortOrder,
+                start_date: startDate.getFullYear().toString() + '-' + (startDate.getMonth() + 1).toString().padStart(2, '0') + '-' + startDate.getDate().toString().padStart(2, '0'),
+                end_date: endDate.getFullYear().toString() + '-' + (endDate.getMonth() + 1).toString().padStart(2, '0') + '-' + endDate.getDate().toString().padStart(2, '0'),
+            }));
+        }
+    }, [currentCompany?._id, customer_id, dispatch, endDate, page, rowsPerPage, searchQuery, sortField, sortOrder, startDate, type]);
 
-    // Handle pagination
-    const handleChangePage = useCallback((_: unknown, newPage: number) => {
-        setPage(newPage);
-    }, []);
+    // Handle sorting change
+    const handleSortRequest = (field: string) => {
+        const isAsc = sortField === field && sortOrder === "asc";
+        setState((prevState) => ({
+            ...prevState,
+            sortOrder: isAsc ? "desc" : "asc",
+            sortField: field
+        }))
+    };
 
-    const handleChangeRowsPerPage = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-        setRowsPerPage(parseInt(event.target.value, 10));
-        setPage(0);
+    // Handle pagination change
+    const handleChangePage = (
+        _: React.ChangeEvent<unknown>,
+        newPage: number
+    ) => {
+
+        setState((prevState) => ({
+            ...prevState,
+            page: newPage
+        }))
+    };
+
+    // Handle Delete Invoice details
+    const handleDeleteInvoice = (invId: string) => {
+        if (currentCompanyDetails?.company_settings?.features?.enable_gst) {
+            dispatch(deleteGSTInvoice({ vouchar_id: invId, company_id: currentCompanyDetails._id })).unwrap().then(() => {
+                // fetchIvoices();
+                toast.success("Invoice deleted successfully!");
+            }).catch((error) => {
+                toast.error(error || 'An unexpected error occurred. Please try again later.');
+            })
+        } else {
+            dispatch(deleteInvoice({ vouchar_id: invId, company_id: currentCompanyDetails._id })).unwrap().then(() => {
+                toast.success("Invoice deleted successfully!");
+                // fetchIvoices();
+            }).catch((error) => {
+                toast.error(error || 'An unexpected error occurred. Please try again later.');
+            })
+        }
+    };
+
+
+    // managing searchQuery, filterState, page, rowsPerPage
+    const handleStateChange = (field: string, value: any) => {
+        setState((prevState) => ({
+            ...prevState,
+            [field]: value
+        }))
+    };
+
+    // Reset filters
+    const handleResetFilters = useCallback(() => {
+        setState({
+            searchQuery: "",
+            type: "all",
+            page: 1,
+            startDate: new Date(),
+            endDate: new Date(),
+            rowsPerPage: 10,
+            sortField: "created_at",
+            sortOrder: "asc" as SortOrder,
+        });
     }, []);
 
     if (!customer) {
@@ -65,225 +164,512 @@ const CustomerProfile: React.FC = () => {
     }
 
     return (
-        <Box
-            sx={{
-                px: 3,
-                marginTop: "2rem",
-                width: "100%",
-            }}
-        >
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
             <Box
                 sx={{
-                    bgcolor: theme.palette.primary.main,
-                    color: "white",
-                    padding: 2,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    borderRadius: 1,
-                    boxShadow: 1,
+                    px: 3,
+                    marginTop: "2rem",
+                    width: "100%",
                 }}
             >
-                <Box sx={{ display: "flex", alignItems: "center", }}>
-                    <Avatar
-                        sx={{
-                            mr: 2,
-                            width: 64,
-                            height: 64,
-                            // bgcolor: theme.palette.primary.main,
-                        }}
-                    >
-                        {getInitials(customer.ledger_name)}
-                    </Avatar>
-                    <Box>
-                        <Typography variant="h6">
-                            {customer.ledger_name}
-                        </Typography>
-                        <Chip
-                            size="small"
-                            label={customer.parent}
-                            style={{
-                                color: theme.palette.primary.main,
+                {/* Component Title and Action Button */}
+                <Card sx={{ mb: 3, p: 2, }}>
+                    <CardContent>
+                        <Paper
+                            sx={{
+                                display: "flex",
+                                width: "100%",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                background: 'transparent'
                             }}
-                        />
-                    </Box>
+                        >
+                            <Grid item sx={{
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                            }}>
+                                <Avatar
+                                    sx={{
+                                        mr: 2,
+                                        width: 64,
+                                        height: 64,
+                                        // bgcolor: theme.palette.primary.main,
+                                    }}
+                                >
+                                    {getInitials(customer.ledger_name)}
+                                </Avatar>
+                                <Box>
+                                    <Typography variant="h6">
+                                        {customer.ledger_name}
+                                    </Typography>
+                                    <Chip
+                                        size="small"
+                                        label={customer.parent}
+                                        style={{
+                                            color: theme.palette.primary.main,
+                                        }}
+                                    />
+                                </Box>
+                            </Grid>
+
+                            <Grid
+                                sx={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                }}
+                            >
+                                {/* Edit Details Button */}
+                                <ActionButton
+                                    variant="contained"
+                                    startIcon={<EditIcon />}
+                                    color="success"
+                                    onClick={() => {
+                                        dispatch(setEditingCustomer(customer));
+                                        navigate(`/customers/edit/${customer.parent.toLowerCase()}`);
+                                    }}
+                                    sx={{
+                                        background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
+                                        border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
+                                        color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
+                                        '&:hover': {
+                                            color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                                            background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
+                                        },
+                                    }}
+                                >
+                                    Edit {customer.ledger_name}
+                                </ActionButton>
+                            </Grid>
+                        </Paper>
+                    </CardContent>
+                </Card>
+
+                {/* Search and Filter Controls */}
+                <Box sx={{ display: "flex", my: 3, gap: 2, flexWrap: "wrap" }}>
+                    <TextField
+                        sx={{ flexGrow: 1, minWidth: "250px" }}
+                        variant="outlined"
+                        size="small"
+                        label='Search'
+                        placeholder="Search by name, type..."
+                        value={searchQuery}
+                        onChange={(e) => handleStateChange("searchQuery", e.target.value)}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <SearchOutlined />
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
+
+                    <DatePicker
+                        label="Start Date"
+                        value={startDate}
+                        format="dd/MM/yyyy"
+                        views={["year", "month", "day"]}
+                        onChange={(newValue) => handleStateChange("startDate", newValue)}
+                        slotProps={{
+                            textField: {
+
+                                size: "small",
+                                sx: {
+                                    '& .MuiOutlinedInput-root': {
+                                        width: "150px",
+                                        borderRadius: '8px'
+                                    },
+                                    '& .MuiInputAdornment-root .MuiButtonBase-root': {
+                                        border: 'none',
+                                        boxShadow: 'none'
+                                    }
+                                }
+                            },
+                        }}
+                    />
+                    <DatePicker
+                        label="End Date"
+                        value={endDate}
+                        format="dd/MM/yyyy"
+                        views={["year", "month", "day"]}
+                        onChange={(newValue) => handleStateChange("endDate", newValue)}
+                        slotProps={{
+                            textField: {
+                                size: "small",
+                                sx: {
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        width: "150px",
+                                    },
+                                    '& .MuiInputAdornment-root .MuiButtonBase-root': {
+                                        border: 'none',
+                                        boxShadow: 'none'
+                                    }
+                                }
+                            },
+                        }}
+                    />
+
+                    <FormControl sx={{ minWidth: "150px" }}>
+                        <TextField
+                            select
+                            size="small"
+                            value={type}
+                            label="Filter by invoice Types"
+                            placeholder="Filter by invoice Types"
+                            onChange={(e) => handleStateChange("type", e.target.value)}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <FilterListOutlined />
+                                    </InputAdornment>
+                                ),
+                            }}
+                        >
+                            <MenuItem selected value="all">
+                                <em>All</em>
+                            </MenuItem>
+                            <MenuItem value={'Sales'}>
+                                Sales
+                            </MenuItem>
+                            <MenuItem value={'Purchase'}>
+                                Purchase
+                            </MenuItem>
+                            <MenuItem value={'Payment'}>
+                                Payment
+                            </MenuItem>
+                            <MenuItem value={'Receipt'}>
+                                Receipt
+                            </MenuItem>
+                        </TextField>
+                    </FormControl>
+
+                    <FormControl>
+                        <TextField
+                            select
+                            size="small"
+                            value={rowsPerPage.toString()}
+                            label="Show"
+                            onChange={(e) => {
+                                handleStateChange("rowsPerPage", parseInt(e.target.value, 10));
+                                handleStateChange("page", 1);
+                            }}
+                        >
+                            {[10, 15, 20].map((option) => (
+                                <MenuItem key={option} value={option.toString()}>
+                                    {option} rows
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    </FormControl>
+
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        size='medium'
+                        startIcon={<RefreshOutlined />}
+                        onClick={handleResetFilters}
+                        sx={{ fontWeight: 'bold', py: 1.5 }}
+                    >
+                        Reset Filters
+                    </Button>
                 </Box>
-                {/* Edit Details Button */}
-                <ActionButton
-                    variant="contained"
-                    startIcon={<EditIcon />}
-                    color="success"
-                    onClick={() => {
-                        dispatch(setEditingCustomer(customer));
-                        navigate(`/customers/edit/${customer.parent.toLowerCase()}`);
-                    }}
+
+                {/* Customer Invoices Table */}
+                <TableContainer component={Paper}
+                    elevation={0}
                     sx={{
-                        background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
-                        color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
-                        '&:hover': {
-                            color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                            background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
-                        },
-                    }}
-                >
-                    Edit {customer.ledger_name}
-                </ActionButton>
-            </Box>
+                        width: '100%',
+                        borderRadius: 1,
+                        border: `1px solid ${alpha(theme.palette.divider, 1)}`,
+                        boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
+                        // overflow: 'hidden',
+                    }}>
+                    <Table sx={{ width: '100%' }}>
+                        <TableHead>
+                            <TableRow
+                                sx={{
+                                    bgcolor: alpha(theme.palette.grey[50], 0.8),
+                                    width: '100%',
+                                    '& .MuiTableCell-head': {
+                                        borderBottom: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                                    },
+                                    "& .MuiTableCell-root": {
+                                        padding: '8px 16px',
+                                    },
+                                }}>
+                                <TableCell sx={{ pl: 3, pr: 1 }}>
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                                        Sr. No.
+                                    </Typography>
+                                </TableCell>
+                                <TableCell align="left" sx={{ px: 1 }}>
+                                    <Tooltip title="Sort by State" arrow>
+                                        <TableSortLabel
+                                            active={sortField === "state"}
+                                            direction={sortField === "state" ? sortOrder : "asc"}
+                                            onClick={() => handleSortRequest("state")}
+                                        >
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                                                <Today fontSize="small" />
+                                                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                                                    Invoice Date
+                                                </Typography>
+                                            </Box>
+                                        </TableSortLabel>
+                                    </Tooltip>
+                                </TableCell>
+                                <TableCell align="left" sx={{ px: 1 }}>
+                                    <Tooltip title="Sort by Name">
+                                        <TableSortLabel
+                                            active={sortField === "name"}
+                                            direction={sortField === "name" ? sortOrder : "asc"}
+                                            onClick={() => handleSortRequest("name")}
+                                        >
+                                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                                                Particulars
+                                            </Typography>
+                                        </TableSortLabel>
+                                    </Tooltip>
+                                </TableCell>
 
-            <Divider sx={{ my: 1 }} />
+                                <TableCell align="left" sx={{ px: 1 }}>
+                                    <Tooltip title="Sort by Item Quantity" arrow>
+                                        <TableSortLabel
+                                            active={sortField === "name"}
+                                            direction={sortField === "name" ? sortOrder : "asc"}
+                                            onClick={() => handleSortRequest("name")}
+                                        >
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                                                {/* <Contacts fontSize="small" /> */}
+                                                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                                                    Invoice Type
+                                                </Typography>
+                                            </Box>
+                                        </TableSortLabel>
+                                    </Tooltip>
+                                </TableCell>
 
-            <Box>
-                {/* Customer Summary Cards */}
-                <Grid container sx={{ mb: 3, mt: 1, justifyContent: 'space-between' }}>
-                    <Grid item xs={12} sm={2.5}>
-                        <Card sx={{ border: '2px solid', borderColor: 'success.light', }}>
-                            <CardContent>
-                                <Grid container justifyContent="space-between" alignItems="center">
-                                    <Typography variant="h6" color="text.secondary">Total Bills  </Typography>
-                                    <Typography variant="h4">{'orderData'.length}</Typography>
-                                </Grid>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                    <Grid item xs={12} sm={2.5}>
-                        <Card sx={{ border: '2px solid', borderColor: 'warning.light', }}>
-                            <CardContent>
-                                <Grid container justifyContent="space-between" alignItems="center">
-                                    <Typography variant="h6" color="text.secondary">Total Amount</Typography>
-                                    <Typography variant="h4">{'orderData'.length}</Typography>
-                                </Grid>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                    <Grid item xs={12} sm={2.5}>
-                        <Card sx={{ border: '2px solid', borderColor: 'warning.light', }}>
-                            <CardContent>
-                                <Grid container justifyContent="space-between" alignItems="center">
-                                    <Typography variant="h6" color="text.secondary">Remaining Amount</Typography>
-                                    <Typography variant="h4">{'orderData'.length}</Typography>
-                                </Grid>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                    <Grid item xs={12} sm={2.5}>
-                        <Card sx={{ border: '2px solid', borderColor: 'info.light' }}>
-                            <CardContent>
-                                <Grid container justifyContent="space-between" alignItems="center">
-                                    <Typography variant="h6" color="text.secondary">Colleted Amount</Typography>
-                                    <Typography variant="h4">{'orderData'.length}</Typography>
-                                </Grid>
+                                <TableCell align="left" sx={{ px: 1 }}>
+                                    <Tooltip title="Sort by Item Quantity" arrow>
+                                        <TableSortLabel
+                                            active={sortField === "name"}
+                                            direction={sortField === "name" ? sortOrder : "asc"}
+                                            onClick={() => handleSortRequest("name")}
+                                        >
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                                                {/* <Contacts fontSize="small" /> */}
+                                                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                                                    Payment Status
+                                                </Typography>
+                                            </Box>
+                                        </TableSortLabel>
+                                    </Tooltip>
+                                </TableCell>
 
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                </Grid>
+                                <TableCell align="left" sx={{ px: 1 }}>
+                                    <Tooltip title="Sort by State" arrow>
+                                        <TableSortLabel
+                                            active={sortField === "state"}
+                                            direction={sortField === "state" ? sortOrder : "asc"}
+                                            onClick={() => handleSortRequest("state")}
+                                        >
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                                                {/* <LocationOn fontSize="small" /> */}
+                                                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                                                    Invoice No.
+                                                </Typography>
+                                            </Box>
+                                        </TableSortLabel>
+                                    </Tooltip>
+                                </TableCell>
 
-                {/* Orders Table */}
-                <Paper elevation={3} sx={{ width: '100%', overflow: 'hidden' }}>
-                    <TableContainer sx={{ maxHeight: 600 }}>
-                        <Table stickyHeader aria-label="orders table">
-                            <TableHead>
+                                <TableCell align="right" sx={{ px: 1 }}>
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                                        Debit
+                                    </Typography>
+                                </TableCell>
+                                <TableCell align="right" sx={{ px: 1 }}>
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                                        Credit
+                                    </Typography>
+                                </TableCell>
+
+
+                                <TableCell align="center" >
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                                        Actions
+                                    </Typography>
+                                </TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {loading ? (
+                                Array([1, 2, 3, 4, 5])
+                                    .map((_, index) => <CustomerInvoicesRowSkeleton key={`skeleton-${index}`} />)
+                            ) : customerInvoices?.length > 0 ? (
+                                customerInvoices?.map((inv, index) => (
+                                    <CustomerInvoicesRow
+                                        key={inv.vouchar_id}
+                                        inv={inv}
+                                        index={index + 1 + (page - 1) * rowsPerPage}
+                                        onView={() => {
+                                            // handleViewInvoice(inv)
+                                        }}
+                                        onEdit={() => {
+                                            navigate(`/invoices/update/${inv.voucher_type.toLowerCase()}/${inv.vouchar_id}`);
+                                        }}
+                                        onDelete={() => {
+                                            handleDeleteInvoice(inv.vouchar_id);
+                                        }}
+                                    />))
+                            ) : (
                                 <TableRow>
-                                    <TableCell>Sr. No.</TableCell>
-                                    <TableCell>Order ID</TableCell>
-                                    <TableCell>Stockist</TableCell>
-                                    <TableCell>Chemist</TableCell>
-                                    <TableCell>Date</TableCell>
-                                    <TableCell>Status</TableCell>
-                                    <TableCell align="right">Total Amount(&#8377;)</TableCell>
+                                    <TableCell colSpan={9} sx={{ textAlign: "center", py: 8 }}>
+                                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                                            <PeopleAlt sx={{ fontSize: '4rem', color: theme.palette.text.disabled }} />
+                                            <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 600 }}>
+                                                There are no invoices for this customer in the current month.
+                                            </Typography>
+                                            <Typography variant="body2" color="text.secondary">
+                                                You can create a new invoice from the invoices page.
+                                            </Typography>
+                                        </Box>
+                                    </TableCell>
                                 </TableRow>
-                            </TableHead>
-                            {/*  <TableBody>
-                                {orderData.length > 0 ? (
-                                    orderData
-                                        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                        .map((order, index) => (
-                                            <TableRow
-                                                key={order._id}
-                                                hover
-                                                sx={{
-                                                    cursor: 'pointer',
-                                                    '&:hover': { bgcolor: 'action.hover' }
-                                                }}
-                                            >
-                                                <TableCell>
-                                                    <Typography
-                                                        variant="body2"
-                                                        sx={{ whiteSpace: "nowrap", display: "flex", justifyContent: "center" }}
-                                                    >
-                                                        {page * rowsPerPage + index + 1}
-                                                    </Typography>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Typography variant="body2" fontWeight="medium">
-                                                        {order._id}
-                                                    </Typography>
-                                                </TableCell>
-                                                <TableCell>
-                                                    {getFullName(order.Stockist.name)}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {chemist?.ChemistData ? getFullName(chemist?.ChemistData.name) : 'N/A'}
-                                                </TableCell>
-                                                <TableCell>{formatDate(order.order_date)}</TableCell>
-                                                <TableCell>
-                                                    <Chip
-                                                        label={order.status}
-                                                        color={getStatusColor(order.status) as "warning" | "success" | "error" | "default"}
-                                                        size="medium"
-                                                        sx={{ fontWeight: 'medium' }}
-                                                    />
-                                                </TableCell>
-                                                <TableCell align="right">
-                                                    <Typography fontWeight="medium">
-                                                        &#8377; {order.total_amount.toFixed(2)}
-                                                    </Typography>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))
-                                ) : (
-                                    <TableRow>
-                                        <TableCell colSpan={7} align="center" sx={{ py: 2 }}>
-                                            <Paper sx={{ p: 0, mt: 0, textAlign: 'center' }}>
-                                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                     <Box sx={{
-                                    bgcolor: 'primary.light',
-                                    borderRadius: '50%',
-                                    p: 2,
-                                    mb: 2
-                                  }}>
-                                    <Add sx={{ fontSize: 40, color: 'primary.main' }} />
-                                  </Box> 
-                                                    <Typography variant="h5" gutterBottom>
-                                                        No Orders Yet
-                                                    </Typography>
-                                                    <Typography variant="body1" color="text.secondary" paragraph>
-                                                        User haven't created any orders yet.
-                                                    </Typography>
-                                                </Box>
-                                            </Paper>
+                            )}
+                            {loading ? (
+                                Array([1, 2, 3, 4, 5])
+                                    .map((_, index) => <CustomerInvoicesRowSkeleton key={`skeleton-${index}`} />)
+                            ) : customerInvoices?.length > 0 && (
+                                <>
+                                    <TableRow sx={{
+                                        "& .MuiTableCell-root": {
+                                            padding: '8px 16px',
+                                            bgcolor: alpha(theme.palette.grey[50], 0.8),
+                                        },
+                                    }}>
+                                        <TableCell colSpan={9}>
                                         </TableCell>
                                     </TableRow>
-                                )}
-                            </TableBody> */}
-                        </Table>
-                    </TableContainer>
-                    <TablePagination
-                        rowsPerPageOptions={[5, 10, 25, 50]}
-                        component="div"
-                        count={4}
-                        rowsPerPage={rowsPerPage}
-                        page={page}
-                        onPageChange={handleChangePage}
-                        onRowsPerPageChange={handleChangeRowsPerPage}
-                        labelDisplayedRows={({ from, to, count }) =>
-                            `${from}-${to} of ${count !== -1 ? count : `more than ${to}`}`
-                        }
-                        sx={{ borderTop: 1, borderColor: 'divider' }}
-                    />
-                </Paper>
+                                    <TableRow sx={{
+                                        "& .MuiTableCell-root": {
+                                            padding: '8px 16px',
+                                        },
+                                    }}>
+                                        <TableCell colSpan={5} sx={{ textAlign: "center", }}>
+                                        </TableCell>
+                                        <TableCell colSpan={1} sx={{ textAlign: "left", }}>
+                                            <Typography variant="body1" color="text.primary" sx={{ fontWeight: 600, textDecoration: 'underline' }}>
+                                                Current Total
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell align="right" colSpan={1} >
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                                                {!customer.is_deemed_positive && <Typography
+                                                    variant="body1"
+                                                    sx={{
+                                                        fontWeight: 700,
+                                                        mr: 0.5,
+                                                        color: customer.is_deemed_positive ? theme.palette.success.main : theme.palette.error.main,
+                                                    }}
+                                                >
+                                                    &#8377;
+                                                </Typography>}
+                                                <Typography variant="body1" sx={{ fontWeight: 600, color: customer.is_deemed_positive ? theme.palette.success.main : theme.palette.error.main, }}>
+                                                    {customerInvoices.reduce((acc, inv) => acc + (inv.is_deemed_positive ? Math.abs(inv.amount) : 0), 0)}
+                                                </Typography>
+                                            </Box>
+                                        </TableCell>
+                                        <TableCell align="right" colSpan={1} >
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                                                {!customer.is_deemed_positive && <Typography
+                                                    variant="body1"
+                                                    sx={{
+                                                        fontWeight: 700,
+                                                        // fontSize: '1.1rem',
+                                                        mr: 0.5,
+                                                        color: customer.is_deemed_positive ? theme.palette.error.main : theme.palette.success.main,
+                                                    }}
+                                                >
+                                                    &#8377;
+                                                </Typography>}
+                                                <Typography variant="body1" sx={{ fontWeight: 600, color: customer.is_deemed_positive ? theme.palette.error.main : theme.palette.success.main, }}>
+                                                    {customerInvoices.reduce((acc, inv) => acc + (inv.is_deemed_positive ? 0 : Math.abs(inv.amount)), 0)}
+                                                </Typography>
+                                            </Box>
+                                        </TableCell>
+                                        <TableCell colSpan={1} sx={{ textAlign: "center", }}>
+                                        </TableCell>
+                                    </TableRow>
+                                    <TableRow sx={{
+                                        "& .MuiTableCell-root": {
+                                            padding: '8px 16px',
+                                        },
+                                    }}>
+                                        <TableCell colSpan={5} sx={{ textAlign: "center", }}>
+                                        </TableCell>
+                                        <TableCell colSpan={1} sx={{ textAlign: "left", }}>
+                                            <Typography variant="body1" color="text.primary" sx={{ fontWeight: 600, textDecoration: 'underline' }}>
+                                                Closing Balance
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell align="right" colSpan={1} >
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                                                {customer.is_deemed_positive && <Typography
+                                                    variant="body1"
+                                                    sx={{
+                                                        fontWeight: 700,
+                                                        mr: 0.5,
+                                                        color: customer.is_deemed_positive ? theme.palette.success.main : theme.palette.error.main,
+                                                    }}
+                                                >
+                                                    &#8377;
+                                                </Typography>}
+                                                <Typography variant="body1" sx={{ fontWeight: 600, color: customer.is_deemed_positive ? theme.palette.success.main : theme.palette.error.main, }}>
+                                                    {customer.is_deemed_positive ? customer.total_amount : ''}
+                                                </Typography>
+                                            </Box>
+                                        </TableCell>
+                                        <TableCell align="right" colSpan={1}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                                                {!customer.is_deemed_positive && <Typography
+                                                    variant="body1"
+                                                    sx={{
+                                                        fontWeight: 700,
+                                                        // fontSize: '1.1rem',
+                                                        mr: 0.5,
+                                                        color: customer.is_deemed_positive ? theme.palette.error.main : theme.palette.success.main,
+                                                    }}
+                                                >
+                                                    &#8377;
+                                                </Typography>}
+                                                <Typography variant="body1" sx={{ fontWeight: 600, color: customer.is_deemed_positive ? theme.palette.error.main : theme.palette.success.main, }}>
+                                                    {customer.is_deemed_positive ? '' : customer.total_amount}
+                                                </Typography>
+                                            </Box>
+                                        </TableCell>
+                                        <TableCell colSpan={1} sx={{ textAlign: "center", }}>
+                                        </TableCell>
+                                    </TableRow>
+                                </>
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+
+                {/* Pagination Controls */}
+                <BottomPagination
+                    total={customerInvoicesMeta?.total || 0}
+                    item="invoices"
+                    page={page}
+                    metaPage={customerInvoicesMeta?.page || 1}
+                    rowsPerPage={rowsPerPage}
+                    onChange={handleChangePage}
+                />
             </Box>
-        </Box>
+        </LocalizationProvider>
     );
 };
 

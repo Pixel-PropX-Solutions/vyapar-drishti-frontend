@@ -22,7 +22,7 @@ import CreateProduct from "./features/products/createProduct";
 import { getCurrentUser } from "./services/auth";
 import LandingPage from "./components/LandingPage/LandingPage";
 import AboutPage from "./components/About/AboutPage";
-import Timeline from "./features/inventory/timeline";
+import Timeline from "./pages/Timeline";
 // import Warehouse from "./features/inventory/warehouse";
 import AdminInventory from "./pages/AdminInventory";
 import ViewItem from "./features/products/ViewItem";
@@ -45,6 +45,8 @@ import Inventory from "./pages/Inventory";
 import EditCustomer from "./features/customer/EditCustomer";
 import CustomerProfile from "./features/customer/CustomerProfile";
 import Xyz from "./pages/xyz";
+import toast from "react-hot-toast";
+// import VerifyOTP from "./pages/VerifyOTP";
 // import PromptModal from "./common/PromptModal";
 
 const xThemeComponents = {
@@ -78,10 +80,11 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
 
       if (!isUserFetched && accessToken) {
         try {
-          await dispatch(getCurrentUser());
-          // await dispatch(getCompany());
-          // await dispatch(getCompany());
-          dispatch(setUser({ authState: AuthStates.AUTHENTICATED }));
+          await dispatch(getCurrentUser()).unwrap().then(() => {
+            dispatch(setUser({ authState: AuthStates.AUTHENTICATED }));
+          }).catch((error) => {
+            toast.error(error || "An unexpected error occurred. Please try again later.");
+          });
         } catch {
           localStorage.removeItem("accessToken");
           dispatch(setUser({ authState: AuthStates.IDLE }));
@@ -172,7 +175,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/invoices" element={<Invoices />} />
                 <Route path="/xyz" element={<Xyz />} />
                 <Route path="/transactions" element={<Transactions />} />
-                <Route path="/transaction/:type" element={<PaymentReceiptInvoice />} />
+                <Route path="/transactions/create/:type" element={<PaymentReceiptInvoice />} />
                 <Route path="/invoices/create/:type" element={<SalePurchaseInvoiceCreation />} />
                 <Route path="/invoices/update/:type/:voucher_id" element={<UpdateSalePurchase />} />
                 {/* <Route path="/*" element={<Navigate to="/" replace />} /> */}
@@ -196,6 +199,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
             <Route path="/admin" element={<LoginPage />} />
 
             <Route path="/signup" element={<SignUpPage />} />
+            {/* <Route path="/verify/:phoneNumber" element={<VerifyOTP />} /> */}
             {/* <Route path="/*" element={<Navigate to="/" replace />} /> */}
           </>
         )

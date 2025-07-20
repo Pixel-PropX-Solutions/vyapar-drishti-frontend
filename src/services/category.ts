@@ -15,10 +15,7 @@ export const createCategory = createAsyncThunk(
                 return rejectWithValue("Category creation failed");
             }
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Upload or creation failed: Invalid input or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -33,10 +30,7 @@ export const viewCategory = createAsyncThunk(
                 return { productData };
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -75,10 +69,7 @@ export const viewAllCategory = createAsyncThunk(
                 return { categories, pageMeta };
             } else return rejectWithValue("Internal Server Error.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -93,16 +84,13 @@ export const viewAllCategories = createAsyncThunk(
             const response = await userApi.get(
                 `/category/view/categories?company_id=${company_id}`
             );
-            
+
             if (response.data.success === true) {
                 const categoryLists = response.data.data;
                 return { categoryLists };
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -121,10 +109,7 @@ export const updateCategory = createAsyncThunk(
                 return;
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -139,10 +124,7 @@ export const deleteCategory = createAsyncThunk(
                 return;
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );

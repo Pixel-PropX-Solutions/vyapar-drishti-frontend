@@ -32,6 +32,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  alpha,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -49,15 +50,14 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import BarChartIcon from "@mui/icons-material/BarChart";
 import TimelineIcon from "@mui/icons-material/Timeline";
-import {  useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
-import {  getProduct, viewProduct } from "@/services/products";
+import { deleteProduct, getProduct, viewProduct } from "@/services/products";
 import { GetItem, ProductUpdate } from "@/utils/types";
 import toast from "react-hot-toast";
-import { formatDate } from "@/utils/functions";
+import { formatDate, getAvatarColor, getInitials } from "@/utils/functions";
 import ProductsSideModal from "./ProductsSideModal";
 
 interface HistoryEntry {
@@ -71,12 +71,12 @@ interface HistoryEntry {
 export default function ViewItem() {
   const { id } = useParams<{ id: string }>();
   const theme = useTheme();
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   // const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const { item } = useSelector((state: RootState) => state.product);
-  
+
   const { currentCompany } = useSelector((state: RootState) => state.auth);
   const [activeTab, setActiveTab] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -84,7 +84,7 @@ export default function ViewItem() {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   // const [isBookmarked, setIsBookmarked] = useState(false);
   const [showCopySnackbar, setShowCopySnackbar] = useState(false);
-  const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const [expandedSection, setExpandedSection] = useState<string | null>('basic');
   const [drawer, setDrawer] = useState<boolean>(false);
   const [selectedProduct, setSelectedProduct] = useState<ProductUpdate | null>(
     null
@@ -123,34 +123,13 @@ export default function ViewItem() {
 
   // Enhanced history data with types
   const historyData: HistoryEntry[] = [
-    {
-      date: "2025-02-20",
-      action: "Stock Update",
-      details: "Added 50 units to inventory",
-      user: "John Doe",
-      type: "stock",
-    },
-    {
-      date: "2025-02-15",
-      action: "Price Change",
-      details: "Price updated from &#8377;65 to &#8377;70",
-      user: "Sarah Smith",
-      type: "price",
-    },
-    {
-      date: "2025-02-01",
-      action: "Description Update",
-      details: "Updated product description",
-      user: "Mike Johnson",
-      type: "info",
-    },
-    {
-      date: "2025-01-10",
-      action: "Initial Stock",
-      details: "Added 150 units to inventory",
-      user: "John Doe",
-      type: "create",
-    },
+    // {
+    //   date: "2025-02-20",
+    //   action: "Stock Update",
+    //   details: "Added 50 units to inventory",
+    //   user: "John Doe",
+    //   type: "stock",
+    // },
   ];
 
   // Calculate stock status
@@ -187,7 +166,8 @@ export default function ViewItem() {
         .then(() => {
           setIsLoading(false);
         })
-        .catch(() => {
+        .catch((error) => {
+          toast.error(error || "An unexpected error occurred. Please try again later.")
           setIsLoading(false);
         });
     };
@@ -214,13 +194,6 @@ export default function ViewItem() {
     setOpenDeleteDialog(true);
   };
 
-  // const handleBookmark = () => {
-  //   setIsBookmarked(!isBookmarked);
-  //   toast.success(
-  //     isBookmarked ? "Removed from bookmarks" : "Added to bookmarks"
-  //   );
-  // };
-
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
     toast.success("Product link copied to clipboard");
@@ -232,17 +205,13 @@ export default function ViewItem() {
   };
 
   const confirmDelete = () => {
-    // toast.promise(
-    //   dispatch(deleteProduct(data._id)).then(() => {
-    //     setOpenDeleteDialog(false);
-    //     navigate("/products");
-    //   }),
-    //   {
-    //     loading: "Deleting product...",
-    //     success: <b>Product deleted successfully!</b>,
-    //     error: <b>Failed to delete product. Please try again.</b>,
-    //   }
-    // );
+    dispatch(deleteProduct({ id: data._id, company_id: data.company_id })).unwrap().then(() => {
+      toast.success('Product deleted successfully.')
+      setOpenDeleteDialog(false);
+      navigate("/products");
+    }).catch((error) => {
+      toast.error(error || "An unexpected error occurred. Please try again later.");
+    });
   };
 
   const getHistoryIcon = (type: string) => {
@@ -266,13 +235,7 @@ export default function ViewItem() {
 
   if (isLoading) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Skeleton
-          variant="rectangular"
-          width="100%"
-          height={60}
-          sx={{ borderRadius: 1, mb: 2 }}
-        />
+      <Container maxWidth={false} sx={{ py: 4 }}>
         <Skeleton
           variant="rectangular"
           width="100%"
@@ -284,7 +247,7 @@ export default function ViewItem() {
             <Skeleton
               variant="rectangular"
               width="100%"
-              height={400}
+              height={500}
               sx={{ borderRadius: 2 }}
             />
           </Grid>
@@ -292,7 +255,7 @@ export default function ViewItem() {
             <Skeleton
               variant="rectangular"
               width="100%"
-              height={400}
+              height={500}
               sx={{ borderRadius: 2 }}
             />
           </Grid>
@@ -302,7 +265,7 @@ export default function ViewItem() {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 3 }}>
+    <Container maxWidth={false} sx={{ py: 3 }}>
       {/* Stock Alert */}
       {stockStatus.severity !== "success" && (
         <Fade in={true} timeout={400}>
@@ -333,11 +296,6 @@ export default function ViewItem() {
             borderRadius: 1,
             border: `1px solid ${theme.palette.divider}`,
             background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.default} 100%)`,
-            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-            "&:hover": {
-              boxShadow: theme.shadows[8],
-              transform: "translateY(-2px)",
-            },
           }}
         >
           <CardContent sx={{ p: 3 }}>
@@ -355,14 +313,14 @@ export default function ViewItem() {
                   sx={{
                     width: 60,
                     height: 60,
-                    bgcolor: "primary.main",
+                    bgcolor: getAvatarColor(data.stock_item_name),
+                    fontSize: '1rem',
+                    fontWeight: 700,
+                    boxShadow: `0 4px 12px ${alpha(getAvatarColor(data.stock_item_name), 0.3)}`,
                     mr: 2,
-                    boxShadow: theme.shadows[4],
                   }}
                 >
-                  {!data?.image && (
-                    <MedicationIcon sx={{ fontSize: 40, color: "white" }} />
-                  )}
+                  {(getInitials(data.stock_item_name))}
                 </Avatar>
                 <Box>
                   <Typography
@@ -393,77 +351,56 @@ export default function ViewItem() {
                       color="primary"
                       variant="outlined"
                       size="small"
+                      sx={{ px: 1 }}
                     />
                     <Chip
                       icon={<InventoryIcon />}
                       label={data.unit}
                       variant="outlined"
                       size="small"
+                      sx={{ px: 1 }}
                     />
                     <Chip
                       label={stockStatus.status}
                       color={stockStatus.color as any}
                       size="small"
-                      sx={{ fontWeight: 600 }}
+                      sx={{ fontWeight: 600, px: 1 }}
                     />
                   </Box>
                 </Box>
               </Box>
 
-              <Box sx={{ display: "flex", gap: 1 }}>
+              <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+                <Box sx={{ textAlign: "center", border: `1px solid ${theme.palette.divider}`, px: 2, py:1, borderRadius: 1, backgroundColor: theme.palette.primary.light }}>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    Selling Price
+                  </Typography>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontWeight: 700,
+                      color: "success.main",
+                    }}
+                  >{data.sales_qty > 0 ? <>
+                    &#8377; {data.sales_value}
+                  </> : 'No Sale Yet'}
+                  </Typography>
+                </Box>
+                <Box sx={{ textAlign: "center", border: `1px solid ${theme.palette.divider}`, px: 2, py:1, borderRadius: 1, backgroundColor: theme.palette.secondary.light }}>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    Purchase Price
+                  </Typography>
+                  <Typography variant="h6" color="text.primary">
+                    {data.purchase_qty > 0 ? <>
+                      &#8377; {data.purchase_value}
+                    </> : "No Purchase Yet"}
+                  </Typography>
+                </Box>
                 <Tooltip title="Share Product">
                   <IconButton onClick={handleShare} color="primary">
                     <ShareIcon />
                   </IconButton>
                 </Tooltip>
-                {/* <Tooltip
-                  title={isBookmarked ? "Remove Bookmark" : "Add Bookmark"}
-                >
-                  <IconButton onClick={handleBookmark} color="primary">
-                    {isBookmarked ? <BookmarkIcon /> : <BookmarkBorderIcon />}
-                  </IconButton>
-                </Tooltip> */}
-              </Box>
-            </Box>
-
-            {/* Price Display */}
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                p: 2,
-                bgcolor: "background.default",
-                borderRadius: 1,
-                mb: 2,
-              }}
-            >
-              <Box>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  Selling Price
-                </Typography>
-                <Typography
-                  variant="h5"
-                  sx={{
-                    fontWeight: 700,
-                    color: "success.main",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >{data.sales_qty > 0 ? <>
-                  <Typography variant="h6" sx={{ color: "success.main" }}>&#8377; {data.sales_value}</Typography>
-                </> : 'No Sale Yet'}
-                </Typography>
-              </Box>
-              <Box sx={{ textAlign: "right" }}>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  Purchase Price
-                </Typography>
-                <Typography variant="h6" color="text.primary">
-                  {data.purchase_qty > 0 ? <>
-                    &#8377; {data.purchase_value}
-                  </> : "No Purchase Yet"}
-                </Typography>
               </Box>
             </Box>
 
@@ -494,11 +431,6 @@ export default function ViewItem() {
                 icon={<HistoryIcon />}
                 iconPosition="start"
               />
-              <Tab
-                label="Analytics"
-                icon={<BarChartIcon />}
-                iconPosition="start"
-              />
             </Tabs>
           </CardContent>
         </Card>
@@ -515,11 +447,6 @@ export default function ViewItem() {
                 height: "100%",
                 borderRadius: 1,
                 border: `1px solid ${theme.palette.divider}`,
-                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                "&:hover": {
-                  boxShadow: theme.shadows[12],
-                  transform: "translateY(-4px)",
-                },
               }}
             >
               {/* Product Image Section */}
@@ -549,17 +476,20 @@ export default function ViewItem() {
                   }}
                 >
                   {!data?.image ? (
-                    <MedicationIcon
+                    <Avatar
+                      src={typeof data?.image === "string" && data.image ? data.image : undefined}
                       sx={{
-                        fontSize: 100,
-                        color: "primary.main",
-                        opacity: 0.8,
-                        transition: "all 0.5s ease-in-out",
-                        "&:hover": {
-                          transform: "scale(1.1) rotate(5deg)",
-                        },
+                        width: 100,
+                        height: 100,
+                        bgcolor: getAvatarColor(data.stock_item_name),
+                        fontSize: '2rem',
+                        fontWeight: 700,
+                        boxShadow: `0 4px 12px ${alpha(getAvatarColor(data.stock_item_name), 0.3)}`,
+                        mr: 2,
                       }}
-                    />
+                    >
+                      {(getInitials(data.stock_item_name))}
+                    </Avatar>
                   ) : (
                     <Box
                       sx={{
@@ -674,13 +604,13 @@ export default function ViewItem() {
                         await dispatch(viewProduct({ product_id: data._id, company_id: currentCompany?._id || '' }))
                           .unwrap().then((res) => {
                             setSelectedProduct(res.product);
+                            toast.success("Product details fetched successfully!");
                             setDrawer(true);
-                          }
-                          ).catch((error) => {
+                          }).catch((error) => {
                             setDrawer(false);
                             setSelectedProduct(null);
                             console.error("Error fetching product details:", error);
-                            toast.error("Failed to fetch product details");
+                            toast.error(error || "Failed to fetch product details");
                           });
                       }}
                       sx={{
@@ -1190,258 +1120,14 @@ export default function ViewItem() {
                     >
                       <HistoryIcon sx={{ fontSize: 64, mb: 2, opacity: 0.5 }} />
                       <Typography variant="h6" gutterBottom>
-                        No Activity Yet
+                        Comming in future updates
                       </Typography>
-                      <Typography variant="body2">
+                      {/* <Typography variant="body2">
                         Product activities will appear here once actions are
                         performed.
-                      </Typography>
+                      </Typography> */}
                     </Box>
                   )}
-                </CardContent>
-              </Card>
-            </Fade>
-          )}
-
-          {/* Analytics Tab */}
-          {activeTab === 2 && (
-            <Fade in={true} timeout={900}>
-              <Card
-                elevation={0}
-                sx={{
-                  borderRadius: 1,
-                  border: `1px solid ${theme.palette.divider}`,
-                  height: "100%",
-                }}
-              >
-                <CardContent sx={{ p: 3 }}>
-                  <Typography
-                    variant="h6"
-                    color="primary.main"
-                    sx={{ display: "flex", alignItems: "center", mb: 2 }}
-                  >
-                    <BarChartIcon sx={{ mr: 1 }} /> Product Analytics
-                  </Typography>
-
-                  <Grid container spacing={2}>
-                    {/* Key Metrics */}
-                    <Grid item xs={12}>
-                      <Typography
-                        variant="subtitle1"
-                        fontWeight={600}
-                        gutterBottom
-                      >
-                        Key Metrics
-                      </Typography>
-                      <Grid container spacing={1}>
-                        <Grid item xs={6} sm={3}>
-                          <Paper
-                            elevation={0}
-                            sx={{
-                              p: 1,
-                              textAlign: "center",
-                              bgcolor: "success.light",
-                              color: "success.contrastText",
-                              borderRadius: 1,
-                            }}
-                          >
-                            <Typography variant="h5" fontWeight={700}>
-                              &#8377;{" "}
-                              {data.sales_value ?? 0 - (data?.purchase_value ?? 0)}
-                            </Typography>
-                            <Typography variant="caption">
-                              Profit per Unit
-                            </Typography>
-                          </Paper>
-                        </Grid>
-                        <Grid item xs={6} sm={3}>
-                          <Paper
-                            elevation={0}
-                            sx={{
-                              p: 1,
-                              textAlign: "center",
-                              bgcolor: "primary.light",
-                              color: "primary.contrastText",
-                              borderRadius: 1,
-                            }}
-                          >
-                            <Typography variant="h5" fontWeight={700}>
-                              {data.sales_qty > 0
-                                ? <>{(
-                                  ((data.sales_value ?? 0 -
-                                    (data?.purchase_value ?? 0)) /
-                                    (data?.purchase_value ?? 1)) *
-                                  100
-                                ).toFixed(2)}
-                                  %</>
-                                : "No Sale"}
-
-                            </Typography>
-                            <Typography variant="caption">
-                              Profit Margin
-                            </Typography>
-                          </Paper>
-                        </Grid>
-                        <Grid item xs={6} sm={3}>
-                          <Paper
-                            elevation={0}
-                            sx={{
-                              p: 1,
-                              textAlign: "center",
-                              bgcolor: "warning.light",
-                              color: "warning.contrastText",
-                              borderRadius: 1,
-                            }}
-                          >
-                            <Typography variant="h5" fontWeight={700}>
-                              {Math.ceil(
-                                (data?.current_stock ?? 1) /
-                                (data.low_stock_alert || 1)
-                              )}
-                            </Typography>
-                            <Typography variant="caption">
-                              Stock Turnover
-                            </Typography>
-                          </Paper>
-                        </Grid>
-                        <Grid item xs={6} sm={3}>
-                          <Paper
-                            elevation={0}
-                            sx={{
-                              p: 1,
-                              textAlign: "center",
-                              bgcolor: "info.light",
-                              color: "info.contrastText",
-                              borderRadius: 1,
-                            }}
-                          >
-                            <Typography variant="h5" fontWeight={700}>
-                              &#8377;{" "}{((data.current_stock ?? 0) * (data.sales_value ?? data.avg_purchase_rate)).toFixed(2)}
-                            </Typography>
-                            <Typography variant="caption">
-                              Total Stock Value
-                            </Typography>
-                          </Paper>
-                        </Grid>
-                      </Grid>
-                    </Grid>
-
-                    {/* Stock Status */}
-                    <Grid item xs={12}>
-                      <Typography
-                        variant="subtitle1"
-                        fontWeight={600}
-                        gutterBottom
-                      >
-                        Stock Status
-                      </Typography>
-                      <Paper
-                        elevation={0}
-                        sx={{
-                          p: 3,
-                          border: `1px solid ${theme.palette.divider}`,
-                          borderRadius: 1,
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            mb: 2,
-                          }}
-                        >
-                          <Typography variant="body1">
-                            Current Stock Level
-                          </Typography>
-                          <Chip
-                            label={stockStatus.status}
-                            color={stockStatus.color as any}
-                            variant="filled"
-                          />
-                        </Box>
-                        <LinearProgress
-                          variant="determinate"
-                          value={Math.min(
-                            ((data?.current_stock ?? 1) /
-                              ((data?.low_stock_alert ?? 1) * 3)) *
-                            100,
-                            100
-                          )}
-                          color={stockStatus.color as any}
-                          sx={{
-                            height: 12,
-                            borderRadius: 6,
-                            bgcolor: theme.palette.grey[200],
-                          }}
-                        />
-                        <Box
-                          sx={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            mt: 1,
-                          }}
-                        >
-                          <Typography variant="caption" color="text.secondary">
-                            0 units
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {data.current_stock ?? 1} /{" "}
-                            {(data.low_stock_alert ?? 1) * 3} units
-                          </Typography>
-                        </Box>
-                      </Paper>
-                    </Grid>
-
-                    {/* Performance Insights */}
-                    <Grid item xs={12}>
-                      <Typography
-                        variant="subtitle1"
-                        fontWeight={600}
-                        gutterBottom
-                      >
-                        Performance Insights
-                      </Typography>
-                      <Stack spacing={2}>
-                        <Alert
-                          severity={
-                            data.sales_value ?? 0 > (data.purchase_value ?? 0)
-                              ? "success"
-                              : "warning"
-                          }
-                          sx={{ borderRadius: 2 }}
-                        >
-                          <Typography variant="body2">
-                            {data.sales_value ?? 0 > (data.purchase_value ?? 0)
-                              ? `Strong profit margin of ${(
-                                ((data.sales_value ?? 0 -
-                                  (data.purchase_value ?? 0)) /
-                                  (data.purchase_value ?? 1)) *
-                                100
-                              ).toFixed(1)}%`
-                              : "Consider reviewing pricing strategy for better profitability"}
-                          </Typography>
-                        </Alert>
-
-                        <Alert
-                          severity={
-                            (data.current_stock ?? 1) >
-                              (data.low_stock_alert ?? 1)
-                              ? "info"
-                              : "warning"
-                          }
-                          sx={{ borderRadius: 2 }}
-                        >
-                          <Typography variant="body2">
-                            {(data.current_stock ?? 1) >
-                              (data.low_stock_alert ?? 1)
-                              ? "Stock level is healthy"
-                              : "Stock level is below alert threshold - consider restocking"}
-                          </Typography>
-                        </Alert>
-                      </Stack>
-                    </Grid>
-                  </Grid>
                 </CardContent>
               </Card>
             </Fade>

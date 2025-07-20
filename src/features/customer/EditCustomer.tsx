@@ -37,7 +37,7 @@ import { AppDispatch, RootState } from "@/store/store";
 import { createCustomer, updateCustomer } from "@/services/customers";
 import countries from "@/internals/data/CountriesStates.json";
 import { useNavigate, useParams } from "react-router-dom";
-import { ActionButton } from "@/common/ActionButton";
+import { ActionButton } from "@/common/buttons/ActionButton";
 import { capitalizeInput } from "@/utils/functions";
 import ImageUpload from "@/common/ImageUpload";
 import { SectionCard } from "./sectionCard";
@@ -65,7 +65,6 @@ interface CustomerFormData {
     bank_branch?: string;
     account_holder?: string;
     gstin?: string;
-    it_pan?: string;
 }
 
 interface ValidationErrors {
@@ -90,6 +89,7 @@ const EditCustomer: React.FC = () => {
     const currentCompanyDetails = user?.company?.find((c: any) => c._id === user.user_settings.current_company_id);
     const { customerType_id, editingCustomer } = useSelector((state: RootState) => state.customersLedger);
     const isGSTINRequired: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst && customerType === 'Creditors';
+    const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
     const [expandedSections, setExpandedSections] = useState({
         profile: true,
         contact: true,
@@ -117,7 +117,6 @@ const EditCustomer: React.FC = () => {
         bank_branch: '',
         account_holder: '',
         gstin: '',
-        it_pan: '',
     });
 
     const validateForm = useCallback((): boolean => {
@@ -233,9 +232,9 @@ const EditCustomer: React.FC = () => {
 
     const validateField = (field: keyof CustomerFormData, value: string): string => {
         if (field === 'name' && !value.trim()) return 'Billing Name is required. This name is used for invoicing and legal purposes.';
-        if (!data.mailing_country && field === 'mailing_state' && !value.trim()) return 'Please select country first.';
-        if (field === 'mailing_country' && !value.trim()) return 'Billing country is required. This is used for address formatting.';
-        if (field === 'mailing_state' && !value.trim()) return 'Billing state is required. This is used for address formatting.';
+        if (gst_enable && !data.mailing_country && field === 'mailing_state' && !value.trim()) return 'Please select country first.';
+        if (gst_enable && field === 'mailing_country' && !value.trim()) return 'Billing country is required. This is used for address formatting.';
+        if (gst_enable && field === 'mailing_state' && !value.trim()) return 'Billing state is required. This is used for address formatting.';
         if (isGSTINRequired && field === 'gstin' && !value.trim()) return 'GSTIN is required.';
 
         // if (field === 'mailing_address' && !value.trim()) return '';
@@ -245,7 +244,6 @@ const EditCustomer: React.FC = () => {
         if (field === 'email' && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Invalid email format';
         if (field === 'name' && value.trim().length < 2) return 'Name must be at least 2 characters';
         if (field === 'gstin' && value && !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][A-Z0-9][Z][0-9A-Z]$/.test(value)) return 'Invalid GSTIN format';
-        if (field === 'it_pan' && value && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(value)) return 'Invalid PAN format';
         if (field === 'account_number' && value && !/^\d{9,18}$/.test(value)) return 'Invalid bank account number format';
         if (field === 'bank_ifsc' && value && !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(value)) return 'Invalid IFSC code format';
         return '';
@@ -273,7 +271,6 @@ const EditCustomer: React.FC = () => {
                 bank_branch: editingCustomer?.bank_branch || '',
                 account_holder: editingCustomer?.account_holder || '',
                 gstin: editingCustomer.gstin || '',
-                it_pan: editingCustomer.it_pan || '',
             });
 
             setImagePreview(
@@ -326,7 +323,6 @@ const EditCustomer: React.FC = () => {
         if (data.bank_branch?.trim()) sanitizedData.bank_branch = data.bank_branch.trim();
         if (data.account_holder?.trim()) sanitizedData.account_holder = data.account_holder.trim();
         if (data.gstin?.trim()) sanitizedData.gstin = data.gstin.trim();
-        if (data.it_pan?.trim()) sanitizedData.it_pan = data.it_pan.trim();
 
         const formData = new FormData();
         Object.entries(sanitizedData).forEach(([key, value]) => {
@@ -772,28 +768,6 @@ const EditCustomer: React.FC = () => {
                     expandedSections={expandedSections}
                 >
                     <Box sx={{ mt: 2 }}>
-                        <FormControl fullWidth>
-                            <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Label fontSize="small" color="primary" />
-                                PAN Number
-                                <Chip label={'Optional'} size="small" color={"default"} variant="outlined" />
-                            </Typography>
-                            <TextField
-                                fullWidth
-                                size="small"
-                                placeholder="ABCDE1234F"
-                                value={data.it_pan || ''}
-                                onChange={(e) => handleInputChange('it_pan', e.target.value)}
-                                error={!!validationErrors.it_pan}
-                                helperText={validationErrors.it_pan || "10-character PAN number"}
-                                InputProps={{
-                                    sx: {
-                                        borderRadius: 1,
-                                    }
-                                }}
-                            />
-                        </FormControl>
-
                         <Box sx={{ display: 'flex', gap: 2, my: 1 }}>
                             <FormControl fullWidth sx={{ width: '50%' }}>
                                 <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>

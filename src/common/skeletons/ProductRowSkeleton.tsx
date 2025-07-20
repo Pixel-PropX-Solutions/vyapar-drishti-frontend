@@ -6,7 +6,7 @@ import {
     TableRow,
 } from "@mui/material";
 
-export const CategoryRowSkeleton: React.FC = () => (
+export const ProductRowSkeleton: React.FC = () => (
     <TableRow sx={{
         "& .MuiTableCell-root": {
             padding: '8px 16px',
@@ -21,7 +21,12 @@ export const CategoryRowSkeleton: React.FC = () => (
                 </Box>
             </Box>
         </TableCell>
-
+        <TableCell align="center">
+            <Skeleton variant="text" width={60} height={20} sx={{ mx: 'auto' }} />
+        </TableCell>
+        <TableCell align="center">
+            <Skeleton variant="text" width={80} height={20} sx={{ mx: 'auto' }} />
+        </TableCell>
         <TableCell align="center">
             <Skeleton variant="text" width={80} height={20} sx={{ mx: 'auto' }} />
         </TableCell>
@@ -30,9 +35,9 @@ export const CategoryRowSkeleton: React.FC = () => (
         </TableCell>
         <TableCell align="center">
             <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}>
-                <Skeleton variant="rectangular" width={32} height={32} sx={{ borderRadius: 1 }} />
-                <Skeleton variant="rectangular" width={32} height={32} sx={{ borderRadius: 1 }} />
-                <Skeleton variant="rectangular" width={32} height={32} sx={{ borderRadius: 1 }} />
+                <Skeleton variant="rectangular" width={32} height={32}  sx={{ borderRadius: 1 }} />
+                <Skeleton variant="rectangular" width={32} height={32}  sx={{ borderRadius: 1 }}/>
+                <Skeleton variant="rectangular" width={32} height={32}  sx={{ borderRadius: 1 }}/>
             </Box>
         </TableCell>
     </TableRow>

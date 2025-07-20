@@ -1,94 +1,71 @@
-import React, { useState, } from "react";
+import React, { useState } from "react";
 import {
+    Alert,
+    alpha,
+    Avatar,
     Box,
+    Button,
+    Card,
+    CardContent,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Divider,
+    IconButton,
+    Stack,
+    Tooltip,
     Typography,
     useTheme,
-    Tooltip,
-    alpha,
-    DialogActions,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    Button,
-    Avatar,
-    IconButton,
-    TableCell,
-    TableRow,
-    Chip,
-    Fade,
-    Zoom,
-    Alert,
+    Zoom
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import CategoryIcon from "@mui/icons-material/Category";
+import { formatDate, getAvatarColor, getInitials } from "@/utils/functions";
+import { Edit, Delete, Category, Visibility } from "@mui/icons-material";
 import { GetCategory } from "@/utils/types";
-import { formatDate } from "@/utils/functions";
-
-interface ProductRowProps {
+interface CategoryCardProps {
     category: GetCategory;
     onDelete: (id: string) => void;
     onEdit: (category: GetCategory) => void;
     onView: (category: GetCategory) => void;
-    index: number;
 }
 
 
-export const CategoryRow: React.FC<ProductRowProps> = ({ category, onDelete, onEdit, onView, index }) => {
+export const CategoryCard: React.FC<CategoryCardProps> = ({ category, onDelete, onEdit, onView }) => {
     const theme = useTheme();
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
-
     const confirmDelete = () => {
         onDelete(category?._id ?? '');
         setOpenDeleteDialog(false);
     };
 
-    const getInitials = (name: string): string => {
-        return name
-            .split(' ')
-            .map(word => word.charAt(0))
-            .join('')
-            .toUpperCase()
-            .slice(0, 2);
-    };
-
-    const getAvatarColor = (name: string): string => {
-        const colors = [
-            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-            '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
-        ];
-        const index = name.length % colors.length;
-        return colors[index];
-    };
-
     return (
+
         <>
-            <Fade in timeout={300 + index * 100}>
-                <TableRow
-                    onMouseEnter={() => setIsHovered(true)}
-                    onMouseLeave={() => setIsHovered(false)}
-                    sx={{
-                        cursor: 'pointer',
-                        width: '100%',
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
-                        boxShadow: isHovered ? `0 8px 25px ${alpha(theme.palette.primary.main, 0.15)}` : 'none',
-                        "&:hover": {
-                            bgcolor: alpha(theme.palette.primary.main, 0.02),
-                        },
-                        borderLeft: `4px solid ${isHovered ? theme.palette.primary.main : 'transparent'}`,
-                    }}
-                    onClick={() => onView(category)}
-                >
-                    {/* Product Info */}
-                    <TableCell sx={{ pl: 3, pr: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
+            <Card
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                elevation={3}
+                sx={{
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+                    "&:hover": {
+                        transform: "translateY(-4px)",
+                        boxShadow: 6,
+                    },
+                    overflow: "visible",
+                }}
+            >
+                <CardContent sx={{ flexGrow: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+
+                        <Box sx={{ display: 'flex', alignItems: 'center', }}>
                             <Avatar
                                 sx={{
-                                    width: 48,
-                                    height: 48,
+                                    width: 36,
+                                    height: 36,
                                     mr: 2,
                                     bgcolor: getAvatarColor(category.category_name),
                                     fontSize: '1rem',
@@ -101,68 +78,16 @@ export const CategoryRow: React.FC<ProductRowProps> = ({ category, onDelete, onE
                             >
                                 {(getInitials(category.category_name))}
                             </Avatar>
-                            <Box sx={{ flex: 1 }}>
-                                <Typography
-                                    variant="subtitle1"
-                                    sx={{
-                                        fontWeight: 600,
-                                        fontSize: '0.95rem',
-                                        color: theme.palette.text.primary,
-                                        mb: 0.5,
-                                        transition: 'color 0.3s ease',
-                                    }}
-                                >
-                                    {category.category_name}
-                                </Typography>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <Chip
-                                        icon={<CategoryIcon />}
-                                        label={category.description || 'No Description'}
-                                        size="small"
-                                        variant="outlined"
-                                        sx={{
-                                            fontSize: '0.7rem',
-                                            height: '20px',
-                                            borderRadius: '10px',
-                                            bgcolor: alpha(theme.palette.primary.main, 0.08),
-                                            borderColor: alpha(theme.palette.primary.main, 0.2),
-                                            color: theme.palette.primary.main,
-                                        }}
-                                    />
-                                </Box>
-                            </Box>
+                            <Typography
+                                variant="h6"
+                                component="h2"
+                                gutterBottom
+                                noWrap
+                                title={category?.category_name}
+                            >
+                                {category?.category_name || ''}
+                            </Typography>
                         </Box>
-                    </TableCell>
-
-                    <TableCell align="center" sx={{ px: 1 }}>
-                        <Typography
-                            variant="h6"
-                            sx={{
-                                fontWeight: 700,
-                                fontSize: '1.1rem',
-                                color: theme.palette.success.main,
-                            }}
-                        >
-                            {formatDate(category.created_at)}
-                        </Typography>
-                    </TableCell>
-
-                    {/* Update Date */}
-                    <TableCell align="center" sx={{ px: 1 }}>
-                        <Typography
-                            variant="h6"
-                            sx={{
-                                fontWeight: 600,
-                                fontSize: '1rem',
-                                color: theme.palette.text.primary,
-                            }}
-                        >
-                            {formatDate(category?.updated_at)}
-                        </Typography>
-                    </TableCell>
-
-                    {/* Actions */}
-                    <TableCell align="center" sx={{ pr: 3, pl: 1 }}>
                         <Zoom in={isHovered} timeout={200}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'center' }}>
                                 <Tooltip title="View Details" arrow>
@@ -182,7 +107,7 @@ export const CategoryRow: React.FC<ProductRowProps> = ({ category, onDelete, onE
                                             },
                                         }}
                                     >
-                                        <VisibilityIcon fontSize="small" />
+                                        <Visibility fontSize="small" />
                                     </IconButton>
                                 </Tooltip>
 
@@ -203,7 +128,7 @@ export const CategoryRow: React.FC<ProductRowProps> = ({ category, onDelete, onE
                                             },
                                         }}
                                     >
-                                        <EditIcon fontSize="small" />
+                                        <Edit fontSize="small" />
                                     </IconButton>
                                 </Tooltip>
 
@@ -224,14 +149,34 @@ export const CategoryRow: React.FC<ProductRowProps> = ({ category, onDelete, onE
                                             },
                                         }}
                                     >
-                                        <DeleteIcon fontSize="small" />
+                                        <Delete fontSize="small" />
                                     </IconButton>
                                 </Tooltip>
                             </Box>
                         </Zoom>
-                    </TableCell>
-                </TableRow>
-            </Fade>
+                    </Box>
+
+                    <Divider sx={{ my: 1.5 }} />
+
+                    <Stack spacing={1}>
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                            <Category
+                                sx={{ mr: 1, color: theme.palette.info.dark, fontSize: "1.2rem" }}
+                            />
+                            <Typography variant="body2" noWrap
+                                title={'Type of Invoice Group'}>
+                                {category?.description || 'No description provided'}
+                            </Typography>
+                        </Box>
+                        <Box>
+                            <Typography variant="body2" color="text.secondary">
+                                Created on: {formatDate(category?.created_at || '')}
+                            </Typography>
+                        </Box>
+                    </Stack>
+                </CardContent>
+            </Card>
+
 
             <Dialog
                 open={openDeleteDialog}
@@ -254,12 +199,12 @@ export const CategoryRow: React.FC<ProductRowProps> = ({ category, onDelete, onE
                         fontWeight: 600,
                     }}
                 >
-                    <DeleteIcon />
+                    <Delete />
                     Delete {category.category_name}?
                 </DialogTitle>
                 <DialogContent>
                     <Alert severity="warning" sx={{ mb: 2 }}>
-                        This action cannot be undone. The category will be permanently removed from your inventory.
+                        This action cannot be undone. The category will be permanently removed from your inventory if it is not associated with any products.
                     </Alert>
                     <Typography>
                         Are you sure you want to delete "<strong>{category.category_name}</strong>"?
@@ -278,9 +223,9 @@ export const CategoryRow: React.FC<ProductRowProps> = ({ category, onDelete, onE
                         color="error"
                         variant="contained"
                         sx={{ borderRadius: 2 }}
-                        startIcon={<DeleteIcon />}
+                        startIcon={<Delete />}
                     >
-                        Delete Product
+                        Delete Category
                     </Button>
                 </DialogActions>
             </Dialog>

@@ -75,21 +75,17 @@ export default function CreateUserProfile() {
     }
 
     setLoading(true);
-    toast.promise(
-      dispatch(createUser(userProfile))
-        .unwrap()
-        .then((result) => {
-          navigate(
-            `/create/user/${userProfile.role.toLowerCase()}/${result.id}`
-          );
-        })
-        .finally(() => setLoading(false)),
-      {
-        loading: "Creating user with basic details...",
-        success: <b>User Created! Redirecting to profile setup...</b>,
-        error: <b>Could not create user. Please try again.</b>,
-      }
-    );
+    dispatch(createUser(userProfile))
+      .unwrap()
+      .then((result) => {
+        toast.success("User created successfully! Redirecting to profile setup...");
+        navigate(
+          `/create/user/${userProfile.role.toLowerCase()}/${result.id}`
+        );
+      }).catch((error) => {
+        toast.error(error || "An unexpected error occurred. Please try again later.");
+      })
+      .finally(() => setLoading(false));
   };
 
   return (

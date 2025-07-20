@@ -1,21 +1,21 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AuthStates } from "@/utils/enums";
 import { deleteAccount, getCurrentCompany, getCurrentUser, login, logout, register } from "@/services/auth";
-import { GetCompany } from "@/utils/types";
+import { GetCompany, UserSignUp } from "@/utils/types";
 
-interface SignupData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  role: string;
-  confirmPassword: string;
-}
+// interface SignupData {
+//   firstName: string;
+//   lastName: string;
+//   email: string;
+//   password: string;
+//   role: string;
+//   confirmPassword: string;
+// }
 
 
 
 interface AuthState {
-  signupData: SignupData;
+  signupData: UserSignUp;
   currentCompany: GetCompany | null;
   email: string;
   user: any;
@@ -36,12 +36,15 @@ const initialState: AuthState = {
   isUserFetched: false,
   user: null,
   signupData: {
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    role: "",
-    confirmPassword: "",
+    name: {
+      first: '',
+      last: '',
+    },
+    email: '',
+    phone: {
+      code: '',
+      number: '',
+    },
   },
   loading: false,
   error: null,
@@ -52,7 +55,7 @@ const authSlice = createSlice({
   initialState,
   reducers: {
 
-    setSignupData(state, action: PayloadAction<SignupData>) {
+    setSignupData(state, action: PayloadAction<UserSignUp>) {
       state.signupData = action.payload;
     },
 

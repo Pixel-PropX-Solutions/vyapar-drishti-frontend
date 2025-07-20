@@ -17,10 +17,7 @@ export const createProduct = createAsyncThunk(
         return rejectWithValue("Product creation failed");
       }
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Upload or creation failed: Invalid input or server error."
-      );
+      return rejectWithValue(error?.response?.data?.message);
     }
   }
 );
@@ -36,10 +33,7 @@ export const sellProduct = createAsyncThunk(
         return;
       } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Login failed: Invalid credentials or server error."
-      );
+      return rejectWithValue(error?.response?.data?.message);
     }
   }
 );
@@ -80,10 +74,7 @@ export const viewAllProducts = createAsyncThunk(
         return { productsData, pageMeta };
       } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Login failed: Invalid credentials or server error."
-      );
+      return rejectWithValue(error?.response?.data?.message);
     }
   }
 );
@@ -124,10 +115,7 @@ export const viewAllStockItems = createAsyncThunk(
         return { stockItems, pageMeta };
       } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Login failed: Invalid credentials or server error."
-      );
+      return rejectWithValue(error?.response?.data?.message);
     }
   }
 );
@@ -143,10 +131,7 @@ export const viewProduct = createAsyncThunk(
         return { product };
       } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Login failed: Invalid credentials or server error."
-      );
+      return rejectWithValue(error?.response?.data?.message);
     }
   }
 );
@@ -157,15 +142,14 @@ export const getProduct = createAsyncThunk(
     try {
       const response = await userApi.get(`/product/get/product/details/${product_id}?company_id=${company_id}`);
 
+      console.log("Get Product Details API Response", response);
+
       if (response.data.success === true) {
         const item = response.data.data[0];
         return { item };
       } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Login failed: Invalid credentials or server error."
-      );
+      return rejectWithValue(error?.response?.data?.message);
     }
   }
 );
@@ -181,10 +165,7 @@ export const viewProductsWithId = createAsyncThunk(
         return itemsList;
       } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Login failed: Invalid credentials or server error."
-      );
+      return rejectWithValue(error?.response?.data?.message);
     }
   }
 );
@@ -202,10 +183,7 @@ export const updateProduct = createAsyncThunk(
         return;
       } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Login failed: Invalid credentials or server error."
-      );
+      return rejectWithValue(error?.response?.data?.message);
     }
   }
 );
@@ -214,16 +192,15 @@ export const deleteProduct = createAsyncThunk(
   "delete/product",
   async ({ id, company_id }: { id: string, company_id: string }, { rejectWithValue }) => {
     try {
-      const response = await userApi.delete(`/product/delete/product/${id}?company_id=${company_id}`);
-
+      const response = await userApi.delete(`/product/delete/product/${id}${company_id !== '' ? '?company_id=' + company_id : ''}`);
+      console.log("Delete product response", response);
       if (response.data.success === true) {
         return;
+      } else if (!response.data.success) {
+        return response.data.message
       } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Login failed: Invalid credentials or server error."
-      );
+      return rejectWithValue(error?.response?.data?.message);
     }
   }
 );

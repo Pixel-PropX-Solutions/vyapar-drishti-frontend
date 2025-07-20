@@ -17,6 +17,7 @@ import { getCurrentCompany, getCurrentUser } from '@/services/auth';
 import { getAllCompanies } from '@/services/company';
 import { updateUserSettings } from '@/services/user';
 import { getAvatarColor, getInitials } from '@/utils/functions';
+import toast from 'react-hot-toast';
 
 const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
   borderRadius: 2,
@@ -73,8 +74,11 @@ export default function SelectContent() {
         if (response) {
           dispatch(getCurrentUser());
           dispatch(getCurrentCompany());
+          toast.success("Company changed successfully!");
         }
-      })
+      }).catch((error) => {
+        toast.error(error || "An unexpected error occurred. Please try again later.");
+      });
   }
 
   useEffect(() => {

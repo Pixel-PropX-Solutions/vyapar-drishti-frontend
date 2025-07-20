@@ -18,10 +18,7 @@ export const createCompany = createAsyncThunk(
         return rejectWithValue("Company creation failed");
       }
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Upload or creation failed: Invalid input or server error."
-      );
+      return rejectWithValue(error?.response?.data?.message);
     }
   }
 );
@@ -38,10 +35,7 @@ export const getCompany = createAsyncThunk(
         return { company };
       } else return rejectWithValue(" No access token recieved.");
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Invalid credentials or server error."
-      );
+      return rejectWithValue(error?.response?.data?.message);
     }
   }
 );
@@ -57,10 +51,7 @@ export const getAllCompanies = createAsyncThunk(
         return { companies };
       } else return rejectWithValue(" No access token recieved.");
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Invalid credentials or server error."
-      );
+      return rejectWithValue(error?.response?.data?.message);
     }
   }
 );
@@ -79,10 +70,7 @@ export const updateCompany = createAsyncThunk(
         return;
       } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Login failed: Invalid credentials or server error."
-      );
+      return rejectWithValue(error?.response?.data?.message);
     }
   }
 );
@@ -100,10 +88,7 @@ export const deleteCompany = createAsyncThunk(
         return;
       } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Login failed: Invalid credentials or server error."
-      );
+      return rejectWithValue(error?.response?.data?.message);
     }
   }
 );
@@ -124,10 +109,7 @@ export const createCompanyBilling = createAsyncThunk(
         return rejectWithValue("Company creation failed");
       }
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Upload or creation failed: Invalid input or server error."
-      );
+      return rejectWithValue(error?.response?.data?.message);
     }
   }
 );
@@ -145,10 +127,7 @@ export const updateCompanyBilling = createAsyncThunk(
         return;
       } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Login failed: Invalid credentials or server error."
-      );
+      return rejectWithValue(error?.response?.data?.message);
     }
   }
 );
@@ -169,10 +148,7 @@ export const createCompanyShipping = createAsyncThunk(
         return rejectWithValue("Company creation failed");
       }
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Upload or creation failed: Invalid input or server error."
-      );
+      return rejectWithValue(error?.response?.data?.message);
     }
   }
 );
@@ -190,10 +166,7 @@ export const updateCompanyShipping = createAsyncThunk(
         return;
       } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Login failed: Invalid credentials or server error."
-      );
+      return rejectWithValue(error?.response?.data?.message);
     }
   }
 );

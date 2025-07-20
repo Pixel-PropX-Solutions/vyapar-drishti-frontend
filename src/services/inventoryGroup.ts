@@ -15,10 +15,7 @@ export const createInventoryGroup = createAsyncThunk(
                 return rejectWithValue("Group creation failed");
             }
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Upload or creation failed: Invalid input or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -35,10 +32,7 @@ export const viewInventoryGroup = createAsyncThunk(
                 return { productData };
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -77,10 +71,7 @@ export const viewAllInventoryGroup = createAsyncThunk(
                 return { inventoryGroups, inventoryGroupPageMeta };
             } else return rejectWithValue("Internal Server Error.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -101,10 +92,7 @@ export const viewAllInventoryGroups = createAsyncThunk(
                 return { inventoryGroupLists };
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -123,10 +111,7 @@ export const updateInventoryGroup = createAsyncThunk(
                 return;
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -141,10 +126,7 @@ export const deleteInventoryGroup = createAsyncThunk(
                 return;
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );

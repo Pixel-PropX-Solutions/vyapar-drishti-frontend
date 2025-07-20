@@ -47,8 +47,10 @@ export type SortOrder = "asc" | "desc";
 
 export interface Units {
   id: string;
-  label: string;
+  unit_name: string;
   value: string;
+  symbol: string;
+  si_representation: 'decimal' | 'integer';
 }
 
 export interface UserSignUp {
@@ -211,10 +213,23 @@ export interface GetUserLedgers {
   bank_branch?: string;
   account_holder?: string;
   gstin?: string;
-  it_pan?: string;
   created_at: string,
   updated_at: string,
   is_deleted: boolean
+}
+
+export interface GetCustomerInvoices {
+  amount: number,
+  is_deemed_positive: boolean,
+  vouchar_id: string,
+  date: string,
+  voucher_number: string,
+  voucher_type: string,
+  narration: string,
+  reference_date: string,
+  reference_number: string,
+  place_of_supply: string,
+  customer: string
 }
 
 export interface CustomersList {
@@ -243,6 +258,12 @@ export interface CreateInvoiceData {
   reference_number: string,
   reference_date: string,
   place_of_supply: string,
+
+  vehicle_number: string,
+  mode_of_transport: string,
+  status: string,
+  due_date: string,
+
   accounting: Array<{
     vouchar_id: string,
     ledger: string,
@@ -273,6 +294,13 @@ export interface UpdateInvoice {
   reference_number: string,
   reference_date: string,
   place_of_supply: string,
+
+  vehicle_number: string,
+  mode_of_transport: string,
+  status: string,
+  due_date: string,
+
+
   accounting: Array<{
     entry_id: string,
     vouchar_id: string,
@@ -297,6 +325,54 @@ export interface UpdateInvoice {
   }>
 }
 
+
+export interface UpdateGSTInvoice {
+  vouchar_id: string,
+  user_id: string,
+  company_id: string,
+  date: string,
+  voucher_type: string,
+  voucher_type_id: string,
+  voucher_number: string,
+  party_name: string,
+  party_name_id: string,
+  narration: string,
+  reference_number: string,
+  reference_date: string,
+  place_of_supply: string,
+
+  vehicle_number: string,
+  mode_of_transport: string,
+  status: string,
+  due_date: string,
+
+  accounting: Array<{
+    entry_id: string,
+    vouchar_id: string,
+    ledger: string,
+    ledger_id: string,
+    amount: number
+  }>,
+  items: Array<{
+    entry_id: string,
+    vouchar_id: string;
+    item: string;
+    item_id: string;
+    quantity: number;
+    rate: number;
+    amount: number;
+    additional_amount: number;
+    discount_amount: number;
+    godown: string;
+    godown_id: string;
+    order_number: string;
+    order_due_date: string;
+    hsn_code: string;
+    gst_rate: string;
+    gst_amount: number;
+  }>
+}
+
 export interface CreateInvoiceWithGSTData {
   company_id: string,
   date: string,
@@ -309,6 +385,13 @@ export interface CreateInvoiceWithGSTData {
   reference_number: string,
   reference_date: string,
   place_of_supply: string,
+
+  vehicle_number: string,
+  mode_of_transport: string,
+  status: string,
+  due_date: string,
+
+
   accounting: Array<{
     vouchar_id: string,
     ledger: string,
@@ -439,7 +522,6 @@ export interface GetCompany {
   books_begin_from: string,
   image: string,
   gstin: string,
-  pan: string,
   is_selected: boolean,
   website: string,
   created_at: string,
@@ -469,7 +551,6 @@ export interface SetCompany {
   email?: string,
   image?: File | string | null,
   gstin?: string,
-  pan_number?: string,
   website?: string,
   account_number?: string,
   account_holder?: string,
@@ -581,6 +662,10 @@ export interface GetInvoiceData {
   reference_date: string,
   reference_number: string,
   place_of_supply: string,
+  mode_of_transport: string,
+  vehicle_number: string,
+  status: string,
+  due_date: string,
   is_invoice: number,
   is_accounting_voucher: number,
   is_inventory_voucher: number,

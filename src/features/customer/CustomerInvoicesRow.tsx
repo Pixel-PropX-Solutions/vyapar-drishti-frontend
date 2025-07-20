@@ -22,22 +22,21 @@ import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { GetAllVouchars } from "@/utils/types";
 import {
-    Print,
+    CheckCircleOutline,
     Today
 } from "@mui/icons-material";
 import { formatDate } from "@/utils/functions";
 
-interface ProductRowProps {
-    inv: GetAllVouchars;
+interface CustomerInvoicesRowProps {
+    inv: any;
     onDelete: (id: string) => void;
     onEdit: (inv: GetAllVouchars) => void;
     onView: (inv: GetAllVouchars) => void;
-    onPrint?: (inv: GetAllVouchars) => void;
     index: number;
 }
 
 
-export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, onView, onPrint, index }) => {
+export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, onDelete, onEdit, onView, index }) => {
     const theme = useTheme();
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
@@ -70,12 +69,12 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                     onClick={() => onView(inv)}
                 >
                     {/* Serial No */}
-                    <TableCell align="left" sx={{ px: 1, }}>
+                    <TableCell align="left" sx={{ pl: 3, }}>
                         <Typography
-                            variant="subtitle1"
+                            variant="body1"
                             sx={{
                                 fontWeight: 600,
-                                fontSize: '0.95rem',
+                                // fontSize: '0.95rem',
                                 color: theme.palette.text.primary,
                                 mb: 0.5,
                                 transition: 'color 0.3s ease',
@@ -87,8 +86,8 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
 
                     {/* Invoice Creation Date */}
                     <TableCell align="left" sx={{ px: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Today sx={{ fontSize: '1rem', mr: 0.5, color: theme.palette.text.secondary }} />
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
+                            <Today sx={{ mr: 0.5, color: theme.palette.text.secondary }} />
                             <Typography
                                 variant="body1"
                                 sx={{
@@ -114,12 +113,12 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                                 transition: 'color 0.3s ease',
                             }}
                         >
-                            {inv.party_name}
+                            {inv?.customer}
                         </Typography>
                     </TableCell>
 
                     {/* Invoice Type */}
-                    <TableCell align="left">
+                    <TableCell align="left" sx={{ px: 1 }}>
                         <Typography
                             variant="body1"
                             sx={{
@@ -130,6 +129,24 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                         >
                             {inv.voucher_type}
                         </Typography>
+                    </TableCell>
+
+                    {/* Invoice Payment Status */}
+                    <TableCell align="left" sx={{ px: 1 }}>
+                        <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', gap: 1 }}>
+                            {['Purchase', 'Sales'].includes(inv.voucher_type) &&
+                                <CheckCircleOutline sx={{ mr: 0.5, color: theme.palette.text.secondary }} />}
+                            <Typography
+                                variant="body1"
+                                sx={{
+                                    fontWeight: 700,
+                                    // fontSize: '1rem',
+                                    color: theme.palette.text.primary,
+                                }}
+                            >
+                                {['Purchase', 'Sales'].includes(inv.voucher_type) ? "Paid" : ""}
+                            </Typography>
+                        </Box>
                     </TableCell>
 
                     {/* Invoice Number */}
@@ -147,15 +164,15 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                     </TableCell>
 
                     {/* Debit Invoice amount */}
-                    <TableCell align="center" sx={{ px: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <TableCell align="right" sx={{ px: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
                             {inv.is_deemed_positive && <Typography
                                 variant="body1"
                                 sx={{
                                     fontWeight: 700,
                                     // fontSize: '1.1rem',
                                     mr: 0.5,
-                                    color: !inv.is_deemed_positive ? theme.palette.error.main : theme.palette.success.main,
+                                    color: !inv.is_deemed_positive ? theme.palette.success.main : theme.palette.error.main,
                                 }}
                             >
                                 &#8377;
@@ -165,7 +182,7 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                                 sx={{
                                     fontWeight: 700,
                                     // fontSize: '1.1rem',
-                                    color: !inv.is_deemed_positive ? theme.palette.error.main : theme.palette.success.main,
+                                    color: !inv.is_deemed_positive ? theme.palette.success.main : theme.palette.error.main,
                                 }}
                             >
                                 {inv.is_deemed_positive ? Math.abs(inv.amount) : " "}
@@ -174,15 +191,15 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                     </TableCell>
 
                     {/* Credit Invoice amount */}
-                    <TableCell align="center" sx={{ px: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <TableCell align="right" sx={{ px: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
                             {!inv.is_deemed_positive && <Typography
                                 variant="body1"
                                 sx={{
                                     fontWeight: 700,
                                     // fontSize: '1.1rem',
                                     mr: 0.5,
-                                    color: inv.is_deemed_positive ? theme.palette.success.main : theme.palette.error.main,
+                                    color: inv.is_deemed_positive ? theme.palette.error.main : theme.palette.success.main,
                                 }}
                             >
                                 &#8377;
@@ -192,7 +209,7 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                                 sx={{
                                     fontWeight: 700,
                                     // fontSize: '1.1rem',
-                                    color: inv.is_deemed_positive ? theme.palette.success.main : theme.palette.error.main,
+                                    color: inv.is_deemed_positive ? theme.palette.error.main : theme.palette.success.main,
                                 }}
                             >
                                 {inv.is_deemed_positive ? " " : inv.amount}
@@ -201,7 +218,7 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                     </TableCell>
 
                     {/* Actions */}
-                    <TableCell align="center" >
+                    <TableCell align="center" sx={{ px: 1 }}>
                         <Zoom in={isHovered} timeout={200}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'center' }}>
                                 <Tooltip title="View Details" arrow>
@@ -266,27 +283,6 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                                         <DeleteIcon fontSize="small" />
                                     </IconButton>
                                 </Tooltip>
-                                <Tooltip title="Print Invoice" arrow>
-                                    <IconButton
-                                        size="small"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            if (onPrint)
-                                                onPrint(inv);
-                                        }}
-                                        sx={{
-                                            bgcolor: alpha(theme.palette.success.main, 0.1),
-                                            color: theme.palette.success.main,
-                                            transition: 'all 0.3s ease',
-                                            '&:hover': {
-                                                bgcolor: alpha(theme.palette.success.main, 0.2),
-                                                transform: 'scale(1.1)',
-                                            },
-                                        }}
-                                    >
-                                        <Print fontSize="small" />
-                                    </IconButton>
-                                </Tooltip>
                             </Box>
                         </Zoom>
                     </TableCell>
@@ -319,10 +315,10 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                 </DialogTitle>
                 <DialogContent>
                     <Alert severity="warning" sx={{ mb: 2 }}>
-                        This action cannot be undone. Any information regarding this invoice will be lost.
+                        This action cannot be undone. The product will be permanently removed from your company database.
                     </Alert>
                     <Typography>
-                        Are you sure you want to delete the invoice with "<strong>{inv.voucher_number}</strong>"?
+                        Are you sure you want to delete "<strong>{inv.voucher_number}</strong>"?
                     </Typography>
                 </DialogContent>
                 <DialogActions sx={{ p: 3, gap: 1 }}>
@@ -340,7 +336,7 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                         sx={{ borderRadius: 2 }}
                         startIcon={<DeleteIcon />}
                     >
-                        Delete Invoice
+                        Delete Customer
                     </Button>
                 </DialogActions>
             </Dialog>

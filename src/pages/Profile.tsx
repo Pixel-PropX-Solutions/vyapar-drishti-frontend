@@ -113,6 +113,8 @@ const ProfilePage: React.FC = () => {
       .then(() => {
         fetchCompleteData();
         toast.success('Company deleted successfully')
+      }).catch((error) => {
+        toast.error(error || "An unexpected error occurred. Please try again later.");
       });
   };
 
@@ -124,6 +126,8 @@ const ProfilePage: React.FC = () => {
       .then(() => {
         // dispatch(getCurrentUser());
         toast.success('Account deleted successfully')
+      }).catch((error) => {
+        toast.error(error || "An unexpected error occurred. Please try again later.");
       });
   };
 
@@ -162,12 +166,10 @@ const ProfilePage: React.FC = () => {
     <Box
       sx={{
         minHeight: "100vh",
-        background: `linear-gradient(135deg, ${alpha(theme.palette.primary.light, 0.08)} 0%, ${alpha(theme.palette.secondary.light, 0.04)} 100%)`,
-        overflow: "hidden",
         width: "100%",
       }}
     >
-      <Container sx={{ position: "relative", width: '100%', zIndex: 1, py: 4 }}>
+      <Container maxWidth={false} sx={{ position: "relative", width: '100%', maxWidth: '100%', zIndex: 1, py: 4 }}>
         <Stack spacing={2}>
 
           {/* Enhanced Profile Header */}
@@ -200,199 +202,16 @@ const ProfilePage: React.FC = () => {
                 },
               }}
             >
-              <Tab label="Personal Info" icon={<Person />} iconPosition="start" />
               <Tab label="Company Info" icon={<BusinessSharp />} iconPosition="start" />
               <Tab label="Templates" icon={<Print />} iconPosition="start" />
               <Tab label="Preferences" icon={<Tune />} iconPosition="start" />
               <Tab label="Settings" icon={<Settings />} iconPosition="start" />
+              <Tab label="Personal Info" icon={<Person />} iconPosition="start" />
             </Tabs>
           </Paper>
 
           {/* Tab Content */}
           {tabValue === 0 && (
-            <Grid container gap={2} sx={{ mt: 2 }}>
-              {/* Contact Information */}
-              <Grid item xs={12} lg={4}>
-                <SettingsCard title="Contact Information" icon={<EmailIcon />}>
-                  <Stack spacing={2}>
-                    <InfoRow
-                      icon={<EmailIcon />}
-                      label="Email Address"
-                      value={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          {user?.email}
-                        </Box>
-                      }
-                    // badge={1}
-                    />
-                    <InfoRow
-                      icon={<PhoneIcon />}
-                      label="Phone Number"
-                      value={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          {user?.phone?.code || ''} {" "}
-                          {user?.phone?.number || 'Not provided'}
-                        </Box>
-                      }
-                    />
-                    <InfoRow
-                      icon={<AccessTime />}
-                      label="Member Since"
-                      value={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          {formatDatewithTime(user?.created_at ?? '')}
-                        </Box>
-                      }
-                    />
-                  </Stack>
-                </SettingsCard>
-              </Grid>
-
-              {/* Password & Security */}
-              <Grid item xs={12} lg={7} >
-                <SettingsCard title="Password & Security" icon={<SecurityOutlined />}>
-                  <Stack spacing={3} sx={{ p: 1 }}>
-                    <Box>
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          mb: 2,
-                          fontWeight: 600,
-                          textDecoration: "underline",
-                          textUnderlineOffset: "4px",
-                        }}
-                      >
-                        Change Password
-                      </Typography>
-                      <Paper
-                        elevation={0}
-                        sx={{
-                          p: 3,
-                          borderRadius: 1,
-                          bgcolor: mode === 'light' ? alpha(theme.palette.success.main, 0.05) : alpha(theme.palette.success.light, 0.1),
-                          border: `1px solid ${alpha(theme.palette.success.main, 0.5)}`,
-                        }}
-                      >
-                        <Box display="flex" alignItems="center" justifyContent="space-between">
-                          <Box display="flex" alignItems="center">
-                            <Box
-                              sx={{
-                                p: 1,
-                                borderRadius: 1,
-                                bgcolor: mode === 'light' ? alpha(theme.palette.success.main, 0.1) : alpha(theme.palette.success.light, 0.1),
-                                color: mode === 'light' ? theme.palette.success.main : theme.palette.success.light,
-                                mr: 2,
-                              }}
-                            >
-                              <Password />
-                            </Box>
-                            <Box>
-                              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                                Want to Change Your Password?
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                Update your password to keep your account secure.
-                              </Typography>
-                            </Box>
-                          </Box>
-                          <Box display="flex" alignItems="center" justifyContent="center" >
-                            <Button
-                              variant="contained"
-                              color="success"
-                              // onClick={onEditToggle}
-                              startIcon={<Password />}
-                              sx={{
-                                background: mode === 'light' ? alpha(theme.palette.success.main, 0.5) : alpha(theme.palette.success.light, 0.5),
-                                "&:hover": {
-                                  background: mode === 'light' ? alpha(theme.palette.success.main, 1) : alpha(theme.palette.success.light, 1),
-                                },
-                                fontWeight: 600,
-                                whiteSpace: "nowrap",
-                                px: 3,
-                              }}
-                            >
-                              Change
-                            </Button>
-                          </Box>
-                        </Box>
-                      </Paper>
-                    </Box>
-
-                    <Divider sx={{ my: 1 }} />
-
-                    <Box>
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          mb: 2,
-                          fontWeight: 600,
-                          color: theme.palette.error.light,
-                          textDecoration: "underline",
-                          textUnderlineOffset: "4px",
-                        }}
-                      >
-                        Danger Zone
-                      </Typography>
-                      <Paper
-                        elevation={0}
-                        sx={{
-                          p: 3,
-                          borderRadius: 1,
-                          bgcolor: alpha(theme.palette.error.light, 0.05),
-                          border: `1px solid ${alpha(theme.palette.error.light, 0.2)}`,
-                        }}
-                      >
-                        <Box display="flex" alignItems="center" justifyContent="space-between">
-                          <Box display="flex" alignItems="center">
-                            <Box
-                              sx={{
-                                p: 1,
-                                borderRadius: 1,
-                                bgcolor: alpha(theme.palette.error.light, 0.1),
-                                color: theme.palette.error.light,
-                                mr: 1,
-                              }}
-                            >
-                              <DeleteForever />
-                            </Box>
-                            <Box>
-                              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                                Want to Delete Your Account Permanently?
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                Your request will be processed within 5-7 business days.
-                              </Typography>
-                            </Box>
-                          </Box>
-                          <Box display="flex" alignItems="center" justifyContent="center" >
-                            <Button
-                              variant="contained"
-                              color="error"
-                              onClick={() => setOpenDeleteDialog(true)}
-                              startIcon={<DeleteForever />}
-                              sx={{
-                                background: alpha(theme.palette.error.light, 0.5),
-                                "&:hover": {
-                                  background: alpha(theme.palette.error.light, 1),
-                                },
-                                fontWeight: 600,
-                                whiteSpace: "nowrap",
-                                px: 3,
-                              }}
-                            >
-                              Delete
-                            </Button>
-                          </Box>
-                        </Box>
-                      </Paper>
-                    </Box>
-                  </Stack>
-                </SettingsCard>
-              </Grid>
-            </Grid>
-          )}
-
-          {tabValue === 1 && (
             (companies.length < 1) ? (
               <Box sx={{ width: '100%', p: 4, textAlign: 'center' }}>
                 <Typography variant="h5" color="text.secondary" sx={{ mb: 2 }}>
@@ -445,14 +264,14 @@ const ProfilePage: React.FC = () => {
                           </Typography>
                         </Box>
                       </TableCell>
-                      <TableCell align="right" sx={{ px: 1 }}>
+                      <TableCell align="center" sx={{ px: 1 }}>
                         <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
                           Financial Year
                         </Typography>
                       </TableCell>
-                      <TableCell align="right" sx={{ px: 1 }}>
+                      <TableCell align="center" sx={{ px: 1 }}>
                         <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                          Legal Information
+                          GSTIN
                         </Typography>
                       </TableCell>
                       <TableCell align="center" sx={{ px: 1 }}>
@@ -497,7 +316,7 @@ const ProfilePage: React.FC = () => {
               </TableContainer>
             ))}
 
-          {tabValue === 2 && (
+          {tabValue === 1 && (
             <Grid container justifyContent={'space-between'} >
               {/* Sales Template */}
               <Grid item xs={12} lg={5.8}>
@@ -575,7 +394,7 @@ const ProfilePage: React.FC = () => {
             </Grid>
           )}
 
-          {tabValue === 3 && (
+          {tabValue === 2 && (
             <Grid container justifyContent={'space-between'}>
               {/* Notification Preferences */}
               <Grid item xs={12} lg={5.8}>
@@ -708,7 +527,7 @@ const ProfilePage: React.FC = () => {
             </Grid>
           )}
 
-          {tabValue === 4 && (
+          {tabValue === 3 && (
             <Grid container justifyContent={'space-between'}>
               {/* Account Settings */}
               <Grid item xs={12} lg={5.8}>
@@ -898,7 +717,7 @@ const ProfilePage: React.FC = () => {
                       <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
                         Features
                       </Typography>
-                      <Stack spacing={2}>
+                      <Stack direction={'row'} spacing={2}>
                         {currentCompanyDetails?.company_settings ? (
                           <>
                             <FormControlLabel
@@ -996,7 +815,7 @@ const ProfilePage: React.FC = () => {
               </Grid>
 
               {/* Data Management */}
-              <Grid item xs={12}>
+              <Grid item xs={12} sx={{mt:3}}>
                 <SettingsCard title="Data Management" icon={<Settings />}>
                   <Grid container spacing={3}>
                     <Grid item xs={12} md={6}>
@@ -1106,6 +925,190 @@ const ProfilePage: React.FC = () => {
               </Grid>
             </Grid>
           )}
+
+           {tabValue === 4 && (
+            <Grid container gap={2} sx={{ mt: 2 }}>
+              {/* Contact Information */}
+              <Grid item xs={12} lg={4}>
+                <SettingsCard title="Contact Information" icon={<EmailIcon />}>
+                  <Stack spacing={2}>
+                    <InfoRow
+                      icon={<EmailIcon />}
+                      label="Email Address"
+                      value={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          {user?.email}
+                        </Box>
+                      }
+                    // badge={1}
+                    />
+                    <InfoRow
+                      icon={<PhoneIcon />}
+                      label="Phone Number"
+                      value={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          {user?.phone?.code || ''} {" "}
+                          {user?.phone?.number || 'Not provided'}
+                        </Box>
+                      }
+                    />
+                    <InfoRow
+                      icon={<AccessTime />}
+                      label="Member Since"
+                      value={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          {formatDatewithTime(user?.created_at ?? '')}
+                        </Box>
+                      }
+                    />
+                  </Stack>
+                </SettingsCard>
+              </Grid>
+
+              {/* Password & Security */}
+              <Grid item xs={12} lg={7} >
+                <SettingsCard title="Password & Security" icon={<SecurityOutlined />}>
+                  <Stack spacing={3} sx={{ p: 1 }}>
+                    <Box>
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          mb: 2,
+                          fontWeight: 600,
+                          textDecoration: "underline",
+                          textUnderlineOffset: "4px",
+                        }}
+                      >
+                        Change Password
+                      </Typography>
+                      <Paper
+                        elevation={0}
+                        sx={{
+                          p: 3,
+                          borderRadius: 1,
+                          bgcolor: mode === 'light' ? alpha(theme.palette.success.main, 0.05) : alpha(theme.palette.success.light, 0.1),
+                          border: `1px solid ${alpha(theme.palette.success.main, 0.5)}`,
+                        }}
+                      >
+                        <Box display="flex" alignItems="center" justifyContent="space-between">
+                          <Box display="flex" alignItems="center">
+                            <Box
+                              sx={{
+                                p: 1,
+                                borderRadius: 1,
+                                bgcolor: mode === 'light' ? alpha(theme.palette.success.main, 0.1) : alpha(theme.palette.success.light, 0.1),
+                                color: mode === 'light' ? theme.palette.success.main : theme.palette.success.light,
+                                mr: 2,
+                              }}
+                            >
+                              <Password />
+                            </Box>
+                            <Box>
+                              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                                Want to Change Your Password?
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Update your password to keep your account secure.
+                              </Typography>
+                            </Box>
+                          </Box>
+                          <Box display="flex" alignItems="center" justifyContent="center" >
+                            <Button
+                              variant="contained"
+                              color="success"
+                              // onClick={onEditToggle}
+                              startIcon={<Password />}
+                              sx={{
+                                background: mode === 'light' ? alpha(theme.palette.success.main, 0.5) : alpha(theme.palette.success.light, 0.5),
+                                "&:hover": {
+                                  background: mode === 'light' ? alpha(theme.palette.success.main, 1) : alpha(theme.palette.success.light, 1),
+                                },
+                                fontWeight: 600,
+                                whiteSpace: "nowrap",
+                                px: 3,
+                              }}
+                            >
+                              Change
+                            </Button>
+                          </Box>
+                        </Box>
+                      </Paper>
+                    </Box>
+
+                    <Divider sx={{ my: 1 }} />
+
+                    <Box>
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          mb: 2,
+                          fontWeight: 600,
+                          color: theme.palette.error.light,
+                          textDecoration: "underline",
+                          textUnderlineOffset: "4px",
+                        }}
+                      >
+                        Danger Zone
+                      </Typography>
+                      <Paper
+                        elevation={0}
+                        sx={{
+                          p: 3,
+                          borderRadius: 1,
+                          bgcolor: alpha(theme.palette.error.light, 0.05),
+                          border: `1px solid ${alpha(theme.palette.error.light, 0.2)}`,
+                        }}
+                      >
+                        <Box display="flex" alignItems="center" justifyContent="space-between">
+                          <Box display="flex" alignItems="center">
+                            <Box
+                              sx={{
+                                p: 1,
+                                borderRadius: 1,
+                                bgcolor: alpha(theme.palette.error.light, 0.1),
+                                color: theme.palette.error.light,
+                                mr: 1,
+                              }}
+                            >
+                              <DeleteForever />
+                            </Box>
+                            <Box>
+                              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                                Want to Delete Your Account Permanently?
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Your request will be processed within 5-7 business days.
+                              </Typography>
+                            </Box>
+                          </Box>
+                          <Box display="flex" alignItems="center" justifyContent="center" >
+                            <Button
+                              variant="contained"
+                              color="error"
+                              onClick={() => setOpenDeleteDialog(true)}
+                              startIcon={<DeleteForever />}
+                              sx={{
+                                background: alpha(theme.palette.error.light, 0.5),
+                                "&:hover": {
+                                  background: alpha(theme.palette.error.light, 1),
+                                },
+                                fontWeight: 600,
+                                whiteSpace: "nowrap",
+                                px: 3,
+                              }}
+                            >
+                              Delete
+                            </Button>
+                          </Box>
+                        </Box>
+                      </Paper>
+                    </Box>
+                  </Stack>
+                </SettingsCard>
+              </Grid>
+            </Grid>
+          )}
+
         </Stack>
 
       </Container>

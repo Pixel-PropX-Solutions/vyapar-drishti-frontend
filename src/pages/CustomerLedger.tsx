@@ -37,12 +37,13 @@ import { CustomerSortField, SortOrder, GetUserLedgers } from "@/utils/types";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { useNavigate } from "react-router-dom";
-import { viewAllCustomer } from "@/services/customers";
-import { CustomerRowSkeleton } from "@/common/CustomerRowSkeleton";
+import { deleteCustomer, viewAllCustomer } from "@/services/customers";
+import { CustomerRowSkeleton } from "@/common/skeletons/CustomerRowSkeleton";
 import { CustomerRow } from "@/features/customer/CustomerRow";
 import { viewAllAccountingGroups } from "@/services/accountingGroup";
-import { ActionButton } from "@/common/ActionButton";
+import { ActionButton } from "@/common/buttons/ActionButton";
 import { setCustomerTypeId, setEditingCustomer } from "@/store/reducers/customersReducer";
+import toast from "react-hot-toast";
 
 const CustomerLedger: React.FC = () => {
   const { customers, pageMeta, loading } = useSelector((state: RootState) => state.customersLedger);
@@ -56,7 +57,7 @@ const CustomerLedger: React.FC = () => {
     searchQuery: "",
     filterState: "All-States",
     is_deleted: false,
-    type: "All",
+    type: "Customers",
     page: 1,
     rowsPerPage: 10,
     sortField: "created_at" as CustomerSortField,
@@ -169,7 +170,7 @@ const CustomerLedger: React.FC = () => {
                 Customers Directory
               </Typography>
               <Typography variant="body2" color="text.secondary" >
-                {pageMeta.total - 2} Customers available in your database after applying
+                {pageMeta.total} Customers available in your database after applying
                 filters
               </Typography>
             </Grid>
@@ -193,6 +194,7 @@ const CustomerLedger: React.FC = () => {
                   sx={{
                     background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
                     color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
+                    border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
                     '&:hover': {
                       color: theme.palette.mode === 'dark' ? '#000' : '#fff',
                       background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
@@ -213,6 +215,7 @@ const CustomerLedger: React.FC = () => {
                   sx={{
                     background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
                     color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
+                    border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#c62828'}`,
                     '&:hover': {
                       color: theme.palette.mode === 'dark' ? '#000' : '#fff',
                       background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
@@ -288,7 +291,7 @@ const CustomerLedger: React.FC = () => {
               ),
             }}
           >
-            <MenuItem selected value="All">
+            <MenuItem selected value="Customers">
               <em>All</em>
             </MenuItem>
             {accountingGroups?.map((group) => (
@@ -450,8 +453,14 @@ const CustomerLedger: React.FC = () => {
                       navigate(`/customers/edit/${cred.parent.toLowerCase()}`);
                     }}
                     onDelete={async () => {
-                      // await deleteCustomer(cred._id);
-                      fetchCustomers();
+                      await dispatch(deleteCustomer(cred._id)).unwrap().then(() => {
+                        dispatch(setEditingCustomer(null));
+                        fetchCustomers();
+                        toast.success(`${cred.ledger_name} deleted successfully.`);
+                      }).catch((error) => {
+                        toast.error(error || "An unexpected error occurred while deleting the customer.");
+                        console.error("Failed to delete customer:", error);
+                      });
                     }}
 
                   />
@@ -487,6 +496,7 @@ const CustomerLedger: React.FC = () => {
                           sx={{
                             background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
                             color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
+                            border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
                             '&:hover': {
                               color: theme.palette.mode === 'dark' ? '#000' : '#fff',
                               background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
@@ -507,6 +517,7 @@ const CustomerLedger: React.FC = () => {
                           sx={{
                             background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
                             color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
+                            border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#c62828'}`,
                             '&:hover': {
                               color: theme.palette.mode === 'dark' ? '#000' : '#fff',
                               background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
@@ -539,12 +550,12 @@ const CustomerLedger: React.FC = () => {
         <Typography variant="body2" sx={{ mr: 2 }}>
           {`Showing ${(pageMeta.page - 1) * rowsPerPage + 1}-${Math.min(
             pageMeta.page * rowsPerPage,
-            (pageMeta.total - 2)
-          )} of ${pageMeta.total - 2} customers`}
+            (pageMeta.total)
+          )} of ${pageMeta.total} customers`}
         </Typography>
 
-        {(pageMeta.total - 2) > 1 && <Pagination
-          count={Math.ceil((pageMeta.total - 2) / rowsPerPage)}
+        {(pageMeta.total) > 1 && <Pagination
+          count={Math.ceil((pageMeta.total) / rowsPerPage)}
           page={pageMeta.page}
           onChange={handleChangePage}
           color="primary"

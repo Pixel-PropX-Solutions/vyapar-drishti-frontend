@@ -11,7 +11,6 @@ import {
   Box,
   TextField,
   InputAdornment,
-  Pagination,
   Tooltip,
   TableSortLabel,
   FormControl,
@@ -43,10 +42,11 @@ import { getAllInvoiceGroups } from "@/services/invoice";
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { InvoicesRowSkeleton } from "@/common/InvoicesRowSkeleton";
-import { ActionButton } from "@/common/ActionButton";
+import { InvoicesRowSkeleton } from "@/common/skeletons/InvoicesRowSkeleton";
+import { ActionButton } from "@/common/buttons/ActionButton";
 import { setInvoiceTypeId } from "@/store/reducers/invoiceReducer";
 import toast from "react-hot-toast";
+import { BottomPagination } from "@/common/BottomPagination";
 
 
 const Invoices: React.FC = () => {
@@ -158,11 +158,19 @@ const Invoices: React.FC = () => {
   // Handle Delete Invoice details
   const handleDeleteInvoice = (inv: GetAllVouchars) => {
     if (currentCompanyDetails?.company_settings?.features?.enable_gst) {
-      dispatch(deleteGSTInvoice({ vouchar_id: inv._id, company_id: currentCompanyDetails._id }));
-      fetchIvoices();
+      dispatch(deleteGSTInvoice({ vouchar_id: inv._id, company_id: currentCompanyDetails._id })).unwrap().then(() => {
+        fetchIvoices();
+        toast.success("Invoice deleted successfully!");
+      }).catch((error) => {
+        toast.error(error || 'An unexpected error occurred. Please try again later.');
+      })
     } else {
-      dispatch(deleteInvoice({ vouchar_id: inv._id, company_id: currentCompanyDetails._id }));
-      fetchIvoices();
+      dispatch(deleteInvoice({ vouchar_id: inv._id, company_id: currentCompanyDetails._id })).unwrap().then(() => {
+        toast.success("Invoice deleted successfully!");
+        fetchIvoices();
+      }).catch((error) => {
+        toast.error(error || 'An unexpected error occurred. Please try again later.');
+      })
     }
   };
 
@@ -174,9 +182,8 @@ const Invoices: React.FC = () => {
           company_id: currentCompany?._id || "",
         })).then((response) => {
           if (response.meta.requestStatus === 'fulfilled') {
-            console.log("GST Invoice printed successfully:", response.payload);
             const payload = response.payload as { paginated_data: Array<{ html: string, page_number: number }>, complete_data: string, download_data: string };
-            console.log("GST Invoice payload printed successfully:", payload);
+            toast.success("Invoice data fetched successfully! 🎉");
             const paginated_html = payload.paginated_data;
             const fullHtml = payload.complete_data;
             const download_html = payload.download_data;
@@ -192,7 +199,7 @@ const Invoices: React.FC = () => {
           }
         }
         ).catch((error) => {
-          console.error("Error printing GST invoice:", error);
+          toast.error(error || "An unexpected error occurred. Please try again later.");
         }
         );
       } else {
@@ -201,9 +208,8 @@ const Invoices: React.FC = () => {
           company_id: currentCompany?._id || "",
         })).then((response) => {
           if (response.meta.requestStatus === 'fulfilled') {
-            console.log("Invoice printed successfully:", response.payload);
             const payload = response.payload as { paginated_data: Array<{ html: string, page_number: number }>, complete_data: string, download_data: string };
-            console.log("Invoice payload printed successfully:", payload);
+            toast.success("Invoice data fetched successfully! 🎉");
             const paginated_html = payload.paginated_data;
             const fullHtml = payload.complete_data;
             const download_html = payload.download_data;
@@ -219,7 +225,7 @@ const Invoices: React.FC = () => {
           }
         }
         ).catch((error) => {
-          console.error("Error printing invoice:", error);
+          toast.error(error || "An unexpected error occurred. Please try again later.");
         }
         );
       }
@@ -277,6 +283,7 @@ const Invoices: React.FC = () => {
                     sx={{
                       background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
                       color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
+                      border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
                       '&:hover': {
                         color: theme.palette.mode === 'dark' ? '#000' : '#fff',
                         background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
@@ -297,6 +304,7 @@ const Invoices: React.FC = () => {
                     sx={{
                       background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
                       color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
+                      border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#c62828'}`,
                       '&:hover': {
                         color: theme.palette.mode === 'dark' ? '#000' : '#fff',
                         background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
@@ -392,7 +400,7 @@ const Invoices: React.FC = () => {
                 ),
               }}
             >
-              <MenuItem selected value="All">
+              <MenuItem selected value="Invoices">
                 <em>All</em>
               </MenuItem>
               <MenuItem value={'Sales'}>
@@ -453,22 +461,17 @@ const Invoices: React.FC = () => {
                   width: '100%',
                   '& .MuiTableCell-head': {
                     borderBottom: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-                  }
+                  },
+                  "& .MuiTableCell-root": {
+                    padding: '8px 16px',
+                  },
                 }}>
-                <TableCell sx={{ pl: 3, pr: 1 }}>
-                  <Tooltip title="Sort by Name">
-                    <TableSortLabel
-                      active={sortField === "name"}
-                      direction={sortField === "name" ? sortOrder : "asc"}
-                      onClick={() => handleSortRequest("name")}
-                    >
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                        Sr. No.
-                      </Typography>
-                    </TableSortLabel>
-                  </Tooltip>
+                <TableCell sx={{ px: 1 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                    Sr. No.
+                  </Typography>
                 </TableCell>
-                <TableCell align="center" sx={{ px: 1 }}>
+                <TableCell align="left" sx={{ px: 1 }}>
                   <Tooltip title="Sort by State" arrow>
                     <TableSortLabel
                       active={sortField === "state"}
@@ -484,7 +487,7 @@ const Invoices: React.FC = () => {
                     </TableSortLabel>
                   </Tooltip>
                 </TableCell>
-                <TableCell align="center" sx={{ px: 1 }}>
+                <TableCell align="left" sx={{ px: 1 }}>
                   <Tooltip title="Sort by Name">
                     <TableSortLabel
                       active={sortField === "name"}
@@ -498,71 +501,44 @@ const Invoices: React.FC = () => {
                   </Tooltip>
                 </TableCell>
 
-                <TableCell align="center" sx={{ px: 1 }}>
+                <TableCell align="left" sx={{ px: 1 }}>
                   <Tooltip title="Sort by Item Quantity" arrow>
                     <TableSortLabel
                     // active={sortField === "name"}
                     // direction={sortField === "name" ? sortOrder : "asc"}
                     // onClick={() => handleSortRequest("name")}
                     >
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                        {/* <Contacts fontSize="small" /> */}
-                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                          Invoice Type
-                        </Typography>
-                      </Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                        Invoice Type
+                      </Typography>
+                    </TableSortLabel>
+                  </Tooltip>
+                </TableCell>
+
+                <TableCell align="left" sx={{ px: 1 }}>
+                  <Tooltip title="Sort by State" arrow sx={{ mx: 'auto' }}>
+                    <TableSortLabel
+                      active={sortField === "state"}
+                      direction={sortField === "state" ? sortOrder : "asc"}
+                      onClick={() => handleSortRequest("state")}
+                      sx={{ mx: 'auto' }}
+                    >
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem', mx: 'auto' }}>
+                        Invoice No.
+                      </Typography>
                     </TableSortLabel>
                   </Tooltip>
                 </TableCell>
 
                 <TableCell align="center" sx={{ px: 1 }}>
-                  <Tooltip title="Sort by State" arrow>
-                    <TableSortLabel
-                      active={sortField === "state"}
-                      direction={sortField === "state" ? sortOrder : "asc"}
-                      onClick={() => handleSortRequest("state")}
-                    >
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                        {/* <LocationOn fontSize="small" /> */}
-                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                          Invoice No.
-                        </Typography>
-                      </Box>
-                    </TableSortLabel>
-                  </Tooltip>
-                </TableCell>
-
-                <TableCell align="center" sx={{ px: 1 }}>
-                  <Tooltip title="Sort by State" arrow>
-                    <TableSortLabel
-                      active={sortField === "state"}
-                      direction={sortField === "state" ? sortOrder : "asc"}
-                      onClick={() => handleSortRequest("state")}
-                    >
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                        {/* <LocationOn fontSize="small" /> */}
-                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                          Debit
-                        </Typography>
-                      </Box>
-                    </TableSortLabel>
-                  </Tooltip>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                    Debit
+                  </Typography>
                 </TableCell>
                 <TableCell align="center" sx={{ px: 1 }}>
-                  <Tooltip title="Sort by State" arrow>
-                    <TableSortLabel
-                      active={sortField === "state"}
-                      direction={sortField === "state" ? sortOrder : "asc"}
-                      onClick={() => handleSortRequest("state")}
-                    >
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                        {/* <LocationOn fontSize="small" /> */}
-                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                          Credit
-                        </Typography>
-                      </Box>
-                    </TableSortLabel>
-                  </Tooltip>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                    Credit
+                  </Typography>
                 </TableCell>
 
 
@@ -614,10 +590,14 @@ const Invoices: React.FC = () => {
                             variant="contained"
                             startIcon={<AddCircleOutlineIcon />}
                             color="success"
-                            onClick={() => { navigate('/invoices/create/sales') }}
+                            onClick={() => {
+                              dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Sales'))?._id || ''));
+                              navigate('/invoices/create/sales')
+                            }}
                             sx={{
                               background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
                               color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
+                              border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
                               '&:hover': {
                                 color: theme.palette.mode === 'dark' ? '#000' : '#fff',
                                 background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
@@ -631,10 +611,14 @@ const Invoices: React.FC = () => {
                             variant="contained"
                             startIcon={<RemoveCircleOutlineIcon />}
                             color="error"
-                            onClick={() => { navigate('/invoices/create/purchase') }}
+                            onClick={() => {
+                              dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Purchase'))?._id || ''));
+                              navigate('/invoices/create/purchase');
+                            }}
                             sx={{
                               background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
                               color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
+                              border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#c62828'}`,
                               '&:hover': {
                                 color: theme.palette.mode === 'dark' ? '#000' : '#fff',
                                 background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
@@ -656,55 +640,14 @@ const Invoices: React.FC = () => {
         </TableContainer>
 
         {/* Pagination Controls */}
-        <Paper
-          elevation={0}
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            p: 1,
-            mt: 1,
-            borderRadius: 1,
-            border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-            boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 0.5 }}>
-            <Typography variant="body2" sx={{ mr: 2 }}>
-              {`Showing ${(pageMeta.page - 1) * rowsPerPage + 1}-${Math.min(
-                pageMeta.page * rowsPerPage,
-                pageMeta.total
-              )} of ${pageMeta.total} invoices`}
-            </Typography>
-          </Box>
-
-          {pageMeta.total > rowsPerPage && (
-            <Pagination
-              count={Math.ceil(pageMeta.total / rowsPerPage)}
-              page={page}
-              onChange={handleChangePage}
-              color="primary"
-              size={"medium"}
-              showFirstButton
-              showLastButton
-              sx={{
-                "& .MuiPaginationItem-root": {
-                  mx: { xs: 0.25, sm: 0.5 },
-                  borderRadius: 1,
-                  fontWeight: 600,
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`,
-                  },
-                  '&.Mui-selected': {
-                    boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`,
-                  },
-                },
-              }}
-            />
-          )}
-        </Paper>
+        <BottomPagination
+          total={pageMeta.total}
+          item="invoices"
+          page={page}
+          metaPage={pageMeta.page}
+          rowsPerPage={rowsPerPage}
+          onChange={handleChangePage}
+        />
 
         {html && <InvoicePrint invoiceHtml={htmlFromAPI} downloadHtml={downloadHtml} customerName={customerName} fullHtml={fullHtml} open={html} onClose={() => setHtml(false)} invoiceNumber={invoiceId} />}
       </Box >

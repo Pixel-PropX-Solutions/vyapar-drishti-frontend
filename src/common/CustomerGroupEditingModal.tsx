@@ -41,7 +41,7 @@ interface CustomerGroupEditingModalProps {
     open: boolean;
     onClose: () => void;
     onUpdated?: () => Promise<void>;
-    onCreated: (group: { name: string; _id: string, user_id: string, parent:string }) => void;
+    onCreated: (group: { name: string; _id: string, user_id: string, parent: string }) => void;
     group: GetGroup | null;
 }
 
@@ -232,49 +232,41 @@ const CustomerGroupEditingModal: React.FC<CustomerGroupEditingModalProps> = ({
         });
 
         try {
-            await toast.promise(
-                group === null
-                    ? dispatch(createCompanyBilling({ data: formData })).unwrap().then((response) => {
-                        const newGroup = {
-                            name: response.inventory_group_name,
-                            _id: response._id,
-                            user_id: user?._id || "",
-                            parent: response.parent || "",
-                        };
-                        onClose();
-                        resetForm();
-                        if (onCreated)
-                            onCreated(newGroup);
-                        setIsLoading(false);
-                    }).catch(() => {
-                        setIsLoading(false);
-                    })
-                    : dispatch(
-                        updateCompanyBilling({ data: formData, id: group._id ?? "" })
-                    ).unwrap()
-                        .then(() => {
-                            setIsLoading(false);
-                            resetForm();
-                            onClose();
-                            if (onUpdated) onUpdated();
-                        })
-                        .catch(() => {
-                            setIsLoading(false);
-                        }),
-                {
-                    loading: (
-                        <b>{group === null ? "Creating" : "Updating"} group... ⏳</b>
-                    ),
-                    success: (
-                        <b>
-                            Group {group === null ? "created" : "updated"} successfully! 🎉
-                        </b>
-                    ),
-                    error: (
-                        <b>Failed to {group === null ? "create" : "update"} group. 🚫</b>
-                    ),
-                }
-            );
+            if (group === null) {
+                dispatch(createCompanyBilling({ data: formData })).unwrap().then((response) => {
+                    const newGroup = {
+                        name: response.inventory_group_name,
+                        _id: response._id,
+                        user_id: user?._id || "",
+                        parent: response.parent || "",
+                    };
+                    onClose();
+                    resetForm();
+                    if (onCreated)
+                        onCreated(newGroup);
+                    toast.success(`Group ${group === null ? "created" : "updated"} successfully! 🎉`);
+                    setIsLoading(false);
+                }).catch((error) => {
+                    setIsLoading(false);
+                    toast.error(error || `Failed to ${group === null ? "create" : "update"} group. 🚫`);
+                });
+            }
+            else {
+                dispatch(
+                    updateCompanyBilling({ data: formData, id: group._id ?? "" })
+                ).unwrap()
+                .then(() => {
+                    setIsLoading(false);
+                    resetForm();
+                    onClose();
+                    if (onUpdated) onUpdated();
+                    toast.success(`Group ${group === null ? "created" : "updated"} successfully! 🎉`);
+                })
+                .catch((error) => {
+                    setIsLoading(false);
+                    toast.error(error || `Failed to ${group === null ? "create" : "update"} group. 🚫`);
+                });
+            }
         } catch {
             // Error handled by toast
         } finally {

@@ -242,26 +242,22 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
             }
         });
 
-        await toast.promise(
-            dispatch(updateUser({
-                data: formData,
-                id: user?._id ?? '',
-            }))
-                .unwrap()
-                .then(() => {
-                    setIsLoading(false);
-                    onClose();
-                    onUpdated();
-                })
-                .catch(() => {
-                    setIsLoading(false);
-                }),
-            {
-                loading: "Updating your user...",
-                success: <b>User successfully updated! 🎉</b>,
-                error: <b>Failed to update user. Please try again.</b>,
-            }
-        );
+        await dispatch(updateUser({
+            data: formData,
+            id: user?._id ?? '',
+        }))
+            .unwrap()
+            .then(() => {
+                setIsLoading(false);
+                toast.success("User successfully updated! 🎉");
+                onClose();
+                onUpdated();
+
+            })
+            .catch((error) => {
+                setIsLoading(false);
+                toast.error(error || "Failed to update user. Please try again.");
+            });
     };
 
     return (

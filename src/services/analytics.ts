@@ -12,10 +12,7 @@ export const getUserAnalytics = createAsyncThunk(
                 return { userAnalyticsData };
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -32,10 +29,7 @@ export const getAdminAnalytics = createAsyncThunk(
                 return { adminAnalyticsData };
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );

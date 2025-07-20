@@ -18,8 +18,6 @@ import {
     Avatar,
     Divider,
     useMediaQuery,
-    Autocomplete,
-    alpha,
 } from "@mui/material";
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import {
@@ -35,7 +33,7 @@ import {
 } from "@mui/icons-material";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
-import { createCategory, updateCategory, viewAllCategories } from "@/services/category";
+import { createCategory, updateCategory } from "@/services/category";
 import { AppDispatch, RootState } from "@/store/store";
 import { UpdateCategory } from "@/utils/types";
 
@@ -49,7 +47,6 @@ interface CategoryCreateModalProps {
 
 interface CategoryFormData {
     name: string;
-    under: string;
     description: string;
     image?: File | string;
 }
@@ -65,29 +62,20 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const dispatch = useDispatch<AppDispatch>();
     const { currentCompany } = useSelector((state: RootState) => state.auth);
-    const { categoryLists } = useSelector((state: RootState) => state.category);
     const [isLoading, setIsLoading] = useState(false);
     const [_uploadProgress, setUploadProgress] = useState(0);
     const categoryfileInputRef = useRef<HTMLInputElement | null>(null);
     const [isDragActive, setIsDragActive] = useState(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
-    const [selectedCategoryOption, setSelectedCateogryOption] = useState<{
-        label: string;
-        value: string;
-    } | null>(null);
+   
 
     const [data, setData] = useState<CategoryFormData>({
         name: '',
         description: '',
         image: '',
-        under: 'Primary Category',
     });
 
-    const categoryOptions = categoryLists?.map(cat => ({
-        label: cat.category_name,
-        value: cat.category_name,
-    })) || [];
 
     const validateForm = (): boolean => {
         const errors: { [key: string]: string } = {};
@@ -118,22 +106,6 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
                 ...prev,
                 [field]: ''
             }));
-        }
-    };
-
-    const handleParentChange = (
-        _: React.SyntheticEvent<Element, Event>,
-        value: string | { label: string; value: string } | null
-    ) => {
-        if (typeof value === 'string') {
-            setSelectedCateogryOption({ label: value, value });
-            handleInputChange('under', value);
-        } else if (value) {
-            setSelectedCateogryOption(value);
-            handleInputChange('under', value.value);
-        } else {
-            setSelectedCateogryOption(null);
-            handleInputChange('under', '');
         }
     };
 
@@ -220,7 +192,6 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
             name: '',
             description: '',
             image: '',
-            under: 'Primary Category',
         });
         setImagePreview(null);
         setUploadProgress(0);
@@ -231,13 +202,11 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
     };
 
     useEffect(() => {
-        dispatch(viewAllCategories(currentCompany?._id || ''));
         if (open && category) {
             setData({
                 name: category.category_name || '',
                 description: category.description || '',
                 image: category.image || '',
-                under: category.under || '',
             });
             setImagePreview(
                 typeof category?.image === "string" ? category.image : null
@@ -246,7 +215,7 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
             resetForm();
         }
 
-    }, [open, category]);
+    }, [open, category, dispatch, currentCompany?._id]);
 
     const handleSubmit = async () => {
         if (!validateForm()) {
@@ -260,7 +229,6 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
         };
         if (data.description && data.description !== '') sanitizedData.description = data.description;
         if (data.image && typeof data.image !== 'string') sanitizedData.image = data.image;
-        if (data.under && data.under !== '') sanitizedData.under = data.under.trim();
 
         const formData = new FormData();
         Object.entries(sanitizedData).forEach(([key, value]) => {
@@ -276,50 +244,40 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
 
         if (category && category._id) {
             // Edit mode
-            await toast.promise(
-                dispatch(updateCategory({
-                    id: category._id,
-                    data: formData
-                }))
-                    .unwrap()
-                    .then(() => {
-                        setIsLoading(false);
-                        onClose();
-                        if (onUpdated) onUpdated();
-                    })
-                    .catch(() => {
-                        setIsLoading(false);
-                    }),
-                {
-                    loading: "Updating your category...",
-                    success: <b>Category successfully updated! 🎉</b>,
-                    error: <b>Failed to update category. Please try again.</b>,
-                }
-            );
+            await dispatch(updateCategory({
+                id: category._id,
+                data: formData
+            }))
+                .unwrap()
+                .then(() => {
+                    setIsLoading(false);
+                    onClose();
+                    if (onUpdated) onUpdated();
+                    toast.success("Category successfully updated! 🎉");
+                })
+                .catch((error) => {
+                    setIsLoading(false);
+                    toast.error(error || "An unexpected error occurred. Please try again later.");
+                });
         } else {
             // Create mode
-            await toast.promise(
-                dispatch(createCategory({ categoryData: formData }))
-                    .unwrap()
-                    .then((response) => {
-                        const newCategory = {
-                            name: response.category_name,
-                            _id: response._id
-                        };
-                        onCreated(newCategory);
-                        setIsLoading(false);
-                        resetForm();
-                        onClose();
-                    })
-                    .catch(() => {
-                        setIsLoading(false);
-                    }),
-                {
-                    loading: "Creating your category...",
-                    success: <b>Category successfully created! 🎉</b>,
-                    error: <b>Failed to create category. Please try again.</b>,
-                }
-            );
+            dispatch(createCategory({ categoryData: formData }))
+                .unwrap()
+                .then((response) => {
+                    const newCategory = {
+                        name: response.category_name,
+                        _id: response._id
+                    };
+                    toast.success("Category successfully created! 🎉");
+                    onCreated(newCategory);
+                    setIsLoading(false);
+                    resetForm();
+                    onClose();
+                })
+                .catch((error) => {
+                    setIsLoading(false);
+                    toast.error(error || "An unexpected error occurred. Please try again later.");
+                });
         }
     };
 
@@ -598,59 +556,6 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
                                             }
                                         }
                                     }}
-                                />
-                            </FormControl>
-
-                            {/* Under Category */}
-                            <FormControl fullWidth>
-                                <Typography variant="body1" fontWeight={600} sx={{ mb: 1 }}>
-                                    Under Category
-                                </Typography>
-                                <Autocomplete
-                                    options={[...categoryOptions, { label: 'Primary Category', value: 'Primary Category' }]}
-                                    freeSolo
-                                    value={selectedCategoryOption}
-                                    onChange={handleParentChange}
-                                    getOptionLabel={(option) =>
-                                        typeof option === 'string' ? option : option.label
-                                    }
-                                    renderOption={(props, option) => (
-                                        <Box
-                                            component="li"
-                                            {...props}
-                                            sx={{
-                                                fontWeight: 400,
-                                                color: 'inherit',
-                                                borderTop: 'none',
-                                                '&:hover': {
-                                                    backgroundColor: alpha(theme.palette.action.hover, 0.1)
-                                                }
-                                            }}
-                                        >
-                                            {option.label}
-                                        </Box>
-                                    )}
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            placeholder="Enter parent category"
-                                            variant="outlined"
-                                            required
-                                            fullWidth
-                                            helperText={formErrors.parent || "Select a parent group if applicable"}
-                                            error={!!formErrors.parent}
-                                            sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    borderRadius: 1,
-                                                    '&:hover fieldset': {
-                                                        borderColor: theme.palette.primary.main,
-                                                        borderWidth: 2
-                                                    }
-                                                }
-                                            }}
-                                        />
-                                    )}
-                                    sx={{ minWidth: 250 }}
                                 />
                             </FormControl>
 

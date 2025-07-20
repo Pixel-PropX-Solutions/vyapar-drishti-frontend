@@ -29,8 +29,8 @@ interface BasicDetailsSectionProps {
     handleChange: (field: keyof FormCreateProduct, value: string | boolean) => void;
     validationErrors: Record<string, string>;
     theme: Theme;
-    selectedUnitOption: { label: string; value: string; id: string; } | null;
-    setSelectedUnitOption: React.Dispatch<React.SetStateAction<{ label: string; value: string; id: string; } | null>>;
+    selectedUnitOption: { unit_name: string; value: string; id: string; } | null;
+    setSelectedUnitOption: React.Dispatch<React.SetStateAction<{ unit_name: string; value: string; id: string; } | null>>;
     imagePreview: string | null;
     setImagePreview: React.Dispatch<React.SetStateAction<string | null>>;
     handleImageChange: (file: File) => void;
@@ -56,7 +56,7 @@ const BasicDetailsSection: React.FC<BasicDetailsSectionProps> = ({
 }) => {
 
 
-    const handleUnitChange = (_: React.SyntheticEvent, newValue: { label: string; value: string; id: string; } | null) => {
+    const handleUnitChange = (_: React.SyntheticEvent, newValue: { unit_name: string; value: string; id: string; } | null) => {
         if (newValue?.value === '__add_new__') {
             return;
         }
@@ -266,7 +266,7 @@ const BasicDetailsSection: React.FC<BasicDetailsSectionProps> = ({
                                 options={units}
                                 value={selectedUnitOption}
                                 onChange={handleUnitChange}
-                                getOptionLabel={(option) => option.label}
+                                getOptionLabel={(option) => option.unit_name}
                                 renderOption={(props, option) => (
                                     <Box
                                         component="li"
@@ -282,7 +282,7 @@ const BasicDetailsSection: React.FC<BasicDetailsSectionProps> = ({
                                             }
                                         }}
                                     >
-                                        {option.label}
+                                        {option.unit_name}
                                     </Box>
                                 )}
                                 renderInput={(params) => (

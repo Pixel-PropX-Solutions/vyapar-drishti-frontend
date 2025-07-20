@@ -82,7 +82,7 @@ export const CompanyRow: React.FC<ProductRowProps> = ({ com, onDelete, onEdit, o
                     onClick={() => onView(com)}
                 >
                     {/* Company Info */}
-                    <TableCell sx={{ pl: 3, pr: 1 }}>
+                    <TableCell align="left" sx={{ pl: 3, pr: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
                             <Avatar
                                 sx={{
@@ -166,77 +166,56 @@ export const CompanyRow: React.FC<ProductRowProps> = ({ com, onDelete, onEdit, o
                     </TableCell>
 
                     {/* Finacial Information */}
-                    <TableCell align="right" sx={{ px: 1 }}>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                <Typography
-                                    variant="h6"
-                                    sx={{
-                                        fontWeight: 600,
-                                        fontSize: '1rem',
-                                        color: theme.palette.text.primary,
-                                        ml: 0.5,
-                                    }}
-                                >
-                                    {new Date(com.financial_year_start).getFullYear()} - {new Date(com.financial_year_start).getFullYear() + 1}
-                                </Typography>
-                            </Box>
-                        </Box>
+                    <TableCell align="center" sx={{ px: 1 }}>
+                        <Typography
+                            variant="h6"
+                            sx={{
+                                fontWeight: 600,
+                                fontSize: '1rem',
+                                color: theme.palette.text.primary,
+                                ml: 0.5,
+                            }}
+                        >
+                            {new Date(com.financial_year_start).getFullYear()} - {new Date(com.financial_year_start).getFullYear() + 1}
+                        </Typography>
                     </TableCell>
-                    <TableCell align="right" sx={{ px: 1 }}>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5 }}>
-                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                {com.gstin && <Typography
-                                    variant="h6"
-                                    sx={{
-                                        fontWeight: 600,
-                                        fontSize: '.8rem',
-                                        color: theme.palette.text.primary,
-                                    }}
-                                >
-                                    GSTIN : {com.gstin}
-                                </Typography>}
-                                {com.pan && <Typography
-                                    variant="h6"
-                                    sx={{
-                                        fontWeight: 600,
-                                        fontSize: '.8rem',
-                                        color: theme.palette.text.primary,
-                                    }}
-                                >
-                                    PAN : {com.pan}
-                                </Typography>}
-                            </Box>
-
-                        </Box>
+                    <TableCell align="center" sx={{ px: 1 }}>
+                        {com.gstin && <Typography
+                            variant="h6"
+                            sx={{
+                                fontWeight: 600,
+                                fontSize: '.8rem',
+                                color: theme.palette.text.primary,
+                            }}
+                        >
+                            {com.gstin}
+                        </Typography>}
                     </TableCell>
 
                     {/* Purchase Price */}
-                    <TableCell align="right" sx={{ px: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                            <Typography
-                                variant="h6"
-                                sx={{
-                                    fontWeight: 600,
-                                    fontSize: '.9rem',
-                                    color: theme.palette.text.primary,
-                                }}
-                            >
-                                {com?.created_at ? new Date(com.created_at).toLocaleString('en-IN', {
-                                    year: 'numeric',
-                                    month: 'short',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                }) : ''}
-                            </Typography>
-                        </Box>
+                    <TableCell align="center" sx={{ px: 1 }}>
+                        <Typography
+                            variant="h6"
+                            sx={{
+                                fontWeight: 600,
+                                fontSize: '.9rem',
+                                color: theme.palette.text.primary,
+                            }}
+                        >
+                            {com?.created_at ? new Date(com.created_at).toLocaleString('en-IN', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                            }) : ''}
+                        </Typography>
                     </TableCell>
 
                     {/* Actions */}
-                    <TableCell align="right" sx={{ pr: 3, pl: 1 }}>
+                    <TableCell align="center" sx={{ px: 1 }}>
                         <Zoom in={isHovered} timeout={200}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'flex-end' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'center' }}>
                                 <Tooltip title="View Details" arrow>
                                     <IconButton
                                         size="small"

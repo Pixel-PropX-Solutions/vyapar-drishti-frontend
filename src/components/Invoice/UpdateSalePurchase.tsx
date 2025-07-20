@@ -44,6 +44,7 @@ import { viewProductsWithId } from '@/services/products';
 import { updateInvoice, viewInvoice } from '@/services/invoice';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { TableRowProps } from "@mui/material";
+import toast from 'react-hot-toast';
 
 // Interfaces
 interface InvoiceItems {
@@ -143,6 +144,10 @@ export default function UpdateSalePurchase() {
         reference_number: "",
         reference_date: "",
         place_of_supply: "",
+        mode_of_transport: "",
+        vehicle_number: "",
+        status: "",
+        due_date: "",
         accounting: [] as InvoiceAccounting[],
         items: [] as InvoiceItems[],
     });
@@ -268,6 +273,10 @@ export default function UpdateSalePurchase() {
             reference_number: data.reference_number || '',
             reference_date: data.reference_date || '',
             place_of_supply: data.place_of_supply || '',
+            mode_of_transport: data.mode_of_transport || '',
+            vehicle_number: data.vehicle_number || '',
+            status: data.status || '',
+            due_date: data.due_date || '',
             accounting:
                 data.accounting.map(acc => {
                     let amount = 0;
@@ -304,9 +313,12 @@ export default function UpdateSalePurchase() {
 
         dispatch(updateInvoice(dataToSend)).then(() => {
             setIsLoading(false);
+            toast.success("Invoice updated successfully!");
             navigate('/invoices', { replace: true });
-        })
-        // }
+        }).catch((error) => {
+            setIsLoading(false);
+            toast.error(error || "An unexpected error occurred. Please try again later.");
+        });
 
     };
 
@@ -329,7 +341,8 @@ export default function UpdateSalePurchase() {
             }
         }
         ).catch((error) => {
-            console.error('Error fetching customers:', error);
+            setIsLoading(false);
+            toast.error(error || "An unexpected error occurred. Please try again later.");
         });
 
         // dispatch(viewAllCustomerWithType({
@@ -359,6 +372,9 @@ export default function UpdateSalePurchase() {
                 );
             }
             return response;
+        }).catch((error) => {
+            toast.error(error || "An unexpected error occurred. Please try again later.");
+            setIsLoading(false);
         });
     }, [dispatch, type, user.user_settings.current_company_id, user]);
 
@@ -385,6 +401,10 @@ export default function UpdateSalePurchase() {
                 reference_number: invoiceData.reference_number || '',
                 reference_date: invoiceData.reference_date || '',
                 place_of_supply: invoiceData.place_of_supply || '',
+                mode_of_transport: invoiceData.mode_of_transport || '',
+                vehicle_number: invoiceData.vehicle_number || '',
+                status: invoiceData.status || '',
+                due_date: invoiceData.due_date || '',
                 accounting: invoiceData.accounting_entries || [],
                 items: invoiceData.inventory.map((item) => ({
                     _id: item._id || '',

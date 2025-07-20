@@ -11,26 +11,26 @@ export const InvoicesRowSkeleton: React.FC = () => (
         <TableCell align="center">
             <Skeleton variant="text" width={20} height={32} />
         </TableCell>
-        <TableCell>
-            <Skeleton variant="text" width={100} height={28} />
+        <TableCell align="left">
+            <Skeleton variant="text" width={100} height={20} />
+        </TableCell>
+        <TableCell align="left">
+            <Skeleton variant="text" width={160} height={20} sx={{ mx: 'auto' }} />
         </TableCell>
         <TableCell align="center">
-            <Skeleton variant="text" width={160} height={32} sx={{ mx: 'auto' }} />
+            <Skeleton variant="text" width={80} height={20} sx={{ mx: 'auto' }} />
         </TableCell>
         <TableCell align="center">
-            <Skeleton variant="text" width={80} height={32} sx={{ ml: 'auto' }} />
+            <Skeleton variant="text" width={80} height={20} sx={{ mx: 'auto' }} />
         </TableCell>
         <TableCell align="center">
-            <Skeleton variant="text" width={80} height={32} sx={{ ml: 'auto' }} />
+            <Skeleton variant="text" width={40} height={20} sx={{ mx: 'auto' }} />
         </TableCell>
-        <TableCell align="right">
-            <Skeleton variant="text" width={40} height={32} sx={{ ml: 'auto' }} />
+        <TableCell align="center">
+            <Skeleton variant="text" width={40} height={20} sx={{ mx: 'auto' }} />
         </TableCell>
-        <TableCell align="right">
-            <Skeleton variant="text" width={40} height={32} sx={{ ml: 'auto' }} />
-        </TableCell>
-        <TableCell align="right">
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+        <TableCell align="center">
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
                 <Skeleton variant="rectangular" width={32} height={32} sx={{ borderRadius: 1 }} />
                 <Skeleton variant="rectangular" width={32} height={32} sx={{ borderRadius: 1 }} />
                 <Skeleton variant="rectangular" width={32} height={32} sx={{ borderRadius: 1 }} />

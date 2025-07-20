@@ -9,6 +9,7 @@ import {
   Grid,
   InputAdornment,
   useTheme,
+  Autocomplete,
 } from "@mui/material";
 import { Email } from "@mui/icons-material";
 import Logo from "../../../assets/Logo.png";
@@ -19,12 +20,15 @@ import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { getCompany } from "@/services/company";
+import CountryCodes from '../../../internals/data/CountryCodes.json';
+
 
 const RegistrationForm: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
-  // const [showPassword, setShowPassword] = React.useState(false);
+  // const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
+
   const [data, setData] = useState({
     first: "",
     last: "",
@@ -33,10 +37,6 @@ const RegistrationForm: React.FC = () => {
     number: '',
   });
 
-  // const handleTogglePasswordVisibility = () => {
-  //   setShowPassword(!showPassword);
-  // };
-
   function changeHandler(event: React.ChangeEvent<HTMLInputElement>) {
     setData((prevData) => ({
       ...prevData,
@@ -44,8 +44,49 @@ const RegistrationForm: React.FC = () => {
     }));
   }
 
+  function changeCountryCode(
+    field: string,
+    value: string) {
+    setData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  }
+
+  // const validateForm = (): boolean => {
+  //   const errors: { [key: string]: string } = {};
+
+  //   if (!data.first.trim()) {
+  //     errors.first = 'First name is required';
+  //   } else if (data.first.length < 2) {
+  //     errors.first = 'First name must be at least 2 characters';
+  //   }
+
+  //   if (!data.email.trim()) {
+  //     errors.email = 'Email is required';
+  //   } else if (!/\S+@\S+\.\S+/.test(data.email)) {
+  //     errors.email = 'Email is invalid';
+  //   }
+
+  //   if (!data.code.trim()) {
+  //     errors.code = 'Country code is required';
+  //   }
+
+  //   if (!data.number.trim()) {
+  //     errors.number = 'Phone number is required';
+  //   }
+
+  //   setFormErrors(errors);
+  //   return Object.keys(errors).length === 0;
+  // };
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // if (!validateForm()) {
+    //   toast.error('Please fix the form errors before submitting');
+    //   return;
+    // }
+
     const userData = {
       name: {
         first: data.first,
@@ -193,25 +234,78 @@ const RegistrationForm: React.FC = () => {
               }}
             />
             <Box sx={{ display: "flex", gap: 2 }}>
-              <TextField
-                required
-                margin="normal"
-                sx={{ width: "20%" }}
-                fullWidth
-                id="code"
-                label="Code"
-                name="code"
-                autoComplete="code"
-                autoFocus
-                onChange={changeHandler}
-                value={data.code}
-                placeholder="+91 "
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start"></InputAdornment>
-                  ),
-                }}
-              />
+              <Box sx={{ width: "20%" }}>
+                <Autocomplete
+                  fullWidth
+                  options={[
+                    ...(CountryCodes?.map(con => ({
+                      label: `${con.dial_code} (${con.code})`,
+                      value: con.dial_code,
+                    })) ?? []),
+                  ]}
+                  freeSolo
+                  renderOption={(props, option) => {
+                    const { key, ...rest } = props;
+                    return (
+                      <li
+                        key={key}
+                        {...rest}
+                        style={{
+                          fontWeight: 400,
+                          color: 'inherit',
+                          ...(props.style || {}),
+                        }}
+                      >
+                        {option.label}
+                      </li>
+                    );
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      fullWidth
+                      required
+                      id="code"
+                      label="Code"
+                      name="code"
+                      placeholder="+91 "
+                      InputProps={{
+                        ...params.InputProps,
+                        startAdornment: (
+                          <InputAdornment position="start">
+                          </InputAdornment>
+                        ),
+                      }}
+                      margin="normal"
+                      autoComplete="off"
+                    />
+                  )}
+                  value={data.code || ''}
+                  onChange={(_, newValue) => {
+                    changeCountryCode(
+                      'code',
+                      typeof newValue === 'string' ? newValue : newValue?.value || ''
+                    );
+                  }}
+                  componentsProps={{
+                    paper: {
+                      sx: {
+                        border: '1px solid #000',
+                        borderRadius: 1,
+                        width: '150px'
+                      },
+                    },
+                  }}
+                  sx={{
+                    '& .MuiAutocomplete-endAdornment': { display: 'none' },
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 1,
+                      width: "100%"
+                    }
+                  }}
+                />
+              </Box>
+
               <TextField
                 required
                 margin="normal"
@@ -232,76 +326,6 @@ const RegistrationForm: React.FC = () => {
                 }}
               />
             </Box>
-            {/* <TextField
-              required
-              margin="normal"
-              fullWidth
-              id="company_name"
-              label="Company Name"
-              name="company_name"
-              onChange={changeHandler}
-              value={data.company_name}
-              autoComplete="company_name"
-              placeholder="Quality Auto Parts"
-              autoFocus
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start"></InputAdornment>
-                ),
-              }}
-            />
-            <TextField
-              required
-              margin="normal"
-              fullWidth
-              id="brand_name"
-              label="Brand Name"
-              name="brand_name"
-              autoComplete="brand_name"
-              onChange={changeHandler}
-              value={data.brand_name}
-              placeholder="Quality Auto Parts"
-              autoFocus
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start"></InputAdornment>
-                ),
-              }}
-            /> */}
-
-            {/* <TextField
-              required
-              margin="normal"
-              fullWidth
-              name="password"
-              label="Password"
-              type={showPassword ? "text" : "password"}
-              id="password"
-              placeholder="password"
-              autoComplete="current-password"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Lock />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    {showPassword ? (
-                      <VisibilityOff
-                        onClick={handleTogglePasswordVisibility}
-                        style={{ cursor: "pointer" }}
-                      />
-                    ) : (
-                      <Visibility
-                        onClick={handleTogglePasswordVisibility}
-                        style={{ cursor: "pointer" }}
-                      />
-                    )}
-                  </InputAdornment>
-                ),
-              }}
-            /> */}
             <Button
               type="submit"
               fullWidth
@@ -318,7 +342,7 @@ const RegistrationForm: React.FC = () => {
                 Already have an account?{" "}
                 <Button
                   onClick={() => navigate("/login")}
-                  sx={{fontSize:'1rem', color: theme.palette.primary.main, textDecoration: 'underline' }}
+                  sx={{ fontSize: '1rem', color: theme.palette.primary.main, textDecoration: 'underline' }}
                 >
                   Sign In
                 </Button>

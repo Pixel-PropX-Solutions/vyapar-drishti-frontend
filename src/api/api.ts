@@ -30,8 +30,8 @@ userApi.interceptors.response.use(
 
             try {
                 const {data} = await axios.post<Token>(
-                    // `${import.meta.env.VITE_BACKEND_BASE_URL}/auth/handleRefreshToken`,
-                    `${import.meta.env.VITE_LOCAL_BACKEND_BASE_URL}/auth/handleRefreshToken`,
+                    // `${import.meta.env.VITE_BACKEND_BASE_URL}/auth/refresh`,
+                    `${import.meta.env.VITE_LOCAL_BACKEND_BASE_URL}/auth/refresh`,
                     {},
                     {withCredentials : true}
                 );

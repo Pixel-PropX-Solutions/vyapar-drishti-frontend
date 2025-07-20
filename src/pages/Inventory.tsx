@@ -39,7 +39,7 @@ import { AppDispatch, RootState } from '@/store/store';
 import { SortField, SortOrder, InventoryItem } from '@/utils/types';
 import { getProductStock } from '@/services/inventory';
 import { WarningOutlined } from '@mui/icons-material';
-import { ActionButton } from "@/common/ActionButton";
+import { ActionButton } from "@/common/buttons/ActionButton";
 
 // Styled Components with enhanced visuals
 const StockCard = styled(Paper)(({ theme }) => ({
@@ -75,8 +75,6 @@ const Inventory: React.FC = () => {
         state: '',
         page_no: 1,
         limit: 10,
-        startDate: new Date('2025-01-01'),
-        endDate: new Date('2025-12-31'),
         sortField: "created_at" as SortField,
         sortOrder: "asc" as SortOrder,
     });
@@ -101,8 +99,6 @@ const Inventory: React.FC = () => {
             state: '',
             page_no: 1,
             limit: 10,
-            startDate: new Date('2025-01-01'),
-            endDate: new Date('2025-12-31'),
             sortField: "created_at" as SortField,
             sortOrder: "asc" as SortOrder,
         });
@@ -209,8 +205,8 @@ const Inventory: React.FC = () => {
                 lowStockItems: lowItems,
                 positiveStockCount: positiveItems.length || 0,
                 positiveStockItems: positiveItems,
-                totalStockValue: lowItems.reduce((acc, item) => acc + (item.sales_value || 0), 0) || 0,
-                totalPurchaseValue: lowItems.reduce((acc, item) => acc + (item.purchase_value || 0), 0) || 0
+                totalStockValue: InventoryItems.reduce((acc, item) => acc + (item.sales_value || 0), 0) || 0,
+                totalPurchaseValue: InventoryItems.reduce((acc, item) => acc + (item.purchase_value || 0), 0) || 0
             });
 
             initialDataLoaded.current = true;

@@ -54,6 +54,7 @@ export const ProfileHeader: React.FC<{
         color: "white",
         borderRadius: 4,
         overflow: "hidden",
+        width: '100%'
       }}
     >
       <CardContent sx={{ p: 4, position: "relative", zIndex: 1 }}>

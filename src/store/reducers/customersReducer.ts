@@ -1,25 +1,36 @@
-import { updateCustomer, getCustomer, createCustomer, deleteCustomer, restoreCustomer, viewAllCustomer, viewAllCustomers } from "@/services/customers";
-import { PageMeta, GetUserLedgers, CustomersList } from "@/utils/types";
+import { updateCustomer, getCustomer, createCustomer, deleteCustomer, viewAllCustomer, viewAllCustomers, getCustomerInvoices, viewAllCustomerWithTypes } from "@/services/customers";
+import { PageMeta, GetUserLedgers, CustomersList, GetCustomerInvoices } from "@/utils/types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface CustomerState {
     customers: Array<GetUserLedgers>;
-    customer: GetUserLedgers | null;
+    customer: any | null;
     editingCustomer: GetUserLedgers | null;
     customerType_id: string | null;
     customersList: Array<CustomersList> | [];
+    customerTypes: Array<{_id:string, ledger_name:string, parent:string}> | [];
+    customerInvoices: Array<GetCustomerInvoices> | [];
     loading: boolean,
     error: string | null;
+    customerInvoicesMeta: PageMeta
     pageMeta: PageMeta
 }
 
 const initialState: CustomerState = {
     customers: [],
     customersList: [],
+    customerInvoices: [],
+    customerTypes: [],
     customer: null,
     editingCustomer: null,
     customerType_id: null,
     pageMeta: {
+        page: 0,
+        limit: 0,
+        total: 0,
+        unique: [],
+    },
+    customerInvoicesMeta: {
         page: 0,
         limit: 0,
         total: 0,
@@ -83,6 +94,19 @@ const customerSlice = createSlice({
                 state.error = action.payload as string;
                 state.loading = false;
             })
+           
+            .addCase(viewAllCustomerWithTypes.pending, (state) => {
+                state.error = null;
+                state.loading = true;
+            })
+            .addCase(viewAllCustomerWithTypes.fulfilled, (state, action: PayloadAction<any>) => {
+                state.customerTypes = action.payload.customerTypes; 
+                state.loading = false;
+            })
+            .addCase(viewAllCustomerWithTypes.rejected, (state, action) => {
+                state.error = action.payload as string;
+                state.loading = false;
+            })
 
 
             .addCase(getCustomer.pending, (state) => {
@@ -96,6 +120,22 @@ const customerSlice = createSlice({
                 }
             )
             .addCase(getCustomer.rejected, (state, action) => {
+                state.error = action.payload as string;
+                state.loading = false;
+            })
+            
+            .addCase(getCustomerInvoices.pending, (state) => {
+                state.error = null;
+                state.loading = true;
+            })
+            .addCase(getCustomerInvoices.fulfilled,
+                (state, action: PayloadAction<any>) => {
+                    state.customerInvoices = action.payload.customerInvoices;
+                    state.customerInvoicesMeta = action.payload.customerInvoicesMeta;
+                    state.loading = false;
+                }
+            )
+            .addCase(getCustomerInvoices.rejected, (state, action) => {
                 state.error = action.payload as string;
                 state.loading = false;
             })
@@ -126,18 +166,6 @@ const customerSlice = createSlice({
                 state.loading = false;
             })
 
-
-            .addCase(restoreCustomer.pending, (state) => {
-                state.error = null;
-                state.loading = true;
-            })
-            .addCase(restoreCustomer.fulfilled, (state) => {
-                state.loading = false;
-            })
-            .addCase(restoreCustomer.rejected, (state, action) => {
-                state.error = action.payload as string;
-                state.loading = false;
-            })
     }
 });
 

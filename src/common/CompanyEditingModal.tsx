@@ -106,7 +106,6 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
         email: '',
         image: '',
         gstin: '',
-        pan_number: '',
         website: '',
         account_number: '',
         account_holder: '',
@@ -288,7 +287,6 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
             email: '',
             image: '',
             gstin: '',
-            pan_number: '',
             website: '',
             account_number: '',
             account_holder: '',
@@ -321,7 +319,6 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                 name: company.name || '',
                 mailing_name: company.mailing_name || '',
                 gstin: company?.gstin || '',
-                pan_number: company?.pan || '',
                 website: company?.website || '',
                 email: company?.email || '',
                 code: company?.phone?.code || '',
@@ -367,7 +364,6 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
 
         if (data.email && data.email !== '') sanitizedData.email = data.email.trim();
         if (data.gstin && data.gstin !== '') sanitizedData.gstin = data.gstin.trim();
-        if (data.pan_number && data.pan_number !== '') sanitizedData.pan_number = data.pan_number.trim();
         if (data.number && data.number !== '') sanitizedData.number = data.number.trim();
         if (data.code && data.code !== '') sanitizedData.code = data.code.trim();
         if (data.address_1 && data.address_1 !== '') sanitizedData.address_1 = data.address_1.trim();
@@ -395,46 +391,37 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
         });
 
         if (company) {
-            await toast.promise(
-                dispatch(updateCompany({ data: formData, id: company._id }))
-                    .unwrap()
-                    .then(() => {
-                        setIsLoading(false);
-                        onClose();
-                        if (onUpdated)
-                            onUpdated();
-                    })
-                    .catch(() => {
-                        setIsLoading(false);
-                    }),
-                {
-                    loading: <b>Updating your company... ⏳</b>,
-                    success: <b>Company Details successfully updated! 🎉</b>,
-                    error: <b>Failed to update company. 🚫</b>,
-                }
-            );
+            await dispatch(updateCompany({ data: formData, id: company._id }))
+                .unwrap()
+                .then(() => {
+                    setIsLoading(false);
+                    onClose();
+                    if (onUpdated)
+                        onUpdated();
+                    toast.success("Company Details successfully updated! 🎉");
+                })
+                .catch((error) => {
+                    setIsLoading(false);
+                    toast.error(error || "Failed to update company. An unexpected error occurred.");
+                })
         }
         else {
-            await toast.promise(
-                dispatch(createCompany(formData))
-                    .unwrap()
-                    .then(() => {
-                        setIsLoading(false);
-                        onClose();
-                        if (onCreated)
-                            onCreated();
-                        if (onUpdated)
-                            onUpdated();
-                    })
-                    .catch(() => {
-                        setIsLoading(false);
-                    }),
-                {
-                    loading: <b>Creating your company... ⏳</b>,
-                    success: <b>Company Details successfully created! 🎉</b>,
-                    error: <b>Failed to create company. 🚫</b>,
-                }
-            );
+            await dispatch(createCompany(formData))
+                .unwrap()
+                .then(() => {
+                    setIsLoading(false);
+                    onClose();
+                    if (onCreated)
+                        onCreated();
+                    if (onUpdated)
+                        onUpdated();
+
+                    toast.success("Company Details successfully created! 🎉");
+                })
+                .catch((error) => {
+                    setIsLoading(false);
+                    toast.error(error || "Failed to create company. An unexpected error occurred.");
+                });
         }
 
     };
@@ -1203,33 +1190,7 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                                         }}
                                     />
 
-                                    <TextField
-                                        fullWidth
-                                        label="PAN Number"
-                                        placeholder="ABCDE1234F"
-                                        value={data.pan_number}
-                                        size="small"
-                                        onChange={(e) => handleInputChange('pan_number', e.target.value.toUpperCase())}
-                                        error={!!formErrors.pan_number}
-                                        helperText={formErrors.pan_number || "10 characters including state code"}
-                                        InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <AccountBalance color={formErrors.pan_number ? 'error' : 'primary'} />
-                                                </InputAdornment>
-                                            ),
-                                        }}
-                                        sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                borderRadius: 1,
-                                                transition: 'all 0.1s ease',
-                                                '&:hover': {
-                                                    transform: 'translateY(-1px)',
-                                                }
-                                            }
-                                        }}
-                                    />
-
+                                    
                                     <DatePicker
                                         label="Financial Year Start"
                                         value={typeof data.financial_year_start === "string" ? new Date(data.financial_year_start) : data.financial_year_start}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   Box,
   Button,
@@ -48,8 +48,21 @@ const LoginForm: React.FC = () => {
     }));
   }
 
+  const validateForm = useCallback(() => {
+    const errors: Record<string, string> = {};
+    if (!data.username.trim()) errors.username = 'Username is required';
+    if (!data.password.trim()) errors.password = 'Password is required';
+    return errors;
+  }, [data]);
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      // Handle validation errors
+      return;
+    }
+
     const formData = new FormData();
     formData.append("username", data.username);
     formData.append("password", data.password);
@@ -57,24 +70,15 @@ const LoginForm: React.FC = () => {
 
     dispatch(login(formData))
       .unwrap()
-      .then(() => {
+      .then((response) => {
+        console.log("Response Login FOrm", response)
+        // if(response)
         dispatch(getCurrentUser());
         dispatch(getCompany());
         navigate("/");
       }).catch((error) => {
-        if (error.response && error.response.status === 401) {
-          console.log("Login error 401:", error);
-          toast.error(error || "Invalid credentials. Please try again.");
-        } else if (error.response && error.response.status === 403) {
-          console.log("Login error 403:", error);
-          toast.error(error || "Access denied. You do not have permission to access this resource.");
-        } else if (error.response && error.response.status === 500) {
-          console.log("Login error 500:", error);
-          toast.error(error || "Internal server error. Please try again later.");
-        } else {
-          console.log("Login error:", error);
-          toast.error(error || "An unexpected error occurred. Please try again later.");
-        }
+        console.error("Login error:", error);
+        toast.error(error || "An unexpected error occurred. Please try again later.");
       });
 
   };
@@ -146,16 +150,19 @@ const LoginForm: React.FC = () => {
           >
 
             <TextField
-              margin="normal"
-              fullWidth
-              id="username"
               label="User Name"
+              variant="outlined"
+              fullWidth
+              required
+              value={data.username}
+              onChange={changeHandler}
+              helperText={"Enter your email or username"}
+              margin="normal"
+              id="username"
               name="username"
               autoComplete="username"
               autoFocus
-              color="primary"
               placeholder="johndoe@gmail.com"
-              onChange={changeHandler}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -163,18 +170,32 @@ const LoginForm: React.FC = () => {
                   </InputAdornment>
                 ),
               }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 1,
+                }
+              }}
             />
+
             <TextField
               onChange={changeHandler}
               margin="normal"
               fullWidth
+              required
               name="password"
               variant="outlined"
+              value={data.password}
               label="Password"
               type={showPassword ? "text" : "password"}
               id="password"
               placeholder="Password"
               autoComplete="current-password"
+              helperText={"Enter your password"}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 1,
+                }
+              }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">

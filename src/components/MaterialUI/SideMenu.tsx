@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { logout } from "@/services/auth";
+import toast from 'react-hot-toast';
 
 const drawerWidth = 280; // Slightly wider for more breathing room
 
@@ -48,8 +49,12 @@ export default function SideMenu() {
 
   const handleLogout = (e: React.MouseEvent) => {
     e.stopPropagation();
-    dispatch(logout());
-    navigate("/");
+    dispatch(logout()).unwrap().then(() => {
+      toast.success("Logged out successfully!");
+      navigate("/");
+    }).catch((error) => {
+      toast.error(error || "An unexpected error occurred. Please try again later.");
+    });
   };
 
   return (

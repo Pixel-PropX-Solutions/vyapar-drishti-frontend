@@ -1,5 +1,5 @@
 import userApi from "@/api/api";
-import { CreateInvoiceData, CreateInvoiceWithGSTData, UpdateInvoice } from "@/utils/types";
+import { CreateInvoiceData, CreateInvoiceWithGSTData, UpdateGSTInvoice, UpdateInvoice } from "@/utils/types";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 
@@ -18,10 +18,7 @@ export const createInvoice = createAsyncThunk(
                 return rejectWithValue("Invoice creation failed");
             }
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Upload or creation failed: Invalid input or server error."
-            );
+           return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -42,10 +39,7 @@ export const createInvoiceWithGST = createAsyncThunk(
                 return rejectWithValue("Product creation failed");
             }
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Upload or creation failed: Invalid input or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -89,10 +83,7 @@ export const viewAllInvoices = createAsyncThunk(
                 return { invoices, pageMeta };
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -120,10 +111,7 @@ export const viewInvoice = createAsyncThunk(
                 return { invoiceData };
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -149,10 +137,7 @@ export const getInvoiceCounter = createAsyncThunk(
                 return response.data.data;
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -197,10 +182,7 @@ export const viewAllInvoiceGroups = createAsyncThunk(
                 return { invoiceGroups, invoiceGroupPageMeta };
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -221,10 +203,7 @@ export const getAllInvoiceGroups = createAsyncThunk(
             else
                 return rejectWithValue("Failed to fetch Customer profile");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Failed: Unable to fetch chemist profile"
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -245,10 +224,29 @@ export const updateInvoice = createAsyncThunk(
                 return rejectWithValue("Invoice update failed");
             }
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Upload or creation failed: Invalid input or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
+        }
+    }
+);
+
+
+export const updateGSTInvoice = createAsyncThunk(
+    "update/invoice/vouchar",
+    async (
+        data: UpdateGSTInvoice,
+        { rejectWithValue }
+    ) => {
+        try {
+
+            const updateRes = await userApi.put(`/invoices/update/vouchar/gst/${data.vouchar_id}`, data);
+
+            if (updateRes.data.success === true) {
+                return;
+            } else {
+                return rejectWithValue("Invoice update failed");
+            }
+        } catch (error: any) {
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -277,10 +275,7 @@ export const printInvoices = createAsyncThunk(
                 return data;
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+           return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -311,10 +306,7 @@ export const printGSTInvoices = createAsyncThunk(
                 return data;
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -343,10 +335,7 @@ export const printRecieptInvoices = createAsyncThunk(
                 return { invoceHtml };
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -376,10 +365,7 @@ export const printPaymentInvoices = createAsyncThunk(
                 return { invoceHtml };
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -402,10 +388,7 @@ export const uploadBill = createAsyncThunk(
                 return { invoiceData };
             } else return rejectWithValue("File upload failed: No data received.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "File upload failed: Server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -431,10 +414,7 @@ export const deleteInvoice = createAsyncThunk(
                 return ;
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -461,10 +441,7 @@ export const deleteGSTInvoice = createAsyncThunk(
                 return ;
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );

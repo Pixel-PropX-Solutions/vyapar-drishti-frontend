@@ -37,11 +37,11 @@ import ProductsSideModal from "@/features/products/ProductsSideModal";
 import { deleteCategory, viewAllCategories, viewAllCategory } from "@/services/category";
 import TabPanel from "@/features/upload-documents/components/TabPanel";
 import { ProductRow } from "@/features/products/ProductRow";
-import { CategoryRow } from "@/features/category/CategoryRow";
 import CategoryCreateModal from "@/features/category/CategoryCreateModal";
-import { CategoryRowSkeleton } from "@/features/category/CategoryRowSekeleton";
-import { ProductRowSkeleton } from "@/common/ProductRowSkeleton";
+import { ProductRowSkeleton } from "@/common/skeletons/ProductRowSkeleton";
 import { useNavigate } from "react-router-dom";
+import { CategoryCard } from "@/features/category/CategoryCard";
+import CategoryCardSkeleton from "@/common/skeletons/CategoryCardSkeleton";
 
 const ProductsListing: React.FC = () => {
   const theme = useTheme();
@@ -68,6 +68,7 @@ const ProductsListing: React.FC = () => {
     sortField: 'created_at' as CategorySortField,
     categorySortOrder: 'asc' as SortOrder,
   });
+
   const { searchTerm, categoryFilter, page, rowsPerPage, sortBy, sortOrder, parent, categorySortOrder, sortField, limit, pageNumber, searchQuery } = data;
   const [loading, setLoading] = useState<boolean>(false);
   const [refreshKey, setRefreshKey] = useState<number>(0);
@@ -87,6 +88,7 @@ const ProductsListing: React.FC = () => {
   };
 
   const handleDelete = (productId: string) => {
+    setLoading(true)
     dispatch(
       deleteProduct({ id: productId, company_id: currentCompany?._id || '' })
     )
@@ -95,6 +97,10 @@ const ProductsListing: React.FC = () => {
         setRefreshKey((prev) => prev + 1);
         setLoading(false);
         toast.success('Product deleted successfully')
+      }).catch((error) => {
+        setRefreshKey((prev) => prev + 1);
+        setLoading(false);
+        toast.error(error || "An unexpected error occurred. Please try again later.");
       });
   };
 
@@ -106,8 +112,7 @@ const ProductsListing: React.FC = () => {
       }
       ).catch((error) => {
         setSelectedProduct(null);
-        console.error("Error fetching product details:", error);
-        toast.error("Failed to fetch product details");
+        toast.error(error || "An unexpected error occurred. Please try again later.");
       });
   };
 
@@ -402,7 +407,10 @@ const ProductsListing: React.FC = () => {
                   width: '100%',
                   '& .MuiTableCell-head': {
                     borderBottom: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-                  }
+                  },
+                  "& .MuiTableCell-root": {
+                    padding: '8px 16px',
+                  },
                 }}
               >
                 <TableCell sx={{ pl: 3, pr: 1 }}>
@@ -521,175 +529,96 @@ const ProductsListing: React.FC = () => {
       </TabPanel>
 
       <TabPanel value={selectedTab} index={1}>
-        <TableContainer
-          component={Paper}
-          elevation={0}
+
+        {/* Enhanced Category Cards */}
+        <Box
           sx={{
             width: '100%',
-            borderRadius: 1,
-            border: `1px solid ${alpha(theme.palette.divider, 1)}`,
-            boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
-          }}
-        >
-          <Table sx={{ width: '100%' }}>
-            <TableHead>
-              <TableRow
-                sx={{
-                  bgcolor: alpha(theme.palette.grey[50], 0.8),
-                  width: '100%',
-                  '& .MuiTableCell-head': {
-                    borderBottom: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-                  }
-                }}
-              >
-                <TableCell sx={{ pl: 3, pr: 1 }}>
-                  <Tooltip title="Sort by Category Name" arrow>
-                    <TableSortLabel
-                      active={sortField === "category_name"}
-                      direction={sortField === "category_name" ? categorySortOrder : "asc"}
-                      onClick={() => {
-                        setData((prevState) => ({
-                          ...prevState,
-                          sortField: "category_name",
-                          categorySortOrder: prevState.categorySortOrder === 'asc' ? 'desc' : 'asc'
-                        }));
-                      }}
-                    >
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                        Category Information
-                      </Typography>
-                    </TableSortLabel>
-                  </Tooltip>
-                </TableCell>
-                <TableCell align="right" sx={{ px: 1 }}>
-                  <Tooltip title="Sort by Parent Category" arrow>
-                    <TableSortLabel
-                      active={sortField === "parent"}
-                      direction={sortField === "parent" ? categorySortOrder : "asc"}
-                      onClick={() => {
-                        setData((prevState) => ({
-                          ...prevState,
-                          sortField: "parent",
-                          categorySortOrder: prevState.categorySortOrder === 'asc' ? 'desc' : 'asc'
-                        }));
-                      }}
-                    >
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                        Parent Category
-                      </Typography>
-                    </TableSortLabel>
-                  </Tooltip>
-                </TableCell>
-                <TableCell align="right" sx={{ px: 1 }}>
-                  <Tooltip title="Sort by Create Date" arrow>
-                    <TableSortLabel
-                      active={sortField === "created_at"}
-                      direction={sortField === "created_at" ? categorySortOrder : "asc"}
-                      onClick={() => {
-                        setData((prevState) => ({
-                          ...prevState,
-                          sortField: "created_at",
-                          categorySortOrder: prevState.categorySortOrder === 'asc' ? 'desc' : 'asc'
-                        }));
-                      }}
-                    >
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                        Created At
-                      </Typography>
-                    </TableSortLabel>
-                  </Tooltip>
-                </TableCell>
-                <TableCell align="right" sx={{ px: 1 }}>
-                  <Tooltip title="Sort by Update Date" arrow>
-                    <TableSortLabel
-                      active={sortField === "updated_at"}
-                      direction={sortField === "updated_at" ? categorySortOrder : "asc"}
-                      onClick={() => {
-                        setData((prevState) => ({
-                          ...prevState,
-                          sortField: "updated_at",
-                          categorySortOrder: prevState.categorySortOrder === 'asc' ? 'desc' : 'asc'
-                        }));
-                      }}
-                    >
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                        Last Updated
-                      </Typography>
-                    </TableSortLabel>
-                  </Tooltip>
-                </TableCell>
-                <TableCell align="center" >
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                    Actions
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {loading ? (
-                Array([1, 2, 3, 4, 5])
-                  .map((_, index) => <CategoryRowSkeleton key={`skeleton-${index}`} />)
-              ) : categories?.length > 0 ? (
-                categories?.map((category, index) => (
-                  <CategoryRow
-                    key={category._id}
-                    category={category}
-                    onDelete={(category_id: string) => {
-                      dispatch(
-                        deleteCategory(category_id)
-                      )
-                        .unwrap()
-                        .then(() => {
-                          setRefreshKey((prev) => prev + 1);
-                          setLoading(false);
-                          toast.success('Product deleted successfully')
-                        });
-                    }}
-                    onEdit={(category: GetCategory) => {
-                      setOpenCategoryModal(true);
-                      setSelectedCategory(category);
-                    }}
-                    onView={(category: GetCategory) => {
-                      setOpenCategoryModal(true);
-                      setSelectedCategory(category);
-                    }}
-                    index={index}
-                  />
+          }}>
+          <Grid container spacing={2}>
+            {loading ? (
+              Array([1, 2, 3, 4, 5])
+                .map((_, index) => (
+                  <Grid
+                    item
+                    xs={12}
+                    sm={6}
+                    md={4}
+                    lg={3}
+                    key={`skeleton-${index}`}
+                  >
+                    <CategoryCardSkeleton />
+                  </Grid>
                 ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={5} sx={{ textAlign: "center", py: 8 }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                      <InventoryIcon sx={{ fontSize: '4rem', color: theme.palette.text.disabled }} />
-                      <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 600 }}>
-                        No categories found
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Try adjusting your search or filter criteria, or add your first category
-                      </Typography>
-                      <Button
-                        variant="contained"
-                        onClick={() => {
-                          setOpenCategoryModal(true);
-                          setSelectedCategory(null);
-                        }}
-                        startIcon={<AddCircleIcon />}
-                        sx={{
-                          mt: 2,
-                          borderRadius: 1,
-                          textTransform: 'none',
-                          fontWeight: 600,
-                        }}
-                      >
-                        Add Your First Category
-                      </Button>
-                    </Box>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+            ) : categories?.length > 0 ? (categories.map((category) => (
+              <Grid item xs={12} sm={6} md={3} key={category._id}>
+                <CategoryCard
+                  category={category}
+                  onDelete={(category_id: string) => {
+                    dispatch(
+                      deleteCategory(category_id)
+                    )
+                      .unwrap()
+                      .then(() => {
+                        setRefreshKey((prev) => prev + 1);
+                        setLoading(false);
+                        toast.success('Category deleted successfully')
+                      }).catch((error) => {
+                        setRefreshKey((prev) => prev + 1);
+                        setLoading(false);
+                        toast.error(error || "An unexpected error occurred. Please try again later.");
+                      });
+                  }}
+                  onEdit={(category: GetCategory) => {
+                    setOpenCategoryModal(true);
+                    setSelectedCategory(category);
+                  }}
+                  onView={(category: GetCategory) => {
+                    setOpenCategoryModal(true);
+                    setSelectedCategory(category);
+                  }}
+                />
+              </Grid>
+            ))) : (
+              <Grid item xs={12}>
+                <Box sx={{
+                  borderRadius: 1,
+                  border: `1px solid ${alpha(theme.palette.divider, 1)}`,
+                  boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 2,
+                  py: 4,
+                }}>
+                  <InventoryIcon sx={{ fontSize: '4rem', color: theme.palette.text.disabled }} />
+                  <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 600 }}>
+                    No categories found
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Try adjusting your search or filter criteria, or add your first category
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      setOpenCategoryModal(true);
+                      setSelectedCategory(null);
+                    }}
+                    startIcon={<AddCircleIcon />}
+                    sx={{
+                      mt: 2,
+                      borderRadius: 1,
+                      textTransform: 'none',
+                      fontWeight: 600,
+                    }}
+                  >
+                    Add Your First Category
+                  </Button>
+                </Box>
+              </Grid>
+            )}
+          </Grid>
+        </Box>
       </TabPanel>
 
       {/* Enhanced Pagination Section */}

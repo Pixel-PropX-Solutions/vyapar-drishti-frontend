@@ -25,6 +25,7 @@ import { GetStockItem } from "@/utils/types";
 import { viewProduct } from "@/services/products";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
+import { getAvatarColor, getInitials } from "@/utils/functions";
 
 interface ProductRowProps {
     product: GetStockItem;
@@ -45,26 +46,6 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
     const confirmDelete = () => {
         onDelete(product?._id ?? '');
         setOpenDeleteDialog(false);
-    };
-
-    const getInitials = (name: string): string => {
-        if (!name) return '';
-        return name
-            .split(' ')
-            .map(word => word.charAt(0))
-            .join('')
-            .toUpperCase()
-            .slice(0, 2);
-    };
-
-    const getAvatarColor = (name: string): string => {
-        const colors = [
-            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-            '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
-        ];
-        const safeName = name || '';
-        const index = safeName.length % colors.length;
-        return colors[index];
     };
 
     return (

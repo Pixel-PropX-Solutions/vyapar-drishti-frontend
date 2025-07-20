@@ -23,10 +23,7 @@ export const viewInventrory = createAsyncThunk(
         return { inventoryData };
       } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Login failed: Invalid credentials or server error."
-      );
+      return rejectWithValue(error?.response?.data?.message);
     }
   }
 );
@@ -58,7 +55,7 @@ export const getStockMovement = createAsyncThunk(
   ) => {
     try {
       const response = await userApi.get(
-        `/user/get/timeline?${search ? `search=${search}&` : ''}${movement_type ? `type=${movement_type}&` : ''}${startDate ? `start_date=${startDate}&` : ''}${endDate ? `end_date=${endDate}&` : ''}page_no=${page_no}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"}`
+        `/invoices/get/timeline?${search ? `search=${search}&` : ''}${movement_type ? `type=${movement_type}&` : ''}${startDate ? `start_date=${startDate}&` : ''}${endDate ? `end_date=${endDate}&` : ''}page_no=${page_no}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"}`
       );
 
       if (response.data.success === true) {
@@ -67,10 +64,7 @@ export const getStockMovement = createAsyncThunk(
         return { stockMovement, pageMeta };
       } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Login failed: Invalid credentials or server error."
-      );
+      return rejectWithValue(error?.response?.data?.message);
     }
   }
 );
@@ -111,10 +105,7 @@ export const getProductStock = createAsyncThunk(
         return { InventoryItems, pageMeta };
       } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Login failed: Invalid credentials or server error."
-      );
+      return rejectWithValue(error?.response?.data?.message);
     }
   }
 );

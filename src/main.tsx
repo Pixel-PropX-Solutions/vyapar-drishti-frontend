@@ -22,12 +22,31 @@ createRoot(document.getElementById("root")!).render(
             containerStyle={{}}
             toastOptions={{
               className: "",
-              duration: 5000,
+              duration: 3500,
               removeDelay: 1000,
               style: {
                 background: "#fff",
                 color: "#000",
                 zIndex: "1000",
+                textAlign: 'center'
+              },
+              error: {
+                duration: 4000,
+                style:{
+                  zIndex: "1000",
+                  textAlign: 'center',
+                  padding: "2px 10px",
+                  display: "flex",
+                  flexDirection: "row-reverse",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: "#f44336",
+                  color: "#fff",
+                },
+                iconTheme: {
+                  primary: "#fff",
+                  secondary: "#f44336",
+                },
               },
               success: {
                 duration: 3000,

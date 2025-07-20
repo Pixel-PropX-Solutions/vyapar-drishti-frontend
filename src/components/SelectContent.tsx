@@ -20,6 +20,7 @@ import CompanyEditingModal from '@/common/CompanyEditingModal';
 import { getCurrentCompany, getCurrentUser } from '@/services/auth';
 import { getAllCompanies } from '@/services/company';
 import { setCurrentCompany } from '@/services/user';
+import toast from 'react-hot-toast';
 
 // Enhanced styled components
 const Avatar = styled(MuiAvatar)(({ theme }) => ({
@@ -81,7 +82,12 @@ export default function SelectContent() {
   }, [])
 
   const handleChangeCompany = async (com: string) => {
-    dispatch(setCurrentCompany(com));
+    dispatch(setCurrentCompany(com)).unwrap().then(() => {
+      dispatch(getCurrentUser());
+      dispatch(getAllCompanies());
+    }).catch((error) => {
+      toast.error(error || "An unexpected error occurred. Please try again later.");
+    });
   }
 
   useEffect(() => {

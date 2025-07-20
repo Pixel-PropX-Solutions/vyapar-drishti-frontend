@@ -2,6 +2,35 @@ import userApi from "@/api/api";
 import { UserSignUp } from "@/utils/types";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
+// export const sendOTP = createAsyncThunk(
+//   "user/sendOTP",
+//   async (
+//     { email, phone }: { email: string; phone: string; },
+//     { rejectWithValue }
+//   ) => {
+//     try {
+//       const response = await userApi.post(`/auth/send/otp`, { email: email, phone_number: phone });
+
+//       console.log("Send OTP response:", response);
+
+//       // const accessToken = response.data.accessToken;
+
+//       // if (accessToken) {
+//       //   localStorage.setItem("accessToken", accessToken);
+//       //   return { accessToken };
+//       // }
+//       // else {
+//       //   return rejectWithValue(
+//       //     "Registration failed: No access token received."
+//       //   );
+//       // }
+//       return;
+//     } catch (error: any) {
+//       return rejectWithValue(error?.response?.data?.message);
+//     }
+//   }
+// );
+
 export const login = createAsyncThunk(
   "user/login",
   async (formData: FormData, { rejectWithValue }) => {
@@ -17,104 +46,12 @@ export const login = createAsyncThunk(
         const accessToken = response.data.accessToken;
         localStorage.setItem("accessToken", accessToken);
         return { accessToken };
-      } else if (response.data.ok === false) {
-        return rejectWithValue(response.data.message);
       } else {
         return rejectWithValue("Login failed: Unknown error.");
       }
 
-    } catch (error) {
-
-      console.log("Login error API:", error);
-
-      const err = error as { message?: string, response?: { data?: { detail?: unknown; message?: string }, statusText?: string } };
-
-      if (err.response?.data?.detail) {
-        const details = err.response.data.detail;
-        const messages = Array.isArray(details)
-          ? details.map((d: Record<string, unknown>) => {
-            if (typeof d === 'string') return d;
-            if (typeof d.msg === 'string' && d.type === 'missing') {
-              const loc = Array.isArray((d as any).loc) ? (d as any).loc : [];
-              return `${loc[1] ?? ''} is required`;
-            }
-            return (typeof d.msg === 'string' ? d.msg : JSON.stringify(d))
-          }).join("; ")
-          : JSON.stringify(details);
-        return rejectWithValue(messages);
-      }
-      if (err.response?.data?.message) {
-        return rejectWithValue(err.response.data.message);
-      }
-      if (err.message) {
-        return rejectWithValue(err.message);
-      }
-      if (err.response?.statusText) {
-        return rejectWithValue(err.response.statusText);
-      }
-      return rejectWithValue(
-        "Login failed: Invalid credentials or server error."
-      );
-    }
-  }
-);
-
-
-export const getCurrentUser = createAsyncThunk(
-  "get/current/user",
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await userApi.get('/auth/current/user',);
-      const user = response.data.data[0];
-
-      if (user) {
-        localStorage.setItem("user", user);
-        return { user };
-      } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Login failed: Invalid credentials or server error."
-      );
-    }
-  }
-);
-
-export const getCurrentCompany = createAsyncThunk(
-  "get/current/company",
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await userApi.get(`user/company`,);
-
-      if (response.data.success === true) {
-        const currentCompany = response.data.data[0];
-        // localStorage.setItem("currentCompany", currentCompany);
-        return { currentCompany };
-      } else return rejectWithValue("Login Failed: No access token recieved.");
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Login failed: Invalid credentials or server error."
-      );
-    }
-  }
-);
-
-export const deleteAccount = createAsyncThunk(
-  "delete/account",
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await userApi.delete(`auth/delete/user`);
-
-      if (response.data.success === true) {
-        localStorage.clear();
-        return { success: true };
-      } else return rejectWithValue("Login Failed: No access token recieved.");
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Login failed: Invalid credentials or server error."
-      );
+      return rejectWithValue(error?.response?.data?.message);
     }
   }
 );
@@ -140,12 +77,62 @@ export const register = createAsyncThunk(
         );
       }
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message || "Registration failed: Server error."
-      );
+      return rejectWithValue(error?.response?.data?.message);
     }
   }
 );
+
+export const getCurrentUser = createAsyncThunk(
+  "get/current/user",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await userApi.get('/auth/current/user',);
+      const user = response.data.data[0];
+
+      if (user) {
+        localStorage.setItem("user", user);
+        return { user };
+      } else return rejectWithValue("Login Failed: No access token recieved.");
+    } catch (error: any) {
+      return rejectWithValue(error?.response?.data?.message);
+    }
+  }
+);
+
+export const getCurrentCompany = createAsyncThunk(
+  "get/current/company",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await userApi.get(`user/company`,);
+
+      if (response.data.success === true) {
+        const currentCompany = response.data.data[0];
+        // localStorage.setItem("currentCompany", currentCompany);
+        return { currentCompany };
+      } else return rejectWithValue("Login Failed: No access token recieved.");
+    } catch (error: any) {
+      return rejectWithValue(error?.response?.data?.message);
+    }
+  }
+);
+
+export const deleteAccount = createAsyncThunk(
+  "delete/account",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await userApi.delete(`auth/delete/user`);
+
+      if (response.data.success === true) {
+        localStorage.clear();
+        return { success: true };
+      } else return rejectWithValue("Login Failed: No access token recieved.");
+    } catch (error: any) {
+      return rejectWithValue(error?.response?.data?.message);
+    }
+  }
+);
+
+
 
 export const forgetPassword = createAsyncThunk(
   "user/forgetPassword",
@@ -163,9 +150,7 @@ export const forgetPassword = createAsyncThunk(
         );
       }
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message || "Registration failed: Server error."
-      );
+      return rejectWithValue(error?.response?.data?.message);
     }
   }
 );
@@ -193,10 +178,7 @@ export const resetPassword = createAsyncThunk(
         return rejectWithValue("Password not updated.");
       }
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Password updation failed: Server error."
-      );
+      return rejectWithValue(error?.response?.data?.message);
     }
   }
 );
@@ -215,10 +197,7 @@ export const logout = createAsyncThunk(
         return rejectWithValue("Login Failed: No access token recieved.");
       }
     } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        "Login failed: Invalid credentials or server error."
-      );
+      return rejectWithValue(error?.response?.data?.message);
     }
   }
 );

@@ -202,46 +202,36 @@ const GroupEditingModal: React.FC<GroupEditingModalProps> = ({
             }
         });
         if (group === null) {
-            await toast.promise(
-                dispatch(createCompanyBilling({
-                    data: formData,
-                }))
-                    .unwrap()
-                    .then(() => {
-                        setIsLoading(false);
-                        onClose();
-                        if (onUpdated) onUpdated();
-                    })
-                    .catch(() => {
-                        setIsLoading(false);
-                    }),
-                {
-                    loading: <b>Creating your group Address... ⏳</b>,
-                    success: <b>Billing Details successfully created! 🎉</b>,
-                    error: <b>Failed to create group. 🚫</b>,
-                }
-            );
+            await dispatch(createCompanyBilling({
+                data: formData,
+            }))
+                .unwrap()
+                .then(() => {
+                    setIsLoading(false);
+                    onClose();
+                    if (onUpdated) onUpdated();
+                    toast.success("Group created successfully! 🎉");
+                })
+                .catch((error) => {
+                    setIsLoading(false);
+                    toast.error(error || "Failed to create group. 🚫");
+                });
         } else {
-            await toast.promise(
-                dispatch(updateCompanyBilling({
-                    data: formData,
-                    id: group?._id ?? '',
-                }))
-                    .unwrap()
-                    .then(() => {
-                        setIsLoading(false);
-                        onClose();
-                        if (onUpdated) onUpdated();
-                    })
-                    .catch(() => {
-                        setIsLoading(false);
-                    }),
-                {
-                    loading: <b>Updating your group... ⏳</b>,
-                    success: <b>Company Details successfully updated! 🎉</b>,
-                    error: <b>Failed to update group. 🚫</b>,
-                }
-            );
+            await dispatch(updateCompanyBilling({
+                data: formData,
+                id: group?._id ?? '',
+            }))
+                .unwrap()
+                .then(() => {
+                    setIsLoading(false);
+                    onClose();
+                    if (onUpdated) onUpdated();
+                    toast.success("Group updated successfully! 🎉");
+                })
+                .catch((error) => {
+                    setIsLoading(false);
+                    toast.error(error || "Failed to update group. 🚫");
+                });
         }
 
     };

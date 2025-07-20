@@ -16,10 +16,7 @@ export const createAccountingGroup = createAsyncThunk(
                 return rejectWithValue("Group creation failed");
             }
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Upload or creation failed: Invalid input or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -63,16 +60,13 @@ export const viewAllCustomerGroups = createAsyncThunk(
                 return { customerGroups, accountingGroupPageMeta };
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
 
 export const viewDefaultAccountingGroup = createAsyncThunk(
-    "view/default/accounitng/groups",
+    "view/default/accounting/groups",
     async (_, { rejectWithValue }) => {
         try {
             const response = await userApi.get(`/user/view/default/accounting/groups`);
@@ -82,10 +76,7 @@ export const viewDefaultAccountingGroup = createAsyncThunk(
                 return { defaultAccountingGroup };
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -107,10 +98,7 @@ export const viewAllAccountingGroups = createAsyncThunk(
                 return { accountingGroups };
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -129,113 +117,7 @@ export const updateAccountingGroup = createAsyncThunk(
                 return;
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
-
-// export const deleteAccountingGroup = createAsyncThunk(
-//     "delete/accounting/group",
-//     async (id: string, { rejectWithValue }) => {
-//         try {
-//             const response = await userApi.delete(`/category/delete/category/${id}`);
-
-//             if (response.data.success === true) {
-//                 return;
-//             } else return rejectWithValue("Login Failed: No access token recieved.");
-//         } catch (error: any) {
-//             return rejectWithValue(
-//                 error.response?.data?.message ||
-//                 "Login failed: Invalid credentials or server error."
-//             );
-//         }
-//     }
-// );
-
-
-// export const deleteCustomer = createAsyncThunk(
-//     "delete/customer",
-//     async (customer_id: string, { rejectWithValue }) => {
-//         try {
-//             const response = await userApi.delete(`/customer/delete/${customer_id}`);
-
-//             if (response.data.success === true) {
-//                 return;
-//             }
-//             else
-//                 return rejectWithValue("Failed to delete Customer profile");
-//         } catch (error: any) {
-//             return rejectWithValue(
-//                 error.response?.data?.message ||
-//                 "Failed: Unable to fetch chemist profile"
-//             );
-//         }
-//     }
-// );
-
-// export const restoreCustomer = createAsyncThunk(
-//     "restore/customer",
-//     async (customer_id: string, { rejectWithValue }) => {
-//         try {
-//             const response = await userApi.put(`/customer/restore/${customer_id}`);
-
-//             if (response.data.success === true) {
-//                 return;
-//             }
-//             else
-//                 return rejectWithValue("Failed to delete Customer profile");
-//         } catch (error: any) {
-//             return rejectWithValue(
-//                 error.response?.data?.message ||
-//                 "Failed: Unable to fetch chemist profile"
-//             );
-//         }
-//     }
-// );
-
-// export const createCustomer = createAsyncThunk(
-//     "create/customer",
-//     async (data: FormData, { rejectWithValue }) => {
-//         try {
-//             const response = await userApi.post(
-//                 `/customer/create`,
-//                 data
-//             );
-
-//             if (response.data.success === true) {
-//                 return;
-//             } else return rejectWithValue("Login Failed: No access token recieved.");
-//         } catch (error: any) {
-//             return rejectWithValue(
-//                 error.response?.data?.message ||
-//                 "Login failed: Invalid credentials or server error."
-//             );
-//         }
-//     }
-// );
-
-// export const updateCustomer = createAsyncThunk(
-//     "update/customer",
-//     async ({ data, id }: { data: FormData; id: string }, { rejectWithValue }) => {
-//         try {
-
-//             const response = await userApi.put(
-//                 `/customer/update/${id}`,
-//                 data
-//             );
-
-
-//             if (response.data.success === true) {
-//                 return;
-//             } else return rejectWithValue("Login Failed: No access token recieved.");
-//         } catch (error: any) {
-//             return rejectWithValue(
-//                 error.response?.data?.message ||
-//                 "Login failed: Invalid credentials or server error."
-//             );
-//         }
-//     }
-// );

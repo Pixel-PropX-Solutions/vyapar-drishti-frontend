@@ -91,7 +91,7 @@ const CreateCustomerGroupModal: React.FC<CreateCustomerGroupModalProps> = ({
         label: group.accounting_group_name,
         value: group.accounting_group_name,
     })) || [];
-    
+
     const validateForm = (): boolean => {
         const errors: { [key: string]: string } = {};
 
@@ -278,50 +278,40 @@ const CreateCustomerGroupModal: React.FC<CreateCustomerGroupModalProps> = ({
 
         if (accountingGroup && accountingGroup._id) {
             // Edit mode
-            await toast.promise(
-                dispatch(updateInventoryGroup({
-                    id: accountingGroup._id,
-                    data: formData
-                }))
-                    .unwrap()
-                    .then(() => {
-                        setIsLoading(false);
-                        onClose();
-                        if (onUpdated) onUpdated();
-                    })
-                    .catch(() => {
-                        setIsLoading(false);
-                    }),
-                {
-                    loading: "Updating your group...",
-                    success: <b>Group successfully updated! 🎉</b>,
-                    error: <b>Failed to update group. Please try again.</b>,
-                }
-            );
+            await dispatch(updateInventoryGroup({
+                id: accountingGroup._id,
+                data: formData
+            }))
+                .unwrap()
+                .then(() => {
+                    setIsLoading(false);
+                    onClose();
+                    if (onUpdated) onUpdated();
+                    toast.success('Group successfully updated! 🎉');
+                })
+                .catch((error) => {
+                    setIsLoading(false);
+                    toast.error(error || "An unexpected error occurred. Please try again later.");
+                });
         } else {
             // Create mode
-            await toast.promise(
-                dispatch(createAccountingGroup(formData))
-                    .unwrap()
-                    .then((response) => {
-                        const newGroup = {
-                            name: response.accounting_group_name,
-                            _id: response._id
-                        };
-                        onCreated(newGroup);
-                        setIsLoading(false);
-                        resetForm();
-                        onClose();
-                    })
-                    .catch(() => {
-                        setIsLoading(false);
-                    }),
-                {
-                    loading: "Creating your group...",
-                    success: <b>Group successfully created! 🎉</b>,
-                    error: <b>Failed to create group. Please try again.</b>,
-                }
-            );
+            await dispatch(createAccountingGroup(formData))
+                .unwrap()
+                .then((response) => {
+                    const newGroup = {
+                        name: response.accounting_group_name,
+                        _id: response._id
+                    };
+                    onCreated(newGroup);
+                    setIsLoading(false);
+                    resetForm();
+                    onClose();
+                    toast.success('Group successfully created! 🎉');
+                })
+                .catch((error) => {
+                    setIsLoading(false);
+                    toast.error(error || 'An unexpected error occurred. Please try again later.');
+                });
         }
     };
 

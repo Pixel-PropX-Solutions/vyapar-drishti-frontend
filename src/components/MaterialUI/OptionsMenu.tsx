@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/store/store";
 import { logout } from "@/services/auth";
+import toast from "react-hot-toast";
 
 const MenuItem = styled(MuiMenuItem)({
   margin: "0px 4px",
@@ -80,8 +81,12 @@ export default function OptionsMenu() {
         <MenuItem
           onClick={() => {
             handleClose();
-            dispatch(logout());
-            navigate("/");
+            dispatch(logout()).unwrap().then(() => {
+              toast.success("Logged out successfully!");
+              navigate("/login");
+            }).catch((error) => {
+              toast.error(error || "An unexpected error occurred. Please try again later.");
+            });
           }}
           sx={{
             [`& .${listItemIconClasses.root}`]: {

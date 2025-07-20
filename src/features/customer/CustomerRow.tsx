@@ -339,7 +339,7 @@ export const CustomerRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit,
                         sx={{ borderRadius: 2 }}
                         startIcon={<DeleteIcon />}
                     >
-                        Delete&#8377;<strong>{cus.ledger_name}</strong>
+                        Delete&nbsp;<strong>{cus.ledger_name}</strong>
                     </Button>
                 </DialogActions>
             </Dialog>

@@ -39,10 +39,7 @@ export const viewAllCustomer = createAsyncThunk(
                 return { customers, pageMeta };
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -70,10 +67,38 @@ export const viewAllCustomerWithType = createAsyncThunk(
                 return ledgersWithType;
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
+            return rejectWithValue(error?.response?.data?.message);
+        }
+    }
+);
+
+export const viewAllCustomerWithTypes = createAsyncThunk(
+    "view/all/ledger/with/types",
+    async (
+        {
+            company_id,
+            customerTypes,
+        }: {
+            company_id: string;
+            customerTypes: Array<string>;
+        },
+        { rejectWithValue }
+    ) => {
+        try {
+            const response = await userApi.post(
+                `/ledger/view/ledgers/transaction/type?company_id=${company_id}`,
+                customerTypes
             );
+
+            console.log("View All Customer With Types Response", response);
+
+
+            if (response.data.success === true) {
+                const customerTypes = response.data.data;
+                return {customerTypes};
+            } else return rejectWithValue("Login Failed: No access token recieved.");
+        } catch (error: any) {
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -89,16 +114,12 @@ export const viewAllCustomers = createAsyncThunk(
                 `ledger/view/all/ledgers?company_id=${company_id}`
             );
 
-
             if (response.data.success === true) {
                 const customersList = response.data.data;
                 return { customersList };
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -116,10 +137,7 @@ export const createCustomer = createAsyncThunk(
                 return;
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -139,10 +157,7 @@ export const updateCustomer = createAsyncThunk(
                 return;
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Login failed: Invalid credentials or server error."
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -163,10 +178,53 @@ export const getCustomer = createAsyncThunk(
             else
                 return rejectWithValue("Failed to fetch Customer profile");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Failed: Unable to fetch chemist profile"
+            return rejectWithValue(error?.response?.data?.message);
+        }
+    }
+);
+
+export const getCustomerInvoices = createAsyncThunk(
+    "get/customer/invoices",
+    async ({
+        searchQuery,
+        company_id,
+        customer_id,
+        pageNumber,
+        type,
+        limit,
+        sortField,
+        sortOrder,
+        start_date,
+        end_date,
+    }: {
+        searchQuery: string;
+        customer_id: string;
+        company_id: string;
+        sortField: string;
+        type: string;
+        pageNumber: number;
+        limit: number;
+        sortOrder: string;
+        start_date: string;
+        end_date: string;
+    }, { rejectWithValue }) => {
+        try {
+            const response = await userApi.get(
+                `/ledger/view/invoices/${customer_id}?${company_id !== "" ? 'company_id=' + company_id : ''}${searchQuery !== "" ? '&search=' + searchQuery : ''}${type !== "all" ? '&type=' + type : ''}&start_date=${start_date}&end_date=${end_date}&page_no=${pageNumber}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"
+                }`
             );
+
+            console.log("Get Customer Invoices API Response", response);
+
+            if (response.data.success === true) {
+                const customerInvoices = response.data.data.docs;
+                const customerInvoicesMeta = response.data.data.meta;
+                return { customerInvoices, customerInvoicesMeta };
+            }
+            else
+                return rejectWithValue("Failed to fetch Customer profile");
+        } catch (error: any) {
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -175,7 +233,7 @@ export const deleteCustomer = createAsyncThunk(
     "delete/customer",
     async (customer_id: string, { rejectWithValue }) => {
         try {
-            const response = await userApi.delete(`/customer/delete/${customer_id}`);
+            const response = await userApi.delete(`/ledger/delete/${customer_id}`);
 
             if (response.data.success === true) {
                 return;
@@ -183,30 +241,7 @@ export const deleteCustomer = createAsyncThunk(
             else
                 return rejectWithValue("Failed to delete Customer profile");
         } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Failed: Unable to fetch chemist profile"
-            );
-        }
-    }
-);
-
-export const restoreCustomer = createAsyncThunk(
-    "restore/customer",
-    async (customer_id: string, { rejectWithValue }) => {
-        try {
-            const response = await userApi.put(`/customer/restore/${customer_id}`);
-
-            if (response.data.success === true) {
-                return;
-            }
-            else
-                return rejectWithValue("Failed to delete Customer profile");
-        } catch (error: any) {
-            return rejectWithValue(
-                error.response?.data?.message ||
-                "Failed: Unable to fetch chemist profile"
-            );
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );

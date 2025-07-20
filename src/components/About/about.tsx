@@ -1496,15 +1496,6 @@ export default AboutPage;
 //                       }
 //                     />
 //                     <InfoRow
-//                       icon={<BadgeOutlined />}
-//                       label="PAN Number"
-//                       value={
-//                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-//                           {company?.pan_number || 'Not provided'}
-//                         </Box>
-//                       }
-//                     />
-//                     <InfoRow
 //                       icon={<WebsiteIcon />}
 //                       label="Phone Number"
 //                       value={
