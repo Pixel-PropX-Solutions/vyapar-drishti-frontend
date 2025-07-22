@@ -31,6 +31,12 @@ export type CategorySortField =
   | "category_name"
   | 'description'
   | 'created_at'
+  | "updated_at";
+
+  export type GroupSortField =
+  | "inventory_group_name"
+  | 'description'
+  | 'created_at'
   | 'parent'
   | "updated_at";
 
@@ -624,9 +630,9 @@ export interface FormCreateProduct {
 
 export interface ProductUpdate {
   _id: string;
-  user_id: string;
   stock_item_name: string;
   company_id: string;
+  user_id: string;
   unit: string;
   unit_id: string;
   is_deleted: boolean;
@@ -644,7 +650,7 @@ export interface ProductUpdate {
   gst_nature_of_goods?: string;
   gst_hsn_code?: string;
   gst_taxability?: string;
-
+  gst_percentage: string;
   low_stock_alert?: number;
 }
 
@@ -687,6 +693,8 @@ export interface GetInvoiceData {
       godown_id: string,
       order_number: string | null,
       order_due_date: string | null,
+      gst?: string,
+      gst_amount?: string,
       created_at: string,
       updated_at: string
     }

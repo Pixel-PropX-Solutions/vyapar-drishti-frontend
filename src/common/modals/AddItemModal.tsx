@@ -82,6 +82,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
         gst: 0,
         gst_amount: 0,
     });
+    const [totalAmount, setTotalAmount] = useState(0);
 
     // Validation function
     const validateForm = (formData = data) => {
@@ -143,13 +144,14 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
                 const quantity = parseFloat(String(field === 'quantity' ? newData.quantity : newData.quantity)) || 0;
                 const rate = parseFloat(String(field === 'rate' ? value : newData.rate)) || 0;
                 const gst = parseFloat(String(field === 'gst' ? value : newData.gst)) || 0;
-                const gstAmount = (quantity * rate * gst) / 100;
-                const amount = quantity * rate + gstAmount;
+                const gstAmount = parseFloat(((quantity * rate * gst) / 100).toFixed(2));
+                const amount = parseFloat((quantity * rate).toFixed(2));
                 newData = {
                     ...newData,
                     amount,
                     gst_amount: gstAmount,
                 };
+                setTotalAmount(amount + gstAmount);
             }
             validateForm(newData);
             return newData;
@@ -207,6 +209,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
                 gst: item.gst || 0,
                 gst_amount: item.gst_amount || 0,
             });
+            setTotalAmount(item.amount + (item.gst_amount || 0));
         } else if (open && !item) {
             setData({
                 item: '',
@@ -217,6 +220,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
                 gst: 0,
                 gst_amount: 0,
             });
+            setTotalAmount(0);
         }
     }, [open, item]);
 
@@ -263,6 +267,15 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
             disabled: false, // This field is editable
         },
         {
+            key: 'amount',
+            label: 'Amount',
+            placeholder: 'Enter the amount',
+            icon: MonetizationOn,
+            required: true,
+            description: 'Enter rate and quantity to calculate amount',
+            disabled: true, // This field is auto-calculated based on rate, quantity, and GST
+        },
+        {
             key: 'gst',
             label: 'GST',
             placeholder: 'Enter the GST percentage',
@@ -281,12 +294,12 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
             disabled: true, // This field is auto-calculated based on rate and quantity
         },
         {
-            key: 'amount',
-            label: 'Amount',
-            placeholder: 'Enter the amount',
+            key: 'total-amount',
+            label: 'Total Amount',
+            placeholder: 'Enter the total amount',
             icon: MonetizationOn,
             required: true,
-            description: 'Enter rate and quantity to calculate amount',
+            description: 'Enter rate and quantity to calculate total amount',
             disabled: true, // This field is auto-calculated based on rate, quantity, and GST
         },
     ] : [
@@ -491,13 +504,20 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
                                         inputType = 'number';
                                         inputStep = unitType === 'integer' ? '1' : '0.01';
                                     }
+                                    let value = undefined;
+                                    if (field.key === 'total-amount') {
+                                        value = totalAmount;
+                                    } else {
+                                        value = data[field.key as keyof InvoiceItems] || '';
+                                    }
+
                                     return (
                                         <TextField
                                             key={index + field.key}
                                             fullWidth
                                             label={field.label}
                                             placeholder={field.placeholder}
-                                            value={data[field.key as keyof InvoiceItems] || ''}
+                                            value={value}
                                             onChange={(e) => handleInputChange(field.key as keyof InvoiceItems, e.target.value)}
                                             error={!!formErrors[field.key]}
                                             helperText={formErrors[field.key] || field.description}

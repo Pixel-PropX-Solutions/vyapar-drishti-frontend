@@ -11,6 +11,7 @@ export const createInvoice = createAsyncThunk(
     ) => {
         try {
             const createRes = await userApi.post(`/invoices/create/vouchar`, data);
+            console.log("Response from createInvoice:", createRes);
 
             if (createRes.data.success === true) {
                 return;
@@ -231,14 +232,16 @@ export const updateInvoice = createAsyncThunk(
 
 
 export const updateGSTInvoice = createAsyncThunk(
-    "update/invoice/vouchar",
+    "update/invoice/gst/vouchar",
     async (
         data: UpdateGSTInvoice,
         { rejectWithValue }
     ) => {
         try {
 
+            console.log("updateGSTInvoice:", data);
             const updateRes = await userApi.put(`/invoices/update/vouchar/gst/${data.vouchar_id}`, data);
+            console.log("Response from updateGSTInvoice:", updateRes);
 
             if (updateRes.data.success === true) {
                 return;

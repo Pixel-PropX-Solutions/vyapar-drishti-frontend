@@ -260,7 +260,7 @@ const ProductsSideModal = (props: SideModalProps) => {
                 gst_hsn_code: data.gst_hsn_code.trim(),
                 gst_taxability: data.gst_taxability.trim(),
                 gst_percentage: data.gst_percentage.trim(),
-                low_stock_alert: data.low_stock_alert || 0,
+                low_stock_alert: data.low_stock_alert,
             };
 
             // Add optional fields
@@ -364,6 +364,28 @@ const ProductsSideModal = (props: SideModalProps) => {
     // Load product data for editing
     useEffect(() => {
         if (product) {
+            const foundUnit = units
+                ?.find(option => option.value === product.unit && option.id === product.unit_id);
+
+            setSelectedUnitOption(foundUnit || null);
+
+            const foundGroup = inventoryGroupLists
+                ?.map(grp => ({ label: grp.inventory_group_name, value: grp._id, id: grp._id }))
+                .find(option => option.label === product.group && option.id === product.group_id);
+
+            setSelectedGroupOption(foundGroup || null);
+
+            const foundCategory = categoryLists
+                ?.map(cat => ({ label: cat.category_name, value: cat._id, id: cat._id }))
+                .find(option => option.label === product.category && option.id === product.category_id);
+
+            setSelectedCategoryOption(foundCategory || null);
+        }
+        // Do NOT resetForm() here when product is null
+    }, [categoryLists, inventoryGroupLists, product]);
+
+    useEffect(() => {
+        if (product) {
             setData({
                 stock_item_name: product.stock_item_name || '',
                 company_id: product.company_id || '',
@@ -384,32 +406,12 @@ const ProductsSideModal = (props: SideModalProps) => {
                 gst_hsn_code: product.gst_hsn_code || '',
                 gst_taxability: product.gst_taxability || '',
                 low_stock_alert: product.low_stock_alert || 0,
-                gst_percentage: '',
+                gst_percentage: product.gst_percentage || '',
             });
-            const foundUnit = units
-                ?.find(option => option.value === product.unit && option.id === product.unit_id);
-            setSelectedUnitOption(
-                foundUnit
-                    ? { unit_name: foundUnit.unit_name, value: foundUnit.value, id: foundUnit.id }
-                    : null
-            );
-
-            const foundGroup = inventoryGroupLists
-                ?.map(grp => ({ label: grp.inventory_group_name, value: grp._id, id: grp._id }))
-                .find(option => option.label === product.group && option.id === product.group_id);
-
-            setSelectedGroupOption(foundGroup || null);
-
-            const foundCategory = categoryLists
-                ?.map(cat => ({ label: cat.category_name, value: cat._id, id: cat._id }))
-                .find(option => option.label === product.category && option.id === product.category_id);
-
-            setSelectedCategoryOption(foundCategory || null);
             setImagePreview(typeof product?.image === 'string' ? product.image : '');
-        } else {
-            resetForm();
         }
-    }, [categoryLists, inventoryGroupLists, product, resetForm]);
+        // Do NOT resetForm() here when product is null
+    }, [product]);
 
     // Fetch categories
     useEffect(() => {
@@ -787,12 +789,9 @@ const ProductsSideModal = (props: SideModalProps) => {
                         value: newCategory.name,
                         id: newCategory._id
                     });
+                    setData(prev => ({ ...prev, category_id: newCategory._id, category: newCategory.name }));
                     setOpenCategoryModal(false);
-                    setSelectedCategoryOption({ label: newCategory.name, value: newCategory.name, id: newCategory._id });
-                    setData(prev => ({ ...prev, category_id: newCategory._id }));
-                    setData(prev => ({ ...prev, category: newCategory.name }));
-                    setOpenCategoryModal(false);
-
+                    // Do NOT reset form or step here
                 }}
             />
             <CreateInventoryGroupModal
@@ -805,12 +804,9 @@ const ProductsSideModal = (props: SideModalProps) => {
                         value: newGroup.name,
                         id: newGroup._id
                     });
+                    setData(prev => ({ ...prev, group: newGroup.name, group_id: newGroup._id }));
                     setOpenGroupModal(false);
-                    setSelectedGroupOption({ label: newGroup.name, value: newGroup.name, id: newGroup._id });
-                    setData(prev => ({ ...prev, _cgroup: newGroup._id }));
-                    setData(prev => ({ ...prev, group: newGroup.name }));
-                    setOpenGroupModal(false);
-
+                    // Do NOT reset form or step here
                 }}
             />
         </>

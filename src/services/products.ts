@@ -86,6 +86,7 @@ export const viewAllStockItems = createAsyncThunk(
       searchQuery,
       company_id,
       category,
+      group,
       pageNumber,
       limit,
       sortField,
@@ -95,6 +96,7 @@ export const viewAllStockItems = createAsyncThunk(
       searchQuery: string;
       company_id: string;
       category: string;
+      group: string;
       sortField: string;
       pageNumber: number;
       limit: number;
@@ -105,14 +107,16 @@ export const viewAllStockItems = createAsyncThunk(
   ) => {
     try {
       const response = await userApi.get(
-        `product/view/all/stock/items?company_id=${company_id}&search=${searchQuery}${category === 'All' ? "" : "&category=" + category}&page_no=${pageNumber}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"
+        `product/view/all/stock/items?company_id=${company_id}&search=${searchQuery}${group === 'All' ? "" : "&group=" + group}${category === 'All' ? "" : "&category=" + category}&page_no=${pageNumber}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"
         }`
       );
 
+      console.log('View All Stock Items API Response', response);
+
       if (response.data.success === true) {
         const stockItems = response.data.data.docs;
-        const pageMeta = response.data.data.meta;
-        return { stockItems, pageMeta };
+        const stockItemsMeta = response.data.data.meta;
+        return { stockItems, stockItemsMeta };
       } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {
       return rejectWithValue(error?.response?.data?.message);

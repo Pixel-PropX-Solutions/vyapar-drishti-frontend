@@ -9,7 +9,6 @@ import {
   Grid,
   InputAdornment,
   useTheme,
-  Autocomplete,
 } from "@mui/material";
 import { Email } from "@mui/icons-material";
 import Logo from "../../../assets/Logo.png";
@@ -20,7 +19,7 @@ import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { getCompany } from "@/services/company";
-import CountryCodes from '../../../internals/data/CountryCodes.json';
+import PhoneNumber from "@/common/PhoneNumber";
 
 
 const RegistrationForm: React.FC = () => {
@@ -233,99 +232,18 @@ const RegistrationForm: React.FC = () => {
                 ),
               }}
             />
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <Box sx={{ width: "20%" }}>
-                <Autocomplete
-                  fullWidth
-                  options={[
-                    ...(CountryCodes?.map(con => ({
-                      label: `${con.dial_code} (${con.code})`,
-                      value: con.dial_code,
-                    })) ?? []),
-                  ]}
-                  freeSolo
-                  renderOption={(props, option) => {
-                    const { key, ...rest } = props;
-                    return (
-                      <li
-                        key={key}
-                        {...rest}
-                        style={{
-                          fontWeight: 400,
-                          color: 'inherit',
-                          ...(props.style || {}),
-                        }}
-                      >
-                        {option.label}
-                      </li>
-                    );
-                  }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      fullWidth
-                      required
-                      id="code"
-                      label="Code"
-                      name="code"
-                      placeholder="+91 "
-                      InputProps={{
-                        ...params.InputProps,
-                        startAdornment: (
-                          <InputAdornment position="start">
-                          </InputAdornment>
-                        ),
-                      }}
-                      margin="normal"
-                      autoComplete="off"
-                    />
-                  )}
-                  value={data.code || ''}
-                  onChange={(_, newValue) => {
-                    changeCountryCode(
-                      'code',
-                      typeof newValue === 'string' ? newValue : newValue?.value || ''
-                    );
-                  }}
-                  componentsProps={{
-                    paper: {
-                      sx: {
-                        border: '1px solid #000',
-                        borderRadius: 1,
-                        width: '150px'
-                      },
-                    },
-                  }}
-                  sx={{
-                    '& .MuiAutocomplete-endAdornment': { display: 'none' },
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 1,
-                      width: "100%"
-                    }
-                  }}
-                />
-              </Box>
-
-              <TextField
-                required
-                margin="normal"
-                fullWidth
-                sx={{ width: "80%" }}
-                id="number"
-                label="Phone Number"
-                name="number"
-                autoComplete="number"
-                onChange={changeHandler}
-                value={data.number}
-                autoFocus
-                placeholder="******7548"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start"></InputAdornment>
-                  ),
-                }}
-              />
-            </Box>
+            <PhoneNumber
+              code={data.code}
+              number={data.number}
+              codeWidth="30%"
+              codeHandler={changeCountryCode}
+              numberHandler={changeHandler}
+              codeLabel="Code"
+              required={true}
+              codePlaceholder="+91"
+              numberLabel="Phone Number"
+              numberPlaceholder="******7548"
+            />
             <Button
               type="submit"
               fullWidth

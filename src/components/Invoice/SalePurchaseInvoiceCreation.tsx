@@ -18,7 +18,6 @@ import {
     Autocomplete,
     InputAdornment,
     Container,
-    CircularProgress,
     Avatar,
     useTheme,
     alpha,
@@ -29,7 +28,6 @@ import {
     Delete,
     Add,
     Receipt,
-    Save,
     AddCircleOutline,
     LocalOffer,
     PeopleAlt,
@@ -39,7 +37,8 @@ import {
     LocalShipping,
     AddCard,
     Edit,
-    AttachMoney,
+    Cancel,
+    Timeline,
 } from "@mui/icons-material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -53,6 +52,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import AddItemModal from '@/common/modals/AddItemModal';
 import { ActionButton } from '@/common/buttons/ActionButton';
+import { capitalizeInput } from '@/utils/functions';
 
 // Interfaces
 interface InvoiceItems {
@@ -179,11 +179,10 @@ export default function SalePurchaseInvoiceCreation() {
         }));
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
+    const handleChange = (field: string, value: any) => {
         setData((prevState) => ({
             ...prevState,
-            [name]: value,
+            [field]: value,
         }));
     };
 
@@ -243,6 +242,8 @@ export default function SalePurchaseInvoiceCreation() {
                     }
                 ],
             }
+
+            console.log("Data to send:", dataToSend);
 
             dispatch(createInvoiceWithGST(dataToSend)).then(() => {
                 setIsLoading(false);
@@ -360,7 +361,7 @@ export default function SalePurchaseInvoiceCreation() {
         <LocalizationProvider dateAdapter={AdapterDateFns}>
             <Container maxWidth="xl" sx={{ py: 4 }}>
                 {/* Header Section */}
-                <Box sx={{ mb: 2 }}>
+                <Box sx={{ mb: 2, display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                         <Avatar
                             sx={{
@@ -381,6 +382,53 @@ export default function SalePurchaseInvoiceCreation() {
                             </Typography>
                         </Box>
                     </Box>
+                    <Grid
+                        sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            gap: 2,
+                        }}
+                    >
+                        <ActionButton
+                            variant="contained"
+                            startIcon={<Cancel />}
+                            color="error"
+                            onClick={() => {
+                                navigate(-1);
+                            }}
+                            disabled={isLoading}
+                            sx={{
+                                background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
+                                color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
+                                border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#c62828'}`,
+                                '&:hover': {
+                                    color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                                    background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
+                                },
+                            }}
+                        >
+                            Cancel
+                        </ActionButton>
+                        <ActionButton
+                            variant="contained"
+                            startIcon={isLoading ? <Timeline className="animate-spin" /> : <AddCircleOutline />}
+                            color="success"
+                            onClick={handleSubmit}
+                            disabled={isLoading}
+                            sx={{
+                                background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
+                                color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
+                                border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
+                                '&:hover': {
+                                    color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                                    background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
+                                },
+                            }}
+                        >
+                            {isLoading ? `Creating...` : `Create Invoice ${(type ? type.charAt(0).toUpperCase() + type.slice(1) : '')}`}
+                        </ActionButton>
+                    </Grid>
                 </Box>
 
                 {/* Main Form */}
@@ -403,7 +451,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                         label="Invoice Number"
                                                         fullWidth
                                                         value={data.voucher_number}
-                                                        onChange={handleChange}
+                                                        onChange={(e) => handleChange('voucher_number', e.target.value)}
                                                         name="voucher_number"
                                                         variant="outlined"
                                                         InputProps={{
@@ -460,7 +508,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                         label="Place of Supply"
                                                         fullWidth
                                                         value={data.place_of_supply}
-                                                        onChange={handleChange}
+                                                        onChange={(e) => handleChange('place_of_supply', capitalizeInput(e.target.value, 'words'))}
                                                         name="place_of_supply"
                                                         variant="outlined"
                                                         InputProps={{
@@ -559,7 +607,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                         label={data.mode_of_transport === 'By Road' ? "Vehicle Number" : data.mode_of_transport === 'By Rail' ? "Train Number" : data.mode_of_transport === 'By Air' ? "Flight Number" : data.mode_of_transport === 'By Sea' ? "Container Number" : 'Vehicle Number'}
                                                         fullWidth
                                                         value={data.vehicle_number}
-                                                        onChange={handleChange}
+                                                        onChange={(e) => handleChange('vehicle_number', capitalizeInput(e.target.value, 'characters'))}
                                                         name="vehicle_number"
                                                         variant="outlined"
                                                         InputProps={{
@@ -955,13 +1003,13 @@ export default function SalePurchaseInvoiceCreation() {
                                     </Table>
                                 </TableContainer>
 
-                                <Box sx={{ my: 2, display: 'flex', justifyContent: 'space-between' }}>
+                                {/* <Box sx={{ my: 2, display: 'flex', justifyContent: 'space-between' }}>
                                     <TextField
                                         label="Additional Charges"
                                         fullWidth
                                         size='small'
-                                        value={'data.additional_charges'}
-                                        onChange={handleChange}
+                                        // value={data.additional_charges}
+                                        // onChange={(e) => handleChange('additional_charges', e.target.value)}
                                         name="additional_charges"
                                         variant="outlined"
                                         type="number"
@@ -978,8 +1026,8 @@ export default function SalePurchaseInvoiceCreation() {
                                         label="Discount"
                                         fullWidth
                                         size='small'
-                                        value={'data.discount'}
-                                        onChange={handleChange}
+                                        // value={data.discount}
+                                        // onChange={(e) => handleChange('discount', e.target.value)}
                                         name="discount"
                                         variant="outlined"
                                         type="number"
@@ -997,8 +1045,8 @@ export default function SalePurchaseInvoiceCreation() {
                                         label="Round Off"
                                         fullWidth
                                         size='small'
-                                        value={'data.round_off'}
-                                        onChange={handleChange}
+                                        // value={data.round_off}
+                                        // onChange={(e) => handleChange('round_off', e.target.value)}
                                         name="round_off"
                                         variant="outlined"
                                         type="number"
@@ -1011,13 +1059,13 @@ export default function SalePurchaseInvoiceCreation() {
                                         }}
                                         sx={{ maxWidth: '200px' }}
                                     />
-                                   
+
                                     <TextField
                                         label="Amount Paid"
                                         fullWidth
                                         size='small'
-                                        value={'data.amount_paid'}
-                                        onChange={handleChange}
+                                        // value={data.amount_paid}
+                                        // onChange={(e) => handleChange('amount_paid', e.target.value)}
                                         name="amount_paid"
                                         variant="outlined"
                                         type="number"
@@ -1030,7 +1078,7 @@ export default function SalePurchaseInvoiceCreation() {
                                         }}
                                         sx={{ maxWidth: '200px' }}
                                     />
-                                    
+
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                         <Typography variant="h6" sx={{ mr: 1 }}>
                                             Total GST
@@ -1067,13 +1115,13 @@ export default function SalePurchaseInvoiceCreation() {
                                         </Box>
                                     </Box>
 
-                                </Box>
+                                </Box> */}
                                 <TextField
                                     label="Remarks"
                                     fullWidth
                                     size='small'
                                     value={data.narration}
-                                    onChange={handleChange}
+                                    onChange={(e) => handleChange('narration', e.target.value)}
                                     name="narration"
                                     variant="outlined"
                                     InputProps={{
@@ -1087,20 +1135,45 @@ export default function SalePurchaseInvoiceCreation() {
                                 />
                             </Box>
 
-                            <Box sx={{ my: 1, width: '100%', display: 'flex', justifyContent: 'flex-end' }}>
-                                <Button
-                                    type="submit"
+                            <Box sx={{ my: 1, width: '100%', display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+                                <ActionButton
                                     variant="contained"
+                                    startIcon={<Cancel />}
+                                    color="error"
+                                    onClick={() => {
+                                        navigate(-1);
+                                    }}
                                     disabled={isLoading}
                                     sx={{
-                                        px: 4,
-                                        py: 1.5,
-                                        borderRadius: 1,
+                                        background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
+                                        color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
+                                        border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#c62828'}`,
+                                        '&:hover': {
+                                            color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                                            background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
+                                        },
                                     }}
-                                    startIcon={isLoading ? <CircularProgress size={20} /> : <Save />}
                                 >
-                                    {isLoading ? 'Creating Invoice...' : 'Create Invoice'}
-                                </Button>
+                                    Cancel
+                                </ActionButton>
+                                <ActionButton
+                                    variant="contained"
+                                    startIcon={isLoading ? <Timeline className="animate-spin" /> : <AddCircleOutline />}
+                                    color="success"
+                                    onClick={handleSubmit}
+                                    disabled={isLoading}
+                                    sx={{
+                                        background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
+                                        color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
+                                        border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
+                                        '&:hover': {
+                                            color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                                            background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
+                                        },
+                                    }}
+                                >
+                                    {isLoading ? `Creating...` : `Create Invoice ${(type ? type.charAt(0).toUpperCase() + type.slice(1) : '')}`}
+                                </ActionButton>
                             </Box>
                         </Box>
                     </CardContent>

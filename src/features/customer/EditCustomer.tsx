@@ -6,7 +6,6 @@ import {
     Typography,
     useTheme,
     FormControl,
-    Chip,
     Alert,
     Autocomplete,
     Slide,
@@ -20,16 +19,12 @@ import {
     Timeline,
     Person,
     Email,
-    Phone,
-    Business,
-    LocationOn,
-    CreditCard,
     CheckCircle,
     Save,
-    Label,
     AccountBalance,
     Cancel,
     AddCircleOutlined,
+    Image,
 } from "@mui/icons-material";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
@@ -42,6 +37,7 @@ import { capitalizeInput } from "@/utils/functions";
 import ImageUpload from "@/common/ImageUpload";
 import { SectionCard } from "./sectionCard";
 import { setEditingCustomer } from "@/store/reducers/customersReducer";
+import PhoneNumber from "@/common/PhoneNumber";
 
 
 interface CustomerFormData {
@@ -132,7 +128,7 @@ const EditCustomer: React.FC = () => {
     }, [data]);
 
     const handleInputChange = (
-        field: keyof CustomerFormData,
+        field: string,
         value: string
     ) => {
 
@@ -230,11 +226,11 @@ const EditCustomer: React.FC = () => {
         }
     }, []);
 
-    const validateField = (field: keyof CustomerFormData, value: string): string => {
+    const validateField = (field: string, value: string): string => {
         if (field === 'name' && !value.trim()) return 'Billing Name is required. This name is used for invoicing and legal purposes.';
         if (gst_enable && !data.mailing_country && field === 'mailing_state' && !value.trim()) return 'Please select country first.';
-        if (gst_enable && field === 'mailing_country' && !value.trim()) return 'Billing country is required. This is used for address formatting.';
-        if (gst_enable && field === 'mailing_state' && !value.trim()) return 'Billing state is required. This is used for address formatting.';
+        if (gst_enable && field === 'mailing_country' && !value.trim()) return 'Billing country is required.';
+        if (gst_enable && field === 'mailing_state' && !value.trim()) return 'Billing state is required.';
         if (isGSTINRequired && field === 'gstin' && !value.trim()) return 'GSTIN is required.';
 
         // if (field === 'mailing_address' && !value.trim()) return '';
@@ -424,6 +420,7 @@ const EditCustomer: React.FC = () => {
                                 sx={{
                                     background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
                                     color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
+                                    border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#c62828'}`,
                                     '&:hover': {
                                         color: theme.palette.mode === 'dark' ? '#000' : '#fff',
                                         background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
@@ -441,6 +438,7 @@ const EditCustomer: React.FC = () => {
                                 sx={{
                                     background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
                                     color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
+                                    border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
                                     '&:hover': {
                                         color: theme.palette.mode === 'dark' ? '#000' : '#fff',
                                         background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
@@ -481,15 +479,11 @@ const EditCustomer: React.FC = () => {
                     expandedSections={expandedSections}
                     required
                 >
-                    <FormControl fullWidth sx={{ mt: 2 }}>
-                        <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Label fontSize="small" color="primary" />
-                            GSTIN Number
-                            <Chip label={isGSTINRequired ? "Required" : 'Optional'} size="small" color={isGSTINRequired ? "primary" : "default"} variant="outlined" />
-                        </Typography>
+                    {gst_enable && <FormControl fullWidth sx={{ mt: 2 }}>
                         <TextField
                             fullWidth
                             size="small"
+                            label={`GSTIN Number (${isGSTINRequired ? 'Required' : 'Optional'})`}
                             placeholder="27XXXXXXXXXXXX"
                             value={data.gstin || ''}
                             required={isGSTINRequired}
@@ -529,17 +523,13 @@ const EditCustomer: React.FC = () => {
                                 ),
                             }}
                         />
-                    </FormControl>
+                    </FormControl>}
 
                     <FormControl fullWidth sx={{ my: 2 }}>
-                        <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Person fontSize="small" color="primary" />
-                            Billing Name
-                            <Chip label={"Required"} size="small" color={"primary"} variant="outlined" />
-                        </Typography>
                         <TextField
                             fullWidth
                             size="small"
+                            label={`Billing Name (Required)`}
                             placeholder="The Acme Corporation Ltd."
                             value={data.name || ''}
                             required
@@ -549,7 +539,12 @@ const EditCustomer: React.FC = () => {
                             InputProps={{
                                 sx: {
                                     borderRadius: 1,
-                                }
+                                },
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <Person fontSize="small" color="action" />
+                                    </InputAdornment>
+                                ),
                             }}
                         />
                     </FormControl>
@@ -557,11 +552,6 @@ const EditCustomer: React.FC = () => {
                     <Box sx={{ display: 'flex', gap: 2 }}>
                         <Box sx={{ width: '50%' }}>
                             <FormControl fullWidth>
-                                <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <Label fontSize="small" color="primary" />
-                                    Mailing Country
-                                    <Chip label={"Required"} size="small" color={"primary"} variant="outlined" />
-                                </Typography>
                                 <Autocomplete
                                     fullWidth
                                     size="small"
@@ -593,8 +583,10 @@ const EditCustomer: React.FC = () => {
                                     renderInput={(params) => (
                                         <TextField
                                             {...params}
-                                            placeholder="Select mailing country"
+                                            placeholder="Select country"
                                             size="small"
+                                            id="mailing_country"
+                                            label={`Country (Required)`}
                                             autoComplete="off"
                                             error={!!validationErrors.mailing_country}
                                             helperText={validationErrors.mailing_country || "Country for mailing address"}
@@ -622,11 +614,6 @@ const EditCustomer: React.FC = () => {
                         </Box>
                         <Box sx={{ width: '50%' }}>
                             <FormControl fullWidth>
-                                <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <LocationOn fontSize="small" color="primary" />
-                                    Mailing State
-                                    <Chip label={"Required"} size="small" color={"primary"} variant="outlined" />
-                                </Typography>
                                 <Autocomplete
                                     fullWidth
                                     size="small"
@@ -655,12 +642,13 @@ const EditCustomer: React.FC = () => {
                                     renderInput={(params) => (
                                         <TextField
                                             {...params}
-                                            placeholder="Select mailing state"
+                                            placeholder="Select state"
                                             disabled={!data.mailing_country}
                                             size="small"
+                                            label={`State (Required)`}
                                             autoComplete="off"
                                             error={!!validationErrors.mailing_state}
-                                            helperText={validationErrors.mailing_state || "State for mailing address"}
+                                            helperText={validationErrors.mailing_state || "State for address"}
                                         />
                                     )}
                                     value={data.mailing_state || ''}
@@ -684,76 +672,153 @@ const EditCustomer: React.FC = () => {
                             </FormControl>
                         </Box>
                     </Box>
+                    {!gst_enable && <FormControl fullWidth sx={{ mt: 2 }}>
+                        <TextField
+                            fullWidth
+                            size="small"
+                            label={`GSTIN Number (${isGSTINRequired ? 'Required' : 'Optional'})`}
+                            placeholder="27XXXXXXXXXXXX"
+                            value={data.gstin || ''}
+                            required={isGSTINRequired}
+                            onChange={(e) => handleInputChange('gstin', capitalizeInput(e.target.value, 'characters'))}
+                            error={!!validationErrors.gstin}
+                            helperText={validationErrors.gstin || "15-digit GSTIN number"}
+                            InputProps={{
+                                sx: {
+                                    borderRadius: 1,
+                                    padding: '0',
+                                    paddingLeft: '8px',
+                                },
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <Button
+                                            variant="contained"
+                                            color="success"
+                                            onClick={handlefetchGSTINDetails}
+                                            disabled={fetchingGST}
+                                            sx={{
+                                                borderRadius: '8px',
+                                                fontWeight: 600,
+                                                transition: 'all 0.2s',
+                                                boxShadow: 'none',
+                                                height: "2.2rem",
+                                                background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
+                                                color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
+                                                '&:hover': {
+                                                    color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                                                    background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
+                                                },
+                                            }}
+                                        >
+                                            {fetchingGST ? <Timeline className="animate-spin" /> : `Fetch Details`}
+                                        </Button>
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
+                    </FormControl>}
                 </SectionCard>
 
                 <SectionCard
-                    title="Profile Information"
-                    icon={<Phone sx={{ color: '#667eea' }} />}
+                    title="Profile Information (Optional)"
+                    icon={<Person sx={{ color: '#667eea' }} />}
                     section="contact"
                     toggleSection={toggleSection}
                     expandedSections={expandedSections}
                 >
-                    <Box sx={{ display: 'flex', gap: 2, my: 2, alignItems: 'center', alignSelf: 'center' }}>
-                        <Box sx={{ width: '50%', position: 'relative' }} >
-                            <ImageUpload
-                                title={`${customerType} Image`}
-                                inputRef={customerImageRef}
-                                imagePreview={imagePreview}
-                                isDragActive={isDragActive}
-                                handleDrop={handleDrop}
-                                handleDragEnter={handleDragEnter}
-                                handleDragLeave={handleDragLeave}
-                                handleBoxClick={handleBoxClick}
-                                handleImageChange={handleImageChange}
-                                removeImage={removeImage}
+                    <Box sx={{ display: 'flex', gap: 2, my: 2, alignItems: 'flex-start' }}>
+                        <Box sx={{ width: '50%', }}>
+                            <TextField
+                                fullWidth
+                                size="small"
+                                label="Contact Person Name (If any)"
+                                placeholder="Enter contact person name"
+                                value={data.mailing_name || ''}
+                                onChange={(e) => handleInputChange('mailing_name', capitalizeInput(e.target.value, 'words'))}
+                                error={!!validationErrors.mailing_name}
+                                helperText={validationErrors.mailing_name || "Customer's mailing name"}
+                                InputProps={{
+                                    sx: {
+                                        borderRadius: 1,
+                                    }
+                                }}
+                            />
+
+                            <PhoneNumber
+                                size={'small'}
+                                code={data.code || ''}
+                                number={data.number || ''}
+                                codeHandler={handleInputChange}
+                                numberHandler={(e) => handleInputChange('number', e.target.value)}
+                                codeWidth={'30%'}
+                                numberWidth={'70%'}
+                                gap={1}
+                                codeLabel={'Code'}
+                                codePlaceholder={'+91'}
+                                numberLabel={'Phone Number'}
+                                numberPlaceholder={"******7548"}
+                            />
+
+                            <TextField
+                                fullWidth
+                                size="small"
+                                label="Contact Email (Optional)"
+                                type="email"
+                                margin="normal"
+                                placeholder="john@example.com"
+                                value={data.email || ''}
+                                onChange={(e) => handleInputChange('email', e.target.value)}
+                                error={!!validationErrors.email}
+                                helperText={validationErrors.email || "Primary contact email"}
+                                InputProps={{
+                                    sx: {
+                                        borderRadius: 1,
+                                    },
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <Email fontSize="small" color="action" />
+                                        </InputAdornment>
+                                    ),
+                                }}
                             />
                         </Box>
-
-                        <Box sx={{ width: '50%' }}>
-                            <FormControl fullWidth sx={{ mb: 1 }}>
-                                <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <Business fontSize="small" color="primary" />
-                                    Mailing Name
-                                    <Chip label={"Optional"} size="small" color={"default"} variant="outlined" />
-                                </Typography>
-                                <TextField
-                                    fullWidth
-                                    size="small"
-                                    placeholder="Acme Inc."
-                                    value={data.mailing_name || ''}
-                                    onChange={(e) => handleInputChange('mailing_name', capitalizeInput(e.target.value, 'words'))}
-                                    error={!!validationErrors.mailing_name}
-                                    helperText={validationErrors.mailing_name || "Customer's mailing name"}
-                                    InputProps={{
-                                        sx: {
-                                            borderRadius: 1,
-                                        }
-                                    }}
-                                />
-                            </FormControl>
-
-                            <FormControl fullWidth sx={{ mb: 1 }}>
-                                <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <Email fontSize="small" color="primary" />
-                                    Email
-                                    <Chip label={'Optional'} size="small" color={"default"} variant="outlined" />
-                                </Typography>
-                                <TextField
-                                    fullWidth
-                                    size="small"
-                                    type="email"
-                                    placeholder="john@example.com"
-                                    value={data.email || ''}
-                                    onChange={(e) => handleInputChange('email', e.target.value)}
-                                    error={!!validationErrors.email}
-                                    helperText={validationErrors.email || "Primary contact email"}
-                                    InputProps={{
-                                        sx: {
-                                            borderRadius: 1,
-                                        }
-                                    }}
-                                />
-                            </FormControl>
+                        <Box sx={{ width: '50%' }} >
+                            <TextField
+                                fullWidth
+                                size="small"
+                                // margin="normal"
+                                label="Street Address (Optional)"
+                                placeholder="123 Main St, Apt 4B"
+                                value={data.mailing_address || ''}
+                                onChange={(e) => handleInputChange('mailing_address', capitalizeInput(e.target.value, 'words'))}
+                                error={!!validationErrors.mailing_address}
+                                helperText={validationErrors.mailing_address || "Street address for correspondence"}
+                                InputProps={{
+                                    sx: {
+                                        borderRadius: 1,
+                                    }
+                                }}
+                                multiline
+                                rows={3}
+                            />
+                            <TextField
+                                fullWidth
+                                size="small"
+                                type="number"
+                                margin="normal"
+                                label="Postal Code (Optional)"
+                                inputMode="numeric"
+                                placeholder="90210"
+                                value={data.mailing_pincode || ''}
+                                onChange={(e) => handleInputChange('mailing_pincode', e.target.value)}
+                                error={!!validationErrors.mailing_pincode}
+                                helperText={validationErrors.mailing_pincode || "6-digit postal code"}
+                                InputProps={{
+                                    sx: {
+                                        borderRadius: 1,
+                                    }
+                                }}
+                            />
                         </Box>
                     </Box>
                 </SectionCard>
@@ -761,151 +826,61 @@ const EditCustomer: React.FC = () => {
 
             <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2, mt: 1 }}>
                 <SectionCard
-                    title="Additional Information"
-                    icon={<LocationOn sx={{ color: '#667eea' }} />}
+                    title="Profile Image (Optional)"
+                    icon={<Image sx={{ color: '#667eea' }} />}
                     section="address"
                     toggleSection={toggleSection}
                     expandedSections={expandedSections}
                 >
-                    <Box sx={{ mt: 2 }}>
-                        <Box sx={{ display: 'flex', gap: 2, my: 1 }}>
-                            <FormControl fullWidth sx={{ width: '50%' }}>
-                                <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <CreditCard fontSize="small" color="primary" />
-                                    Mailing Address
-                                    <Chip label="Optional" size="small" color="default" variant="outlined" />
-                                </Typography>
-                                <TextField
-                                    fullWidth
-                                    size="small"
-                                    placeholder="123 Main St, Apt 4B"
-                                    value={data.mailing_address || ''}
-                                    onChange={(e) => handleInputChange('mailing_address', capitalizeInput(e.target.value, 'words'))}
-                                    error={!!validationErrors.mailing_address}
-                                    helperText={validationErrors.mailing_address || "Street address for correspondence"}
-                                    InputProps={{
-                                        sx: {
-                                            borderRadius: 1,
-                                        }
-                                    }}
-                                    multiline
-                                    rows={3}
-                                />
-                            </FormControl>
-                            <Box sx={{ width: '50%' }}>
-                                <FormControl fullWidth>
-                                    <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <Label fontSize="small" color="primary" />
-                                        Postal Code
-                                        <Chip label="Optional" size="small" color="default" variant="outlined" />
-                                    </Typography>
-                                    <TextField
-                                        fullWidth
-                                        size="small"
-                                        type="number"
-                                        inputMode="numeric"
-                                        placeholder="90210"
-                                        value={data.mailing_pincode || ''}
-                                        onChange={(e) => handleInputChange('mailing_pincode', e.target.value)}
-                                        error={!!validationErrors.mailing_pincode}
-                                        helperText={validationErrors.mailing_pincode || "6-digit postal code"}
-                                        InputProps={{
-                                            sx: {
-                                                borderRadius: 1,
-                                            }
-                                        }}
-                                    />
-                                </FormControl>
-                            </Box>
-                        </Box>
 
-                        <Box sx={{ width: "100%" }}>
-                            <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Phone fontSize="small" color="primary" />
-                                Phone Number
-                                <Chip label="Optional" size="small" color="default" variant="outlined" />
-                            </Typography>
-                            <Box sx={{ display: 'flex', gap: 2 }}>
-                                <Box sx={{ width: '20%' }}>
-                                    <TextField
-                                        fullWidth
-                                        size="small"
-                                        inputMode="numeric"
-                                        placeholder="+91"
-                                        value={data.code}
-                                        onChange={(e) => handleInputChange('code', e.target.value)}
-                                        error={!!validationErrors.code}
-                                        InputProps={{
-                                            sx: {
-                                                borderRadius: 1,
-                                            }
-                                        }}
-                                    />
-                                </Box>
-                                <Box sx={{ width: '80%' }}>
-                                    <TextField
-                                        fullWidth
-                                        size="small"
-                                        type="tel"
-                                        inputMode="numeric"
-                                        placeholder="1234567890"
-                                        value={data.number}
-                                        onChange={(e) => handleInputChange('number', e.target.value)}
-                                        error={!!validationErrors.number}
-                                        helperText={validationErrors.number || "10-digit phone number"}
-                                        InputProps={{
-                                            sx: {
-                                                borderRadius: 1,
-                                            }
-                                        }}
-                                    />
-                                </Box>
-                            </Box>
-                        </Box>
+                    <Box sx={{ mt: 2 }}>
+                        <ImageUpload
+                            title={`${customerType} Image`}
+                            inputRef={customerImageRef}
+                            imagePreview={imagePreview}
+                            isDragActive={isDragActive}
+                            handleDrop={handleDrop}
+                            handleDragEnter={handleDragEnter}
+                            handleDragLeave={handleDragLeave}
+                            handleBoxClick={handleBoxClick}
+                            handleImageChange={handleImageChange}
+                            removeImage={removeImage}
+                        />
 
                     </Box>
                 </SectionCard>
 
                 <SectionCard
-                    title="Bank Details"
+                    title="Bank Details (Optional)"
                     icon={<AccountBalance sx={{ color: '#667eea' }} />}
                     section="bank"
                     toggleSection={toggleSection}
                     expandedSections={expandedSections}
                 >
                     <Box sx={{ mt: 2 }}>
-                        <FormControl fullWidth>
-                            <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <LocationOn fontSize="small" color="primary" />
-                                Bank Name
-                                <Chip label={'Optional'} size="small" color={"default"} variant="outlined" />
-                            </Typography>
-                            <TextField
-                                fullWidth
-                                size="small"
-                                placeholder="e.g. State Bank of India"
-                                value={data.bank_name || ''}
-                                onChange={(e) => handleInputChange('bank_name', capitalizeInput(e.target.value, 'words'))}
-                                error={!!validationErrors.bank_name}
-                                helperText={validationErrors.bank_name || "Name of the bank"}
-                                InputProps={{
-                                    sx: {
-                                        borderRadius: 1,
-                                    }
-                                }}
-                            />
-                        </FormControl>
+                        <TextField
+                            fullWidth
+                            size="small"
+                            label="Bank Name (Optional)"
+                            placeholder="e.g. State Bank of India"
+                            value={data.bank_name || ''}
+                            onChange={(e) => handleInputChange('bank_name', capitalizeInput(e.target.value, 'words'))}
+                            error={!!validationErrors.bank_name}
+                            helperText={validationErrors.bank_name || "Name of the bank"}
+                            InputProps={{
+                                sx: {
+                                    borderRadius: 1,
+                                }
+                            }}
+                        />
 
                         <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
                             <FormControl fullWidth sx={{ width: '50%' }}>
-                                <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <Label fontSize="small" color="primary" />
-                                    Account Holder Name
-                                    <Chip label={'Optional'} size="small" color={"default"} variant="outlined" />
-                                </Typography>
                                 <TextField
                                     fullWidth
                                     size="small"
+                                    margin="normal"
+                                    label="Account Holder Name (Optional)"
                                     placeholder="John Doe"
                                     value={data.account_holder || ''}
                                     onChange={(e) => handleInputChange('account_holder', capitalizeInput(e.target.value, 'characters'))}
@@ -919,14 +894,11 @@ const EditCustomer: React.FC = () => {
                                 />
                             </FormControl>
                             <FormControl fullWidth sx={{ width: '50%' }}>
-                                <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <Label fontSize="small" color="primary" />
-                                    Account Number
-                                    <Chip label={'Optional'} size="small" color={"default"} variant="outlined" />
-                                </Typography>
                                 <TextField
                                     fullWidth
                                     size="small"
+                                    margin="normal"
+                                    label="Account Number (Optional)"
                                     placeholder="123456789012"
                                     value={data.account_number || ''}
                                     onChange={(e) => handleInputChange('account_number', e.target.value)}
@@ -943,53 +915,41 @@ const EditCustomer: React.FC = () => {
 
                         <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
                             <Box sx={{ width: '50%' }}>
-                                <FormControl fullWidth>
-                                    <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <LocationOn fontSize="small" color="primary" />
-                                        IFSC Code
-                                        <Chip label={'Optional'} size="small" color="default" variant="outlined" />
-                                    </Typography>
-                                    <TextField
-                                        fullWidth
-                                        size="small"
-                                        placeholder="e.g. SBIN0001234"
-                                        value={data.bank_ifsc || ''}
-                                        onChange={(e) => handleInputChange('bank_ifsc', capitalizeInput(e.target.value, 'characters'))}
-                                        error={!!validationErrors.bank_ifsc}
-                                        helperText={validationErrors.bank_ifsc}
-                                        InputProps={{
-                                            sx: {
-                                                borderRadius: 1,
-                                            }
-                                        }}
-                                        inputProps={{
-                                            autoCapitalize: "characters"
-                                        }}
-                                    />
-                                </FormControl>
+                                <TextField
+                                    fullWidth
+                                    size="small"
+                                    label="IFSC Code (Optional)"
+                                    placeholder="e.g. SBIN0001234"
+                                    value={data.bank_ifsc || ''}
+                                    onChange={(e) => handleInputChange('bank_ifsc', capitalizeInput(e.target.value, 'characters'))}
+                                    error={!!validationErrors.bank_ifsc}
+                                    helperText={validationErrors.bank_ifsc}
+                                    InputProps={{
+                                        sx: {
+                                            borderRadius: 1,
+                                        }
+                                    }}
+                                    inputProps={{
+                                        autoCapitalize: "characters"
+                                    }}
+                                />
                             </Box>
                             <Box sx={{ width: '50%' }}>
-                                <FormControl fullWidth>
-                                    <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <Label fontSize="small" color="primary" />
-                                        Branch Name
-                                        <Chip label={'Optional'} size="small" color="default" variant="outlined" />
-                                    </Typography>
-                                    <TextField
-                                        fullWidth
-                                        size="small"
-                                        placeholder="Main Branch, Downtown"
-                                        value={data.bank_branch || ''}
-                                        onChange={(e) => handleInputChange('bank_branch', capitalizeInput(e.target.value, 'words'))}
-                                        error={!!validationErrors.bank_branch}
-                                        helperText={validationErrors.bank_branch || "Name of the bank branch"}
-                                        InputProps={{
-                                            sx: {
-                                                borderRadius: 1,
-                                            }
-                                        }}
-                                    />
-                                </FormControl>
+                                <TextField
+                                    fullWidth
+                                    size="small"
+                                    label="Bank Branch (Optional)"
+                                    placeholder="Main Branch, Downtown"
+                                    value={data.bank_branch || ''}
+                                    onChange={(e) => handleInputChange('bank_branch', capitalizeInput(e.target.value, 'words'))}
+                                    error={!!validationErrors.bank_branch}
+                                    helperText={validationErrors.bank_branch || "Name of the bank branch"}
+                                    InputProps={{
+                                        sx: {
+                                            borderRadius: 1,
+                                        }
+                                    }}
+                                />
                             </Box>
                         </Box>
                     </Box>
@@ -1019,6 +979,7 @@ const EditCustomer: React.FC = () => {
                     sx={{
                         background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
                         color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
+                        border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#c62828'}`,
                         '&:hover': {
                             color: theme.palette.mode === 'dark' ? '#000' : '#fff',
                             background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
@@ -1036,6 +997,7 @@ const EditCustomer: React.FC = () => {
                     sx={{
                         background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
                         color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
+                        border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
                         '&:hover': {
                             color: theme.palette.mode === 'dark' ? '#000' : '#fff',
                             background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',

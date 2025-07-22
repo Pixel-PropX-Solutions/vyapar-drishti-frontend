@@ -19,23 +19,23 @@ import {
     useTheme,
     Zoom
 } from "@mui/material";
-import { getAvatarColor, getInitials } from "@/utils/functions";
+import { formatDate, getAvatarColor, getInitials } from "@/utils/functions";
 import { Edit, Delete, Category, Visibility } from "@mui/icons-material";
-import { GetCategory } from "@/utils/types";
-interface CategoryCardProps {
-    category: GetCategory;
+import { GetInventoryGroups } from "@/utils/types";
+interface InventoryGroupCardProps {
+    group: GetInventoryGroups;
     onDelete: (id: string) => void;
-    onEdit: (category: GetCategory) => void;
-    onView: (category: GetCategory) => void;
+    onEdit: (group: GetInventoryGroups) => void;
+    onView: (group: GetInventoryGroups) => void;
 }
 
 
-export const CategoryCard: React.FC<CategoryCardProps> = ({ category, onDelete, onEdit, onView }) => {
+export const InventoryGroupCard: React.FC<InventoryGroupCardProps> = ({ group, onDelete, onEdit, onView }) => {
     const theme = useTheme();
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const confirmDelete = () => {
-        onDelete(category?._id ?? '');
+        onDelete(group?._id ?? '');
         setOpenDeleteDialog(false);
     };
 
@@ -59,32 +59,33 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category, onDelete, 
                 }}
             >
                 <CardContent sx={{ flexGrow: 1 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', mb: 2 }}>
-                        <Avatar
-                            sx={{
-                                width: 36,
-                                height: 36,
-                                mr: 2,
-                                bgcolor: getAvatarColor(category.category_name),
-                                fontSize: '1rem',
-                                fontWeight: 700,
-                                boxShadow: `0 4px 12px ${alpha(getAvatarColor(category.category_name), 0.3)}`,
-                                transition: 'all 0.3s ease',
-                                transform: isHovered ? 'scale(1.1)' : 'scale(1)',
-                            }}
-                            src={category?.image ? category.image : ''}
-                        >
-                            {(getInitials(category.category_name))}
-                        </Avatar>
-                        <Typography
-                            variant="body1"
-                            // component="h2"
-                            gutterBottom
-                            noWrap
-                            title={category?.category_name}
-                        >
-                            {category?.category_name || ''}
-                        </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+
+                        <Box sx={{ display: 'flex', alignItems: 'center', }}>
+                            <Avatar
+                                sx={{
+                                    width: 36,
+                                    height: 36,
+                                    mr: 2,
+                                    bgcolor: getAvatarColor(group.inventory_group_name),
+                                    fontSize: '1rem',
+                                    fontWeight: 700,
+                                    boxShadow: `0 4px 12px ${alpha(getAvatarColor(group.inventory_group_name), 0.3)}`,
+                                    transition: 'all 0.3s ease',
+                                    transform: isHovered ? 'scale(1.1)' : 'scale(1)',
+                                }}
+                                src={group?.image ? group.image : ''}
+                            >
+                                {(getInitials(group.inventory_group_name))}
+                            </Avatar>
+                            <Typography
+                                variant="body1"
+                                gutterBottom
+                                noWrap
+                            >
+                                {group?.inventory_group_name || ''}
+                            </Typography>
+                        </Box>
                     </Box>
 
                     <Divider sx={{ my: 1.5 }} />
@@ -94,8 +95,19 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category, onDelete, 
                             <Category
                                 sx={{ mr: 1, color: theme.palette.info.dark, fontSize: "1.2rem" }}
                             />
-                            <Typography variant="body2" noWrap>
-                                {category?.description || 'No description provided'}
+                            <Typography variant="body2" noWrap
+                            >
+                                {group?.description || 'No description provided'}
+                            </Typography>
+                        </Box>
+                        <Box>
+                            <Typography variant="body2" color="text.secondary">
+                                Parent: {group?.parent || 'None'}
+                            </Typography>
+                        </Box>
+                        <Box>
+                            <Typography variant="body2" color="text.secondary">
+                                Created on: {formatDate(group?.created_at || '')}
                             </Typography>
                         </Box>
                         <Zoom in={isHovered} timeout={200}>
@@ -105,7 +117,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category, onDelete, 
                                         size="small"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            onView(category);
+                                            onView(group);
                                         }}
                                         sx={{
                                             bgcolor: alpha(theme.palette.info.main, 0.1),
@@ -121,12 +133,12 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category, onDelete, 
                                     </IconButton>
                                 </Tooltip>
 
-                                <Tooltip title="Edit Category" arrow>
+                                <Tooltip title="Edit Group" arrow>
                                     <IconButton
                                         size="small"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            onEdit(category);
+                                            onEdit(group);
                                         }}
                                         sx={{
                                             bgcolor: alpha(theme.palette.warning.main, 0.1),
@@ -142,7 +154,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category, onDelete, 
                                     </IconButton>
                                 </Tooltip>
 
-                                <Tooltip title="Delete Category" arrow>
+                                <Tooltip title="Delete Group" arrow>
                                     <IconButton
                                         size="small"
                                         onClick={(e) => {
@@ -166,7 +178,6 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category, onDelete, 
                         </Zoom>
                     </Stack>
                 </CardContent>
-
             </Card>
 
 
@@ -192,14 +203,14 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category, onDelete, 
                     }}
                 >
                     <Delete />
-                    Delete {category.category_name}?
+                    Delete {group.inventory_group_name}?
                 </DialogTitle>
                 <DialogContent>
                     <Alert severity="warning" sx={{ mb: 2 }}>
-                        This action cannot be undone. The category will be permanently removed from your inventory if it is not associated with any products.
+                        This action cannot be undone. The group will be permanently removed from your inventory if it is not associated with any products.
                     </Alert>
                     <Typography>
-                        Are you sure you want to delete "<strong>{category.category_name}</strong>"?
+                        Are you sure you want to delete "<strong>{group.inventory_group_name}</strong>"?
                     </Typography>
                 </DialogContent>
                 <DialogActions sx={{ p: 3, gap: 1 }}>
@@ -217,7 +228,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category, onDelete, 
                         sx={{ borderRadius: 2 }}
                         startIcon={<Delete />}
                     >
-                        Delete Category
+                        Delete Group
                     </Button>
                 </DialogActions>
             </Dialog>

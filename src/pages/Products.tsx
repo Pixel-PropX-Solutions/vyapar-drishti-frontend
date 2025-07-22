@@ -32,9 +32,9 @@ import { deleteProduct, viewAllStockItems, viewProduct } from "@/services/produc
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import toast from "react-hot-toast";
-import { CategorySortField, GetCategory, GetStockItem, ProductSortField, ProductUpdate, SortOrder, UpdateCategory } from "@/utils/types";
+import { CategorySortField, GetCategory, GetInventoryGroups, GetStockItem, GroupSortField, ProductSortField, ProductUpdate, SortOrder, UpdateCategory, UpdateInventoryGroup } from "@/utils/types";
 import ProductsSideModal from "@/features/products/ProductsSideModal";
-import { deleteCategory, viewAllCategories, viewAllCategory } from "@/services/category";
+import { deleteCategory, viewAllCategory } from "@/services/category";
 import TabPanel from "@/features/upload-documents/components/TabPanel";
 import { ProductRow } from "@/features/products/ProductRow";
 import CategoryCreateModal from "@/features/category/CategoryCreateModal";
@@ -42,18 +42,23 @@ import { ProductRowSkeleton } from "@/common/skeletons/ProductRowSkeleton";
 import { useNavigate } from "react-router-dom";
 import { CategoryCard } from "@/features/category/CategoryCard";
 import CategoryCardSkeleton from "@/common/skeletons/CategoryCardSkeleton";
+import CreateInventoryGroupModal from "@/features/Group/CreateInventoryGroupModal";
+import { viewAllInventoryGroup } from "@/services/inventoryGroup";
+import { InventoryGroupCard } from "@/features/Group/InventoryGroupCard";
 
 const ProductsListing: React.FC = () => {
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { stockItems, pageMeta } = useSelector((state: RootState) => state.product);
-  const { categoryLists, categories } = useSelector((state: RootState) => state.category);
+  const { stockItems, stockItemsMeta } = useSelector((state: RootState) => state.product);
+  const { categories } = useSelector((state: RootState) => state.category);
+  const { inventoryGroups } = useSelector((state: RootState) => state.inventoryGroup);
   const [products, setProducts] = useState<GetStockItem[]>([]);
 
   const [data, setData] = useState({
     searchTerm: '',
     categoryFilter: 'All',
+    groupFilter: 'All',
     page: 1,
     rowsPerPage: 10,
     // is_deleted: false,
@@ -63,20 +68,30 @@ const ProductsListing: React.FC = () => {
     // Category Filters
     searchQuery: '',
     pageNumber: 1,
-    parent: 'All',
     limit: 10,
     sortField: 'created_at' as CategorySortField,
     categorySortOrder: 'asc' as SortOrder,
+
+    // Group Filters
+    searchGroupQuery: '',
+    pageGroupNumber: 1,
+    limitGroup: 10,
+    sortGroupField: 'created_at' as GroupSortField,
+    groupSortOrder: 'asc' as SortOrder,
+    groupParent: 'All',
   });
 
-  const { searchTerm, categoryFilter, page, rowsPerPage, sortBy, sortOrder, parent, categorySortOrder, sortField, limit, pageNumber, searchQuery } = data;
+  const { searchTerm, categoryFilter, groupFilter, page, rowsPerPage, sortBy, sortOrder, groupParent, categorySortOrder, sortField, limit, pageNumber, searchQuery, searchGroupQuery, pageGroupNumber, limitGroup, sortGroupField, groupSortOrder } = data;
   const [loading, setLoading] = useState<boolean>(false);
   const [refreshKey, setRefreshKey] = useState<number>(0);
   const [drawer, setDrawer] = useState<boolean>(false);
-  const { currentCompany } = useSelector((state: RootState) => state.auth);
-  const [openCategoryModal, setOpenCategoryModal] = useState<boolean>(false);
+  const { user } = useSelector((state: RootState) => state.auth);
+  const currentCompanyDetails = user?.company?.find((c: any) => c._id === user.user_settings.current_company_id);
   const [selectedProduct, setSelectedProduct] = useState<ProductUpdate | null>(null);
+  const [openCategoryModal, setOpenCategoryModal] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<UpdateCategory | null>(null);
+  const [openGroupModal, setOpenGroupModal] = useState<boolean>(false);
+  const [selectedGroup, setSelectedGroup] = useState<UpdateInventoryGroup | null>(null);
   const [selectedTab, setSelectedTab] = useState(0);
 
   const handlePageChange = (_: unknown, value: number) => {
@@ -90,7 +105,7 @@ const ProductsListing: React.FC = () => {
   const handleDelete = (productId: string) => {
     setLoading(true)
     dispatch(
-      deleteProduct({ id: productId, company_id: currentCompany?._id || '' })
+      deleteProduct({ id: productId, company_id: currentCompanyDetails?._id || '' })
     )
       .unwrap()
       .then(() => {
@@ -106,7 +121,7 @@ const ProductsListing: React.FC = () => {
 
   const handleEdit = async (product: GetStockItem) => {
     setDrawer(true);
-    await dispatch(viewProduct({ product_id: product._id, company_id: currentCompany?._id || '' }))
+    await dispatch(viewProduct({ product_id: product._id, company_id: currentCompanyDetails?._id || '' }))
       .unwrap().then((res) => {
         setSelectedProduct(res.product);
       }
@@ -129,6 +144,7 @@ const ProductsListing: React.FC = () => {
     setData({
       searchTerm: '',
       categoryFilter: 'All',
+      groupFilter: 'All',
       page: 1,
       rowsPerPage: 10,
       sortBy: "created_at" as ProductSortField,
@@ -137,10 +153,18 @@ const ProductsListing: React.FC = () => {
       // Category Filters
       searchQuery: '',
       pageNumber: 1,
-      parent: 'All',
       limit: 10,
       sortField: 'created_at' as CategorySortField,
       categorySortOrder: 'asc' as SortOrder,
+
+      // Group Filters
+      searchGroupQuery: '',
+      pageGroupNumber: 1,
+      limitGroup: 10,
+      sortGroupField: 'created_at' as GroupSortField,
+      groupSortOrder: 'asc' as SortOrder,
+      groupParent: 'All',
+
     });
     setRefreshKey((prev) => prev + 1);
   };
@@ -152,6 +176,9 @@ const ProductsListing: React.FC = () => {
     } else if (newValue === 1) {
       handleResetFilters();
       fetchCategory();
+    } else if (newValue === 2) {
+      handleResetFilters();
+      fetchGroup();
     }
 
     setSelectedTab(newValue);
@@ -161,9 +188,10 @@ const ProductsListing: React.FC = () => {
     setLoading(true);
     dispatch(
       viewAllStockItems({
-        company_id: currentCompany?._id || '',
+        company_id: currentCompanyDetails?._id || '',
         searchQuery: searchTerm,
         category: categoryFilter,
+        group: groupFilter,
         pageNumber: page,
         limit: rowsPerPage,
         sortField: sortBy,
@@ -175,7 +203,7 @@ const ProductsListing: React.FC = () => {
       .then(() => {
         setLoading(false);
       });
-  }, [dispatch, currentCompany?._id, searchTerm, categoryFilter, page, rowsPerPage, sortBy, sortOrder]);
+  }, [dispatch, currentCompanyDetails?._id, searchTerm, categoryFilter, groupFilter, page, rowsPerPage, sortBy, sortOrder]);
 
 
   const fetchCategory = useCallback(async () => {
@@ -187,33 +215,46 @@ const ProductsListing: React.FC = () => {
         limit: limit,
         sortField: sortField,
         sortOrder: categorySortOrder,
-        company_id: currentCompany?._id || '',
-        parent: parent,
+        company_id: currentCompanyDetails?._id || '',
       })
     )
       .unwrap()
       .then(() => {
         setLoading(false);
       });
-  }, [categorySortOrder, currentCompany?._id, parent, dispatch, limit, pageNumber, searchQuery, sortField]);
+  }, [categorySortOrder, currentCompanyDetails?._id, dispatch, limit, pageNumber, searchQuery, sortField]);
+
+
+  const fetchGroup = useCallback(async () => {
+    setLoading(true);
+    dispatch(
+      viewAllInventoryGroup({
+        searchQuery: searchGroupQuery,
+        pageNumber: pageGroupNumber,
+        limit: limitGroup,
+        sortField: sortGroupField,
+        sortOrder: groupSortOrder,
+        company_id: currentCompanyDetails?._id || '',
+        parent: groupParent,
+      })
+    )
+      .unwrap()
+      .then(() => {
+        setLoading(false);
+      });
+  }, [dispatch, searchGroupQuery, pageGroupNumber, limitGroup, sortGroupField, groupSortOrder, currentCompanyDetails?._id, groupParent]);
 
 
   useEffect(() => {
     fetchProducts();
-    dispatch(
-      viewAllCategories(currentCompany?._id || '')
-    );
-  }, [page, searchTerm, rowsPerPage, sortOrder, categoryFilter, sortBy, refreshKey, dispatch, fetchProducts, currentCompany?._id]);
+  }, [page, searchTerm, rowsPerPage, sortOrder, categoryFilter, sortBy, refreshKey, dispatch, fetchProducts, currentCompanyDetails?._id]);
+
 
   useEffect(() => {
-    fetchCategory();
-  }, [fetchCategory, categorySortOrder, currentCompany?._id, parent, limit, pageNumber, searchQuery, sortField]);
-
-  useEffect(() => {
-    if (stockItems && pageMeta) {
+    if (stockItems && stockItemsMeta) {
       setProducts(stockItems);
     }
-  }, [stockItems, pageMeta]);
+  }, [stockItems, stockItemsMeta]);
 
   return (
     <Box sx={{ p: 3, minHeight: '100vh', width: '100%' }}>
@@ -224,12 +265,16 @@ const ProductsListing: React.FC = () => {
             <Grid item xs={12} md={8}>
               <Box>
                 <Typography variant="h5" component="h1" fontWeight="700" color="text.primary">
-                  {selectedTab === 0 ? 'Products' : 'Categories'}
+                  {selectedTab === 0 && 'Products'}
+                  {selectedTab === 1 && 'Categories'}
+                  {selectedTab === 2 && 'Groups'}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   {selectedTab === 0
                     ? 'Manage your product inventory, add new items, and track stock levels.'
-                    : 'Organize your products into categories for better management and navigation.'}
+                    : selectedTab === 1
+                      ? 'Organize your products into categories for better management and navigation.'
+                      : 'Group your products for better organization and reporting.'}
                 </Typography>
               </Box>
               <Tabs
@@ -240,6 +285,7 @@ const ProductsListing: React.FC = () => {
               >
                 <Tab label="Products" />
                 <Tab label="Categories" />
+                <Tab label="Groups" />
               </Tabs>
             </Grid>
             <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
@@ -251,16 +297,21 @@ const ProductsListing: React.FC = () => {
                   if (selectedTab === 1) {
                     setOpenCategoryModal(true);
                     setSelectedCategory(null);
+                  } else if (selectedTab === 2) {
+                    setOpenGroupModal(true);
+                    setSelectedGroup(null);
                   } else {
                     setDrawer(true);
+                    setSelectedProduct(null);
                   }
-
                 }}
                 sx={{
                   width: "max-content",
                 }}
               >
-                {selectedTab === 1 ? ('Add New Category') : ('Add New Items')}
+                {selectedTab === 0 && ('Add New Items')}
+                {selectedTab === 1 && ('Add New Category')}
+                {selectedTab === 2 && ('Add New Group')}
               </Button>
             </Grid>
           </Grid>
@@ -271,12 +322,12 @@ const ProductsListing: React.FC = () => {
 
       {/* Enhanced Search and Filters */}
       <Grid container spacing={2} alignItems="center">
-        <Grid item xs={12} sm={7}>
+        <Grid item xs={12} sm={selectedTab === 0 ? 5 : 9}>
           <TextField
             fullWidth
             size="small"
-            placeholder={selectedTab === 0 ? "Search item name, category, description, barcode..." : "Search category name, description ..."}
-            value={selectedTab === 0 ? searchTerm : searchQuery}
+            placeholder={selectedTab === 0 ? "Search item name, category, description, barcode..." : selectedTab === 1 ? "Search category name, description ..." : "Search group name, description ..."}
+            value={selectedTab === 0 ? searchTerm : selectedTab === 1 ? searchQuery : searchGroupQuery}
             onChange={(e) => {
               if (selectedTab === 0) {
                 setData((prevState) => ({
@@ -284,10 +335,16 @@ const ProductsListing: React.FC = () => {
                   searchTerm: e.target.value,
                 }));
               }
-              else {
+              else if (selectedTab === 1) {
                 setData((prevState) => ({
                   ...prevState,
                   searchQuery: e.target.value,
+                }));
+              }
+              else {
+                setData((prevState) => ({
+                  ...prevState,
+                  searchGroupQuery: e.target.value,
                 }));
               }
             }}
@@ -315,7 +372,7 @@ const ProductsListing: React.FC = () => {
           />
         </Grid>
 
-        <Grid item xs={12} sm={2}>
+        {selectedTab === 0 && <Grid item xs={12} sm={2}>
           <TextField
             fullWidth
             select
@@ -335,13 +392,41 @@ const ProductsListing: React.FC = () => {
             <MenuItem value={'All'}>
               All Categories
             </MenuItem>
-            {categoryLists?.map((category) => (
-              <MenuItem key={category?._id} value={category?.category_name}>
-                {category?.category_name}
+            {stockItemsMeta.unique_categories?.map((category) => (
+              <MenuItem key={category} value={category}>
+                {category}
               </MenuItem>
             ))}
           </TextField>
-        </Grid>
+        </Grid>}
+
+        {selectedTab === 0 && <Grid item xs={12} sm={2}>
+          <TextField
+            fullWidth
+            select
+            size="small"
+            label="Group"
+            value={groupFilter}
+            onChange={(e) => setData((prevState) => ({
+              ...prevState,
+              groupFilter: e.target.value,
+            }))}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 1,
+              },
+            }}
+          >
+            <MenuItem value={'All'}>
+              All Groups
+            </MenuItem>
+            {stockItemsMeta.unique_groups?.map((group) => (
+              <MenuItem key={group} value={group}>
+                {group}
+              </MenuItem>
+            ))}
+          </TextField>
+        </Grid>}
 
         <Grid item xs={12} sm={1}>
           <TextField
@@ -529,7 +614,6 @@ const ProductsListing: React.FC = () => {
       </TabPanel>
 
       <TabPanel value={selectedTab} index={1}>
-
         {/* Enhanced Category Cards */}
         <Box
           sx={{
@@ -621,6 +705,98 @@ const ProductsListing: React.FC = () => {
         </Box>
       </TabPanel>
 
+      <TabPanel value={selectedTab} index={2}>
+        {/* Enhanced Groups Cards */}
+        <Box
+          sx={{
+            width: '100%',
+          }}>
+          <Grid container spacing={2}>
+            {loading ? (
+              Array([1, 2, 3, 4, 5])
+                .map((_, index) => (
+                  <Grid
+                    item
+                    xs={12}
+                    sm={6}
+                    md={4}
+                    lg={3}
+                    key={`skeleton-${index}`}
+                  >
+                    <CategoryCardSkeleton />
+                  </Grid>
+                ))
+            ) : inventoryGroups?.length > 0 ? (inventoryGroups.map((group) => (
+              <Grid item xs={12} sm={6} md={3} key={group._id}>
+                <InventoryGroupCard
+                  group={group}
+                  onDelete={(group_id: string) => {
+                    dispatch(
+                      deleteCategory(group_id)
+                    )
+                      .unwrap()
+                      .then(() => {
+                        setRefreshKey((prev) => prev + 1);
+                        setLoading(false);
+                        toast.success('Group deleted successfully')
+                      }).catch((error) => {
+                        setRefreshKey((prev) => prev + 1);
+                        setLoading(false);
+                        toast.error(error || "An unexpected error occurred. Please try again later.");
+                      });
+                  }}
+                  onEdit={(group: GetInventoryGroups) => {
+                    setOpenGroupModal(true);
+                    setSelectedGroup(group);
+                  }}
+                  onView={(group: GetInventoryGroups) => {
+                    setOpenGroupModal(true);
+                    setSelectedGroup(group);
+                  }}
+                />
+              </Grid>
+            ))) : (
+              <Grid item xs={12}>
+                <Box sx={{
+                  borderRadius: 1,
+                  border: `1px solid ${alpha(theme.palette.divider, 1)}`,
+                  boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 2,
+                  py: 4,
+                }}>
+                  <InventoryIcon sx={{ fontSize: '4rem', color: theme.palette.text.disabled }} />
+                  <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 600 }}>
+                    No groups found
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Try adjusting your search or filter criteria, or add your first group
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      setOpenCategoryModal(true);
+                      setSelectedCategory(null);
+                    }}
+                    startIcon={<AddCircleIcon />}
+                    sx={{
+                      mt: 2,
+                      borderRadius: 1,
+                      textTransform: 'none',
+                      fontWeight: 600,
+                    }}
+                  >
+                    Add Your First Group
+                  </Button>
+                </Box>
+              </Grid>
+            )}
+          </Grid>
+        </Box>
+      </TabPanel>
+
       {/* Enhanced Pagination Section */}
       <Paper
         elevation={0}
@@ -636,12 +812,16 @@ const ProductsListing: React.FC = () => {
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 0.5 }}>
-          {selectedTab !== 1 ?
+          {selectedTab === 0 ?
             (<Typography variant="body2" sx={{ mr: 2 }}>
               Showing {Math.min((page - 1) * rowsPerPage + 1, products.length)} - {Math.min(page * rowsPerPage, products.length)} of {products.length} products
-            </Typography>) : (
+            </Typography>) : selectedTab === 1 ? (
               <Typography variant="body2" sx={{ mr: 2 }}>
                 Showing {Math.min((page - 1) * rowsPerPage + 1, categories?.length)} - {Math.min(page * rowsPerPage, categories?.length)} of {categories?.length} categories
+              </Typography>
+            ) : (
+              <Typography variant="body2" sx={{ mr: 2 }}>
+                Showing {Math.min((page - 1) * rowsPerPage + 1, inventoryGroups?.length)} - {Math.min(page * rowsPerPage, inventoryGroups?.length)} of {inventoryGroups?.length} groups
               </Typography>
             )
           }
@@ -673,9 +853,37 @@ const ProductsListing: React.FC = () => {
             }}
           />
         )}
+
         {categories?.length > rowsPerPage && selectedTab === 1 && (
           <Pagination
             count={Math.ceil(categories?.length / rowsPerPage)}
+            page={page}
+            onChange={handlePageChange}
+            color="primary"
+            size={"medium"}
+            showFirstButton
+            showLastButton
+            sx={{
+              "& .MuiPaginationItem-root": {
+                mx: { xs: 0.25, sm: 0.5 },
+                borderRadius: 1,
+                fontWeight: 600,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`,
+                },
+                '&.Mui-selected': {
+                  boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`,
+                },
+              },
+            }}
+          />
+        )}
+
+        {inventoryGroups?.length > rowsPerPage && selectedTab === 2 && (
+          <Pagination
+            count={Math.ceil(inventoryGroups?.length / rowsPerPage)}
             page={page}
             onChange={handlePageChange}
             color="primary"
@@ -711,7 +919,14 @@ const ProductsListing: React.FC = () => {
         onUpdated={() => fetchCategory()}
         category={selectedCategory}
         onCreated={function (category: { name: string; _id: string; }): void { console.log("Category created:", category); }} />
-    </Box>
+
+      <CreateInventoryGroupModal
+        open={openGroupModal}
+        inventoryGroup={selectedGroup}
+        onClose={() => setOpenGroupModal(false)}
+        onCreated={async (newGroup) => { console.log("Group created:", newGroup); await fetchProducts(); }}
+      />
+    </Box >
   );
 };
 

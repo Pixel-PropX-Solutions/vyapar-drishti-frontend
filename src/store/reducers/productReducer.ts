@@ -26,7 +26,13 @@ interface ProductState {
   deletionModal: boolean;
   productId: string;
   pageMeta: PageMeta;
-
+  stockItemsMeta: {
+    page: number;
+    limit: number;
+    total: number;
+    unique_groups: Array<string>;
+    unique_categories: Array<string>;
+  },
   error: string | null;
 }
 
@@ -47,6 +53,13 @@ const initialState: ProductState = {
     limit: 0,
     total: 0,
     unique: [],
+  },
+  stockItemsMeta: {
+    page: 0,
+    limit: 0,
+    total: 0,
+    unique_groups: [],
+    unique_categories: [],
   },
   error: null,
 };
@@ -129,7 +142,7 @@ const productSlice = createSlice({
         viewAllStockItems.fulfilled,
         (state, action: PayloadAction<any>) => {
           state.stockItems = action.payload.stockItems;
-          state.pageMeta = action.payload.pageMeta;
+          state.stockItemsMeta = action.payload.stockItemsMeta;
           state.loading = false;
         }
       )

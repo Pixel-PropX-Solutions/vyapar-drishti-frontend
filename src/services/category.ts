@@ -41,7 +41,6 @@ export const viewAllCategory = createAsyncThunk(
         {
             searchQuery,
             company_id,
-            parent,
             pageNumber,
             limit,
             sortField,
@@ -49,7 +48,6 @@ export const viewAllCategory = createAsyncThunk(
         }: {
             searchQuery: string;
             company_id: string;
-            parent: string;
             sortField: string;
             pageNumber: number;
             limit: number;
@@ -59,7 +57,7 @@ export const viewAllCategory = createAsyncThunk(
     ) => {
         try {
             const response = await userApi.get(
-                `/category/view/all/category?company_id=${company_id}${searchQuery !== "" ? '&search=' + searchQuery : ''}${parent === "" || parent === "All" ? "" : '&parent=' + parent}&page_no=${pageNumber}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"
+                `/category/view/all/category?company_id=${company_id}${searchQuery !== "" ? '&search=' + searchQuery : ''}&page_no=${pageNumber}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"
                 }`
             );
 
