@@ -73,7 +73,7 @@ const Invoices: React.FC = () => {
     endDate: new Date(),
     rowsPerPage: 10,
     sortField: "created_at" as CustomerSortField,
-    sortOrder: "asc" as SortOrder,
+    sortOrder: "desc" as SortOrder,
   });
 
   const { searchQuery, filterState, page, is_deleted, rowsPerPage, startDate, endDate, type, sortField, sortOrder } = state;

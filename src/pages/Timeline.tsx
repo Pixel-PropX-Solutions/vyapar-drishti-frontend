@@ -152,7 +152,7 @@ const Timeline: React.FC = () => {
                             </Grid>
 
 
-                            <Grid item xs={12} sm={4} flexDirection={'row'} display="flex" gap={2} alignItems="center">
+                            <Grid item xs={12} sm={3} flexDirection={'row'} display="flex" gap={2} alignItems="center">
                                 <DatePicker
                                     label="Start Date"
                                     value={startDate}
@@ -198,7 +198,7 @@ const Timeline: React.FC = () => {
                                     }}
                                 />
                             </Grid>
-                            <Grid item xs={12} md={2}>
+                            <Grid item xs={12} md={1}>
                                 <TextField
                                     select
                                     value={movement_type}
@@ -208,11 +208,39 @@ const Timeline: React.FC = () => {
                                     onChange={(e) => handleStateChange('movement_type', e.target.value)}
                                 >
                                     <MenuItem value="all" sx={{ fontWeight: 600 }}>All </MenuItem>
-                                    <MenuItem value="IN">STOCK IN</MenuItem>
-                                    <MenuItem value="OUT">STOCK OUT</MenuItem>
+                                    <MenuItem value="Sales">Sales</MenuItem>
+                                    <MenuItem value="Purchase">Purchase</MenuItem>
                                 </TextField>
                             </Grid>
-                            <Grid item xs={12} md={2}>
+                            <Grid item xs={12} md={1}>
+                                <TextField
+                                    select
+                                    value={movement_type}
+                                    fullWidth
+                                    label="Product Name"
+                                    size="small"
+                                    onChange={(e) => handleStateChange('movement_type', e.target.value)}
+                                >
+                                    <MenuItem value="all" sx={{ fontWeight: 600 }}>All </MenuItem>
+                                    <MenuItem value="Sales">Sales</MenuItem>
+                                    <MenuItem value="Purchase">Purchase</MenuItem>
+                                </TextField>
+                            </Grid>
+                            <Grid item xs={12} md={1}>
+                                <TextField
+                                    select
+                                    value={movement_type}
+                                    fullWidth
+                                    label="Party Name"
+                                    size="small"
+                                    onChange={(e) => handleStateChange('movement_type', e.target.value)}
+                                >
+                                    <MenuItem value="all" sx={{ fontWeight: 600 }}>All </MenuItem>
+                                    <MenuItem value="Sales">Sales</MenuItem>
+                                    <MenuItem value="Purchase">Purchase</MenuItem>
+                                </TextField>
+                            </Grid>
+                            <Grid item xs={12} md={1.5}>
                                 <Button
                                     variant="outlined"
                                     color="primary"
@@ -222,6 +250,7 @@ const Timeline: React.FC = () => {
                                     sx={{
                                         fontWeight: '600',
                                         py: 1,
+                                        width: '100%',
                                         borderRadius: '8px',
                                         boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
                                         borderColor: '#1976d2'

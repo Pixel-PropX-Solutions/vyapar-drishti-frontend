@@ -6,7 +6,7 @@ import { AuthStates, ROLE_ENUM } from "./utils/enums";
 import { Route, Routes, useLocation } from "react-router-dom";
 import LoginPage from "@/pages/Login";
 import Dashboard from "./pages/Dashboard";
-import { Box, CircularProgress, CssBaseline } from "@mui/material";
+import { CssBaseline } from "@mui/material";
 import AppTheme from "./theme/AppTheme";
 import {
   chartsCustomizations,
@@ -15,15 +15,12 @@ import {
   treeViewCustomizations,
 } from "./theme/customizations";
 import Products from "./pages/Products";
-// import UploadDocuments from "./pages/UploadDocuments";
 import CreateUserProfile from "./features/profile/createUser";
 import CreateProduct from "./features/products/createProduct";
-// import AdminDashboard from "./pages/AdminDashboard";
 import { getCurrentUser } from "./services/auth";
 import LandingPage from "./components/LandingPage/LandingPage";
 import AboutPage from "./components/About/AboutPage";
 import Timeline from "./pages/Timeline";
-// import Warehouse from "./features/inventory/warehouse";
 import AdminInventory from "./pages/AdminInventory";
 import ViewItem from "./features/products/ViewItem";
 import { ContactPage } from "@mui/icons-material";
@@ -36,7 +33,6 @@ import SignUpPage from "./pages/SignUp";
 import ProfilePage from "./pages/Profile";
 import CustomerLedger from "./pages/CustomerLedger";
 import Invoices from "./pages/Invoices";
-// import GroupAndTypes from "./pages/GroupAndTypes";
 import SalePurchaseInvoiceCreation from "./components/Invoice/SalePurchaseInvoiceCreation";
 import PaymentReceiptInvoice from "./components/Invoice/PaymentReceiptInvoice";
 import UpdateSalePurchase from "./components/Invoice/UpdateSalePurchase";
@@ -46,8 +42,8 @@ import EditCustomer from "./features/customer/EditCustomer";
 import CustomerProfile from "./features/customer/CustomerProfile";
 import Xyz from "./pages/xyz";
 import toast from "react-hot-toast";
-// import VerifyOTP from "./pages/VerifyOTP";
-// import PromptModal from "./common/PromptModal";
+import CenterLoader from "./common/loaders/CenterLoader";
+// import PromptModal from "./common/modals/PromptModal";
 
 const xThemeComponents = {
   ...chartsCustomizations,
@@ -113,20 +109,6 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
   // }, [authState, user]);
 
 
-  if (!isInitialized.current)
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-        <CircularProgress />
-      </Box>
-    );
-
-  if (authState === AuthStates.INITIALIZING && user === null)
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-        <CircularProgress />
-      </Box>
-    );
-
   return (
     <AppTheme {...props} themeComponents={xThemeComponents}>
       <CssBaseline enableColorScheme />
@@ -157,8 +139,6 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
 
             {user?.user_type === ROLE_ENUM.USER && (
               <Route element={<Dashboard />}>
-                {/* <Route path="/dashboard" element={<AdminDashboard />} /> */}
-                {/* <Route path="/" element={<AdminDashboard />} /> */}
                 <Route path="/account" element={<ProfilePage />} />
                 <Route path="/" element={<ProfilePage />} />
                 <Route path="/add/product" element={<CreateProduct />} />
@@ -206,6 +186,12 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
         }
 
       </Routes>
+      {!isInitialized.current &&
+        <CenterLoader />
+      }
+      {(authState === AuthStates.INITIALIZING && user === null) &&
+        <CenterLoader />
+      }
       {/* <PromptModal
         open={showProfileModal}
         onClose={() => {

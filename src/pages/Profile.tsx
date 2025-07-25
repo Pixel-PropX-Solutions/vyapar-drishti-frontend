@@ -63,20 +63,18 @@ import EditUserModal from "@/features/profile/EditUserModal";
 import { deleteAccount, getCurrentUser } from "@/services/auth";
 import { deleteCompany, getAllCompanies } from "@/services/company";
 import { formatDatewithTime } from "@/utils/functions";
-import CompanyEditingModal from "@/common/CompanyEditingModal";
+import CompanyEditingModal from "@/common/modals/CompanyEditingModal";
 import { InfoRow } from "@/common/InfoRow";
 import { SettingsCard } from "@/common/SettingsCard";
 import { ProfileHeader } from "@/common/ProfileHeader";
 import { CompanyRow } from "@/common/CompanyRow";
 import { GetCompany } from "@/utils/types";
-import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
 // Main Enhanced Component
 const ProfilePage: React.FC = () => {
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
-  const navigate = useNavigate();
   const { mode, setMode } = useColorScheme();
 
   const { user } = useSelector((state: RootState) => state.auth)
@@ -137,7 +135,9 @@ const ProfilePage: React.FC = () => {
   };
 
   const handleView = (company: GetCompany) => {
-    navigate(`/company/${company._id}`);
+    console.log('Viewing company:', company);
+    toast.success(`Comming Soon`);
+    // navigate(`/company/${company._id}`);
   };
 
 
@@ -815,7 +815,7 @@ const ProfilePage: React.FC = () => {
               </Grid>
 
               {/* Data Management */}
-              <Grid item xs={12} sx={{mt:3}}>
+              <Grid item xs={12} sx={{ mt: 3 }}>
                 <SettingsCard title="Data Management" icon={<Settings />}>
                   <Grid container spacing={3}>
                     <Grid item xs={12} md={6}>
@@ -926,7 +926,7 @@ const ProfilePage: React.FC = () => {
             </Grid>
           )}
 
-           {tabValue === 4 && (
+          {tabValue === 4 && (
             <Grid container gap={2} sx={{ mt: 2 }}>
               {/* Contact Information */}
               <Grid item xs={12} lg={4}>

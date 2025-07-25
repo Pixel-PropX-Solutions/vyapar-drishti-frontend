@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     Box,
     Button,
@@ -40,6 +40,7 @@ import { SortField, SortOrder, InventoryItem } from '@/utils/types';
 import { getProductStock } from '@/services/inventory';
 import { WarningOutlined } from '@mui/icons-material';
 import { ActionButton } from "@/common/buttons/ActionButton";
+import InventoryStockCardSkeleton from '@/common/skeletons/InventoryStockCardSkeleton';
 
 // Styled Components with enhanced visuals
 const StockCard = styled(Paper)(({ theme }) => ({
@@ -66,7 +67,9 @@ const Inventory: React.FC = () => {
     const [currentTab, setCurrentTab] = useState(0);
 
     const { InventoryItems, pageMeta } = useSelector((state: RootState) => state.inventory);
-    const { currentCompany } = useSelector((state: RootState) => state.auth);
+    const { user } = useSelector((state: RootState) => state.auth);
+    const currentCompanyDetails = user?.company?.find((c: any) => c._id === user.user_settings.current_company_id);
+
 
     const [data, setData] = useState({
         search: '',
@@ -130,9 +133,11 @@ const Inventory: React.FC = () => {
         setCurrentTab(newValue);
         handleResetFilters();
         // Set appropriate filters based on tab
-        let newQtyFilter = 'all';
-        if (newValue === 1) newQtyFilter = 'low';
-        if (newValue === 2) newQtyFilter = 'postive';
+        let newQtyFilter = '';
+        if (newValue === 0) newQtyFilter = 'all';
+        if (newValue === 1) newQtyFilter = 'zero';
+        if (newValue === 2) newQtyFilter = 'low';
+        if (newValue === 3) newQtyFilter = 'positive';
 
         setData(prev => ({
             ...prev,
@@ -155,7 +160,7 @@ const Inventory: React.FC = () => {
             try {
                 await dispatch(
                     getProductStock({
-                        company_id: currentCompany?._id || '',
+                        company_id: currentCompanyDetails?._id || '',
                         search: search,
                         category: category === 'all' ? "" : category.toLowerCase(),
                         page_no: page_no,
@@ -170,11 +175,7 @@ const Inventory: React.FC = () => {
         };
 
         fetchInventoryData();
-    }, [category, currentCompany?._id, dispatch, limit, page_no, search, sortField, sortOrder]);
-
-    useEffect(() => {
-        // dispatch(viewAllCategories());
-    }, [dispatch]);
+    }, [category, currentCompanyDetails?._id, dispatch, limit, page_no, search, sortField, sortOrder]);
 
     // State to store summary stats that only change on initial load
     const [summaryStats, setSummaryStats] = useState({
@@ -188,12 +189,9 @@ const Inventory: React.FC = () => {
         totalPurchaseValue: 0
     });
 
-    // Track if initial data is loaded
-    const initialDataLoaded = useRef(false);
-
     // Calculate summary stats only on initial data load
     useEffect(() => {
-        if (InventoryItems && InventoryItems.length > 0 && !initialDataLoaded.current) {
+        if (InventoryItems && InventoryItems.length > 0) {
             const zeroItems = InventoryItems.filter(item => item.current_stock <= 0);
             const lowItems = InventoryItems.filter(item => item.current_stock > 0 && item.current_stock <= (item.low_stock_alert || 10));
             const positiveItems = InventoryItems.filter(item => item.current_stock > (item.low_stock_alert || 10));
@@ -208,10 +206,8 @@ const Inventory: React.FC = () => {
                 totalStockValue: InventoryItems.reduce((acc, item) => acc + (item.sales_value || 0), 0) || 0,
                 totalPurchaseValue: InventoryItems.reduce((acc, item) => acc + (item.purchase_value || 0), 0) || 0
             });
-
-            initialDataLoaded.current = true;
         }
-    }, [pageMeta, InventoryItems]);
+    }, [pageMeta, InventoryItems, currentCompanyDetails?._id, dispatch]);
 
     // Destructure values from summaryStats for use in the component
     const { zeroStockItems, zeroStockCount, lowStockCount, lowStockItems, positiveStockCount, positiveStockItems, totalStockValue, totalPurchaseValue } = summaryStats;
@@ -309,149 +305,159 @@ const Inventory: React.FC = () => {
 
 
             {/* Stock Summary Cards with enhanced visuals */}
-            <Grid container spacing={1} sx={{ mb: 4 }}>
-                <Grid item xs={12} sm={6} md={2.4}>
-                    <StockCard sx={{
-                        bgcolor: '#ffebee',
-                        borderLeft: '5px solid #c62828'
-                    }}>
-                        <Box>
-                            <Typography variant="subtitle2" sx={{ color: theme.palette.grey[600] }} gutterBottom>
-                                Zero Stock Items
-                            </Typography>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: theme.palette.common.black }}>
-                                {zeroStockCount > 0 && <WarningAmberIcon color="error" />}
-                                <Typography variant="h4" component="div" fontWeight="bold">
-                                    {zeroStockCount} Items
-                                </Typography>
-                            </Box>
-                            {zeroStockCount > 0 && (
-                                <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block' }}>
-                                    Some items are out of stock, please restock them
-                                </Typography>
-                            )}
-                        </Box>
-                    </StockCard>
+            {isLoading ? (
+                <Grid container spacing={1} sx={{ mb: 4 }}>
+                    <InventoryStockCardSkeleton color='#ffebee' border='5px solid #c62828' />
+                    <InventoryStockCardSkeleton color='hsl(45, 92%, 90%)' border='5px solid hsl(45, 90%, 40%)' />
+                    <InventoryStockCardSkeleton color='#e8f5e9' border='5px solid #2e7d32' />
+                    <InventoryStockCardSkeleton color='#e8f4fd' border='5px solid #1976d2' />
+                    <InventoryStockCardSkeleton color='#fff8e1' border='5px solid #ff9800' />
                 </Grid>
-                <Grid item xs={12} sm={6} md={2.4}>
-                    <StockCard sx={{
-                        bgcolor: 'hsl(45, 92%, 90%)',
-                        borderLeft: '5px solid hsl(45, 90%, 40%)'
-                    }}>
-                        <Box>
-                            <Typography variant="subtitle2" sx={{ color: theme.palette.grey[600] }} gutterBottom>
-                                Low Stock Items
-                            </Typography>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: theme.palette.common.black }}>
-                                {lowStockCount > 0 && <WarningAmberIcon color="error" />}
-                                <Typography variant="h4" component="div" fontWeight="bold">
-                                    {lowStockCount} Items
-                                </Typography>
-                            </Box>
-                            {lowStockCount > 0 && (
-                                <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block' }}>
-                                    Attention required! Some items need restocking
-                                </Typography>
-                            )}
-                        </Box>
-                    </StockCard>
-                </Grid>
-
-                <Grid item xs={12} sm={6} md={2.4}>
-                    <StockCard sx={{
-                        bgcolor: '#e8f5e9',
-                        borderLeft: '5px solid #2e7d32'
-                    }}>
-                        <Box>
-                            <Typography variant="subtitle2" sx={{ color: theme.palette.grey[600] }} gutterBottom>
-                                Well Stock
-                            </Typography>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: theme.palette.common.black }}>
-                                <CheckCircleOutlineIcon color="success" />
-                                <Typography variant="h4" component="div" fontWeight="bold">
-                                    {positiveStockCount} Items
-                                </Typography>
-                            </Box>
-                            <Typography variant="caption" color="success.dark" sx={{ mt: 1, display: 'block' }}>
-                                Well stocked items ready for sale
-                            </Typography>
-                        </Box>
-                    </StockCard>
-                </Grid>
-
-                <Grid item xs={12} sm={6} md={2.4}>
-                    <StockCard sx={{
-                        bgcolor: '#e8f4fd',
-                        borderLeft: '5px solid #1976d2'
-                    }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            ) : (
+                <Grid container spacing={1} sx={{ mb: 4 }}>
+                    <Grid item xs={12} sm={6} md={2.4}>
+                        <StockCard sx={{
+                            bgcolor: '#ffebee',
+                            borderLeft: '5px solid #c62828'
+                        }}>
                             <Box>
                                 <Typography variant="subtitle2" sx={{ color: theme.palette.grey[600] }} gutterBottom>
-                                    Sales Value
+                                    Zero Stock Items
                                 </Typography>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: theme.palette.common.black }}>
-                                    <Typography variant="h6" sx={{ color: theme.palette.primary.main }}>
-                                        &#8377;
-                                    </Typography>
+                                    {zeroStockCount > 0 && <WarningAmberIcon color="error" />}
                                     <Typography variant="h4" component="div" fontWeight="bold">
-                                        {totalStockValue.toLocaleString('en-IN')}
+                                        {zeroStockCount} Items
                                     </Typography>
                                 </Box>
-                                <Typography variant="caption" sx={{ mt: 1, display: 'block', color: theme.palette.primary.main }}>
-                                    Potential revenue at current prices
-                                </Typography>
+                                {zeroStockCount > 0 && (
+                                    <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block' }}>
+                                        Some items are out of stock, please restock them
+                                    </Typography>
+                                )}
                             </Box>
-                            <Tooltip
-                                title="This value is an estimate based on current selling prices without considering discounts or taxes."
-                                arrow
-                                placement="top"
-                            >
-                                <InfoOutlinedIcon fontSize="small" sx={{ cursor: 'pointer', color: theme.palette.primary.main }} />
-                            </Tooltip>
-                        </Box>
-                    </StockCard>
-                </Grid>
-
-                <Grid item xs={12} sm={6} md={2.4}>
-                    <StockCard sx={{
-                        bgcolor: '#fff8e1',
-                        borderLeft: '5px solid #ff9800'
-                    }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        </StockCard>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={2.4}>
+                        <StockCard sx={{
+                            bgcolor: 'hsl(45, 92%, 90%)',
+                            borderLeft: '5px solid hsl(45, 90%, 40%)'
+                        }}>
                             <Box>
                                 <Typography variant="subtitle2" sx={{ color: theme.palette.grey[600] }} gutterBottom>
-                                    Purchase Value
+                                    Low Stock Items
                                 </Typography>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: theme.palette.common.black }}>
-                                    <Typography variant="h6" sx={{ color: theme.palette.warning.main }}>
-                                        &#8377;
-                                    </Typography>
+                                    {lowStockCount > 0 && <WarningAmberIcon color="error" />}
                                     <Typography variant="h4" component="div" fontWeight="bold">
-                                        {totalPurchaseValue.toLocaleString('en-IN')}
+                                        {lowStockCount} Items
                                     </Typography>
                                 </Box>
-                                <Typography variant="caption" color="warning.dark" sx={{ mt: 1, display: 'block' }}>
-                                    Total investment in current stock
+                                {lowStockCount > 0 && (
+                                    <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block' }}>
+                                        Attention required! Some items need restocking
+                                    </Typography>
+                                )}
+                            </Box>
+                        </StockCard>
+                    </Grid>
+
+                    <Grid item xs={12} sm={6} md={2.4}>
+                        <StockCard sx={{
+                            bgcolor: '#e8f5e9',
+                            borderLeft: '5px solid #2e7d32'
+                        }}>
+                            <Box>
+                                <Typography variant="subtitle2" sx={{ color: theme.palette.grey[600] }} gutterBottom>
+                                    Well Stock
+                                </Typography>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: theme.palette.common.black }}>
+                                    <CheckCircleOutlineIcon color="success" />
+                                    <Typography variant="h4" component="div" fontWeight="bold">
+                                        {positiveStockCount} Items
+                                    </Typography>
+                                </Box>
+                                <Typography variant="caption" color="success.dark" sx={{ mt: 1, display: 'block' }}>
+                                    Well stocked items ready for sale
                                 </Typography>
                             </Box>
-                            <Tooltip
-                                title="This value is calculated based on purchase prices without considering discounts or taxes."
-                                arrow
-                                placement="top"
-                            >
-                                <InfoOutlinedIcon fontSize="small" color="warning" sx={{ cursor: 'pointer' }} />
-                            </Tooltip>
-                        </Box>
-                    </StockCard>
+                        </StockCard>
+                    </Grid>
+
+                    <Grid item xs={12} sm={6} md={2.4}>
+                        <StockCard sx={{
+                            bgcolor: '#e8f4fd',
+                            borderLeft: '5px solid #1976d2'
+                        }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <Box>
+                                    <Typography variant="subtitle2" sx={{ color: theme.palette.grey[600] }} gutterBottom>
+                                        Sales Value
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: theme.palette.common.black }}>
+                                        <Typography variant="h6" sx={{ color: theme.palette.primary.main }}>
+                                            &#8377;
+                                        </Typography>
+                                        <Typography variant="h4" component="div" fontWeight="bold">
+                                            {totalStockValue.toLocaleString('en-IN')}
+                                        </Typography>
+                                    </Box>
+                                    <Typography variant="caption" sx={{ mt: 1, display: 'block', color: theme.palette.primary.main }}>
+                                        Potential revenue at current prices
+                                    </Typography>
+                                </Box>
+                                <Tooltip
+                                    title="This value is an estimate based on current selling prices without considering discounts or taxes."
+                                    arrow
+                                    placement="top"
+                                >
+                                    <InfoOutlinedIcon fontSize="small" sx={{ cursor: 'pointer', color: theme.palette.primary.main }} />
+                                </Tooltip>
+                            </Box>
+                        </StockCard>
+                    </Grid>
+
+                    <Grid item xs={12} sm={6} md={2.4}>
+                        <StockCard sx={{
+                            bgcolor: '#fff8e1',
+                            borderLeft: '5px solid #ff9800'
+                        }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <Box>
+                                    <Typography variant="subtitle2" sx={{ color: theme.palette.grey[600] }} gutterBottom>
+                                        Purchase Value
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: theme.palette.common.black }}>
+                                        <Typography variant="h6" sx={{ color: theme.palette.warning.main }}>
+                                            &#8377;
+                                        </Typography>
+                                        <Typography variant="h4" component="div" fontWeight="bold">
+                                            {totalPurchaseValue.toLocaleString('en-IN')}
+                                        </Typography>
+                                    </Box>
+                                    <Typography variant="caption" color="warning.dark" sx={{ mt: 1, display: 'block' }}>
+                                        Total investment in current stock
+                                    </Typography>
+                                </Box>
+                                <Tooltip
+                                    title="This value is calculated based on purchase prices without considering discounts or taxes."
+                                    arrow
+                                    placement="top"
+                                >
+                                    <InfoOutlinedIcon fontSize="small" color="warning" sx={{ cursor: 'pointer' }} />
+                                </Tooltip>
+                            </Box>
+                        </StockCard>
+                    </Grid>
                 </Grid>
-            </Grid>
+            )}
 
             {/* Search and Filter section with enhanced UX */}
             <Box sx={{ mb: 3 }}>
                 <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
                         <TextField
-                            placeholder="Search by product name, SKU, or category..."
+                            placeholder="Search by product name, HSN, or category..."
                             variant="outlined"
                             fullWidth
                             value={search}
@@ -505,10 +511,8 @@ const Inventory: React.FC = () => {
                             onChange={(e) => handleStateChange('qtyFilter', e.target.value)}
                         >
                             <MenuItem value="all" sx={{ fontWeight: 600 }}>All Items</MenuItem>
-                            <MenuItem value="negative"
-                                sx={{ color: theme.palette.mode === 'dark' ? 'rgb(255, 0, 0)' : theme.palette.error.main, fontWeight: 600 }}>Negative Stock</MenuItem>
                             <MenuItem value="zero"
-                                sx={{ color: theme.palette.mode === 'dark' ? 'rgb(255, 255, 255)' : '', fontWeight: 600 }}>Zero Stock</MenuItem>
+                                sx={{ color: theme.palette.mode === 'dark' ? 'rgb(255, 0, 0)' : theme.palette.error.main, fontWeight: 600 }}>Zero Stock</MenuItem>
                             <MenuItem value="low"
                                 sx={{ color: theme.palette.mode === 'dark' ? theme.palette.warning.light : theme.palette.warning.main, fontWeight: 600 }}
                             >Low Stock</MenuItem>
@@ -561,7 +565,7 @@ const Inventory: React.FC = () => {
                     sortOrder={sortOrder}
                 />
             </TabPanel>
-            
+
 
             {/* Inventory Table with enhanced styling */}
             <TabPanel value={currentTab} index={2}>

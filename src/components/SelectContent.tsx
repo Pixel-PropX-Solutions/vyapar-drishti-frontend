@@ -16,7 +16,7 @@ import logo from "../assets/Logo.png";
 import MuiAvatar from '@mui/material/Avatar';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import { useEffect, useState, useRef } from 'react';
-import CompanyEditingModal from '@/common/CompanyEditingModal';
+import CompanyEditingModal from '@/common/modals/CompanyEditingModal';
 import { getCurrentCompany, getCurrentUser } from '@/services/auth';
 import { getAllCompanies } from '@/services/company';
 import { setCurrentCompany } from '@/services/user';

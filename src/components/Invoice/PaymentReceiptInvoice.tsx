@@ -607,7 +607,7 @@ const PaymentReceiptInvoice: React.FC = () => {
                 date: date instanceof Date ? date.toISOString().split('T')[0] : date,
                 voucher_number: transactionNumber,
                 party_name: partyName,
-                party_name_id: customersList.find(c => c.ledger_name === partyName)?._id,
+                party_name_id: customersList.find(c => c.ledger_name === partyName)?._id ??'',
                 narration: notes,
                 company_id: currentCompany?._id || '',
                 reference_number: "",
@@ -644,7 +644,7 @@ const PaymentReceiptInvoice: React.FC = () => {
 
     useEffect(() => {
         dispatch(viewAllCustomers(currentCompany?._id || ''))
-        dispatch(viewAllCustomerWithTypes({ company_id: currentCompany?._id || '', customerTypes: ["Bank Accounts", "Cash-in-hand"] }))
+        dispatch(viewAllCustomerWithTypes({ company_id: currentCompany?._id || '', customerTypes: ["Bank Accounts", "Cash-in-Hand"] }))
         dispatch(getInvoiceCounter({
             company_id: currentCompany?._id || '',
             voucher_type: transactionType,

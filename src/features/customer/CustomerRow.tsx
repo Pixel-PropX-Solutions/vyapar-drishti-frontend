@@ -197,10 +197,10 @@ export const CustomerRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit,
                             variant="body1"
                             sx={{
                                 fontWeight: 700,
-                                color: cus.parent.includes('Debtors') ? theme.palette.error.main : theme.palette.success.main,
+                                color: cus.is_positive ? theme.palette.success.main : theme.palette.error.main,
                             }}
                         >
-                            {cus.parent || "N/A"}
+                            {cus.total_amount}{cus.is_positive ? ' DR' : ' CR'}
                         </Typography>
                     </TableCell>
 

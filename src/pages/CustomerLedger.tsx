@@ -22,6 +22,8 @@ import {
   Card,
   CardContent,
   Grid,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import {
   Search as SearchIcon,
@@ -52,12 +54,14 @@ const CustomerLedger: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
+  const [selectedTab, setSelectedTab] = useState(0);
+
 
   const [state, setState] = useState({
     searchQuery: "",
     filterState: "All-States",
     is_deleted: false,
-    type: "Customers",
+    type: "Creditors",
     page: 1,
     rowsPerPage: 10,
     sortField: "created_at" as CustomerSortField,
@@ -101,6 +105,23 @@ const CustomerLedger: React.FC = () => {
       sortField: field
     }))
   };
+
+  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
+    if (newValue === 0) {
+      setState((prevState) => ({
+        ...prevState,
+        type: "Creditors"
+      }));
+    } else if (newValue === 1) {
+      setState((prevState) => ({
+        ...prevState,
+        type: "Debtors"
+      }));
+    }
+
+    setSelectedTab(newValue);
+  };
+
 
   // Handle pagination change
   const handleChangePage = (
@@ -150,83 +171,76 @@ const CustomerLedger: React.FC = () => {
   return (
     <Box sx={{ p: 3, width: "100%" }}>
       {/* Page Title */}
-      <Card sx={{ mb: 3, p: 2, }}>
+      <Card sx={{ mb: 3, p: 2, boxShadow: '0 2px 4px rgba(0,0,0,0.05)', borderRadius: '8px' }}>
         <CardContent>
-          <Paper
-            sx={{
-              display: "flex",
-              width: "100%",
-              justifyContent: "space-between",
-              alignItems: "center",
-              background: 'transparent'
-            }}
-          >
-            <Grid item sx={{ width: "50%" }}>
-              <Typography
-                variant="h4"
-                component="h1"
-                gutterBottom
-              >
-                Customers Directory
-              </Typography>
-              <Typography variant="body2" color="text.secondary" >
-                {pageMeta.total} Customers available in your database after applying
-                filters
-              </Typography>
-            </Grid>
-
-            <Grid
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                <ActionButton
-                  variant="contained"
-                  startIcon={<AddCircleOutline />}
-                  color="success"
-                  onClick={() => {
-                    navigate('/customers/create/debtors');
-                    dispatch(setCustomerTypeId(accountingGroups.find((group) => group.name.includes('Debtors'))?._id || ''))
-                  }}
-                  sx={{
-                    background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
-                    color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
-                    border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
-                    '&:hover': {
-                      color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                      background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
-                    },
-                  }}
-                >
-                  Add Debtors
-                </ActionButton>
-
-                <ActionButton
-                  variant="contained"
-                  startIcon={<AddCircleOutline />}
-                  color="error"
-                  onClick={() => {
-                    navigate('/customers/create/creditors');
-                    dispatch(setCustomerTypeId(accountingGroups.find((group) => group.name.includes('Creditors'))?._id || ''))
-                  }}
-                  sx={{
-                    background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
-                    color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
-                    border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#c62828'}`,
-                    '&:hover': {
-                      color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                      background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
-                    },
-                  }}
-                >
-                  Add Creditors
-                </ActionButton>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} md={8}>
+              <Box>
+                <Typography variant="h5" component="h1" fontWeight="700" color="text.primary">
+                  {selectedTab === 0 && 'Creditors Directory'}
+                  {selectedTab === 1 && 'Debtors Directory'}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {selectedTab === 0
+                    && 'Organize your creditors for better management and navigation.'}
+                  {selectedTab === 1
+                    && 'Organize your debtors for better management and navigation.'}
+                </Typography>
               </Box>
+              <Tabs
+                value={selectedTab}
+                onChange={handleTabChange}
+                aria-label="dashboard tabs"
+                sx={{ mt: 1 }}
+              >
+                <Tab label="Creditors" />
+                <Tab label="Debtors" />
+              </Tabs>
             </Grid>
-          </Paper>
+            <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
+              {selectedTab === 1 && <ActionButton
+                variant="contained"
+                startIcon={<AddCircleOutline />}
+                color="success"
+                onClick={() => {
+                  navigate('/customers/create/debtors');
+                  dispatch(setCustomerTypeId(accountingGroups.find((group) => group.name.includes('Debtors'))?._id || ''))
+                }}
+                sx={{
+                  background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
+                  color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
+                  border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
+                  '&:hover': {
+                    color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                    background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
+                  },
+                }}
+              >
+                Add Debtors
+              </ActionButton>}
+
+              {selectedTab === 0 && <ActionButton
+                variant="contained"
+                startIcon={<AddCircleOutline />}
+                color="error"
+                onClick={() => {
+                  navigate('/customers/create/creditors');
+                  dispatch(setCustomerTypeId(accountingGroups.find((group) => group.name.includes('Creditors'))?._id || ''))
+                }}
+                sx={{
+                  background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
+                  color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
+                  border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#c62828'}`,
+                  '&:hover': {
+                    color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                    background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
+                  },
+                }}
+              >
+                Add Creditors
+              </ActionButton>}
+            </Grid>
+          </Grid>
         </CardContent>
       </Card>
 
@@ -270,33 +284,6 @@ const CustomerLedger: React.FC = () => {
             {pageMeta.unique?.map((state) => (
               <MenuItem key={state} value={state}>
                 {state}
-              </MenuItem>
-            ))}
-          </TextField>
-        </FormControl>
-
-        <FormControl sx={{ minWidth: "150px" }}>
-          <TextField
-            select
-            size="small"
-            value={type}
-            label="Filter by customer Types"
-            placeholder="Filter by customer Types"
-            onChange={(e) => handleStateChange("type", e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <FilterIcon />
-                </InputAdornment>
-              ),
-            }}
-          >
-            <MenuItem selected value="Customers">
-              <em>All</em>
-            </MenuItem>
-            {accountingGroups?.map((group) => (
-              <MenuItem key={group?._id} value={group?.name}>
-                {group?.name}
               </MenuItem>
             ))}
           </TextField>
@@ -406,7 +393,7 @@ const CustomerLedger: React.FC = () => {
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
                       <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                        Customer Type
+                        Closing Balance
                       </Typography>
                     </Box>
                   </TableSortLabel>

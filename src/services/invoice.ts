@@ -19,7 +19,7 @@ export const createInvoice = createAsyncThunk(
                 return rejectWithValue("Invoice creation failed");
             }
         } catch (error: any) {
-           return rejectWithValue(error?.response?.data?.message);
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -274,11 +274,11 @@ export const printInvoices = createAsyncThunk(
             );
 
             if (response.data.success === true) {
-                 const data = response.data.data;
+                const data = response.data.data;
                 return data;
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
-           return rejectWithValue(error?.response?.data?.message);
+            return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
@@ -414,7 +414,7 @@ export const deleteInvoice = createAsyncThunk(
             );
 
             if (response.data.success === true) {
-                return ;
+                return;
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
             return rejectWithValue(error?.response?.data?.message);
@@ -441,7 +441,7 @@ export const deleteGSTInvoice = createAsyncThunk(
             );
 
             if (response.data.success === true) {
-                return ;
+                return;
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
             return rejectWithValue(error?.response?.data?.message);

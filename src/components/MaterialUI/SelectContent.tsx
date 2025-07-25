@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import { useEffect, useState, useRef } from 'react';
-import CompanyEditingModal from '@/common/CompanyEditingModal';
+import CompanyEditingModal from '@/common/modals/CompanyEditingModal';
 import { getCurrentCompany, getCurrentUser } from '@/services/auth';
 import { getAllCompanies } from '@/services/company';
 import { updateUserSettings } from '@/services/user';

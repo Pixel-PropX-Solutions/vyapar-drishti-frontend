@@ -33,6 +33,8 @@ export const viewAllCustomer = createAsyncThunk(
                 }`
             );
 
+            console.log("View All Customer API Response", response.data);
+
             if (response.data.success === true) {
                 const customers = response.data.data.docs;
                 const pageMeta = response.data.data.meta;

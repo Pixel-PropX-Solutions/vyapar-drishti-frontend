@@ -40,6 +40,7 @@ import {
     Signpost,
     Flag,
     Place,
+    AddCircleOutline,
 } from "@mui/icons-material";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
@@ -50,6 +51,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import countries from "@/internals/data/CountriesStates.json";
+import { ActionButton } from "../buttons/ActionButton";
 
 
 interface EditUserModalProps {
@@ -80,6 +82,7 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
     const [qrPreview, setQrPreview] = useState<string | null>(null);
     const [imageLoading, setImageLoading] = useState(false);
     const [qrLoading, setQrLoading] = useState(false);
+    const [addBank, setAddBank] = useState(false);
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
     // Helper to get 1st April of current year
@@ -333,8 +336,10 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                 bank_name: company?.bank_name || '',
                 bank_branch: company?.bank_branch || '',
                 qr_code_url: typeof company?.qr_code_url === 'string' ? company?.qr_code_url : '',
-
             });
+            if(company?.account_holder || company?.account_number || company?.bank_ifsc || company?.bank_name || company?.bank_branch) {
+                setAddBank(true);
+            }
 
             setImagePreview(
                 typeof company?.image === "string" ? company.image : null
@@ -1162,35 +1167,33 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                                 </Typography>
                                 <Divider sx={{ mb: 3 }} />
 
-                                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
-                                    <TextField
-                                        fullWidth
-                                        label="GSTIN Number"
-                                        placeholder="15-digit GSTIN"
-                                        value={data.gstin}
-                                        size="small"
-                                        onChange={(e) => handleInputChange('gstin', e.target.value.toUpperCase())}
-                                        error={!!formErrors.gstin}
-                                        helperText={formErrors.gstin || "15 characters including state code"}
-                                        InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <CreditCard color={formErrors.gstin ? 'error' : 'primary'} />
-                                                </InputAdornment>
-                                            ),
-                                        }}
-                                        sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                borderRadius: 1,
-                                                transition: 'all 0.1s ease',
-                                                '&:hover': {
-                                                    transform: 'translateY(-1px)',
-                                                }
+                                <TextField
+                                    fullWidth
+                                    label="GSTIN Number"
+                                    placeholder="15-digit GSTIN"
+                                    value={data.gstin}
+                                    size="small"
+                                    onChange={(e) => handleInputChange('gstin', e.target.value.toUpperCase())}
+                                    error={!!formErrors.gstin}
+                                    helperText={formErrors.gstin || "15 characters including state code. If you enter the GSTIN then the company will be registered as a GST-registered company."}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <CreditCard color={formErrors.gstin ? 'error' : 'primary'} />
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            borderRadius: 1,
+                                            transition: 'all 0.1s ease',
+                                            '&:hover': {
+                                                transform: 'translateY(-1px)',
                                             }
-                                        }}
-                                    />
-
-                                    
+                                        }
+                                    }}
+                                />
+                                <Box sx={{ display: 'grid', mt: 2, gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
                                     <DatePicker
                                         label="Financial Year Start"
                                         value={typeof data.financial_year_start === "string" ? new Date(data.financial_year_start) : data.financial_year_start}
@@ -1291,9 +1294,9 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
 
                             </Box>
 
-                            {/* Bank Details */}
-                            {data.gstin &&
-                                (<Box sx={{ mb: 4 }}>
+                            {/* Bank Information */}
+                            <Box sx={{ mb: 4 }}>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                                     <Typography variant="h6" gutterBottom sx={{
                                         display: 'flex',
                                         alignItems: 'center',
@@ -1304,7 +1307,28 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                                         <AccountBalance />
                                         Bank Information
                                     </Typography>
-                                    <Divider sx={{ mb: 3 }} />
+                                    <ActionButton
+                                        variant="contained"
+                                        startIcon={<AddCircleOutline />}
+                                        color="success"
+                                        onClick={() => setAddBank(!addBank)}
+                                        disabled={isLoading}
+                                        sx={{
+                                            background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
+                                            color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
+                                            border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
+                                            '&:hover': {
+                                                color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                                                background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
+                                            },
+                                        }}
+                                    >
+                                        {addBank ? 'Hide Bank Information' : 'Add Bank Information'}
+                                    </ActionButton>
+                                </Box>
+                                <Divider sx={{ mb: 3 }} />
+
+                                {addBank && <Box>
 
                                     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
                                         <TextField
@@ -1544,11 +1568,9 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                                                 }}
                                             />
                                         </Box>
-
                                     </Box>
-
-
-                                </Box>)}
+                                </Box>}
+                            </Box>
 
                             {/* Action Buttons */}
                             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
@@ -1586,6 +1608,9 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                             </Box>
                         </Paper>
                     </Box>
+
+
+
                 </Box>
             </Drawer>
         </LocalizationProvider>

@@ -65,7 +65,7 @@ const InvoicePrint: React.FC<Props> = ({
         try {
             const pdf = await html2pdf()
                 .set({
-                    margin: 0,
+                    margin: [5, 0, 0, 0],
                     filename: `${invoiceNumber}-vyapar-drishti.pdf`,
                     html2canvas: {
                         scale: 3,

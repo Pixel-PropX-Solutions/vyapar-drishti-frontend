@@ -45,6 +45,7 @@ export const getAllCompanies = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await userApi.get('/user/all/company',);
+      console.log('response get All companies', response);
 
       if (response.data.success) {
         const companies = response.data.data;
