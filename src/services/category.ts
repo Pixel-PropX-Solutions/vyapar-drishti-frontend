@@ -117,11 +117,13 @@ export const deleteCategory = createAsyncThunk(
     async (id: string, { rejectWithValue }) => {
         try {
             const response = await userApi.delete(`/category/delete/category/${id}`);
+            console.log("Category Delete API response", response);
 
             if (response.data.success === true) {
                 return;
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
+            console.log("Category Delete API error", error);
             return rejectWithValue(error?.response?.data?.message);
         }
     }

@@ -670,7 +670,7 @@ const CategoryCreateModal: React.FC<CategoryCreateModalProps> = ({
                     </Stack>
 
                     {!isMobile && data.name.trim() && (
-                        <Zoom in timeout={300}>
+                        <Zoom appear in timeout={300}>
                             <Chip
                                 icon={<CheckCircle />}
                                 label="Ready to submit"

@@ -249,7 +249,7 @@ const PricingPage: React.FC = () => {
           
           return (
             <Grid item xs={12} md={4} key={index}>
-              <Zoom in={true} style={{ transitionDelay: `${index * 100}ms` }}>
+              <Zoom appear in style={{ transitionDelay: `${index * 100}ms` }}>
                 <Card 
                   raised={plan.highlighted || hoveredPlan === index}
                   sx={{

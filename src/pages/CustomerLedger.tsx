@@ -22,8 +22,6 @@ import {
   Card,
   CardContent,
   Grid,
-  Tabs,
-  Tab,
 } from "@mui/material";
 import {
   Search as SearchIcon,
@@ -54,14 +52,14 @@ const CustomerLedger: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
-  const [selectedTab, setSelectedTab] = useState(0);
+  // const [selectedTab, setSelectedTab] = useState(0);
 
 
   const [state, setState] = useState({
     searchQuery: "",
     filterState: "All-States",
     is_deleted: false,
-    type: "Creditors",
+    type: "Customers",
     page: 1,
     rowsPerPage: 10,
     sortField: "created_at" as CustomerSortField,
@@ -106,21 +104,21 @@ const CustomerLedger: React.FC = () => {
     }))
   };
 
-  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    if (newValue === 0) {
-      setState((prevState) => ({
-        ...prevState,
-        type: "Creditors"
-      }));
-    } else if (newValue === 1) {
-      setState((prevState) => ({
-        ...prevState,
-        type: "Debtors"
-      }));
-    }
+  // const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
+  //   if (newValue === 0) {
+  //     setState((prevState) => ({
+  //       ...prevState,
+  //       type: "Creditors"
+  //     }));
+  //   } else if (newValue === 1) {
+  //     setState((prevState) => ({
+  //       ...prevState,
+  //       type: "Debtors"
+  //     }));
+  //   }
 
-    setSelectedTab(newValue);
-  };
+  //   setSelectedTab(newValue);
+  // };
 
 
   // Handle pagination change
@@ -164,9 +162,7 @@ const CustomerLedger: React.FC = () => {
     navigate(`/customers/view/${cus._id}`)
   };
 
-  const filteredCustomers = customers?.filter((cred) => {
-    return cred.parent === "Debtors" || cred.parent === "Creditors";
-  });
+  const filteredCustomers = customers;
 
   return (
     <Box sx={{ p: 3, width: "100%" }}>
@@ -175,70 +171,57 @@ const CustomerLedger: React.FC = () => {
         <CardContent>
           <Grid container spacing={2} alignItems="center">
             <Grid item xs={12} md={8}>
-              <Box>
-                <Typography variant="h5" component="h1" fontWeight="700" color="text.primary">
-                  {selectedTab === 0 && 'Creditors Directory'}
-                  {selectedTab === 1 && 'Debtors Directory'}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {selectedTab === 0
-                    && 'Organize your creditors for better management and navigation.'}
-                  {selectedTab === 1
-                    && 'Organize your debtors for better management and navigation.'}
-                </Typography>
-              </Box>
-              <Tabs
-                value={selectedTab}
-                onChange={handleTabChange}
-                aria-label="dashboard tabs"
-                sx={{ mt: 1 }}
-              >
-                <Tab label="Creditors" />
-                <Tab label="Debtors" />
-              </Tabs>
+              <Typography variant="h5" component="h1" fontWeight="700" color="text.primary">
+                Customers Directory
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Manage your customers, view their details, and perform actions like adding, editing, or deleting customers.
+              </Typography>
             </Grid>
             <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
-              {selectedTab === 1 && <ActionButton
-                variant="contained"
-                startIcon={<AddCircleOutline />}
-                color="success"
-                onClick={() => {
-                  navigate('/customers/create/debtors');
-                  dispatch(setCustomerTypeId(accountingGroups.find((group) => group.name.includes('Debtors'))?._id || ''))
-                }}
-                sx={{
-                  background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
-                  color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
-                  border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
-                  '&:hover': {
-                    color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                    background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
-                  },
-                }}
-              >
-                Add Debtors
-              </ActionButton>}
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, flexWrap: 'wrap' }}>
+                <ActionButton
+                  variant="contained"
+                  startIcon={<AddCircleOutline />}
+                  color="success"
+                  onClick={() => {
+                    navigate('/customers/create/debtors');
+                    dispatch(setCustomerTypeId(accountingGroups.find((group) => group.name.includes('Debtors'))?._id || ''))
+                  }}
+                  sx={{
+                    background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
+                    color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
+                    border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
+                    '&:hover': {
+                      color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                      background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
+                    },
+                  }}
+                >
+                  Add Debtors
+                </ActionButton>
 
-              {selectedTab === 0 && <ActionButton
-                variant="contained"
-                startIcon={<AddCircleOutline />}
-                color="error"
-                onClick={() => {
-                  navigate('/customers/create/creditors');
-                  dispatch(setCustomerTypeId(accountingGroups.find((group) => group.name.includes('Creditors'))?._id || ''))
-                }}
-                sx={{
-                  background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
-                  color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
-                  border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#c62828'}`,
-                  '&:hover': {
-                    color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                    background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
-                  },
-                }}
-              >
-                Add Creditors
-              </ActionButton>}
+                <ActionButton
+                  variant="contained"
+                  startIcon={<AddCircleOutline />}
+                  color="error"
+                  onClick={() => {
+                    navigate('/customers/create/creditors');
+                    dispatch(setCustomerTypeId(accountingGroups.find((group) => group.name.includes('Creditors'))?._id || ''))
+                  }}
+                  sx={{
+                    background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
+                    color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
+                    border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#c62828'}`,
+                    '&:hover': {
+                      color: theme.palette.mode === 'dark' ? '#000' : '#fff',
+                      background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
+                    },
+                  }}
+                >
+                  Add Creditors
+                </ActionButton>
+              </Box>
             </Grid>
           </Grid>
         </CardContent>
@@ -286,6 +269,34 @@ const CustomerLedger: React.FC = () => {
                 {state}
               </MenuItem>
             ))}
+          </TextField>
+        </FormControl>
+
+        <FormControl sx={{ minWidth: "150px" }}>
+          <TextField
+            select
+            size="small"
+            value={type}
+            label="Filter by Type"
+            placeholder="Filter by Type"
+            onChange={(e) => handleStateChange("type", e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <FilterIcon />
+                </InputAdornment>
+              ),
+            }}
+          >
+            <MenuItem selected value="Customers">
+              <em>All Types</em>
+            </MenuItem>
+            <MenuItem value="Debtors">
+              Debtors
+            </MenuItem>
+            <MenuItem value="Creditors">
+              Creditors
+            </MenuItem>
           </TextField>
         </FormControl>
 

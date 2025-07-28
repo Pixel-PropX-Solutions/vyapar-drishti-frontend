@@ -22,7 +22,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
 import { InventoryItem } from '@/utils/types';
-import { formatDatewithTime } from '@/utils/functions';
+import { formatDate } from '@/utils/functions';
 import { useNavigate } from 'react-router-dom';
 
 const CustomTableCell = styled(TableCell)(({ theme }) => ({
@@ -168,8 +168,8 @@ export const InventoryRow = (props: InventoryRowRowProps) => {
                 </CustomTableCell>
                 <CustomTableCell>
                     {row.last_restock_date ?
-                        (<Tooltip title={formatDatewithTime(row.last_restock_date)} arrow placement="top">
-                            <Typography variant="body2">{formatDatewithTime(row.last_restock_date)}</Typography>
+                        (<Tooltip title={formatDate(row.last_restock_date)} arrow placement="top">
+                            <Typography variant="body2">{formatDate(row.last_restock_date)}</Typography>
                         </Tooltip>) :
                         (<Tooltip title='Not Restocked Yet' arrow placement="top">
                             <Typography variant="body2">Not Restocked Yet</Typography>

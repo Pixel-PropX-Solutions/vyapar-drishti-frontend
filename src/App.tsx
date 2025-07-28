@@ -21,9 +21,8 @@ import { getCurrentUser } from "./services/auth";
 import LandingPage from "./components/LandingPage/LandingPage";
 import AboutPage from "./components/About/AboutPage";
 import Timeline from "./pages/Timeline";
-import AdminInventory from "./pages/AdminInventory";
+// import AdminInventory from "./pages/AdminInventory";
 import ViewItem from "./features/products/ViewItem";
-import { ContactPage } from "@mui/icons-material";
 import CookiePolicyPage from "./components/Legal/CookiePolicy";
 import PrivacyPolicyPage from "./components/Legal/PrivacyPolicyPage";
 import SecurityPolicyPage from "./components/Legal/SecurityPolicyPage";
@@ -43,6 +42,8 @@ import CustomerProfile from "./features/customer/CustomerProfile";
 import Xyz from "./pages/xyz";
 import toast from "react-hot-toast";
 import CenterLoader from "./common/loaders/CenterLoader";
+import ContactPage from "./components/Contact/ContactPage";
+import UpdatePaymentReceipt from "./components/Invoice/UpdatePaymentReceipt";
 // import PromptModal from "./common/modals/PromptModal";
 
 const xThemeComponents = {
@@ -126,7 +127,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/add/product" element={<CreateProduct />} />
                 <Route path="/products/:id" element={<ViewItem />} />
                 <Route path="/products" element={<Products />} />
-                <Route path="/inventory" element={<AdminInventory />} />
+                {/* <Route path="/inventory" element={<AdminInventory />} /> */}
                 {/* <Route path="/upload" element={<UploadDocuments />} /> */}
                 {/* <Route path="/settings" element={<Settings />} /> */}
                 <Route path="/about" element={<AboutPage />} />
@@ -152,12 +153,15 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/customers/view/:customer_id" element={<CustomerProfile />} />
                 <Route path="/customers/create/:type" element={<EditCustomer />} />
                 <Route path="/customers/edit/:type" element={<EditCustomer />} />
-                <Route path="/invoices" element={<Invoices />} />
-                <Route path="/xyz" element={<Xyz />} />
+                
                 <Route path="/transactions" element={<Transactions />} />
                 <Route path="/transactions/create/:type" element={<PaymentReceiptInvoice />} />
+                <Route path="/transactions/update/:type/:voucher_id" element={<UpdatePaymentReceipt />} />
+                
+                <Route path="/invoices" element={<Invoices />} />
                 <Route path="/invoices/create/:type" element={<SalePurchaseInvoiceCreation />} />
                 <Route path="/invoices/update/:type/:voucher_id" element={<UpdateSalePurchase />} />
+                <Route path="/xyz" element={<Xyz />} />
                 {/* <Route path="/*" element={<Navigate to="/" replace />} /> */}
               </Route>
             )}

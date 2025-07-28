@@ -33,7 +33,7 @@ export type CategorySortField =
   | 'created_at'
   | "updated_at";
 
-  export type GroupSortField =
+export type GroupSortField =
   | "inventory_group_name"
   | 'description'
   | 'created_at'
@@ -126,63 +126,6 @@ export interface GetGroup {
   updated_at: string,
 }
 
-export interface GetBilling {
-  _id: string,
-  user_id?: string,
-  // company_id: string,
-  is_deleted?: boolean,
-  address_1: string,
-  address_2?: string,
-  pinCode?: string,
-  city?: string,
-  state: string,
-  country?: string,
-  created_at?: string,
-  updated_at?: string,
-}
-
-export interface GetAllBilling {
-  _id: string,
-  user_id: string,
-  is_deleted: boolean,
-  address_1: string,
-  address_2?: string,
-  pinCode?: string,
-  city?: string,
-  state: string,
-  country?: string,
-}
-
-export interface GetAllShipping {
-  _id: string,
-  user_id: string,
-  is_deleted: boolean,
-  address_1: string,
-  title?: string,
-  notes?: string,
-  address_2?: string,
-  pinCode?: string,
-  city?: string,
-  state: string,
-  country?: string,
-}
-
-export interface ShippingAddress {
-  _id?: string,
-  user_id?: string,
-  // company_id: string,
-  is_deleted?: boolean,
-  title?: string,
-  address_1: string,
-  address_2?: string,
-  pinCode?: string,
-  city?: string,
-  state: string,
-  country?: string,
-  notes?: string,
-  created_at: string,
-  updated_at: string,
-}
 
 export interface CreateBasicUser {
   name: {
@@ -427,58 +370,6 @@ export interface CreateInvoiceWithGSTData {
   }>
 }
 
-export interface UserData {
-  _id: string;
-  name: Name;
-  phone_number: PhoneNumber;
-  shop_name?: string;
-  company_name?: string;
-  address: Address;
-  licence_number?: string;
-}
-
-export interface ChemistData {
-  _id: string;
-  name: Name;
-  phone_number: PhoneNumber;
-  shop_name: string;
-  address: Address;
-  licence_number: string;
-}
-
-export interface StockistData {
-  name: Name;
-  phone_number: PhoneNumber;
-  company_name: string;
-  address: Address;
-}
-
-export interface Stockist {
-  _id: string;
-  email: string;
-  role: string;
-  StockistData: StockistData;
-}
-
-export interface Chemist {
-  _id: string;
-  email: string;
-  role: string;
-  ChemistData: ChemistData;
-}
-
-export interface CreateChemist {
-  _id: string;
-  email: string;
-  role: string;
-  ChemistData: {
-    name: Name;
-    phone_number: PhoneNumber;
-    shop_name: string;
-    address: Address;
-    licence_number: string;
-  }
-}
 
 export interface GetUser {
   _id: string;
@@ -511,10 +402,6 @@ export interface GetUser {
   }]
 }
 
-export interface CreateUser {
-  email: string;
-  role: string;
-}
 
 export interface GetCompany {
   _id: string,
@@ -553,8 +440,8 @@ export interface SetCompany {
   pinCode?: string,
   state: string,
   country: string,
-  financial_year_start: string | Date, // Use string for date format
-  books_begin_from: string | Date, // Use string for date format
+  financial_year_start: string, // Use string for date format
+  books_begin_from: string, // Use string for date format
   is_deleted: boolean,
   number?: string;
   code?: string;
@@ -753,18 +640,22 @@ export interface GetProduct {
 export interface GetStockItem {
   _id: string,
   stock_item_name: string,
-  user_id: string,
   company_id: string,
+  user_id: string,
   unit: string,
   alias_name: string | null,
+  category: string | null,
+  group: string | null
   image: string | null,
   description: string | null,
   gst_hsn_code: string | null,
+  opening_balance: number,
+  opening_rate: number,
+  opening_value: number,
   low_stock_alert: number | null,
   created_at: string,
   updated_at: string,
-  category: string | null,
-  group: string | null
+  current_stock: number,
 }
 
 export interface GetItem {
@@ -934,130 +825,7 @@ export interface UpdateCategory {
   updated_at: string;
 }
 
-export interface Product {
-  _id: string;
-  product_name: string;
-  category: string;
-  state: string;
-  measure_of_unit: string;
-  no_of_tablets_per_pack: number;
-  price: number;
-  storage_requirement: string;
-  description: string;
-  expiry_date: string;
-}
 
-export interface Inventory {
-  _id: "";
-  chemist_id: "";
-  product_id: "";
-  quantity: 76;
-  last_restock_date: "";
-  product: Product;
-  Chemist: {
-    _id: "";
-    user_id: "";
-    name: Name;
-    phone_number: PhoneNumber;
-    shop_name: "";
-    address: Address;
-  };
-}
-
-export interface Pharmacy {
-  id: string;
-  name: string;
-  totalSales: number;
-  stockPurchased: number;
-  stockRemaining: number;
-  pendingReturns: number;
-}
-
-export interface SalesData {
-  date: string;
-  amount: number;
-  pharmacyId?: string;
-}
-
-export interface BubbleData {
-  pharmacy: string;
-  returns: number;
-  sales: number;
-  stockRemaining: number;
-}
-
-export interface OrderCreate {
-  stockist_id: string,
-  order_date: string,
-  total_amount: number,
-}
-
-export interface StockOutState {
-  product_id: string,
-  quantity: number,
-  unit_price: number,
-  unit: string // added for unit selection
-}
-
-export interface OrderDetailsCreate {
-  order_id: string,
-  product_details: Array<StockOutState>
-}
-
-export interface Order {
-  _id: string,
-  order_date: string,
-  status: string,
-  total_amount: number,
-  Stockist: {
-    _id: string,
-    name: Name,
-    company_name: string,
-    address: Address,
-    phone_number: PhoneNumber
-  }
-}
-
-export interface OrderDetails {
-  stockist: {
-    name: Name,
-    company_name: string,
-    address: Address,
-    phone_number: PhoneNumber
-  },
-  order_details: {
-    status: string,
-    order_date: string,
-    total_amount: number,
-    _id: string,
-    chemist_id: string,
-    stockist_id: string,
-    created_at: string,
-    updated_at: string
-  },
-  orders: [
-    {
-      _id: string,
-      order_id: string,
-      product_details: StockOutState,
-      ProductDetails: {
-        _id: string;
-        product_name: string;
-        category: string;
-        state: string;
-        measure_of_unit: string;
-        no_of_tablets_per_pack: number;
-        price: number;
-        expiry_date: string;
-      }
-    }
-  ]
-}
-
-export interface StockistShops {
-  _id: string,
-  company_name: string,
-}
 
 export interface ProductListing {
   _id: string
@@ -1066,12 +834,6 @@ export interface ProductListing {
   price: number,
 }
 
-export interface ProductForOrder {
-  product_name: string,
-  product_id: string,
-  quantity: number,
-  unit_price: number
-}
 
 
 export interface StockMovement {
@@ -1121,177 +883,4 @@ export interface InventoryItem {
   description?: string;
   low_stock_alert?: number;
   last_restock_date: string;
-}
-
-export interface Item {
-  product_name?: string,
-  pack?: string,
-  batch?: string,
-  HSN?: string,
-  expiry?: string,
-  quantity?: string,
-  MRP?: string,
-  rate?: string,
-  GST_percent?: string,
-  amount?: string,
-}
-
-
-export interface InvoiceData {
-  invoice_no: string,
-  date: string,
-  stockist: {
-    name?: string,
-    address?: {
-      street_address_1?: string;
-      street_address_2?: string;
-      city?: string;
-      state?: string;
-      zip_code?: string;
-    };
-    phone?: string,
-    GSTIN?: string,
-    DL_No?: string,
-  },
-  chemist: {
-    name?: string,
-    address?: {
-      street_address_1?: string;
-      street_address_2?: string;
-      city?: string;
-      state?: string;
-      zip_code?: string;
-    };
-    GSTIN?: string,
-    DL_No?: string,
-  },
-  items: Item[];
-  totals: {
-    subtotal?: number;
-    discount?: number;
-    SGST?: number;
-    CGST?: number;
-    GST_total?: number;
-    grand_total?: number;
-    outstanding_amount?: number;
-  }
-}
-
-export interface ItemToSent {
-  product_id: string;
-  product_name: string;
-  pack: string;
-  expiry: string;
-  quantity: string;
-  rate: string;
-}
-
-export interface InvoiceDataToSent {
-  invoice_no: string;
-  date: string;
-  stockist_id: string;
-  chemist_id: string;
-  items: ItemToSent[];
-  total: string;
-}
-
-export interface BillItem {
-  product_id: string;
-  product_name: string;
-  quantity: number;
-  unit_price: number;
-}
-
-export type StockLevelType = "Low" | "Normal" | "Overstock";
-
-
-export interface StockLevel {
-  stock_level: StockLevelType,
-  count: number
-}
-
-export interface CategoryPercent {
-  label: string,
-  total_amount: number,
-  value: number
-}
-
-export interface TopMonthSale {
-  id: string,
-  name: string,
-  totalSales: number,
-  stockPurchased: number
-}
-
-export interface Top5Categories {
-  id: string,
-  label: string,
-  data: Array<number>
-}
-
-export interface UserAnalyticsData {
-  total_sales: number,
-  total_purchased: number,
-  remaining_stock: number,
-  pending_returns: number,
-  dead_stocks: number,
-  sales_trends_yearly: {
-    month: number,
-    labels: Array<string>
-    year: number,
-    data: Array<number>
-  },
-  sales_trends_monthly: {
-    month: number,
-    labels: Array<string>
-    year: number,
-    data: Array<number>
-  },
-  top_month_sales: Array<TopMonthSale>,
-  category_wise_percent: Array<CategoryPercent>,
-  stock_level: Array<StockLevel>,
-  top_5_categories_all_time: {
-    year: number,
-    total_sales: number,
-    data: Array<Top5Categories>,
-  }
-}
-
-export interface ChemistTotalSales {
-  chemistId: string,
-  totalSales: number,
-  stockPurchased: number,
-  name: string,
-  shop_name: string,
-  pendingStockAmount: number,
-  remainingStock: number,
-  data: {
-    month: number,
-    year: number,
-    labels: Array<string>
-    data: Array<number>
-  }
-}
-
-export interface AdminAnalyticsData {
-  total_sales: 5318986.86,
-  total_purchase: 5318986.86,
-  remaining_stock: 2722045,
-  pending_stock: 10570,
-  dead_stock: 7650,
-  sales_trends: {
-    month: 2,
-    year: 2025,
-
-    data: Array<number>
-  },
-  sales_trends_month_wise: Array<TopMonthSale>,
-  category_wise: Array<CategoryPercent>,
-  stock_level: Array<StockLevel>,
-  chemist_wise_total_sales: Array<ChemistTotalSales>,
-  top_5_categories_all_time: {
-    year: number,
-    total_sales: number,
-    data: Array<Top5Categories>,
-  }
 }

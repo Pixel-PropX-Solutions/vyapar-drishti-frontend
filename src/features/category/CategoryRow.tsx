@@ -163,7 +163,7 @@ export const CategoryRow: React.FC<ProductRowProps> = ({ category, onDelete, onE
 
                     {/* Actions */}
                     <TableCell align="center" sx={{ pr: 3, pl: 1 }}>
-                        <Zoom in={isHovered} timeout={200}>
+                        <Zoom appear in timeout={200}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'center' }}>
                                 <Tooltip title="View Details" arrow>
                                     <IconButton

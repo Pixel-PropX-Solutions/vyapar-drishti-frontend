@@ -98,7 +98,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category, onDelete, 
                                 {category?.description || 'No description provided'}
                             </Typography>
                         </Box>
-                        <Zoom in={isHovered} timeout={200}>
+                        <Zoom appear in>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'flex-end' }}>
                                 <Tooltip title="View Details" arrow>
                                     <IconButton

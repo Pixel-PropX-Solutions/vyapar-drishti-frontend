@@ -214,7 +214,7 @@ export const CompanyRow: React.FC<ProductRowProps> = ({ com, onDelete, onEdit, o
 
                     {/* Actions */}
                     <TableCell align="center" sx={{ px: 1 }}>
-                        <Zoom in={isHovered} timeout={200}>
+                        <Zoom appear in>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'center' }}>
                                 <Tooltip title="View Details" arrow>
                                     <IconButton

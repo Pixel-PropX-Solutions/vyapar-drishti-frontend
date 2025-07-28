@@ -49,6 +49,7 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { InvoicesRowSkeleton } from "@/common/skeletons/InvoicesRowSkeleton";
 import { ActionButton } from "@/common/buttons/ActionButton";
 import { BottomPagination } from "@/common/BottomPagination";
+import { setInvoiceTypeId } from "@/store/reducers/invoiceReducer";
 
 
 const Transactions: React.FC = () => {
@@ -58,7 +59,7 @@ const Transactions: React.FC = () => {
     // const [htmlFromAPI, setHtmlFromAPI] = useState<string>('');
     // const [html, setHtml] = useState<boolean>(false);
     // const [invoiceId, setInvoiceId] = useState<string>('');
-    const { invoices, loading, pageMeta } = useSelector((state: RootState) => state.invoice);
+    const { invoices, loading, pageMeta, invoiceGroups } = useSelector((state: RootState) => state.invoice);
     const { currentCompany } = useSelector((state: RootState) => state.auth);
 
     const [state, setState] = useState({
@@ -232,7 +233,10 @@ const Transactions: React.FC = () => {
                                         variant="contained"
                                         startIcon={<AddCircleOutlineIcon />}
                                         color="success"
-                                        onClick={() => { navigate('/transactions/create/receipt') }}
+                                        onClick={() => {
+                                            dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Receipt'))?._id || ''));
+                                            navigate('/transactions/create/receipt');
+                                        }}
                                         sx={{
                                             background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
                                             color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
@@ -250,7 +254,10 @@ const Transactions: React.FC = () => {
                                         variant="contained"
                                         startIcon={<RemoveCircleOutlineIcon />}
                                         color="error"
-                                        onClick={() => { navigate('/transactions/create/payment') }}
+                                        onClick={() => {
+                                            dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Payment'))?._id || ''));
+                                            navigate('/transactions/create/payment');
+                                        }}
                                         sx={{
                                             background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
                                             color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
@@ -516,7 +523,8 @@ const Transactions: React.FC = () => {
                                         index={index + 1 + (page - 1) * rowsPerPage}
                                         onView={() => handleViewInvoice(inv)}
                                         onEdit={() => {
-                                            navigate(`/invoices/update/${inv.voucher_type.toLowerCase()}/${inv._id}`);
+                                            dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes(inv.voucher_type))?._id || ''));
+                                            navigate(`/transactions/update/${inv.voucher_type.toLowerCase()}/${inv._id}`);
                                         }}
                                         onDelete={async () => {
                                             // await deleteCustomer(cred._id);
@@ -548,7 +556,10 @@ const Transactions: React.FC = () => {
                                                         variant="contained"
                                                         startIcon={<AddCircleOutlineIcon />}
                                                         color="success"
-                                                        onClick={() => { navigate('/transactions/create/receipt') }}
+                                                        onClick={() => {
+                                                            dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Receipt'))?._id || ''));
+                                                            navigate('/transactions/create/receipt');
+                                                        }}
                                                         sx={{
                                                             background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
                                                             color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
@@ -566,7 +577,10 @@ const Transactions: React.FC = () => {
                                                         variant="contained"
                                                         startIcon={<RemoveCircleOutlineIcon />}
                                                         color="error"
-                                                        onClick={() => { navigate('/transactions/create/payment') }}
+                                                        onClick={() => {
+                                                            dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Payment'))?._id || ''));
+                                                            navigate('/transactions/create/payment');
+                                                        }}
                                                         sx={{
                                                             background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
                                                             color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',

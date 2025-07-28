@@ -37,7 +37,7 @@ import InventoryTable from '@/features/inventory/InventoryTable';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { SortField, SortOrder, InventoryItem } from '@/utils/types';
-import { getProductStock } from '@/services/inventory';
+import { getInventoryStockItems } from '@/services/inventory';
 import { WarningOutlined } from '@mui/icons-material';
 import { ActionButton } from "@/common/buttons/ActionButton";
 import InventoryStockCardSkeleton from '@/common/skeletons/InventoryStockCardSkeleton';
@@ -66,7 +66,7 @@ const Inventory: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [currentTab, setCurrentTab] = useState(0);
 
-    const { InventoryItems, pageMeta } = useSelector((state: RootState) => state.inventory);
+    const { InventoryItems, inventoryPageMeta } = useSelector((state: RootState) => state.inventory);
     const { user } = useSelector((state: RootState) => state.auth);
     const currentCompanyDetails = user?.company?.find((c: any) => c._id === user.user_settings.current_company_id);
 
@@ -159,10 +159,10 @@ const Inventory: React.FC = () => {
             setIsLoading(true);
             try {
                 await dispatch(
-                    getProductStock({
+                    getInventoryStockItems({
                         company_id: currentCompanyDetails?._id || '',
                         search: search,
-                        category: category === 'all' ? "" : category.toLowerCase(),
+                        category: category === 'all' ? "" : category,
                         page_no: page_no,
                         limit: limit,
                         sortField: sortField,
@@ -198,16 +198,16 @@ const Inventory: React.FC = () => {
 
             setSummaryStats({
                 zeroStockItems: zeroItems,
-                zeroStockCount: zeroItems.length || 0,
-                lowStockCount: lowItems.length || 0,
+                zeroStockCount: inventoryPageMeta.negative_stock || 0,
+                lowStockCount: inventoryPageMeta.low_stock || 0,
                 lowStockItems: lowItems,
-                positiveStockCount: positiveItems.length || 0,
+                positiveStockCount: inventoryPageMeta.positive_stock || 0,
                 positiveStockItems: positiveItems,
-                totalStockValue: InventoryItems.reduce((acc, item) => acc + (item.sales_value || 0), 0) || 0,
-                totalPurchaseValue: InventoryItems.reduce((acc, item) => acc + (item.purchase_value || 0), 0) || 0
+                totalStockValue: inventoryPageMeta.sale_value || 0,
+                totalPurchaseValue: inventoryPageMeta.purchase_value || 0
             });
         }
-    }, [pageMeta, InventoryItems, currentCompanyDetails?._id, dispatch]);
+    }, [inventoryPageMeta, InventoryItems, currentCompanyDetails?._id, dispatch]);
 
     // Destructure values from summaryStats for use in the component
     const { zeroStockItems, zeroStockCount, lowStockCount, lowStockItems, positiveStockCount, positiveStockItems, totalStockValue, totalPurchaseValue } = summaryStats;
@@ -493,11 +493,11 @@ const Inventory: React.FC = () => {
                             onChange={(e) => handleStateChange('category', e.target.value)}
                         >
                             <MenuItem value="all">All Categories</MenuItem>
-                            {/* {categories?.map((cat, index) => (
+                            {inventoryPageMeta?.unique?.map((cat, index) => (
                                 <MenuItem key={index} value={cat}>
                                     {cat}
                                 </MenuItem>
-                            ))} */}
+                            ))}
                         </TextField>
                     </Grid>
 

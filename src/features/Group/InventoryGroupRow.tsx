@@ -202,7 +202,7 @@ export const InventoryGroupsRow: React.FC<ProductRowProps> = ({ inventoryGroup, 
 
                     {/* Actions */}
                     <TableCell align="center" >
-                        <Zoom in={isHovered} timeout={200}>
+                        <Zoom appear in timeout={200}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'center' }}>
                                 {/* <Tooltip title="View Details" arrow>
                                     <IconButton

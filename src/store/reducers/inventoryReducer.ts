@@ -1,21 +1,30 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AuthStates } from "@/utils/enums";
-import { Inventory, PageMeta, StockMovement, InventoryItem } from "@/utils/types";
-import { getProductStock, getStockMovement, viewInventrory } from "@/services/inventory";
+import { PageMeta, StockMovement, InventoryItem } from "@/utils/types";
+import { getInventoryStockItems, getStockMovement } from "@/services/inventory";
 
 interface InventoryState {
   authState: AuthStates;
-  inventoryData: Array<Inventory> | null;
   stockMovement: Array<StockMovement> | null;
   InventoryItems: Array<InventoryItem> | null;
   pageMeta: PageMeta;
+  inventoryPageMeta: {
+    page: number;
+    limit: number;
+    total: number;
+    sale_value: number;
+    purchase_value: number;
+    positive_stock: number;
+    negative_stock: number;
+    low_stock: number;
+    unique: string[];
+  };
   loading: boolean;
   error: string | null;
 }
 
 const initialState: InventoryState = {
   authState: AuthStates.INITIALIZING,
-  inventoryData: [],
   stockMovement: [],
   InventoryItems: [],
   pageMeta: {
@@ -28,6 +37,17 @@ const initialState: InventoryState = {
     positive_stock: 0,
     low_stock: 0,
   },
+  inventoryPageMeta: {
+    page: 0,
+    limit: 0,
+    total: 0,
+    sale_value: 0,
+    purchase_value: 0,
+    positive_stock: 0,
+    negative_stock: 0,
+    low_stock: 0,
+    unique:[]
+  },
   loading: false,
   error: null,
 };
@@ -38,22 +58,6 @@ const inventorySlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-
-      .addCase(viewInventrory.pending, (state) => {
-        state.error = null;
-        state.loading = true;
-      })
-      .addCase(
-        viewInventrory.fulfilled,
-        (state, action: PayloadAction<any>) => {
-          state.inventoryData = action.payload.inventoryData;
-          state.loading = false;
-        }
-      )
-      .addCase(viewInventrory.rejected, (state, action) => {
-        state.error = action.payload as string;
-        state.loading = false;
-      })
 
       .addCase(getStockMovement.pending, (state) => {
         state.error = null;
@@ -72,19 +76,19 @@ const inventorySlice = createSlice({
         state.loading = false;
       })
 
-      .addCase(getProductStock.pending, (state) => {
+      .addCase(getInventoryStockItems.pending, (state) => {
         state.error = null;
         state.loading = true;
       })
       .addCase(
-        getProductStock.fulfilled,
+        getInventoryStockItems.fulfilled,
         (state, action: PayloadAction<any>) => {
           state.InventoryItems = action.payload.InventoryItems;
-          state.pageMeta = action.payload.pageMeta;
+          state.inventoryPageMeta = action.payload.inventoryPageMeta;
           state.loading = false;
         }
       )
-      .addCase(getProductStock.rejected, (state, action) => {
+      .addCase(getInventoryStockItems.rejected, (state, action) => {
         state.error = action.payload as string;
         state.loading = false;
       });

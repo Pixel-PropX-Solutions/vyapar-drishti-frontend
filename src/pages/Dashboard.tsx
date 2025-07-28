@@ -45,9 +45,9 @@ export default function Dashboard(props: {
           <Stack
             sx={{
               alignItems: "center",
-              mx: 3,
+              mx: { xs: 0, md: 5 },
               pb: 5,
-              mt: { xs: 0, md: 0 },
+              mt: { xs: 5, md: 0 },
             }}
           >
             <Header />

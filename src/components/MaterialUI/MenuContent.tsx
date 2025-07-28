@@ -50,19 +50,8 @@ const createMainListItems = (role: string): MenuItem[] => {
 
 
   const chemistItems: MenuItem[] = [
-    {
-      text: "Inventory",
-      icon: <InventoryIcon />,
-      path: "/warehouses",
-      children: [
-        { text: "WareHouse", path: "/warehouses", icon: <InventoryIcon /> },
-        { text: "Timeline", path: "/timeline", icon: <ViewTimelineIcon /> },
-        // { text: "Payment Links", path: "/payment-links", icon: <InventoryIcon /> },
-        // { text: "Journals", path: "/journals", icon: <InventoryIcon /> },
-        // { text: "Bank Reconciliation", path: "/bank-reconciliation", icon: <InventoryIcon /> }
-      ],
-      requiredRole: 'user'
-    },
+    { text: "WareHouse", path: "/warehouses", icon: <InventoryIcon />, requiredRole: 'user' },
+    { text: "Timeline", path: "/timeline", icon: <ViewTimelineIcon />, requiredRole: 'user' },
     {
       text: "Products",
       path: "/products",
@@ -119,7 +108,12 @@ const secondaryListItems: MenuItem[] = [
   { text: "About", path: "/about", icon: <InfoRoundedIcon /> },
 ];
 
-export default function MenuContent() {
+interface SideMenuMobileProps {
+  open?: boolean | undefined;
+  toggleDrawer?: (newOpen: boolean) => () => void;
+}
+
+export default function MenuContent({ toggleDrawer }: SideMenuMobileProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const theme = useTheme();
@@ -141,12 +135,14 @@ export default function MenuContent() {
         // Navigate to first child
         if (item.children[0] && item.children[0].path) {
           handleNavigation(item.children[0].path);
+          if (toggleDrawer) toggleDrawer(false);
         }
       } else {
         // Collapse all sections
         setOpenSections({});
         // Navigate to this item's path
         if (item.path) {
+          if (toggleDrawer) toggleDrawer(false);
           handleNavigation(item.path);
         }
       }

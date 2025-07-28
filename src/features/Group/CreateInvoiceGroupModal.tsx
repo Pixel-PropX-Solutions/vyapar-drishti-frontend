@@ -778,7 +778,7 @@
 //                     </Stack>
 
 //                     {!isMobile && data.inventory_group_name.trim() && (
-//                         <Zoom in timeout={300}>
+//                         <Zoom appear in timeout={300}>
 //                             <Chip
 //                                 icon={<CheckCircle />}
 //                                 label="Ready to submit"

@@ -201,7 +201,7 @@ export const DeletedProductRow: React.FC<DeletedProductRowProps> = ({ product, o
 
                     {/* Actions */}
                     <TableCell align="center" >
-                        <Zoom in={isHovered} timeout={200}>
+                        <Zoom appear in timeout={200}>
                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
                                 <Tooltip title="View Details" arrow>
                                     <IconButton

@@ -320,7 +320,7 @@ const Timeline: React.FC = () => {
                                     key={item?._id || `item-${Math.random()}`}
                                     sx={{
                                         '&:hover': { bgcolor: theme.palette.mode === 'dark' ? 'rgba(182, 185, 188, 0.15)' : '#f1f8ff', },
-                                        backgroundColor: item?.voucher_type === "Sales" ? 'rgba(244, 67, 54, 0.1)' : 'rgba(76, 175, 80, 0.1)',
+                                        backgroundColor: item?.voucher_type === "Purchase" ? 'rgba(244, 67, 54, 0.1)' : 'rgba(76, 175, 80, 0.1)',
                                     }}
                                 >
                                     <TableCell component="th" scope="row">
@@ -329,13 +329,13 @@ const Timeline: React.FC = () => {
                                         </Typography>
                                     </TableCell>
                                     <TableCell align="center" sx={{
-                                        backgroundColor: item?.voucher_type === "Purchase" ? 'rgba(76, 175, 80, 0.1)' : 'transparent',
+                                        backgroundColor: item?.voucher_type === "Purchase" ? 'rgba(244, 67, 54, 0.1)' : 'transparent',
                                         fontWeight: item?.voucher_type === "Purchase" ? '600' : 'normal'
                                     }}>
                                         {item?.voucher_type === "Purchase" && (item?.quantity || 0)}
                                     </TableCell>
                                     <TableCell align="center" sx={{
-                                        backgroundColor: item?.voucher_type === "Sales" ? 'rgba(244, 67, 54, 0.1)' : 'transparent',
+                                        backgroundColor: item?.voucher_type === "Sales" ? 'rgba(76, 175, 80, 0.1)' : 'transparent',
                                         fontWeight: item?.voucher_type === "Sales" ? '600' : 'normal'
                                     }}>
                                         {item?.voucher_type === "Sales" && (item?.quantity || 0)}
@@ -349,7 +349,7 @@ const Timeline: React.FC = () => {
                                     </TableCell>
                                     <TableCell>
                                         <Typography variant="body2" fontWeight="500">
-                                            {item?.created_at ? formatDate(item.created_at) : 'N/A'}
+                                            {item?.date ? formatDate(item.date) : 'N/A'}
                                         </Typography>
                                     </TableCell>
                                     {/* <TableCell>
@@ -416,8 +416,9 @@ const Timeline: React.FC = () => {
                             size="small"
                         >
                             <MenuItem value={10}>10</MenuItem>
-                            <MenuItem value={20}>20</MenuItem>
                             <MenuItem value={30}>30</MenuItem>
+                            <MenuItem value={50}>50</MenuItem>
+                            <MenuItem value={100}>100</MenuItem>
                         </TextField>
                         <Pagination
                             count={Math.ceil(pageMeta?.total / limit)}

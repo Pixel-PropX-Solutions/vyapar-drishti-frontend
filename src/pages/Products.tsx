@@ -87,6 +87,7 @@ const ProductsListing: React.FC = () => {
   const [drawer, setDrawer] = useState<boolean>(false);
   const { user } = useSelector((state: RootState) => state.auth);
   const currentCompanyDetails = user?.company?.find((c: any) => c._id === user.user_settings.current_company_id);
+  const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
   const [selectedProduct, setSelectedProduct] = useState<ProductUpdate | null>(null);
   const [openCategoryModal, setOpenCategoryModal] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<UpdateCategory | null>(null);
@@ -517,7 +518,7 @@ const ProductsListing: React.FC = () => {
                     </TableSortLabel>
                   </Tooltip>
                 </TableCell>
-                <TableCell align="center" sx={{ px: 1 }}>
+                {/* <TableCell align="center" sx={{ px: 1 }}>
                   <Tooltip title="Sort by Item Quantity" arrow>
                     <TableSortLabel
                     >
@@ -526,8 +527,13 @@ const ProductsListing: React.FC = () => {
                       </Typography>
                     </TableSortLabel>
                   </Tooltip>
-                </TableCell>
+                </TableCell> */}
                 <TableCell align="center" sx={{ px: 1 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                    Low Stock ALert
+                  </Typography>
+                </TableCell>
+                {gst_enable && <TableCell align="center" sx={{ px: 1 }}>
                   <Tooltip title="Sort by Bar-Code" arrow>
                     <TableSortLabel
                       active={sortBy === "gst_hsn_code"}
@@ -545,15 +551,15 @@ const ProductsListing: React.FC = () => {
                       </Typography>
                     </TableSortLabel>
                   </Tooltip>
-                </TableCell>
+                </TableCell>}
                 <TableCell align="center" sx={{ px: 1 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                    Category
+                    Opening Stock
                   </Typography>
                 </TableCell>
                 <TableCell align="center" sx={{ px: 1 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                    Group
+                    Closing Stock
                   </Typography>
                 </TableCell>
                 <TableCell align="center" >
@@ -644,11 +650,11 @@ const ProductsListing: React.FC = () => {
                     )
                       .unwrap()
                       .then(() => {
-                        setRefreshKey((prev) => prev + 1);
+                        fetchCategory();
                         setLoading(false);
                         toast.success('Category deleted successfully')
                       }).catch((error) => {
-                        setRefreshKey((prev) => prev + 1);
+                        fetchCategory();
                         setLoading(false);
                         toast.error(error || "An unexpected error occurred. Please try again later.");
                       });
@@ -736,11 +742,11 @@ const ProductsListing: React.FC = () => {
                     )
                       .unwrap()
                       .then(() => {
-                        setRefreshKey((prev) => prev + 1);
+                        fetchGroup();
                         setLoading(false);
                         toast.success('Group deleted successfully')
                       }).catch((error) => {
-                        setRefreshKey((prev) => prev + 1);
+                        fetchGroup();
                         setLoading(false);
                         toast.error(error || "An unexpected error occurred. Please try again later.");
                       });

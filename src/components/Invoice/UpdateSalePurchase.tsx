@@ -254,6 +254,7 @@ export default function UpdateSalePurchase() {
 
 
             dispatch(updateGSTInvoice(dataToSend)).then(() => {
+                toast.success("Invoice updated successfully!");
                 setIsLoading(false);
                 navigate('/invoices', { replace: true });
             }).catch((error) => {

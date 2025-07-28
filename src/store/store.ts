@@ -9,7 +9,6 @@ import invoiceReducer from "./reducers/invoiceReducer";
 import customerReducer from "./reducers/customersReducer";
 import accountingGroupReducer from "./reducers/accountingGroupReducer";
 import inventoryGroupReducer from "./reducers/inventoryGroupReducer";
-import analyticsReducer from "./reducers/analyticsReducer";
 
 const store = configureStore({
   reducer: {
@@ -25,7 +24,6 @@ const store = configureStore({
     user: userReducer,
     inventory: inventoryReducer,
     invoice: invoiceReducer,
-    analytics: analyticsReducer,
   },
 });
 

@@ -202,7 +202,7 @@ export default function SalePurchaseInvoiceCreation() {
         e.preventDefault();
         setIsLoading(true);
 
-        if (currentCompanyDetails?.company_settings?.features?.enable_gst) {
+        if (gst_enable) {
             const dataToSend = {
                 ...data,
                 date: date.toISOString().split('T')[0],
@@ -451,8 +451,9 @@ export default function SalePurchaseInvoiceCreation() {
                                                         label="Invoice Number"
                                                         fullWidth
                                                         value={data.voucher_number}
-                                                        onChange={(e) => handleChange('voucher_number', e.target.value)}
+                                                        onChange={invoiceType === "Sales" ? (e) => handleChange('voucher_number', e.target.value) : undefined}
                                                         name="voucher_number"
+                                                        disabled={invoiceType === "Sales"}
                                                         variant="outlined"
                                                         InputProps={{
                                                             startAdornment: (
@@ -461,6 +462,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                                 </InputAdornment>
                                                             ),
                                                         }}
+                                                        sx={{ cursor: invoiceType === "Sales" ? 'not-allowed' : 'text', }}
                                                     />
 
                                                     <DatePicker
@@ -504,7 +506,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                 </Stack>
 
                                                 {gst_enable && <Stack direction={'row'} spacing={2} sx={{ mt: 2 }}>
-                                                    <TextField
+                                                    {invoiceType === "Sales" && <TextField
                                                         label="Place of Supply"
                                                         fullWidth
                                                         value={data.place_of_supply}
@@ -519,7 +521,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                             ),
                                                         }}
                                                         sx={{ maxWidth: '50%' }}
-                                                    />
+                                                    />}
 
                                                     <Autocomplete
                                                         options={modeOfTransportOptions}

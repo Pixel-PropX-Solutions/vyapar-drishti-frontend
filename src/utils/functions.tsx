@@ -4,7 +4,6 @@ import ProductIcon from "@mui/icons-material/LocalPharmacyOutlined";
 import QuantityIcon from "@mui/icons-material/LocalOffer";
 import ExpiryIcon from "@mui/icons-material/CalendarToday";
 import { ProductSortField, SortOrder } from "./types";
-// import { LocalShipping, Cancel, CheckCircle, ReceiptLong } from '@mui/icons-material';
 import ImageIcon from '@mui/icons-material/Image';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
@@ -184,31 +183,3 @@ export function capitalizeInput(value: string, mode: 'off' | 'sentences' | 'word
   if (mode === 'sentences') return value.replace(/(^|[.!?]\s+)([a-z])/g, (_m, p1, p2) => p1 + p2.toUpperCase());
   return value;
 };
-
-// // Status chip color mapping
-// export const getStatusColor = (status: OrderStatus) => {
-//   switch (status) {
-//     case OrderStatus.PENDING:
-//       return 'warning';
-//     case OrderStatus.SHIPPED:
-//       return 'success';
-//     case OrderStatus.CANCELLED:
-//       return 'error';
-//     default:
-//       return 'default';
-//   }
-// };
-
-// // Status icon mapping
-// export const getStatusIcon = (status: OrderStatus) => {
-//   switch (status) {
-//     case OrderStatus.PENDING:
-//       return <ReceiptLong />;
-//     case OrderStatus.SHIPPED:
-//       return <LocalShipping />;
-//     case OrderStatus.CANCELLED:
-//       return <Cancel />;
-//     default:
-//       return <CheckCircle />;
-//   }
-// };

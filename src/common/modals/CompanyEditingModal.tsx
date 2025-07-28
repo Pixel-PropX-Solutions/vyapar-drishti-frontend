@@ -89,7 +89,7 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
     const getDefaultAprilFirst = () => {
         const now = new Date();
         const year = now.getFullYear();
-        return new Date(year, 3, 1); // Month is 0-indexed, so 3 = April
+        return `${year}-04-01`;
     };
 
     const [data, setData] = useState<SetCompany>({
@@ -337,7 +337,7 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                 bank_branch: company?.bank_branch || '',
                 qr_code_url: typeof company?.qr_code_url === 'string' ? company?.qr_code_url : '',
             });
-            if(company?.account_holder || company?.account_number || company?.bank_ifsc || company?.bank_name || company?.bank_branch) {
+            if (company?.account_holder || company?.account_number || company?.bank_ifsc || company?.bank_name || company?.bank_branch) {
                 setAddBank(true);
             }
 
@@ -374,8 +374,8 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
         if (data.address_1 && data.address_1 !== '') sanitizedData.address_1 = data.address_1.trim();
         if (data.address_2 && data.address_2 !== '') sanitizedData.address_2 = data.address_2.trim();
         if (data.pinCode && data.pinCode !== '') sanitizedData.pinCode = data.pinCode.trim();
-        if (data.financial_year_start && data.financial_year_start !== '') sanitizedData.financial_year_start = String(data.financial_year_start).trim();
-        if (data.books_begin_from && data.books_begin_from !== '') sanitizedData.books_begin_from = String(data.books_begin_from).trim();
+        if (data.financial_year_start && data.financial_year_start !== '') sanitizedData.financial_year_start = data.financial_year_start.trim();
+        if (data.books_begin_from && data.books_begin_from !== '') sanitizedData.books_begin_from = data.books_begin_from.trim();
         if (data.website && data.website !== '') sanitizedData.website = data.website.trim();
         if (data.mailing_name && data.mailing_name !== '') sanitizedData.mailing_name = data.mailing_name.trim();
         if (data.image && typeof data.image !== 'string') sanitizedData.image = data.image;
@@ -1210,7 +1210,7 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                                             } else {
                                                 setData((prev) => ({
                                                     ...prev,
-                                                    financial_year_start: new Date()
+                                                    financial_year_start: new Date().toISOString().split('T')[0]
                                                 }));
                                             }
                                         }}
@@ -1257,7 +1257,7 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                                             } else {
                                                 setData((prev) => ({
                                                     ...prev,
-                                                    books_begin_from: new Date()
+                                                    books_begin_from: new Date().toISOString().split('T')[0]
                                                 }));
                                             }
                                         }}

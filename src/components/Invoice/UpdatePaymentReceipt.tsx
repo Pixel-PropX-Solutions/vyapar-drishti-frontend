@@ -36,7 +36,7 @@ import toast from 'react-hot-toast';
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { viewAllCustomers, viewAllCustomerWithTypes } from "@/services/customers";
-import { createInvoice, getInvoiceCounter } from "@/services/invoice";
+import { createInvoice, getInvoiceCounter, viewInvoice } from "@/services/invoice";
 import { useNavigate, useParams } from "react-router-dom";
 
 const transactionTypes = ["Payment", "Receipt"];
@@ -46,16 +46,15 @@ interface SingleEntry {
     amount: number;
 }
 
-const PaymentReceiptInvoice: React.FC = () => {
-    const { type } = useParams();
+const UpdatePaymentReceipt: React.FC = () => {
+    const { type, voucher_id } = useParams();
     const dispatch = useDispatch<AppDispatch>();
     const theme = useTheme();
     const navigate = useNavigate();
     const { currentCompany } = useSelector((state: RootState) => state.auth)
+    const { invoiceData, invoiceType_id } = useSelector((state: RootState) => state.invoice);
     const { customersList, customerTypes } = useSelector((state: RootState) => state.customersLedger)
     const transactionType = (type ? type.charAt(0).toUpperCase() + type.slice(1) : "Payment") as 'Payment' | 'Receipt';
-    const { invoiceType_id } = useSelector((state: RootState) => state.invoice);
-
     const [date, setDate] = useState(new Date());
     const [transactionNumber, setTransactionNumber] = useState<string>('');
     const [partyName, setPartyName] = useState("");
@@ -182,6 +181,27 @@ const PaymentReceiptInvoice: React.FC = () => {
             toast.error(error || "An unexpected error occurred. Please try again later.");
         });
     }, [dispatch, currentCompany?._id, currentCompany, transactionType]);
+
+    useEffect(() => {
+        dispatch(viewInvoice({
+            vouchar_id: voucher_id || '',
+            company_id: currentCompany?._id || '',
+        }));
+    }, [dispatch, currentCompany?._id, voucher_id]);
+
+
+    useEffect(() => {
+        if (invoiceData) {
+            setDate(new Date(invoiceData.date));
+            setTransactionNumber(invoiceData.voucher_number || '');
+            setPartyName(invoiceData.party_name || '');
+            setNotes(invoiceData.narration || '');
+            setSingleEntry({
+                customer: invoiceData.accounting_entries.find(entry => entry.ledger_id !== invoiceData.party_name_id)?.ledger || '',
+                amount: Math.abs(invoiceData.accounting_entries.find(entry => entry.ledger_id !== invoiceData.party_name_id)?.amount || 0) || 0,
+            });
+        }
+    }, [invoiceData]);
 
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -610,4 +630,4 @@ const PaymentReceiptInvoice: React.FC = () => {
     );
 };
 
-export default PaymentReceiptInvoice;
+export default UpdatePaymentReceipt;

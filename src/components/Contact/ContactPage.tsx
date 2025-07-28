@@ -264,7 +264,6 @@ const ContactPage: React.FC = () => {
 
         // Required fields
         if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
-        if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
 
         // Email validation
         if (!formData.email.trim()) {
@@ -329,6 +328,7 @@ const ContactPage: React.FC = () => {
                 marketingConsent: true
             });
         } catch (error) {
+            console.log("Error", error);
             // Error handling
             setSnackbar({
                 open: true,
@@ -461,7 +461,7 @@ const ContactPage: React.FC = () => {
                             fontWeight: 400
                         }}
                     >
-                        Have questions about our pharmacy inventory management solution? Our team is here to help you streamline your operations.
+                        Have questions about our inventory management solution? Our team is here to help you streamline your operations.
                     </Typography>
                 </Box>
 
@@ -559,7 +559,7 @@ const ContactPage: React.FC = () => {
                                     <Grid item xs={12}>
                                         <TextField
                                             fullWidth
-                                            label="Company / Pharmacy Name"
+                                            label="Company Name"
                                             name="company"
                                             value={formData.company}
                                             onChange={handleInputChange}
@@ -767,14 +767,6 @@ const ContactPage: React.FC = () => {
 
                     <Grid container spacing={3}>
                         {[
-                            {
-                                question: "How quickly can we implement your system?",
-                                answer: "Most pharmacies are fully operational within 2-3 weeks. Our implementation team works closely with you to ensure a smooth transition with minimal disruption to your daily operations."
-                            },
-                            {
-                                question: "Do you offer integration with existing pharmacy systems?",
-                                answer: "Yes, our solution integrates with most major pharmacy management systems, including RxWorks, PharmaSys, and MedicalTrack. We'll provide a full compatibility assessment during your consultation."
-                            },
                             {
                                 question: "Is your platform HIPAA compliant?",
                                 answer: "Absolutely. Our entire system is built with HIPAA compliance as a foundational requirement. We maintain strict data security protocols and regular compliance audits."

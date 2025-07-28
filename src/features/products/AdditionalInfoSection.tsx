@@ -9,13 +9,17 @@ import {
     alpha,
     Autocomplete,
     InputAdornment,
-    Theme
+    Theme,
+    Divider
 } from '@mui/material';
 import {
+    Calculate,
     Category as CategoryIcon,
     Info as InfoIcon,
+    Inventory,
     Label as LabelIcon,
-    TrendingUp as TrendingUpIcon
+    Money,
+    ProductionQuantityLimitsOutlined,
 } from '@mui/icons-material';
 import { CategoryLists, FormCreateProduct, InventoryGroupList } from '@/utils/types';
 
@@ -32,6 +36,7 @@ interface AdditionalInfoSectionProps {
     setSelectedGroupOption: React.Dispatch<React.SetStateAction<{ label: string; value: string; id: string; } | null>>;
     setOpenCategoryModal: React.Dispatch<React.SetStateAction<boolean>>;
     setOpenGroupModal: React.Dispatch<React.SetStateAction<boolean>>;
+    calculateStockValue: () => number;
 }
 
 const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({
@@ -46,7 +51,8 @@ const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({
     selectedGroupOption,
     setSelectedGroupOption,
     setOpenGroupModal,
-    setOpenCategoryModal
+    setOpenCategoryModal,
+    calculateStockValue
 }) => {
     const categoryOptions = categoryLists?.map(cat => ({
         id: cat._id,
@@ -91,6 +97,8 @@ const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({
         handleChange('group_id', newValue?.id || '');
     };
 
+    const stockValue = calculateStockValue();
+
     return (
         <Box sx={{ px: 4, py: 4 }}>
             <Typography
@@ -122,7 +130,7 @@ const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({
                     <Card sx={{
                         background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.secondary.main, 0.05)} 100%)`,
                         width: '50%',
-                        border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                        border: `1px solid ${alpha(theme.palette.primary.main, 0.5)}`,
                         boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.08)}`
                     }}>
                         <CardContent sx={{ p: 1 }}>
@@ -218,7 +226,7 @@ const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({
                     <Card sx={{
                         background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.secondary.main, 0.05)} 100%)`,
                         width: '50%',
-                        border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                        border: `1px solid ${alpha(theme.palette.primary.main, 0.5)}`,
                         boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.08)}`
                     }}>
                         <CardContent sx={{ p: 1 }}>
@@ -254,7 +262,7 @@ const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">
-                                                <TrendingUpIcon color="action" fontSize="small" />
+                                                <ProductionQuantityLimitsOutlined color="action" fontSize="small" />
                                             </InputAdornment>
                                         ),
                                         endAdornment: data.unit && (
@@ -279,56 +287,168 @@ const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({
                     </Card>
                 </Box>
 
-                {/* Info Card */}
-                {/* <Card sx={{
-                    background: `linear-gradient(135deg, ${alpha(theme.palette.info.main, 0.05)} 0%, ${alpha(theme.palette.info.light, 0.1)} 100%)`,
-                    mt: 2,
-                    border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`
+                {/* Stock Details Card */}
+                <Card sx={{
+                    background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.secondary.main, 0.05)} 100%)`,
+                    border: `1px solid ${alpha(theme.palette.primary.main, 0.5)}`,
+                    boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.08)}`,
+                    mt: 2
                 }}>
                     <CardContent sx={{ p: 1 }}>
+                        <Stack spacing={1}>
+                            <Box sx={{ mb: 2 }}>
+                                <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 1 }}>
+                                    <Inventory />
+                                    <Box>
+                                        <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.text.primary }}>
+                                            Opening Stock & Pricing
+                                        </Typography>
+                                        {/* <Typography variant="body2" color="text.secondary">
+                                            Set initial inventory levels and pricing information
+                                        </Typography> */}
+                                    </Box>
+                                </Stack>
+                            </Box>
 
-                        <Box>
-                            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                                <strong>Tips for better product organization:</strong>
-                            </Typography>
-                            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                                <Chip
-                                    label="Use clear category names"
-                                    size="small"
-                                    variant="outlined"
+                            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
+                                {/* Opening Stock Quantity */}
+                                <TextField
+                                    fullWidth
+                                    label=" Opening Stock Quantity"
+                                    placeholder="Enter opening stock quantity"
+                                    value={data.opening_balance || ''}
+                                    onChange={handleNumberChange('opening_balance')}
+                                    type="text"
+                                    inputMode="decimal"
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <Inventory color="action" fontSize="small" />
+                                            </InputAdornment>
+                                        ),
+                                        endAdornment: data.unit && (
+                                            <InputAdornment position="end">
+                                                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                                                    {data.unit_id || data.unit}
+                                                </Typography>
+                                            </InputAdornment>
+                                        )
+                                    }}
+                                    error={!!validationErrors.opening_balance}
+                                    helperText={validationErrors.opening_balance || 'Current stock quantity in your inventory'}
                                     sx={{
-                                        borderColor: theme.palette.primary.main,
-                                        color: theme.palette.primary.main
+                                        '& .MuiOutlinedInput-root': {
+                                            borderRadius: 1,
+                                            backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                                            '&:hover': {
+                                                backgroundColor: theme.palette.background.paper,
+                                            },
+                                            '&.Mui-focused': {
+                                                backgroundColor: theme.palette.background.paper,
+                                                boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.1)}`
+                                            }
+                                        }
                                     }}
                                 />
-                                <Chip
-                                    label="Group similar products"
-                                    size="small"
-                                    variant="outlined"
-                                    sx={{
-                                        borderColor: theme.palette.secondary.main,
-                                        color: theme.palette.secondary.main
+
+                                {/* Opening Stock Rate */}
+                                <TextField
+                                    fullWidth
+                                    label="Opening Rate"
+                                    placeholder="Enter cost per unit"
+                                    value={data.opening_rate || ''}
+                                    onChange={handleNumberChange('opening_rate')}
+                                    type="text"
+                                    inputMode="decimal"
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <Money color="action" fontSize="small" />
+                                            </InputAdornment>
+                                        ),
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                                                    per {data.unit_id || data.unit || 'unit'}
+                                                </Typography>
+                                            </InputAdornment>
+                                        )
                                     }}
-                                />
-                                <Chip
-                                    label="Use meaningful SKU codes"
-                                    size="small"
-                                    variant="outlined"
+                                    error={!!validationErrors.opening_rate}
+                                    helperText={validationErrors.opening_rate || 'Cost price per unit of this product'}
                                     sx={{
-                                        borderColor: theme.palette.success.main,
-                                        color: theme.palette.success.main
+                                        '& .MuiOutlinedInput-root': {
+                                            borderRadius: 1,
+                                            backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                                            '&:hover': {
+                                                backgroundColor: theme.palette.background.paper,
+                                            },
+                                            '&.Mui-focused': {
+                                                backgroundColor: theme.palette.background.paper,
+                                                boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.1)}`
+                                            }
+                                        }
                                     }}
                                 />
                             </Stack>
-                        </Box>
-                        <Divider sx={{ my: 1 }} />
 
-                        <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                            💡 <strong>Pro Tip:</strong> Organizing your products with categories and groups makes it easier to generate reports,
-                            track inventory, and analyze sales patterns. You can always update these details later.
-                        </Typography>
+
+                            {/* Calculated Value Display */}
+                            {((data?.opening_balance ?? 0) > 0 || (data?.opening_rate ?? 0) > 0) && (
+                                <>
+                                    <Divider sx={{ my: 2 }} />
+
+                                    <Box sx={{
+                                        p: 1,
+                                        borderRadius: 1,
+                                        background: `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.1)} 0%, ${alpha(theme.palette.success.light, 0.05)} 100%)`,
+                                        border: `1px solid ${alpha(theme.palette.success.main, 0.2)}`
+                                    }}>
+                                        <Stack direction="row" alignItems="center" justifyContent="space-between">
+                                            <Stack direction="row" alignItems="center" spacing={2}>
+                                                <Box sx={{
+                                                    p: 1,
+                                                    borderRadius: 1.5,
+                                                    backgroundColor: alpha(theme.palette.success.main, 0.2),
+                                                    color: theme.palette.success.main
+                                                }}>
+                                                    <Calculate fontSize="small" />
+                                                </Box>
+                                                <Box>
+                                                    <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                                                        Opening Stock Value
+                                                    </Typography>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        Quantity × Rate = Total Value
+                                                    </Typography>
+                                                </Box>
+                                            </Stack>
+
+                                            <Box sx={{ textAlign: 'right' }}>
+                                                <Typography variant="subtitle2" sx={{
+                                                    fontWeight: 700,
+                                                    color: theme.palette.success.main,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 0.5
+                                                }}>
+                                                    &#8377; {stockValue.toLocaleString('en-IN', {
+                                                        minimumFractionDigits: 2,
+                                                        maximumFractionDigits: 2
+                                                    })}
+                                                </Typography>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    {data.opening_balance || 0} × &#8377; {data.opening_rate || 0}
+                                                </Typography>
+                                            </Box>
+                                        </Stack>
+                                    </Box>
+                                </>
+                            )}
+
+                        </Stack>
                     </CardContent>
-                </Card> */}
+                </Card>
             </Stack>
         </Box>
     );

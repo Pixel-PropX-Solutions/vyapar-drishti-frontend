@@ -81,6 +81,8 @@ const ProductsSideModal = (props: SideModalProps) => {
     const { setDrawer, drawer, setRefreshKey, product, setSelectedProduct } = props;
     const { user, currentCompany } = useSelector((state: RootState) => state.auth);
     const currentCompanyDetails = user?.company?.find((c: any) => c._id === user.user_settings.current_company_id);
+    const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
+
 
     // State management
     const [currentStep, setCurrentStep] = useState(0);
@@ -141,7 +143,7 @@ const ProductsSideModal = (props: SideModalProps) => {
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     // Step configuration
-    const steps = currentCompanyDetails?.company_settings?.features?.enable_gst ? [
+    const steps = gst_enable ? [
         { label: 'Basic Details', icon: EditIcon },
         { label: 'Additional Info', icon: AddIcon },
         { label: 'Advanced Settings', icon: CheckCircleIcon }
@@ -486,7 +488,7 @@ const ProductsSideModal = (props: SideModalProps) => {
             setOpenCategoryModal,
             setOpenGroupModal,
             showGstFields,
-            isHSNRequired: currentCompanyDetails?.company_settings?.features?.enable_gst,
+            isHSNRequired: gst_enable,
             selectedUnitOption,
             setSelectedUnitOption,
             imagePreview,
@@ -496,6 +498,9 @@ const ProductsSideModal = (props: SideModalProps) => {
             isDragActive,
             setIsDragActive,
             fileInputRef,
+            calculateStockValue: () => {
+                return (data?.opening_balance || 0) * (data?.opening_rate || 0);
+            }
         };
 
         switch (currentStep) {
@@ -517,7 +522,7 @@ const ProductsSideModal = (props: SideModalProps) => {
             case 1:
                 return true;
             case 2:
-                if (currentCompanyDetails.company_settings.features.enable_gst) {
+                if (gst_enable) {
                     if (!data.gst_hsn_code.trim() || !data.gst_taxability.trim()) {
                         return false;
                     }
@@ -532,6 +537,8 @@ const ProductsSideModal = (props: SideModalProps) => {
                 return true;
         }
     };
+
+    const isHSNCodeEntered = gst_enable && data.gst_hsn_code.trim() !== '';
 
     return (
         <>
@@ -754,7 +761,7 @@ const ProductsSideModal = (props: SideModalProps) => {
                                 size="large"
                                 startIcon={<SaveIcon />}
                                 onClick={handleSubmit}
-                                disabled={isLoading || !canProceed()}
+                                disabled={isLoading || !isHSNCodeEntered || !canProceed()}
                                 sx={{
                                     textTransform: 'none',
                                     px: 3,

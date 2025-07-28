@@ -219,7 +219,6 @@ export const getDesignTokens = (mode: PaletteMode) => {
       },
       h4: {
         fontSize: defaultTheme.typography.pxToRem(24),
-        fontWeight: 600,
         lineHeight: 1.5,
       },
       h5: {

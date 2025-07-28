@@ -251,7 +251,7 @@ export const CustomerGroupsRow: React.FC<ProductRowProps> = ({ cusGroup, onDelet
 
                     {/* Actions */}
                     <TableCell align="center" >
-                        <Zoom in={isHovered} timeout={200}>
+                        <Zoom appear in>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'center' }}>
                                 {/* <Tooltip title="View Details" arrow>
                                     <IconButton

@@ -33,7 +33,7 @@
 
 // import { useDispatch, useSelector } from 'react-redux';
 // import { AppDispatch, RootState } from '@/store/store';
-// import { getProductStock } from '@/services/inventory';
+// import { getInventoryStockItems } from '@/services/inventory';
 // import { SortField, SortOrder, InventoryItem } from '@/utils/types';
 // import TabPanel from '../upload-documents/components/TabPanel';
 // // import SideModal from '@/common/WareHouseSideModal';
@@ -173,7 +173,7 @@
 //             setIsLoading(true);
 //             try {
 //                 await dispatch(
-//                     getProductStock({
+//                     getInventoryStockItems({
 //                         search: search,
 //                         category: category === 'all' ? "" : category.toLowerCase(),
 //                         state: state,

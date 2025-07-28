@@ -1,5 +1,4 @@
 import userApi from "@/api/api";
-import { StockOutState } from "@/utils/types";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 export const createProduct = createAsyncThunk(
@@ -16,22 +15,6 @@ export const createProduct = createAsyncThunk(
       } else {
         return rejectWithValue("Product creation failed");
       }
-    } catch (error: any) {
-      return rejectWithValue(error?.response?.data?.message);
-    }
-  }
-);
-
-
-export const sellProduct = createAsyncThunk(
-  "sell/product",
-  async (data: Array<StockOutState>, { rejectWithValue }) => {
-    try {
-      const response = await userApi.post(`/sales/create/mulitple_sales`, data);
-
-      if (response.data.success === true) {
-        return;
-      } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {
       return rejectWithValue(error?.response?.data?.message);
     }

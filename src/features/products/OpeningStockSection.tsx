@@ -50,31 +50,29 @@ const OpeningStockSection: React.FC<OpeningStockSectionProps> = ({
 
     return (
         <Box sx={{ p: 3 }}>
-            <Stack spacing={3}>
+            <Stack spacing={2}>
                 {/* Section Header */}
-                <Box>
-                    <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 1 }}>
-                        <Box sx={{
-                            p: 1.5,
-                            borderRadius: 1,
-                            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                            color: 'white',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                        }}>
-                            <InventoryIcon />
-                        </Box>
-                        <Box>
-                            <Typography variant="h5" sx={{ fontWeight: 700, color: theme.palette.text.primary }}>
-                                Opening Stock & Pricing
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                Set initial inventory levels and pricing information
-                            </Typography>
-                        </Box>
-                    </Stack>
-                </Box>
+                <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 1 }}>
+                    <Box sx={{
+                        p: 1,
+                        borderRadius: 1,
+                        background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                        color: 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        <InventoryIcon />
+                    </Box>
+                    <Box>
+                        <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.text.primary }}>
+                            Opening Stock & Pricing
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                            Set initial inventory levels and pricing information
+                        </Typography>
+                    </Box>
+                </Stack>
 
                 {/* Info Alert */}
                 <Alert
@@ -99,60 +97,70 @@ const OpeningStockSection: React.FC<OpeningStockSectionProps> = ({
                     background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.8)} 0%, ${alpha(theme.palette.action.hover, 0.2)} 100%)`,
                     backdropFilter: 'blur(10px)'
                 }}>
-                    <CardContent sx={{ p: 3 }}>
-                        <Stack spacing={3}>
-                            {/* Opening Stock Quantity */}
-                            <Box>
-                                <Typography variant="subtitle1" sx={{
-                                    fontWeight: 600,
-                                    mb: 2,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 1
-                                }}>
-                                    <InventoryIcon fontSize="small" color="primary" />
-                                    Opening Stock Quantity
-                                </Typography>
-
-                                <TextField
-                                    fullWidth
-                                    label="Opening Balance"
-                                    placeholder="Enter opening stock quantity"
-                                    value={data.opening_balance || ''}
-                                    onChange={handleNumberChange('opening_balance')}
-                                    type="text"
-                                    inputMode="decimal"
-                                    InputProps={{
-                                        startAdornment: (
-                                            <InputAdornment position="start">
-                                                <InventoryIcon color="action" fontSize="small" />
-                                            </InputAdornment>
-                                        ),
-                                        endAdornment: data.unit && (
-                                            <InputAdornment position="end">
-                                                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                                                    {data.unit_id || data.unit}
-                                                </Typography>
-                                            </InputAdornment>
-                                        )
-                                    }}
-                                    error={!!validationErrors.opening_balance}
-                                    helperText={validationErrors.opening_balance || 'Current stock quantity in your inventory'}
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': {
-                                            borderRadius: 1,
-                                            backgroundColor: alpha(theme.palette.background.paper, 0.8),
-                                            '&:hover': {
-                                                backgroundColor: theme.palette.background.paper,
-                                            },
-                                            '&.Mui-focused': {
-                                                backgroundColor: theme.palette.background.paper,
-                                                boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.1)}`
-                                            }
-                                        }
-                                    }}
-                                />
+                    <CardContent sx={{ p: 1 }}>
+                        <Stack spacing={1}>
+                            <Box sx={{ mb: 2 }}>
+                                <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 1 }}>
+                                    <Box sx={{
+                                        p: 1,
+                                        borderRadius: 1,
+                                        background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                                        color: 'white',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}>
+                                        <InventoryIcon />
+                                    </Box>
+                                    <Box>
+                                        <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.text.primary }}>
+                                            Opening Stock & Pricing
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            Set initial inventory levels and pricing information
+                                        </Typography>
+                                    </Box>
+                                </Stack>
                             </Box>
+                            {/* Opening Stock Quantity */}
+                            <TextField
+                                fullWidth
+                                label=" Opening Stock Quantity"
+                                placeholder="Enter opening stock quantity"
+                                value={data.opening_balance || ''}
+                                onChange={handleNumberChange('opening_balance')}
+                                type="text"
+                                inputMode="decimal"
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <InventoryIcon color="action" fontSize="small" />
+                                        </InputAdornment>
+                                    ),
+                                    endAdornment: data.unit && (
+                                        <InputAdornment position="end">
+                                            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                                                {data.unit_id || data.unit}
+                                            </Typography>
+                                        </InputAdornment>
+                                    )
+                                }}
+                                error={!!validationErrors.opening_balance}
+                                helperText={validationErrors.opening_balance || 'Current stock quantity in your inventory'}
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: 1,
+                                        backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                                        '&:hover': {
+                                            backgroundColor: theme.palette.background.paper,
+                                        },
+                                        '&.Mui-focused': {
+                                            backgroundColor: theme.palette.background.paper,
+                                            boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.1)}`
+                                        }
+                                    }
+                                }}
+                            />
 
                             {/* Opening Stock Rate */}
                             <Box>

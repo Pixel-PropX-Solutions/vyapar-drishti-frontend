@@ -3,13 +3,12 @@ import {
   createUser,
   updateUserSettings,
 } from "@/services/user";
-import { CreateUser, PageMeta } from "@/utils/types";
+import { PageMeta } from "@/utils/types";
 import { setCurrentCompany } from "@/services/user";
 
 interface UserState {
   id: string;
   accessToken: string | null;
-  createdUser: CreateUser | null;
   loading: boolean;
   pageMeta: PageMeta;
   error: string | null;
@@ -20,7 +19,6 @@ const initialState: UserState = {
   accessToken: localStorage.getItem("accessToken")
     ? (localStorage.getItem("accessToken") as string)
     : null,
-  createdUser: null,
   pageMeta: {
     page: 0,
     limit: 0,

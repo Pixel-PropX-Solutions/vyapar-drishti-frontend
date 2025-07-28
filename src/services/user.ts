@@ -52,44 +52,6 @@ export const createBasicUser = createAsyncThunk(
 );
 
 
-// export const createCompany = createAsyncThunk(
-//   "company/create",
-//   async (
-//     {  data }: {  data: FormData },
-//     { rejectWithValue }
-//   ) => {
-//     try {
-//       const createRes = await userApi.post(`/user/create/company`, data);
-
-//       if (createRes.data.success === true) {
-//         return createRes.data.data;
-//       } else {
-//         return rejectWithValue("Company creation failed");
-//       }
-//     } catch (error: any) {
-// return rejectWithValue(error?.response?.data?.message);
-//     }
-//   }
-// );
-
-// export const getCompany = createAsyncThunk(
-//   "get/company",
-//   async (_, { rejectWithValue }) => {
-//     try {
-//       const response = await userApi.get('/user/company',);
-
-//       if (response.data.success) {
-//         const company = response.data.data[0];
-//         localStorage.setItem("company", company);
-//         return { company };
-//       } else return rejectWithValue(" No access token recieved.");
-//     } catch (error: any) {
-// return rejectWithValue(error?.response?.data?.message);
-//     }
-//   }
-// );
-
-
 export const updateUser = createAsyncThunk(
   "update/user",
   async (

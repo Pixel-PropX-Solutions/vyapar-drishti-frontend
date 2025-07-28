@@ -22,7 +22,9 @@ import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { GetAllVouchars } from "@/utils/types";
 import {
+    CancelOutlined,
     CheckCircleOutline,
+    ScheduleOutlined,
     Today
 } from "@mui/icons-material";
 import { formatDate } from "@/utils/functions";
@@ -134,17 +136,22 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, o
                     {/* Invoice Payment Status */}
                     <TableCell align="left" sx={{ px: 1 }}>
                         <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', gap: 1 }}>
-                            {['Purchase', 'Sales'].includes(inv.voucher_type) &&
-                                <CheckCircleOutline sx={{ mr: 0.5, color: theme.palette.text.secondary }} />}
+                            {['Purchase', 'Sales'].includes(inv.voucher_type) && inv.status === 'Paid' &&
+                                <CheckCircleOutline sx={{ mr: 0.5, color: theme.palette.success.main }} />}
+                            {['Purchase', 'Sales'].includes(inv.voucher_type) && inv.status === 'Unpaid' &&
+                                <CancelOutlined sx={{ mr: 0.5, color: theme.palette.error.main }} />}
+                            {['Purchase', 'Sales'].includes(inv.voucher_type) && inv.status === 'Partially Paid' &&
+                                <ScheduleOutlined sx={{ mr: 0.5, color: theme.palette.warning.main }} />}
                             <Typography
                                 variant="body1"
                                 sx={{
                                     fontWeight: 700,
                                     // fontSize: '1rem',
-                                    color: theme.palette.text.primary,
+                                    color: ['Purchase', 'Sales'].includes(inv.voucher_type) ?
+                                        inv.status === 'Paid' ? theme.palette.success.main : inv.status === 'Unpaid' ? theme.palette.error.main : inv.status === 'Partially Paid' ? theme.palette.warning.main : theme.palette.text.primary : theme.palette.text.primary,
                                 }}
                             >
-                                {['Purchase', 'Sales'].includes(inv.voucher_type) ? "Paid" : ""}
+                                {['Purchase', 'Sales'].includes(inv.voucher_type) ? inv.status ? inv.status : 'Status Unknown' : ""}
                             </Typography>
                         </Box>
                     </TableCell>
@@ -219,7 +226,7 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, o
 
                     {/* Actions */}
                     <TableCell align="center" sx={{ px: 1 }}>
-                        <Zoom in={isHovered} timeout={200}>
+                        <Zoom appear in timeout={200}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'center' }}>
                                 <Tooltip title="View Details" arrow>
                                     <IconButton

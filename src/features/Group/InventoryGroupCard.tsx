@@ -110,7 +110,7 @@ export const InventoryGroupCard: React.FC<InventoryGroupCardProps> = ({ group, o
                                 Created on: {formatDate(group?.created_at || '')}
                             </Typography>
                         </Box>
-                        <Zoom in={isHovered} timeout={200}>
+                        <Zoom appear in timeout={200}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'flex-end' }}>
                                 <Tooltip title="View Details" arrow>
                                     <IconButton

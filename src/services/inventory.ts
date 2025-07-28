@@ -1,32 +1,6 @@
 import userApi from "@/api/api";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-export const viewInventrory = createAsyncThunk(
-  "view/inventory",
-  async (
-    {
-      chemistId,
-      productId,
-    }: {
-      chemistId: string;
-      productId: string;
-    },
-    { rejectWithValue }
-  ) => {
-    try {
-      const response = await userApi.get(
-        `inventory/inventory/product?chemist_id=${chemistId}&product_id=${productId}`
-      );
-
-      if (response.data.success === true) {
-        const inventoryData = response.data.data;
-        return { inventoryData };
-      } else return rejectWithValue("Login Failed: No access token recieved.");
-    } catch (error: any) {
-      return rejectWithValue(error?.response?.data?.message);
-    }
-  }
-);
 
 
 export const getStockMovement = createAsyncThunk(
@@ -71,8 +45,8 @@ export const getStockMovement = createAsyncThunk(
 
 
 
-export const getProductStock = createAsyncThunk(
-  "view/productStock",
+export const getInventoryStockItems = createAsyncThunk(
+  "view/getInventoryStockItems",
   async (
     {
       company_id,
@@ -94,15 +68,26 @@ export const getProductStock = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
+      console.log("Parameters", {
+        company_id,
+        search,
+        category,
+        page_no,
+        limit,
+        sortField,
+        sortOrder
+      });
       const response = await userApi.get(
         `/product/view/all/product?company_id=${company_id}&search=${search}${category === 'All' ? "" : "&category=" + category}&page_no=${page_no}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"
         }`
       );
 
+      console.log("View InventoryStockItems response", response)
+
       if (response.data.success === true) {
         const InventoryItems = response.data.data.docs;
-        const pageMeta = response.data.data.meta;
-        return { InventoryItems, pageMeta };
+        const inventoryPageMeta = response.data.data.meta;
+        return { InventoryItems, inventoryPageMeta };
       } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {
       return rejectWithValue(error?.response?.data?.message);

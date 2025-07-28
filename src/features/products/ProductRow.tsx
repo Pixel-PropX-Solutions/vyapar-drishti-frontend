@@ -39,7 +39,9 @@ interface ProductRowProps {
 export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdit, onView, index }) => {
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
-    const { currentCompany } = useSelector((state: RootState) => state.auth)
+    const { user } = useSelector((state: RootState) => state.auth);
+    const currentCompanyDetails = user?.company?.find((c: any) => c._id == user?.user_settings?.current_company_id);
+    const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
 
@@ -117,7 +119,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                     </TableCell>
 
                     {/* Product Unit */}
-                    <TableCell align="center" sx={{ px: 1 }}>
+                    {/* <TableCell align="center" sx={{ px: 1 }}>
                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
                             <Typography
                                 variant="body1"
@@ -129,10 +131,23 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                                 {product.unit || '-'}
                             </Typography>
                         </Box>
+                    </TableCell> */}
+
+                    {/* Product Low Stock Alert */}
+                    <TableCell align="center" sx={{ px: 1 }}>
+                        <Typography
+                            variant="body1"
+                            sx={{
+                                fontWeight: 700,
+                                color: theme.palette.text.primary,
+                            }}
+                        >
+                            {product.low_stock_alert || 0}
+                        </Typography>
                     </TableCell>
 
                     {/* Product HSN/SAC Code */}
-                    <TableCell align="center" sx={{ px: 1 }}>
+                    {gst_enable && <TableCell align="center" sx={{ px: 1 }}>
                         <Typography
                             variant="body1"
                             sx={{
@@ -142,9 +157,9 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                         >
                             {product.gst_hsn_code ? (`#${product.gst_hsn_code}`) : ('-')}
                         </Typography>
-                    </TableCell>
+                    </TableCell>}
 
-                    {/* Product Category */}
+                    {/* Product Opening Balance */}
                     <TableCell align="center" sx={{ px: 1 }}>
                         <Typography
                             variant="body1"
@@ -153,11 +168,11 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                                 color: theme.palette.text.primary,
                             }}
                         >
-                            {product.category || '-'}
+                            {product.opening_balance || 0}  {product.unit}
                         </Typography>
                     </TableCell>
 
-                    {/* Product Group */}
+                    {/* Product Closing Balance */}
                     <TableCell align="center" sx={{ px: 1 }}>
                         <Typography
                             variant="body1"
@@ -166,13 +181,13 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                                 color: theme.palette.text.primary,
                             }}
                         >
-                            {(product?.group || '-')}
+                            {product?.current_stock} {product.unit}
                         </Typography>
                     </TableCell>
 
                     {/* Actions */}
                     <TableCell align="center">
-                        <Zoom in={isHovered} timeout={200}>
+                        <Zoom appear in >
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'center' }}>
                                 <Tooltip title="View Details" arrow>
                                     <IconButton
@@ -201,7 +216,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                                         onClick={async (e) => {
                                             e.stopPropagation();
                                             onEdit(product);
-                                            dispatch(viewProduct({ product_id: product._id, company_id: currentCompany?._id ?? '' }));
+                                            dispatch(viewProduct({ product_id: product._id, company_id: currentCompanyDetails?._id ?? '' }));
                                         }}
                                         sx={{
                                             bgcolor: alpha(theme.palette.warning.main, 0.1),
