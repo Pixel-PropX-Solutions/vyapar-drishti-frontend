@@ -538,7 +538,7 @@ const ProductsSideModal = (props: SideModalProps) => {
         }
     };
 
-    const isHSNCodeEntered = gst_enable && data.gst_hsn_code.trim() !== '';
+    const isHSNCodeEntered = gst_enable ? data.gst_hsn_code.trim() !== '' : true;
 
     return (
         <>
