@@ -26,7 +26,7 @@ import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import InfoIcon from "@mui/icons-material/Info";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import { DocumentUploadLoader } from "@/common/Loader";
+import { DocumentUploadLoader } from "@/common/loaders/Loader";
 import userApi from "@/api/api";
 // import { setInvoiceData } from "@/store/reducers/invoiceReducer";
 // import { useDispatch } from "react-redux";

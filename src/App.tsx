@@ -44,6 +44,8 @@ import toast from "react-hot-toast";
 import CenterLoader from "./common/loaders/CenterLoader";
 import ContactPage from "./components/Contact/ContactPage";
 import UpdatePaymentReceipt from "./components/Invoice/UpdatePaymentReceipt";
+import { ViewInvoiceInfo } from "./components/Invoice/ViewInvoice";
+import ForgotPassword from "./pages/ForgotPassword";
 // import PromptModal from "./common/modals/PromptModal";
 
 const xThemeComponents = {
@@ -159,6 +161,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/transactions/update/:type/:voucher_id" element={<UpdatePaymentReceipt />} />
                 
                 <Route path="/invoices" element={<Invoices />} />
+                <Route path="/invoices/:invoice_id" element={<ViewInvoiceInfo />} />
                 <Route path="/invoices/create/:type" element={<SalePurchaseInvoiceCreation />} />
                 <Route path="/invoices/update/:type/:voucher_id" element={<UpdateSalePurchase />} />
                 <Route path="/xyz" element={<Xyz />} />
@@ -181,6 +184,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
             </Route>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/admin" element={<LoginPage />} />
+            <Route path="/reset-password" element={<ForgotPassword />} />
 
             <Route path="/signup" element={<SignUpPage />} />
             {/* <Route path="/verify/:phoneNumber" element={<VerifyOTP />} /> */}

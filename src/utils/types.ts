@@ -881,6 +881,6 @@ export interface InventoryItem {
   alias_name?: string;
   gst_hsn_code?: string;
   description?: string;
-  low_stock_alert?: number;
+  low_stock_alert: number;
   last_restock_date: string;
 }

@@ -451,7 +451,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                         label="Invoice Number"
                                                         fullWidth
                                                         value={data.voucher_number}
-                                                        onChange={invoiceType === "Sales" ? (e) => handleChange('voucher_number', e.target.value) : undefined}
+                                                        onChange={invoiceType === "Sales" ? undefined : (e) => handleChange('voucher_number', e.target.value)}
                                                         name="voucher_number"
                                                         disabled={invoiceType === "Sales"}
                                                         variant="outlined"

@@ -11,7 +11,6 @@ import {
   Box,
   TextField,
   InputAdornment,
-  Pagination,
   Tooltip,
   TableSortLabel,
   FormControl,
@@ -44,6 +43,7 @@ import { viewAllAccountingGroups } from "@/services/accountingGroup";
 import { ActionButton } from "@/common/buttons/ActionButton";
 import { setCustomerTypeId, setEditingCustomer } from "@/store/reducers/customersReducer";
 import toast from "react-hot-toast";
+import { BottomPagination } from "@/common/modals/BottomPagination";
 
 const CustomerLedger: React.FC = () => {
   const { customers, pageMeta, loading } = useSelector((state: RootState) => state.customersLedger);
@@ -52,8 +52,7 @@ const CustomerLedger: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
-  // const [selectedTab, setSelectedTab] = useState(0);
-
+  const [debouncedQuery, setDebouncedQuery] = useState("");
 
   const [state, setState] = useState({
     searchQuery: "",
@@ -84,10 +83,29 @@ const CustomerLedger: React.FC = () => {
     )
   }, [dispatch, searchQuery, filterState, type, is_deleted, page, rowsPerPage, sortField, sortOrder]);
 
-  // Fetch stockists data from API
   useEffect(() => {
     fetchCustomers();
-  }, [searchQuery, page, rowsPerPage, is_deleted, sortField, filterState, sortOrder, dispatch, fetchCustomers]);
+  }, []);
+
+
+  // Debounce logic: delay setting the debouncedQuery
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 500); // wait 500ms after last keystroke
+
+    return () => {
+      clearTimeout(handler); // cancel timeout if query changes before 500ms
+    };
+  }, [searchQuery]);
+
+  // Fetch stockists data from API
+  useEffect(() => {
+    if (debouncedQuery) {
+      fetchCustomers();
+    }
+
+  }, [debouncedQuery, page, rowsPerPage, is_deleted, sortField, filterState, sortOrder, dispatch, fetchCustomers]);
 
   useEffect(() => {
     dispatch(viewAllAccountingGroups(currentCompany?._id || ""));
@@ -103,23 +121,6 @@ const CustomerLedger: React.FC = () => {
       sortField: field
     }))
   };
-
-  // const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-  //   if (newValue === 0) {
-  //     setState((prevState) => ({
-  //       ...prevState,
-  //       type: "Creditors"
-  //     }));
-  //   } else if (newValue === 1) {
-  //     setState((prevState) => ({
-  //       ...prevState,
-  //       type: "Debtors"
-  //     }));
-  //   }
-
-  //   setSelectedTab(newValue);
-  // };
-
 
   // Handle pagination change
   const handleChangePage = (
@@ -154,7 +155,7 @@ const CustomerLedger: React.FC = () => {
     setState((prevState) => ({
       ...prevState,
       [field]: value
-    }))
+    }));
   }
 
   // Handle view stockist details
@@ -537,30 +538,14 @@ const CustomerLedger: React.FC = () => {
       </TableContainer>
 
       {/* Pagination Controls */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "flex-end",
-          alignItems: "center",
-          mt: 2,
-        }}
-      >
-        <Typography variant="body2" sx={{ mr: 2 }}>
-          {`Showing ${(pageMeta.page - 1) * rowsPerPage + 1}-${Math.min(
-            pageMeta.page * rowsPerPage,
-            (pageMeta.total)
-          )} of ${pageMeta.total} customers`}
-        </Typography>
-
-        {(pageMeta.total) > 1 && <Pagination
-          count={Math.ceil((pageMeta.total) / rowsPerPage)}
-          page={pageMeta.page}
-          onChange={handleChangePage}
-          color="primary"
-          showFirstButton
-          showLastButton
-        />}
-      </Box>
+      <BottomPagination
+        total={pageMeta.total}
+        item="customers"
+        page={page}
+        metaPage={pageMeta.page}
+        rowsPerPage={rowsPerPage}
+        onChange={handleChangePage}
+      />
     </Box >
   );
 };

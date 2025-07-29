@@ -46,7 +46,7 @@ import { InvoicesRowSkeleton } from "@/common/skeletons/InvoicesRowSkeleton";
 import { ActionButton } from "@/common/buttons/ActionButton";
 import { setInvoiceTypeId } from "@/store/reducers/invoiceReducer";
 import toast from "react-hot-toast";
-import { BottomPagination } from "@/common/BottomPagination";
+import { BottomPagination } from "@/common/modals/BottomPagination";
 
 
 const Invoices: React.FC = () => {
@@ -152,7 +152,8 @@ const Invoices: React.FC = () => {
 
   // Handle view invoice details
   const handleViewInvoice = (inv: GetAllVouchars) => {
-    toast.success(`Viewing ${inv.voucher_type} invoice Cooming Soon`);
+    toast.success(`Viewing ${inv.voucher_type} invoice Coming Soon`);
+    navigate(`/invoices/${inv._id}`);
   };
 
   // Handle Delete Invoice details

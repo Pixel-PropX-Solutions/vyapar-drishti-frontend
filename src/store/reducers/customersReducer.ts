@@ -1,5 +1,5 @@
 import { updateCustomer, getCustomer, createCustomer, deleteCustomer, viewAllCustomer, viewAllCustomers, getCustomerInvoices, viewAllCustomerWithTypes } from "@/services/customers";
-import { PageMeta, GetUserLedgers, CustomersList, GetCustomerInvoices } from "@/utils/types";
+import { PageMeta, GetUserLedgers, CustomersList, GetCustomerInvoices, SortOrder } from "@/utils/types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface CustomerState {
@@ -8,12 +8,22 @@ interface CustomerState {
     editingCustomer: GetUserLedgers | null;
     customerType_id: string | null;
     customersList: Array<CustomersList> | [];
-    customerTypes: Array<{_id:string, ledger_name:string, parent:string}> | [];
+    customerTypes: Array<{ _id: string, ledger_name: string, parent: string }> | [];
     customerInvoices: Array<GetCustomerInvoices> | [];
     loading: boolean,
     error: string | null;
     customerInvoicesMeta: PageMeta
-    pageMeta: PageMeta
+    pageMeta: PageMeta;
+    customersFilters: {
+        searchQuery: string,
+        type: string,
+        page: number,
+        startDate: string,
+        endDate: string,
+        rowsPerPage: number,
+        sortField: string,
+        sortOrder: SortOrder,
+    }
 }
 
 const initialState: CustomerState = {
@@ -37,7 +47,17 @@ const initialState: CustomerState = {
         unique: [],
     },
     loading: false,
-    error: null
+    error: null,
+    customersFilters: {
+        searchQuery: "",
+        type: "all",
+        page: 1,
+        startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString(),
+        endDate: new Date().toISOString(),
+        rowsPerPage: 10,
+        sortField: "date",
+        sortOrder: "asc" as SortOrder,
+    }
 }
 
 const customerSlice = createSlice({
@@ -49,7 +69,14 @@ const customerSlice = createSlice({
         },
         setCustomerTypeId: (state, action: PayloadAction<string | null>) => {
             state.customerType_id = action.payload;
+        },
+        setCustomersFilters: (state, action: PayloadAction<Partial<CustomerState['customersFilters']>>) => {
+            state.customersFilters = {
+                ...state.customersFilters,
+                ...action.payload,
+            };
         }
+
     },
 
     extraReducers: (builder) => {
@@ -94,13 +121,13 @@ const customerSlice = createSlice({
                 state.error = action.payload as string;
                 state.loading = false;
             })
-           
+
             .addCase(viewAllCustomerWithTypes.pending, (state) => {
                 state.error = null;
                 state.loading = true;
             })
             .addCase(viewAllCustomerWithTypes.fulfilled, (state, action: PayloadAction<any>) => {
-                state.customerTypes = action.payload.customerTypes; 
+                state.customerTypes = action.payload.customerTypes;
                 state.loading = false;
             })
             .addCase(viewAllCustomerWithTypes.rejected, (state, action) => {
@@ -123,7 +150,7 @@ const customerSlice = createSlice({
                 state.error = action.payload as string;
                 state.loading = false;
             })
-            
+
             .addCase(getCustomerInvoices.pending, (state) => {
                 state.error = null;
                 state.loading = true;
@@ -169,6 +196,6 @@ const customerSlice = createSlice({
     }
 });
 
-export const { setEditingCustomer, setCustomerTypeId } = customerSlice.actions;
+export const { setEditingCustomer, setCustomerTypeId, setCustomersFilters } = customerSlice.actions;
 
 export default customerSlice.reducer;

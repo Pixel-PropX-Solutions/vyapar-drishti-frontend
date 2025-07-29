@@ -7,7 +7,6 @@ import {
   TextField,
   InputAdornment,
   MenuItem,
-  Pagination,
   useTheme,
   Tooltip,
   alpha,
@@ -43,16 +42,17 @@ import { useNavigate } from "react-router-dom";
 import { CategoryCard } from "@/features/category/CategoryCard";
 import CategoryCardSkeleton from "@/common/skeletons/CategoryCardSkeleton";
 import CreateInventoryGroupModal from "@/features/Group/CreateInventoryGroupModal";
-import { viewAllInventoryGroup } from "@/services/inventoryGroup";
+import { deleteInventoryGroup, viewAllInventoryGroup } from "@/services/inventoryGroup";
 import { InventoryGroupCard } from "@/features/Group/InventoryGroupCard";
+import { BottomPagination } from "@/common/modals/BottomPagination";
 
 const ProductsListing: React.FC = () => {
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { stockItems, stockItemsMeta } = useSelector((state: RootState) => state.product);
-  const { categories } = useSelector((state: RootState) => state.category);
-  const { inventoryGroups } = useSelector((state: RootState) => state.inventoryGroup);
+  const { categories, pageMeta: categoryPageMeta } = useSelector((state: RootState) => state.category);
+  const { inventoryGroups, inventoryGroupPageMeta } = useSelector((state: RootState) => state.inventoryGroup);
   const [products, setProducts] = useState<GetStockItem[]>([]);
 
   const [data, setData] = useState({
@@ -738,7 +738,7 @@ const ProductsListing: React.FC = () => {
                   group={group}
                   onDelete={(group_id: string) => {
                     dispatch(
-                      deleteCategory(group_id)
+                      deleteInventoryGroup(group_id)
                     )
                       .unwrap()
                       .then(() => {
@@ -803,117 +803,31 @@ const ProductsListing: React.FC = () => {
         </Box>
       </TabPanel>
 
-      {/* Enhanced Pagination Section */}
-      <Paper
-        elevation={0}
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          p: 1,
-          mt: 1,
-          borderRadius: 1,
-          border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
-          boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 0.5 }}>
-          {selectedTab === 0 ?
-            (<Typography variant="body2" sx={{ mr: 2 }}>
-              Showing {Math.min((page - 1) * rowsPerPage + 1, products.length)} - {Math.min(page * rowsPerPage, products.length)} of {products.length} products
-            </Typography>) : selectedTab === 1 ? (
-              <Typography variant="body2" sx={{ mr: 2 }}>
-                Showing {Math.min((page - 1) * rowsPerPage + 1, categories?.length)} - {Math.min(page * rowsPerPage, categories?.length)} of {categories?.length} categories
-              </Typography>
-            ) : (
-              <Typography variant="body2" sx={{ mr: 2 }}>
-                Showing {Math.min((page - 1) * rowsPerPage + 1, inventoryGroups?.length)} - {Math.min(page * rowsPerPage, inventoryGroups?.length)} of {inventoryGroups?.length} groups
-              </Typography>
-            )
-          }
-        </Box>
-
-        {products.length > rowsPerPage && selectedTab !== 1 && (
-          <Pagination
-            count={Math.ceil(products.length / rowsPerPage)}
-            page={page}
-            onChange={handlePageChange}
-            color="primary"
-            size={"medium"}
-            showFirstButton
-            showLastButton
-            sx={{
-              "& .MuiPaginationItem-root": {
-                mx: { xs: 0.25, sm: 0.5 },
-                borderRadius: 1,
-                fontWeight: 600,
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`,
-                },
-                '&.Mui-selected': {
-                  boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`,
-                },
-              },
-            }}
-          />
-        )}
-
-        {categories?.length > rowsPerPage && selectedTab === 1 && (
-          <Pagination
-            count={Math.ceil(categories?.length / rowsPerPage)}
-            page={page}
-            onChange={handlePageChange}
-            color="primary"
-            size={"medium"}
-            showFirstButton
-            showLastButton
-            sx={{
-              "& .MuiPaginationItem-root": {
-                mx: { xs: 0.25, sm: 0.5 },
-                borderRadius: 1,
-                fontWeight: 600,
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`,
-                },
-                '&.Mui-selected': {
-                  boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`,
-                },
-              },
-            }}
-          />
-        )}
-
-        {inventoryGroups?.length > rowsPerPage && selectedTab === 2 && (
-          <Pagination
-            count={Math.ceil(inventoryGroups?.length / rowsPerPage)}
-            page={page}
-            onChange={handlePageChange}
-            color="primary"
-            size={"medium"}
-            showFirstButton
-            showLastButton
-            sx={{
-              "& .MuiPaginationItem-root": {
-                mx: { xs: 0.25, sm: 0.5 },
-                borderRadius: 1,
-                fontWeight: 600,
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`,
-                },
-                '&.Mui-selected': {
-                  boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`,
-                },
-              },
-            }}
-          />
-        )}
-      </Paper>
+      {/* Pagination Controls */}
+      {selectedTab === 0 && <BottomPagination
+        total={stockItemsMeta.total}
+        item="products"
+        page={page}
+        metaPage={stockItemsMeta.page}
+        rowsPerPage={rowsPerPage}
+        onChange={handlePageChange}
+      />}
+      {selectedTab === 1 && <BottomPagination
+        total={categoryPageMeta.total}
+        item="categories"
+        page={page}
+        metaPage={categoryPageMeta.page}
+        rowsPerPage={rowsPerPage}
+        onChange={handlePageChange}
+      />}
+      {selectedTab === 2 && <BottomPagination
+        total={inventoryGroupPageMeta.total}
+        item="groups"
+        page={page}
+        metaPage={inventoryGroupPageMeta.page}
+        rowsPerPage={rowsPerPage}
+        onChange={handlePageChange}
+      />}
 
       <ProductsSideModal drawer={drawer} setDrawer={setDrawer} setRefreshKey={setRefreshKey} product={selectedProduct} setSelectedProduct={setSelectedProduct} />
       <CategoryCreateModal

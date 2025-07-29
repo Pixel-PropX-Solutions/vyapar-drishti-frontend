@@ -17,7 +17,6 @@ import {
     Stack,
     TextField,
     MenuItem,
-    Pagination,
     TableSortLabel,
     Tooltip,
     useTheme,
@@ -32,6 +31,7 @@ import { AppDispatch, RootState } from '@/store/store';
 import { getStockMovement } from '@/services/inventory';
 import { formatDate } from '@/utils/functions';
 import { SortField, SortOrder } from '@/utils/types';
+import { BottomPagination } from '@/common/modals/BottomPagination';
 
 const Timeline: React.FC = () => {
     const theme = useTheme();
@@ -130,7 +130,7 @@ const Timeline: React.FC = () => {
                     </CardContent>
                 </Card>
 
-                <Grid container spacing={2} sx={{ mb: 3 }}>
+                <Grid container spacing={2} sx={{ mb: 2 }}>
                     <Grid item xs={12} md={12}>
                         <Stack
                             direction={{ xs: "column", sm: "row" }}
@@ -217,7 +217,7 @@ const Timeline: React.FC = () => {
                                     select
                                     value={movement_type}
                                     fullWidth
-                                    label="Product Name"
+                                    label="Party Name"
                                     size="small"
                                     onChange={(e) => handleStateChange('movement_type', e.target.value)}
                                 >
@@ -229,15 +229,16 @@ const Timeline: React.FC = () => {
                             <Grid item xs={12} md={1}>
                                 <TextField
                                     select
-                                    value={movement_type}
                                     fullWidth
-                                    label="Party Name"
+                                    label="Show"
+                                    value={limit}
+                                    onChange={(e) => handleStateChange('limit', e.target.value)}
                                     size="small"
-                                    onChange={(e) => handleStateChange('movement_type', e.target.value)}
                                 >
-                                    <MenuItem value="all" sx={{ fontWeight: 600 }}>All </MenuItem>
-                                    <MenuItem value="Sales">Sales</MenuItem>
-                                    <MenuItem value="Purchase">Purchase</MenuItem>
+                                    <MenuItem value={10}>10</MenuItem>
+                                    <MenuItem value={30}>30</MenuItem>
+                                    <MenuItem value={50}>50</MenuItem>
+                                    <MenuItem value={100}>100</MenuItem>
                                 </TextField>
                             </Grid>
                             <Grid item xs={12} md={1.5}>
@@ -269,7 +270,7 @@ const Timeline: React.FC = () => {
                     borderColor: theme.palette.mode === 'light' ? '#e0e0e0' : 'rgba(255, 255, 255, 0.12)',
                     borderRadius: '8px',
                     overflow: 'hidden',
-                    mb: 3
+                    mb: 1
                 }}>
                     <Table sx={{ minWidth: 650 }}>
                         <TableHead>
@@ -352,30 +353,6 @@ const Timeline: React.FC = () => {
                                             {item?.date ? formatDate(item.date) : 'N/A'}
                                         </Typography>
                                     </TableCell>
-                                    {/* <TableCell>
-                                        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
-                                            <IconButton
-                                                size="small"
-                                                color="primary"
-                                                sx={{
-                                                    bgcolor: 'rgba(83, 193, 116, 0.19)',
-                                                    '&:hover': { bgcolor: 'rgba(34, 238, 41, 0.31)' }
-                                                }}
-                                            >
-                                                <EditIcon />
-                                            </IconButton>
-                                            <IconButton
-                                                size="small"
-                                                color="error"
-                                                sx={{
-                                                    bgcolor: 'rgba(244, 67, 54, 0.1)',
-                                                    '&:hover': { bgcolor: 'rgba(244, 67, 54, 0.2)' }
-                                                }}
-                                            >
-                                                <DeleteIcon />
-                                            </IconButton>
-                                        </Box>
-                                    </TableCell> */}
                                 </TableRow>
                             ))}
 
@@ -393,44 +370,14 @@ const Timeline: React.FC = () => {
                 </TableContainer>
 
                 {/* Pagination */}
-                <Box
-                    sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        p: 2,
-                    }}
-                >
-                    <Typography variant="body2" sx={{ mr: 2 }}>
-                        {`Showing ${(pageMeta?.page - 1) * limit + 1}-${Math.min(
-                            pageMeta?.page * limit,
-                            pageMeta?.total
-                        )} of ${pageMeta?.total} items`}
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <TextField
-                            select
-                            label="Show"
-                            value={limit}
-                            onChange={(e) => handleStateChange('limit', e.target.value)}
-                            size="small"
-                        >
-                            <MenuItem value={10}>10</MenuItem>
-                            <MenuItem value={30}>30</MenuItem>
-                            <MenuItem value={50}>50</MenuItem>
-                            <MenuItem value={100}>100</MenuItem>
-                        </TextField>
-                        <Pagination
-                            count={Math.ceil(pageMeta?.total / limit)}
-                            page={pageMeta?.page}
-                            onChange={handleChangePage}
-                            color="primary"
-                            showFirstButton
-                            showLastButton
-                        />
-                    </Box>
-
-                </Box>
+                <BottomPagination
+                    total={pageMeta.total}
+                    item="items"
+                    page={pageMeta?.page}
+                    metaPage={pageMeta.page}
+                    rowsPerPage={limit}
+                    onChange={handleChangePage}
+                />
             </Box>
         </LocalizationProvider>
     );

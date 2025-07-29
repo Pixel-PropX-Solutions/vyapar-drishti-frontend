@@ -38,13 +38,13 @@ import { getCustomer, getCustomerInvoices } from "@/services/customers";
 import { useNavigate, useParams } from "react-router-dom";
 import { getInitials } from "@/utils/functions";
 import { ActionButton } from "@/common/buttons/ActionButton";
-import { setEditingCustomer } from "@/store/reducers/customersReducer";
+import { setCustomersFilters, setEditingCustomer } from "@/store/reducers/customersReducer";
 import { CustomerInvoicesRow } from "./CustomerInvoicesRow";
 import { SortOrder } from "@/utils/types";
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { BottomPagination } from "@/common/BottomPagination";
+import { BottomPagination } from "@/common/modals/BottomPagination";
 import { CustomerInvoicesRowSkeleton } from "@/common/skeletons/CustomerInvoicesRowSkeleton";
 import { deleteGSTInvoice, deleteInvoice } from "@/services/invoice";
 import toast from "react-hot-toast";
@@ -57,20 +57,23 @@ const CustomerProfile: React.FC = () => {
     const navigate = useNavigate();
     const { customer_id } = useParams();
     const theme = useTheme();
+    const { searchQuery, page, rowsPerPage, startDate, endDate, type, sortField, sortOrder } = useSelector((state: RootState) => state.customersLedger.customersFilters);
+    const [debouncedQuery, setDebouncedQuery] = useState("");
 
-    const [state, setState] = useState({
-        searchQuery: "",
-        type: "all",
-        page: 1,
-        startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-        endDate: new Date(),
-        rowsPerPage: 10,
-        sortField: "date",
-        sortOrder: "asc" as SortOrder,
-    });
-
-    const { searchQuery, page, rowsPerPage, startDate, endDate, type, sortField, sortOrder } = state;
-
+    const fetchCustomersInvoices = useCallback(async () => {
+        dispatch(getCustomerInvoices({
+            searchQuery,
+            company_id: currentCompany?._id || "",
+            customer_id: customer_id || "",
+            pageNumber: page,
+            type,
+            limit: rowsPerPage,
+            sortField,
+            sortOrder,
+            start_date: new Date(startDate).toLocaleDateString(),
+            end_date: new Date(endDate).toLocaleDateString(),
+        }));
+    }, [currentCompany?._id, customer_id, dispatch, endDate, page, rowsPerPage, searchQuery, sortField, sortOrder, startDate, type]);
 
     useEffect(() => {
         if (customer_id) {
@@ -79,27 +82,31 @@ const CustomerProfile: React.FC = () => {
     }, [dispatch, customer_id]);
 
     useEffect(() => {
-        if (customer_id) {
-            dispatch(getCustomerInvoices({
-                searchQuery,
-                company_id: currentCompany?._id || "",
-                customer_id,
-                pageNumber: page,
-                type,
-                limit: rowsPerPage,
-                sortField,
-                sortOrder,
-                start_date: startDate.getFullYear().toString() + '-' + (startDate.getMonth() + 1).toString().padStart(2, '0') + '-' + startDate.getDate().toString().padStart(2, '0'),
-                end_date: endDate.getFullYear().toString() + '-' + (endDate.getMonth() + 1).toString().padStart(2, '0') + '-' + endDate.getDate().toString().padStart(2, '0'),
-            }));
+        fetchCustomersInvoices();
+    }, []);
+
+    // Debounce logic: delay setting the debouncedQuery
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedQuery(searchQuery);
+        }, 500);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [searchQuery]);
+
+    // Fetch customers when debouncedQuery or other filters change
+    useEffect(() => {
+        if (debouncedQuery) {
+            fetchCustomersInvoices();
         }
-    }, [currentCompany?._id, customer_id, dispatch, endDate, page, rowsPerPage, searchQuery, sortField, sortOrder, startDate, type]);
+    }, [debouncedQuery, page, rowsPerPage, sortField, sortOrder, type, fetchCustomersInvoices]);
 
     // Handle sorting change
     const handleSortRequest = (field: string) => {
         const isAsc = sortField === field && sortOrder === "asc";
-        setState((prevState) => ({
-            ...prevState,
+        dispatch(setCustomersFilters({
             sortOrder: isAsc ? "desc" : "asc",
             sortField: field
         }))
@@ -111,8 +118,7 @@ const CustomerProfile: React.FC = () => {
         newPage: number
     ) => {
 
-        setState((prevState) => ({
-            ...prevState,
+        dispatch(setCustomersFilters({
             page: newPage
         }))
     };
@@ -139,24 +145,23 @@ const CustomerProfile: React.FC = () => {
 
     // managing searchQuery, filterState, page, rowsPerPage
     const handleStateChange = (field: string, value: any) => {
-        setState((prevState) => ({
-            ...prevState,
+        dispatch(setCustomersFilters({
             [field]: value
         }))
     };
 
     // Reset filters
     const handleResetFilters = useCallback(() => {
-        setState({
+        dispatch(setCustomersFilters({
             searchQuery: "",
             type: "all",
             page: 1,
-            startDate: new Date(),
-            endDate: new Date(),
+            startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString(),
+            endDate: new Date().toISOString(),
             rowsPerPage: 10,
             sortField: "created_at",
             sortOrder: "asc" as SortOrder,
-        });
+        }));
     }, []);
 
     if (!customer) {
@@ -267,7 +272,7 @@ const CustomerProfile: React.FC = () => {
 
                     <DatePicker
                         label="Start Date"
-                        value={startDate}
+                        value={new Date(startDate)}
                         format="dd/MM/yyyy"
                         views={["year", "month", "day"]}
                         onChange={(newValue) => handleStateChange("startDate", newValue)}
@@ -290,7 +295,7 @@ const CustomerProfile: React.FC = () => {
                     />
                     <DatePicker
                         label="End Date"
-                        value={endDate}
+                        value={new Date(endDate)}
                         format="dd/MM/yyyy"
                         views={["year", "month", "day"]}
                         onChange={(newValue) => handleStateChange("endDate", newValue)}

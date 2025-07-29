@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
     Box,
     Button,
@@ -13,7 +13,6 @@ import {
     Card,
     CardContent,
     IconButton,
-    Fade,
     Tabs,
     Tab,
 } from '@mui/material';
@@ -64,26 +63,25 @@ const Inventory: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
+    const [isStatsLoading, setIsStatsLoading] = useState(false);
     const [currentTab, setCurrentTab] = useState(0);
 
     const { InventoryItems, inventoryPageMeta } = useSelector((state: RootState) => state.inventory);
     const { user } = useSelector((state: RootState) => state.auth);
     const currentCompanyDetails = user?.company?.find((c: any) => c._id === user.user_settings.current_company_id);
-
+    const isInventoryFetched = useRef(false);
 
     const [data, setData] = useState({
         search: '',
         category: 'all',
-        qtyFilter: 'all',
-        state: '',
+        stock_status: 'all',
         page_no: 1,
         limit: 10,
         sortField: "created_at" as SortField,
         sortOrder: "asc" as SortOrder,
     });
-    // const { categories } = useSelector((state: RootState) => state.product);
-    const { search, category, qtyFilter, page_no, limit, sortField, sortOrder } = data;
-    const [selectedRows, setSelectedRows] = useState<string[]>([]);
+
+    const { search, category, stock_status, page_no, limit, sortField, sortOrder } = data;
 
     const handleSortRequest = (field: SortField) => {
         const isAsc = sortField === field && sortOrder === "asc";
@@ -98,8 +96,7 @@ const Inventory: React.FC = () => {
         setData({
             search: '',
             category: 'all',
-            qtyFilter: 'all',
-            state: '',
+            stock_status: 'all',
             page_no: 1,
             limit: 10,
             sortField: "created_at" as SortField,
@@ -131,91 +128,94 @@ const Inventory: React.FC = () => {
 
     const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
         setCurrentTab(newValue);
-        handleResetFilters();
         // Set appropriate filters based on tab
-        let newQtyFilter = '';
-        if (newValue === 0) newQtyFilter = 'all';
-        if (newValue === 1) newQtyFilter = 'zero';
-        if (newValue === 2) newQtyFilter = 'low';
-        if (newValue === 3) newQtyFilter = 'positive';
+        let newStockStatus = '';
+        if (newValue === 0) { newStockStatus = 'all'; }
+        if (newValue === 1) { newStockStatus = 'zero'; }
+        if (newValue === 2) { newStockStatus = 'low'; }
+        if (newValue === 3) { newStockStatus = 'positive'; }
 
         setData(prev => ({
             ...prev,
-            qtyFilter: newQtyFilter
+            stock_status: newStockStatus
         }));
+
+        fetchInventoryData(newStockStatus);
     };
 
     // Bulk operations
-    const handleBulkAction = (action: 'stockIn' | 'stockOut') => {
-        if (action === 'stockIn') {
-            navigate('/orders/create');
-        } else if (action === 'stockOut') {
-            navigate('/sell');
+    // const handleBulkAction = (action: 'stockIn' | 'stockOut') => {
+    //     if (action === 'stockIn') {
+    //         navigate('/orders/create');
+    //     } else if (action === 'stockOut') {
+    //         navigate('/sell');
+    //     }
+    // };
+
+    const fetchInventoryData = async (status:string) => {
+        setIsLoading(true);
+        try {
+            await dispatch(
+                getInventoryStockItems({
+                    company_id: currentCompanyDetails?._id || '',
+                    search: search,
+                    category: category === 'all' ? "" : category,
+                    stock_status: status === 'all' ? "" : status,
+                    page_no: page_no,
+                    limit: limit,
+                    sortField: sortField,
+                    sortOrder: sortOrder,
+                })
+            );
+        } finally {
+            setIsLoading(false);
         }
     };
 
     useEffect(() => {
-        const fetchInventoryData = async () => {
-            setIsLoading(true);
-            try {
-                await dispatch(
-                    getInventoryStockItems({
-                        company_id: currentCompanyDetails?._id || '',
-                        search: search,
-                        category: category === 'all' ? "" : category,
-                        page_no: page_no,
-                        limit: limit,
-                        sortField: sortField,
-                        sortOrder: sortOrder,
-                    })
-                );
-            } finally {
-                setIsLoading(false);
-            }
-        };
+        fetchInventoryData(stock_status);
+    }, [category, currentCompanyDetails._id, stock_status, dispatch, limit, page_no, search, sortField, sortOrder]);
 
-        fetchInventoryData();
-    }, [category, currentCompanyDetails?._id, dispatch, limit, page_no, search, sortField, sortOrder]);
+    // Reset summary stats fetch flag when company changes
+    useEffect(() => {
+        isInventoryFetched.current = false;
+    }, [currentCompanyDetails?._id]);
 
     // State to store summary stats that only change on initial load
     const [summaryStats, setSummaryStats] = useState({
         zeroStockCount: 0,
-        zeroStockItems: [] as InventoryItem[],
         lowStockCount: 0,
-        lowStockItems: [] as InventoryItem[],
         positiveStockCount: 0,
-        positiveStockItems: [] as InventoryItem[],
         totalStockValue: 0,
         totalPurchaseValue: 0
     });
 
-    // Calculate summary stats only on initial data load
+    // Calculate summary stats only when company changes or on initial load
     useEffect(() => {
-        if (InventoryItems && InventoryItems.length > 0) {
-            const zeroItems = InventoryItems.filter(item => item.current_stock <= 0);
-            const lowItems = InventoryItems.filter(item => item.current_stock > 0 && item.current_stock <= (item.low_stock_alert || 10));
-            const positiveItems = InventoryItems.filter(item => item.current_stock > (item.low_stock_alert || 10));
-
+        setIsStatsLoading(true);
+        if (!isInventoryFetched.current &&
+            currentCompanyDetails?._id
+        ) {
             setSummaryStats({
-                zeroStockItems: zeroItems,
                 zeroStockCount: inventoryPageMeta.negative_stock || 0,
                 lowStockCount: inventoryPageMeta.low_stock || 0,
-                lowStockItems: lowItems,
                 positiveStockCount: inventoryPageMeta.positive_stock || 0,
-                positiveStockItems: positiveItems,
                 totalStockValue: inventoryPageMeta.sale_value || 0,
                 totalPurchaseValue: inventoryPageMeta.purchase_value || 0
             });
+            isInventoryFetched.current = true;
+            setIsStatsLoading(false);
         }
-    }, [inventoryPageMeta, InventoryItems, currentCompanyDetails?._id, dispatch]);
+        setIsStatsLoading(false);
+    }, [currentCompanyDetails?._id, dispatch]);
 
     // Destructure values from summaryStats for use in the component
-    const { zeroStockItems, zeroStockCount, lowStockCount, lowStockItems, positiveStockCount, positiveStockItems, totalStockValue, totalPurchaseValue } = summaryStats;
+    const { zeroStockCount, lowStockCount, positiveStockCount, totalStockValue, totalPurchaseValue } = summaryStats;
 
     return (
-        <Container maxWidth="xl" sx={{ mt: 3 }}>
+        <Container maxWidth={false} sx={{ mt: 3, width: '100%' }}>
             {/* Header Section with enhanced styling */}
-            <Card sx={{ mb: 3, p: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.05)', borderRadius: '12px' }}>
+            <Card sx={{ mb: 2, p: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.05)', borderRadius: '12px' }}>
                 <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
                         <Box>
@@ -270,7 +270,7 @@ const Inventory: React.FC = () => {
             </Card>
 
             {/* Tab Navigation for quick filtering */}
-            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
                 <Tabs
                     value={currentTab}
                     onChange={handleTabChange}
@@ -305,8 +305,8 @@ const Inventory: React.FC = () => {
 
 
             {/* Stock Summary Cards with enhanced visuals */}
-            {isLoading ? (
-                <Grid container spacing={1} sx={{ mb: 4 }}>
+            {isStatsLoading ? (
+                <Grid container spacing={1} sx={{ mb: 2 }}>
                     <InventoryStockCardSkeleton color='#ffebee' border='5px solid #c62828' />
                     <InventoryStockCardSkeleton color='hsl(45, 92%, 90%)' border='5px solid hsl(45, 90%, 40%)' />
                     <InventoryStockCardSkeleton color='#e8f5e9' border='5px solid #2e7d32' />
@@ -314,7 +314,7 @@ const Inventory: React.FC = () => {
                     <InventoryStockCardSkeleton color='#fff8e1' border='5px solid #ff9800' />
                 </Grid>
             ) : (
-                <Grid container spacing={1} sx={{ mb: 4 }}>
+                <Grid container spacing={1} sx={{ mb: 2 }}>
                     <Grid item xs={12} sm={6} md={2.4}>
                         <StockCard sx={{
                             bgcolor: '#ffebee',
@@ -453,7 +453,7 @@ const Inventory: React.FC = () => {
             )}
 
             {/* Search and Filter section with enhanced UX */}
-            <Box sx={{ mb: 3 }}>
+            <Box sx={{ mb: 2 }}>
                 <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
                         <TextField
@@ -501,14 +501,14 @@ const Inventory: React.FC = () => {
                         </TextField>
                     </Grid>
 
-                    <Grid item xs={12} md={2}>
+                    <Grid item xs={12} md={1.5}>
                         <TextField
                             select
-                            value={qtyFilter}
+                            value={stock_status}
                             fullWidth
                             label="Stock Status"
                             size="small"
-                            onChange={(e) => handleStateChange('qtyFilter', e.target.value)}
+                            onChange={(e) => handleStateChange('stock_status', e.target.value)}
                         >
                             <MenuItem value="all" sx={{ fontWeight: 600 }}>All Items</MenuItem>
                             <MenuItem value="zero"
@@ -522,7 +522,23 @@ const Inventory: React.FC = () => {
                         </TextField>
                     </Grid>
 
-                    <Grid item xs={12} md={2}>
+                    <Grid item xs={12} md={1}>
+                        <TextField
+                            select
+                            label="Show"
+                            fullWidth
+                            value={limit}
+                            onChange={(e) => handleStateChange('limit', e.target.value)}
+                            size="small"
+                        >
+                            <MenuItem value={5}>5</MenuItem>
+                            <MenuItem value={10}>10</MenuItem>
+                            <MenuItem value={25}>25</MenuItem>
+                            <MenuItem value={50}>50</MenuItem>
+                        </TextField>
+                    </Grid>
+
+                    <Grid item xs={12} md={1.5}>
                         <Button
                             fullWidth
                             variant="outlined"
@@ -549,13 +565,14 @@ const Inventory: React.FC = () => {
                     limit={limit}
                     sortField={sortField}
                     sortOrder={sortOrder}
+                    pageMeta={inventoryPageMeta}
                 />
             </TabPanel>
 
             {/* Inventory Table with enhanced styling */}
             <TabPanel value={currentTab} index={1}>
                 <InventoryTable
-                    stockItems={zeroStockItems}
+                    stockItems={InventoryItems as []}
                     sortRequest={handleSortRequest}
                     isLoading={isLoading}
                     stateChange={handleStateChange}
@@ -563,6 +580,7 @@ const Inventory: React.FC = () => {
                     limit={limit}
                     sortField={sortField}
                     sortOrder={sortOrder}
+                    pageMeta={inventoryPageMeta}
                 />
             </TabPanel>
 
@@ -570,7 +588,7 @@ const Inventory: React.FC = () => {
             {/* Inventory Table with enhanced styling */}
             <TabPanel value={currentTab} index={2}>
                 <InventoryTable
-                    stockItems={lowStockItems}
+                    stockItems={InventoryItems as []}
                     sortRequest={handleSortRequest}
                     isLoading={isLoading}
                     stateChange={handleStateChange}
@@ -578,13 +596,14 @@ const Inventory: React.FC = () => {
                     limit={limit}
                     sortField={sortField}
                     sortOrder={sortOrder}
+                    pageMeta={inventoryPageMeta}
                 />
             </TabPanel>
 
             {/* Inventory Table with enhanced styling */}
             <TabPanel value={currentTab} index={3}>
                 <InventoryTable
-                    stockItems={positiveStockItems}
+                    stockItems={InventoryItems as []}
                     sortRequest={handleSortRequest}
                     isLoading={isLoading}
                     stateChange={handleStateChange}
@@ -592,66 +611,9 @@ const Inventory: React.FC = () => {
                     limit={limit}
                     sortField={sortField}
                     sortOrder={sortOrder}
+                    pageMeta={inventoryPageMeta}
                 />
             </TabPanel>
-
-
-            {/* Bulk Actions Footer */}
-            {selectedRows.length > 0 && (
-                <Fade in={selectedRows.length > 0}>
-                    <Paper
-                        elevation={3}
-                        sx={{
-                            position: 'fixed',
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            p: 2,
-                            zIndex: 1000,
-                            borderRadius: '12px 12px 0 0',
-                            bgcolor: '#f5f5f5',
-                            boxShadow: '0 -4px 20px rgba(0,0,0,0.1)',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                        }}
-                    >
-                        <Typography variant="body1">
-                            <strong>{selectedRows.length}</strong> items selected
-                        </Typography>
-                        <Box sx={{ display: 'flex', gap: 2 }}>
-                            <Button
-                                variant="contained"
-                                color="error"
-                                onClick={() => setSelectedRows([])}
-                                sx={{ minWidth: 100 }}
-                            >
-                                Clear
-                            </Button>
-
-                            <Button
-                                variant="contained"
-                                color="success"
-                                startIcon={<AddCircleOutlineIcon />}
-                                onClick={() => handleBulkAction('stockIn')}
-                                sx={{ minWidth: 120 }}
-                            >
-                                Stock In
-                            </Button>
-
-                            <Button
-                                variant="contained"
-                                color="error"
-                                startIcon={<RemoveCircleOutlineIcon />}
-                                onClick={() => handleBulkAction('stockOut')}
-                                sx={{ minWidth: 120 }}
-                            >
-                                Stock Out
-                            </Button>
-                        </Box>
-                    </Paper>
-                </Fade>
-            )}
 
             {/* Side Modal for Stock In/Out actions */}
             {/* <SideModal drawer={drawer} setDrawer={setDrawer} /> */}

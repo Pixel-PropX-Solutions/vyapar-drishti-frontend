@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 import { useState } from "react";
-import { DocumentUploadLoader } from "./Loader";
+import { DocumentUploadLoader } from "./loaders/Loader";
 
 // Usage example component
 const DocumentUploadExample: React.FC = () => {

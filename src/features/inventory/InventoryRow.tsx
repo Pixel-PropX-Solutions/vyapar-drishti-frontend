@@ -116,21 +116,23 @@ export const InventoryRow = (props: InventoryRowRowProps) => {
                 </CustomTableCell>
                 <CustomTableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        {row?.current_stock <= 0 ? (
+                        {row?.current_stock <= 0 && (
                             <Chip
                                 size="small"
                                 label={`${row?.current_stock} ${row?.unit}`}
                                 color="error"
                                 sx={{ fontWeight: 'bold' }}
                             />
-                        ) : row?.current_stock < (row?.low_stock_alert || 10) ? (
+                        )}
+                        {(row?.current_stock > 0 && row?.current_stock < (row?.low_stock_alert)) && (
                             <Chip
                                 size="small"
                                 label={`${row?.current_stock} ${row?.unit}`}
                                 color="warning"
                                 sx={{ fontWeight: 'bold' }}
                             />
-                        ) : (
+                        )}
+                        {row?.current_stock > (row?.low_stock_alert) && (
                             <Chip
                                 size="small"
                                 label={`${row?.current_stock} ${row?.unit}`}

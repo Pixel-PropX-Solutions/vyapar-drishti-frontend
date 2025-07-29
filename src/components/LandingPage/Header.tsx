@@ -44,8 +44,8 @@ const Header: React.FC = () => {
 
     return (
         <>
-            <AppBar position="static" color="transparent" elevation={0}>
-                <Container maxWidth="xl" sx={{ borderBottom:'1px solid #000' }}>
+            <AppBar position="static" color="transparent" elevation={0} sx={{ borderBottom: '1px solid #000' }}>
+                <Container maxWidth="xl" >
                     <Toolbar disableGutters>
                         <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}
                             onClick={() => navigate("/")}

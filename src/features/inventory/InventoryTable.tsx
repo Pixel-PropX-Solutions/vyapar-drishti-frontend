@@ -9,12 +9,8 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    TextField,
     Typography,
     Tooltip,
-    MenuItem,
-    Pagination,
-    FormControl,
     Card,
     TableSortLabel,
     Skeleton,
@@ -24,10 +20,9 @@ import { styled, useTheme } from '@mui/material/styles';
 // Icons
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import InventoryIcon from '@mui/icons-material/Inventory';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
-import { SortField, SortOrder, InventoryItem } from '@/utils/types';
+import { SortField, SortOrder, InventoryItem, PageMeta } from '@/utils/types';
 import { InventoryRow } from './InventoryRow';
+import { BottomPagination } from '@/common/modals/BottomPagination';
 
 // Styled Components with enhanced visuals
 const CustomTableCell = styled(TableCell)(({ theme }) => ({
@@ -43,183 +38,130 @@ interface InventoryTableProps {
     limit: number;
     sortField: SortField;
     sortOrder: SortOrder;
-    pageChange?: (_: React.ChangeEvent<unknown>, newPage: number) => void;
+    pageMeta: PageMeta;
+    pageChange: (event: React.ChangeEvent<unknown>, page: number) => void;
 }
 
 
 const InventoryTable = (props: InventoryTableProps) => {
     const theme = useTheme();
-    const { InventoryItems, pageMeta } = useSelector((state: RootState) => state.inventory);
-    const { stockItems, stateChange, isLoading, limit, sortField, sortOrder, sortRequest, pageChange } = props;
+    const { stockItems, pageMeta, isLoading, limit, sortField, sortOrder, sortRequest, pageChange } = props;
 
 
     return (
-        <Card sx={{ mb: 3, borderRadius: '12px', overflow: 'hidden' }}>
-            <TableContainer component={Paper} elevation={0}>
-                {isLoading ? (
-                    <Box sx={{ p: 2 }}>
-                        {[1, 2, 3, 4, 5].map((item) => (
-                            <Box key={item} sx={{ display: 'flex', my: 2, px: 2 }}>
-                                {/* <Skeleton variant="rectangular" width={24} height={30} sx={{ mr: 2 }} /> */}
-                                <Skeleton variant="text" width="40%" height={30} sx={{ mr: 2 }} />
-                                <Skeleton variant="text" width="10%" height={30} sx={{ mr: 2 }} />
-                                <Skeleton variant="text" width="15%" height={30} sx={{ mr: 2 }} />
-                                <Skeleton variant="text" width="15%" height={30} sx={{ mr: 2 }} />
-                                <Skeleton variant="text" width="20%" height={30} />
-                            </Box>
-                        ))}
-                    </Box>
-                ) : stockItems?.length === 0 ? (
-                    <Box sx={{ p: 6, textAlign: 'center' }}>
-                        <InventoryIcon sx={{ fontSize: 60, color: 'text.secondary', mb: 2 }} />
-                        <Typography variant="h6" gutterBottom>
-                            No inventory items found
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                            Try adjusting your filters or add new items to your inventory
-                        </Typography>
-                        <Button
-                            variant="contained"
-                            startIcon={<AddCircleOutlineIcon />}
-                            color="primary"
-                        >
-                            Add New Item
-                        </Button>
-                    </Box>
-                ) : (
-                    <Table sx={{ minWidth: 650 }}>
-                        <TableHead>
-                            <TableRow sx={{ backgroundColor: theme.palette.mode === 'light' ? '#f5f5f5' : 'rgba(25, 118, 210, 0.08)' }}>
-                                {/* <CustomTableCell padding="checkbox">
-                                    <input
-                                        type="checkbox"
-                                        checked={
-                                            (wareHouseProduct || []).length > 0 &&
-                                            selectedRows.length === (wareHouseProduct || []).length
-                                        }
-                                        onChange={handleSelectAll}
-                                        style={{
-                                            cursor: 'pointer',
-                                            width: '18px',
-                                            height: '18px',
-                                            accentColor: '#1976d2',
-                                            borderRadius: '3px',
-                                            border: '1.5px solid #c4c4c4',
-                                            outline: 'none',
-                                            transition: 'all 0.2s ease-in-out',
-                                            verticalAlign: 'middle',
-                                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
-                                        }}
-                                    />
-                                </CustomTableCell> */}
-                                <CustomTableCell sx={{ fontWeight: '600' }}>
-                                    <Tooltip title="Sort by Product Name" arrow>
-                                        <TableSortLabel
-                                            active={sortField === "product_name"}
-                                            direction={sortField === "product_name" ? sortOrder : "asc"}
-                                            onClick={() => sortRequest("product_name")}
-                                        >
-                                            Product Name
-                                        </TableSortLabel>
-                                    </Tooltip>
-                                </CustomTableCell>
-                                <CustomTableCell sx={{ fontWeight: '600', whiteSpace: 'nowrap' }}>
-                                    <Tooltip title="Sort by Quantity" arrow>
-                                        <TableSortLabel
-                                            active={sortField === "available_quantity"}
-                                            direction={sortField === "available_quantity" ? sortOrder : "asc"}
-                                            onClick={() => sortRequest("available_quantity")}
-                                        >
-                                            Qty
-                                        </TableSortLabel>
-                                    </Tooltip>
-                                </CustomTableCell>
-                                <CustomTableCell sx={{ fontWeight: '600', whiteSpace: 'nowrap' }}>
-                                    <Tooltip title="Sort by Purchase Price" arrow>
-                                        <TableSortLabel
-                                            active={sortField === "available_product_price"}
-                                            direction={sortField === "available_product_price" ? sortOrder : "asc"}
-                                            onClick={() => sortRequest("available_product_price")}
-                                        >
-                                            Purchase Rate
-                                        </TableSortLabel>
-                                    </Tooltip>
-                                </CustomTableCell>
-                                <CustomTableCell sx={{ fontWeight: '600', whiteSpace: 'nowrap' }}>
-                                    Sale Rate
-                                </CustomTableCell>
-                                <CustomTableCell sx={{ fontWeight: '600' }}>
-                                    <Tooltip title="Sort by Last Updated Date" arrow>
-                                        <TableSortLabel
-                                            active={sortField === "created_at"}
-                                            direction={sortField === "created_at" ? sortOrder : "asc"}
-                                            onClick={() => sortRequest("created_at")}
-                                        >
-                                            Last Restocked
-                                        </TableSortLabel>
-                                    </Tooltip>
-                                </CustomTableCell>
-                                <CustomTableCell align="center" sx={{ fontWeight: '600', whiteSpace: 'nowrap' }}>
-                                    Actions
-                                </CustomTableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {stockItems?.map((item) => (
-                                <InventoryRow
-                                    key={item._id}
-                                    row={item}
-                                />
+        <>
+            <Card sx={{ mb: 1, borderRadius: '12px', overflow: 'hidden' }}>
+                <TableContainer component={Paper} elevation={0}>
+                    {isLoading ? (
+                        <Box sx={{ p: 2 }}>
+                            {[1, 2, 3, 4, 5].map((item) => (
+                                <Box key={item} sx={{ display: 'flex', my: 2, px: 2 }}>
+                                    {/* <Skeleton variant="rectangular" width={24} height={30} sx={{ mr: 2 }} /> */}
+                                    <Skeleton variant="text" width="40%" height={30} sx={{ mr: 2 }} />
+                                    <Skeleton variant="text" width="10%" height={30} sx={{ mr: 2 }} />
+                                    <Skeleton variant="text" width="15%" height={30} sx={{ mr: 2 }} />
+                                    <Skeleton variant="text" width="15%" height={30} sx={{ mr: 2 }} />
+                                    <Skeleton variant="text" width="20%" height={30} />
+                                </Box>
                             ))}
-                        </TableBody>
-                    </Table>
-                )}
-            </TableContainer>
-
-            {/* Enhanced pagination with better information */}
-            {!isLoading && Array.isArray(InventoryItems) && InventoryItems.length > 0 && (
-                <Box
-                    sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        p: 2,
-                    }}
-                >
-                    <Typography variant="body2" color="text.secondary">
-                        {`Showing ${(pageMeta?.page - 1) * limit + 1}-${Math.min(
-                            pageMeta?.page * limit,
-                            pageMeta?.total
-                        )} of ${pageMeta?.total} items`}
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <FormControl size="small" sx={{ width: 80 }}>
-                            <TextField
-                                select
-                                label="Show"
-                                value={limit}
-                                onChange={(e) => stateChange('limit', e.target.value)}
-                                size="small"
+                        </Box>
+                    ) : stockItems?.length === 0 ? (
+                        <Box sx={{ p: 6, textAlign: 'center' }}>
+                            <InventoryIcon sx={{ fontSize: 60, color: 'text.secondary', mb: 2 }} />
+                            <Typography variant="h6" gutterBottom>
+                                No inventory items found
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                                Try adjusting your filters or add new items to your inventory
+                            </Typography>
+                            <Button
+                                variant="contained"
+                                startIcon={<AddCircleOutlineIcon />}
+                                color="primary"
                             >
-                                <MenuItem value={5}>5</MenuItem>
-                                <MenuItem value={10}>10</MenuItem>
-                                <MenuItem value={25}>25</MenuItem>
-                                <MenuItem value={50}>50</MenuItem>
-                            </TextField>
-                        </FormControl>
-                        <Pagination
-                            count={Math.ceil(pageMeta?.total / limit)}
-                            page={pageMeta?.page}
-                            onChange={pageChange}
-                            color="primary"
-                            showFirstButton
-                            showLastButton
-                            size="small"
-                        />
-                    </Box>
-                </Box>
-            )}
-        </Card>
+                                Add New Item
+                            </Button>
+                        </Box>
+                    ) : (
+                        <Table sx={{ minWidth: 650 }}>
+                            <TableHead>
+                                <TableRow sx={{ backgroundColor: theme.palette.mode === 'light' ? '#f5f5f5' : 'rgba(25, 118, 210, 0.08)' }}>
+                                    <CustomTableCell sx={{ fontWeight: '600' }}>
+                                        <Tooltip title="Sort by Product Name" arrow>
+                                            <TableSortLabel
+                                                active={sortField === "product_name"}
+                                                direction={sortField === "product_name" ? sortOrder : "asc"}
+                                                onClick={() => sortRequest("product_name")}
+                                            >
+                                                Product Name
+                                            </TableSortLabel>
+                                        </Tooltip>
+                                    </CustomTableCell>
+                                    <CustomTableCell sx={{ fontWeight: '600', whiteSpace: 'nowrap' }}>
+                                        <Tooltip title="Sort by Quantity" arrow>
+                                            <TableSortLabel
+                                                active={sortField === "available_quantity"}
+                                                direction={sortField === "available_quantity" ? sortOrder : "asc"}
+                                                onClick={() => sortRequest("available_quantity")}
+                                            >
+                                                Qty
+                                            </TableSortLabel>
+                                        </Tooltip>
+                                    </CustomTableCell>
+                                    <CustomTableCell sx={{ fontWeight: '600', whiteSpace: 'nowrap' }}>
+                                        <Tooltip title="Sort by Purchase Price" arrow>
+                                            <TableSortLabel
+                                                active={sortField === "available_product_price"}
+                                                direction={sortField === "available_product_price" ? sortOrder : "asc"}
+                                                onClick={() => sortRequest("available_product_price")}
+                                            >
+                                                Purchase Rate
+                                            </TableSortLabel>
+                                        </Tooltip>
+                                    </CustomTableCell>
+                                    <CustomTableCell sx={{ fontWeight: '600', whiteSpace: 'nowrap' }}>
+                                        Sale Rate
+                                    </CustomTableCell>
+                                    <CustomTableCell sx={{ fontWeight: '600' }}>
+                                        <Tooltip title="Sort by Last Updated Date" arrow>
+                                            <TableSortLabel
+                                                active={sortField === "created_at"}
+                                                direction={sortField === "created_at" ? sortOrder : "asc"}
+                                                onClick={() => sortRequest("created_at")}
+                                            >
+                                                Last Restocked
+                                            </TableSortLabel>
+                                        </Tooltip>
+                                    </CustomTableCell>
+                                    <CustomTableCell align="center" sx={{ fontWeight: '600', whiteSpace: 'nowrap' }}>
+                                        Actions
+                                    </CustomTableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {stockItems?.map((item) => (
+                                    <InventoryRow
+                                        key={item._id}
+                                        row={item}
+                                    />
+                                ))}
+                            </TableBody>
+                        </Table>
+                    )}
+                </TableContainer>
+
+            </Card>
+            {/* Enhanced pagination with better information */}
+            <BottomPagination
+                total={pageMeta.total}
+                item="items"
+                page={pageMeta?.page}
+                metaPage={pageMeta.page}
+                rowsPerPage={limit}
+                onChange={pageChange}
+            />
+        </>
+
     );
 };
 

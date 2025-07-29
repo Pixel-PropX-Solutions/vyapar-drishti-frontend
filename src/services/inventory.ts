@@ -52,6 +52,7 @@ export const getInventoryStockItems = createAsyncThunk(
       company_id,
       search,
       category,
+      stock_status,
       page_no,
       limit,
       sortField,
@@ -60,6 +61,7 @@ export const getInventoryStockItems = createAsyncThunk(
       company_id: string;
       search: string;
       category: string;
+      stock_status: string;
       page_no: number;
       limit: number;
       sortField: string;
@@ -68,17 +70,8 @@ export const getInventoryStockItems = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      console.log("Parameters", {
-        company_id,
-        search,
-        category,
-        page_no,
-        limit,
-        sortField,
-        sortOrder
-      });
       const response = await userApi.get(
-        `/product/view/all/product?company_id=${company_id}&search=${search}${category === 'All' ? "" : "&category=" + category}&page_no=${page_no}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"
+        `/product/view/all/product?company_id=${company_id}&search=${search}${category === 'all' ? "" : "&category=" + category}${stock_status === 'all' ? "" : "&stock_status=" + stock_status}&page_no=${page_no}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"
         }`
       );
 

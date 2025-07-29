@@ -87,6 +87,7 @@ export const getCurrentUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await userApi.get('/auth/current/user',);
+      console.log("Current user response:", response);
       const user = response.data.data[0];
 
       if (user) {

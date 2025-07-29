@@ -311,6 +311,7 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
     };
 
     useEffect(() => {
+        console.log("CompanyEditingModal mounted", company);
         if (open && company) {
             setData({
                 pinCode: company.pinCode || '',

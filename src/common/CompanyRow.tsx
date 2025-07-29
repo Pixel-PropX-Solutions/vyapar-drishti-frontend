@@ -113,7 +113,7 @@ export const CompanyRow: React.FC<ProductRowProps> = ({ com, onDelete, onEdit, o
                                 >
                                     {com.name}
                                 </Typography>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                               {com.mailing_name && <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                     <Chip
                                         icon={<AlternateEmail />}
                                         label={com.mailing_name || 'Uncategorized'}
@@ -128,7 +128,7 @@ export const CompanyRow: React.FC<ProductRowProps> = ({ com, onDelete, onEdit, o
                                             color: theme.palette.primary.main,
                                         }}
                                     />
-                                </Box>
+                                </Box>}
                             </Box>
                         </Box>
                     </TableCell>
@@ -146,22 +146,16 @@ export const CompanyRow: React.FC<ProductRowProps> = ({ com, onDelete, onEdit, o
                             >
                                 {com.phone.code || '+91'}{" "} {com.phone.number || 'N/A'}
                             </Typography>}
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Chip
-                                    icon={<Email />}
-                                    label={com.email || 'No Email'}
-                                    size="small"
-                                    variant="outlined"
-                                    sx={{
-                                        fontSize: '0.7rem',
-                                        height: '20px',
-                                        borderRadius: '10px',
-                                        bgcolor: alpha(theme.palette.primary.main, 0.08),
-                                        borderColor: alpha(theme.palette.primary.main, 0.2),
-                                        color: theme.palette.primary.main,
-                                    }}
-                                />
-                            </Box>
+                            {com.email && <Typography
+                                variant="h6"
+                                sx={{
+                                    fontWeight: 700,
+                                    fontSize: '0.8rem',
+                                    color: theme.palette.text.primary,
+                                }}
+                            >
+                                {com.email}
+                            </Typography>}
                         </Box>
                     </TableCell>
 

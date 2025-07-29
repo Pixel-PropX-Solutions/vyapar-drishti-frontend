@@ -120,7 +120,7 @@ export const deleteInventoryGroup = createAsyncThunk(
     "delete/inventory/group",
     async (id: string, { rejectWithValue }) => {
         try {
-            const response = await userApi.delete(`/category/delete/category/${id}`);
+            const response = await userApi.delete(`/user/delete/group/${id}`);
 
             if (response.data.success === true) {
                 return;

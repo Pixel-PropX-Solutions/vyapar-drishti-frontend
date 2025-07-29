@@ -172,7 +172,6 @@ export default function UpdateSalePurchase() {
         }));
     };
 
-
     const handleChange = (field: string, value: any) => {
         setData((prevState) => ({
             ...prevState,
@@ -267,7 +266,7 @@ export default function UpdateSalePurchase() {
                 vouchar_id: data._id || '',
                 user_id: user._id,
                 company_id: currentCompany?._id || '',
-                date: data.date,
+                date: date.toISOString().split('T')[0],
                 voucher_type: data.voucher_type,
                 voucher_type_id: invoiceType_id || '',
                 voucher_number: data.voucher_number,
@@ -415,8 +414,7 @@ export default function UpdateSalePurchase() {
                     amount: item.amount || 0.0,
                 })),
             });
-
-
+            setDate(new Date(invoiceData.date));
         }
     }, [invoiceData]);
 
