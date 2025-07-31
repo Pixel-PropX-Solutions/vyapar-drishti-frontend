@@ -60,8 +60,8 @@ const Invoices: React.FC = () => {
   const [downloadHtml, setDownloadHtml] = useState<string>('');
   const [customerName, setCustomerName] = useState<string>('');
   const { invoices, loading, pageMeta, invoiceGroups } = useSelector((state: RootState) => state.invoice);
-  const { currentCompany, user } = useSelector((state: RootState) => state.auth);
-  const currentCompanyDetails = user?.company?.find((c: any) => c._id === user.user_settings.current_company_id);
+  const { currentCompany, user, current_company_id } = useSelector((state: RootState) => state.auth);
+  const currentCompanyDetails = user?.company?.find((c: any) => c._id === current_company_id);
 
   const [state, setState] = useState({
     searchQuery: "",

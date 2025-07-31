@@ -2,15 +2,13 @@ import React, { useCallback, useState } from "react";
 import {
     Box,
     Button,
-    Checkbox,
     Container,
     CssBaseline,
-    FormControlLabel,
     TextField,
     Typography,
     Grid,
     InputAdornment,
-    useTheme,
+    // useTheme,
 } from "@mui/material";
 import { Person, Lock, Visibility, VisibilityOff } from "@mui/icons-material";
 import Logo from "../../../assets/Logo.png";
@@ -29,9 +27,9 @@ const ForgotPasswordForm: React.FC = () => {
     const email = searchParams.get('email');
 
     const dispatch = useDispatch<AppDispatch>();
-    const theme = useTheme();
+    // const theme = useTheme();
     const { authState, signupData } = useSelector((state: RootState) => state.auth);
-    const pathName = window.location.pathname;
+    // const pathName = window.location.pathname;
     const [data, setData] = useState({
         email: email || "",
         password: "",

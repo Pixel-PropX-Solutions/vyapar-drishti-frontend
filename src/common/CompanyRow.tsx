@@ -23,7 +23,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { GetCompany } from "@/utils/types";
-import { AlternateEmail, Email } from "@mui/icons-material";
+import { AlternateEmail } from "@mui/icons-material";
 
 interface ProductRowProps {
     com: GetCompany;

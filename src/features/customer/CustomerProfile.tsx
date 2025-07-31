@@ -51,8 +51,8 @@ import toast from "react-hot-toast";
 
 const CustomerProfile: React.FC = () => {
     const { customer, loading, customerInvoices, customerInvoicesMeta } = useSelector((state: RootState) => state.customersLedger);
-    const { currentCompany, user } = useSelector((state: RootState) => state.auth);
-    const currentCompanyDetails = user?.company?.find((c: any) => c._id === user.user_settings.current_company_id);
+    const { currentCompany, user, current_company_id } = useSelector((state: RootState) => state.auth);
+    const currentCompanyDetails = user?.company?.find((c: any) => c._id === current_company_id);
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const { customer_id } = useParams();
@@ -62,7 +62,7 @@ const CustomerProfile: React.FC = () => {
 
     const fetchCustomersInvoices = useCallback(async () => {
         dispatch(getCustomerInvoices({
-            searchQuery,
+            searchQuery: debouncedQuery,
             company_id: currentCompany?._id || "",
             customer_id: customer_id || "",
             pageNumber: page,
@@ -73,7 +73,7 @@ const CustomerProfile: React.FC = () => {
             start_date: new Date(startDate).toLocaleDateString(),
             end_date: new Date(endDate).toLocaleDateString(),
         }));
-    }, [currentCompany?._id, customer_id, dispatch, endDate, page, rowsPerPage, searchQuery, sortField, sortOrder, startDate, type]);
+    }, [currentCompany?._id, customer_id, dispatch, endDate, page, rowsPerPage, debouncedQuery, sortField, sortOrder, startDate, type]);
 
     useEffect(() => {
         if (customer_id) {
@@ -89,7 +89,7 @@ const CustomerProfile: React.FC = () => {
     useEffect(() => {
         const handler = setTimeout(() => {
             setDebouncedQuery(searchQuery);
-        }, 500);
+        }, 300);
 
         return () => {
             clearTimeout(handler);

@@ -13,9 +13,9 @@ import { AppDispatch, RootState } from '@/store/store';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import { useEffect, useState, useRef } from 'react';
 import CompanyEditingModal from '@/common/modals/CompanyEditingModal';
-import { getCurrentCompany, getCurrentUser } from '@/services/auth';
+import { getCurrentCompany, getCurrentUser, switchCompany } from '@/services/auth';
 import { getAllCompanies } from '@/services/company';
-import { updateUserSettings } from '@/services/user';
+// import { updateUserSettings } from '@/services/user';
 import { getAvatarColor, getInitials } from '@/utils/functions';
 import toast from 'react-hot-toast';
 
@@ -36,7 +36,7 @@ export default function SelectContent() {
   const dispatch = useDispatch<AppDispatch>();
   const [isCompanyEditing, setIsCompanyEditing] = useState(false);
   const user = useSelector((state: RootState) => state.auth.user);
-  const currentCompany = useSelector((state: RootState) => state.auth.currentCompany);
+  const { current_company_id } = useSelector((state: RootState) => state.auth);
   const [detail, setDetails] = useState(
     {
       name: '',
@@ -45,14 +45,14 @@ export default function SelectContent() {
   const selectRef = useRef<HTMLButtonElement | null>(null);
 
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>(
-    (user?.company?.length ?? 0) === 0 ? 'Add Company' : (user?.user_settings?.current_company_id || "")
+    (user?.company?.length ?? 0) === 0 ? 'Add Company' : (current_company_id || "")
   );
 
   const [selectOpen, setSelectOpen] = useState(false);
 
   useEffect(() => {
-    setSelectedCompanyId((user?.company?.length ?? 0) === 0 ? 'Add Company' : (user?.user_settings?.current_company_id || ""));
-  }, [user?.user_settings?.current_company_id, user?.company]);
+    setSelectedCompanyId((user?.company?.length ?? 0) === 0 ? 'Add Company' : (current_company_id || ""));
+  }, [current_company_id, user?.company]);
 
   const handleChange = (event: SelectChangeEvent) => {
     const value = event.target.value as string;
@@ -69,7 +69,7 @@ export default function SelectContent() {
   }, [dispatch]);
 
   const handleChangeCompany = async (com: string) => {
-    dispatch(updateUserSettings({ id: user?.user_settings?._id || '', data: { current_company_id: com } }))
+    dispatch(switchCompany(com))
       .unwrap().then((response) => {
         if (response) {
           dispatch(getCurrentUser());
@@ -82,16 +82,12 @@ export default function SelectContent() {
   }
 
   useEffect(() => {
-    setDetails({
-      name: user?.name?.first + " " + user?.name?.last || 'User',
-      company: currentCompany
-        ? currentCompany._id
-        : (user?.company?.length ?? 0) > 0
-          ? user?.company?.find((c :any) => c._id === user.user_settings.current_company_id)?.company_id || ''
-          : 'Add Company'
-    })
-
-  }, [currentCompany, user]);
+    setSelectedCompanyId(
+      (user?.company?.length ?? 0) === 0
+        ? 'Add Company'
+        : current_company_id || ""
+    );
+  }, [current_company_id, user?.company]);
 
   return (
     <>

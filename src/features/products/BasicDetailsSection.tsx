@@ -26,7 +26,7 @@ import { units } from '@/internals/data/units';
 
 interface BasicDetailsSectionProps {
     data: FormCreateProduct;
-    handleChange: (field: keyof FormCreateProduct, value: string | boolean) => void;
+    handleChange: (field: keyof FormCreateProduct, value: string | boolean | number) => void;
     validationErrors: Record<string, string>;
     theme: Theme;
     selectedUnitOption: { unit_name: string; value: string; id: string; } | null;

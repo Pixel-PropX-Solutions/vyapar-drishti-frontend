@@ -77,7 +77,7 @@ const ProfilePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { mode, setMode } = useColorScheme();
 
-  const { user } = useSelector((state: RootState) => state.auth)
+  const { user, current_company_id } = useSelector((state: RootState) => state.auth)
   const { companies } = useSelector((state: RootState) => state.company)
 
   const [isUserEditing, setIsUserEditing] = useState(false);
@@ -160,7 +160,7 @@ const ProfilePage: React.FC = () => {
     fetchCompanyData();
   }, [fetchCompanyData]);
 
-  const currentCompanyDetails = user?.company?.find((c: any) => c._id === user.user_settings.current_company_id);
+  const currentCompanyDetails = user?.company?.find((c: any) => c._id === current_company_id);
 
   return (
     <Box

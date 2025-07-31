@@ -22,10 +22,11 @@ import {
     ProductionQuantityLimitsOutlined,
 } from '@mui/icons-material';
 import { CategoryLists, FormCreateProduct, InventoryGroupList } from '@/utils/types';
+import { units } from '@/internals/data/units';
 
 interface AdditionalInfoSectionProps {
     data: FormCreateProduct;
-    handleChange: (field: keyof FormCreateProduct, value: string | boolean) => void;
+    handleChange: (field: keyof FormCreateProduct, value: string | boolean | number) => void;
     validationErrors: Record<string, string>;
     theme: Theme;
     categoryLists: CategoryLists[];
@@ -77,15 +78,29 @@ const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({
         handleChange('category', newValue?.value || '');
         handleChange('category_id', newValue?.id || '');
     };
+
+
     const handleNumberChange = (field: keyof FormCreateProduct) => (
         event: React.ChangeEvent<HTMLInputElement>
     ) => {
         const value = event.target.value;
-        // Allow empty string or valid numbers (including decimals)
-        if (value === '' || /^\d*\.?\d*$/.test(value)) {
-            handleChange(field, value === '' ? '' : (parseFloat(value).toString() || '0'));
+        const unitType = units.find(unit => unit.value === data?.unit)?.si_representation;
+
+        let quantity = value;
+        if (unitType === 'integer') {
+            // Only allow whole numbers
+            const intVal = Math.max(0, Math.floor(Number(quantity)));
+            quantity = intVal.toString();
+        } else if (unitType === 'decimal') {
+            // Allow up to two decimals
+            let floatVal = Math.max(0, parseFloat(quantity));
+            floatVal = Math.round(floatVal * 100) / 100;
+            quantity = floatVal.toFixed(2);
         }
+        handleChange(field, Number(quantity));
     };
+
+
     const handleGroupChange = (_: React.SyntheticEvent, newValue: { label: string; value: string; id: string; } | null) => {
         if (newValue?.value === '__add_new__') {
             setOpenGroupModal(true);
@@ -237,7 +252,7 @@ const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({
 
 
                             <TextField
-                                label="Product Alias Name"
+                                label="Alternate Name"
                                 placeholder="e.g. PROD-1234"
                                 variant="outlined"
                                 fullWidth
@@ -329,7 +344,7 @@ const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({
                                         endAdornment: data.unit && (
                                             <InputAdornment position="end">
                                                 <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                                                    {data.unit_id || data.unit}
+                                                    {data.unit}
                                                 </Typography>
                                             </InputAdornment>
                                         )
@@ -358,8 +373,11 @@ const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({
                                     placeholder="Enter cost per unit"
                                     value={data.opening_rate || ''}
                                     onChange={handleNumberChange('opening_rate')}
-                                    type="text"
-                                    inputMode="decimal"
+                                    type="number"
+                                    inputProps={{
+                                        step: units.find(unit => unit.value === data.unit)?.si_representation === 'integer' ? 1 : 0.01,
+                                        min: 0
+                                    }}
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">
@@ -369,7 +387,7 @@ const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({
                                         endAdornment: (
                                             <InputAdornment position="end">
                                                 <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                                                    per {data.unit_id || data.unit || 'unit'}
+                                                    per {data.unit || 'unit'}
                                                 </Typography>
                                             </InputAdornment>
                                         )

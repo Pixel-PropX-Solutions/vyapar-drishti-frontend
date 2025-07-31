@@ -24,7 +24,7 @@ import { FormCreateProduct } from '@/utils/types';
 
 interface AdvancedSettingsSectionProps {
     data: FormCreateProduct;
-    handleChange: (field: keyof FormCreateProduct, value: string | boolean) => void;
+    handleChange: (field: keyof FormCreateProduct, value: string | boolean | number) => void;
     validationErrors: Record<string, string>;
     theme: Theme;
     showGstFields: boolean;

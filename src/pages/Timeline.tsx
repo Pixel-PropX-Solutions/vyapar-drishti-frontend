@@ -32,16 +32,20 @@ import { getStockMovement } from '@/services/inventory';
 import { formatDate } from '@/utils/functions';
 import { SortField, SortOrder } from '@/utils/types';
 import { BottomPagination } from '@/common/modals/BottomPagination';
+import { TimelineRowSkeleton } from '@/common/skeletons/TimelineRowSkeleton';
 
 const Timeline: React.FC = () => {
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
-    const { stockMovement, pageMeta } = useSelector((state: RootState) => state.inventory);
+    const { stockMovement, timelinePageMeta } = useSelector((state: RootState) => state.inventory);
+    const [debounceQuery, setDebounceQuery] = useState<string>('');
+    const [loading, setLoading] = useState<boolean>(false);
     const [data, setData] = useState({
         search: '',
         category: 'All-Categories',
         state: '',
         movement_type: 'all',
+        party_name: 'all',
         page_no: 1,
         limit: 10,
         startDate: new Date('2025-04-01'),
@@ -50,7 +54,7 @@ const Timeline: React.FC = () => {
         sortOrder: "desc" as SortOrder,
     });
 
-    const { search, movement_type, page_no, limit, startDate, endDate, sortField, sortOrder } =
+    const { search, movement_type, page_no, limit, startDate, party_name, endDate, sortField, sortOrder } =
         data;
 
     const handleSortRequest = (field: SortField) => {
@@ -62,21 +66,38 @@ const Timeline: React.FC = () => {
         }));
     };
 
-    // Reset filters
-    const handleResetFilters = useCallback(() => {
-        setData({
-            search: '',
-            category: '',
-            state: '',
-            movement_type: 'all',
-            page_no: 1,
-            limit: 10,
-            startDate: new Date('2025-04-01'),
-            endDate: new Date('2026-03-31'),
-            sortField: "created_at" as SortField,
-            sortOrder: "asc" as SortOrder,
+    const fetchMovement = useCallback(async () => {
+        setLoading(true);
+        dispatch(
+            getStockMovement({
+                search: debounceQuery,
+                movement_type: movement_type == 'all' ? '' : movement_type,
+                party_name: party_name,
+                page_no: page_no,
+                limit: limit,
+                startDate: startDate.toISOString(),
+                endDate: endDate.toISOString(),
+                sortField: sortField,
+                sortOrder: sortOrder,
+            })
+        ).unwrap().then(() => {
+            setLoading(false);
+        }).catch((error: any) => {
+            setLoading(false);
+            console.error("Error fetching stock movement:", error);
         });
-    }, []);
+    }, [dispatch, debounceQuery, movement_type, page_no, limit, startDate, party_name, endDate, sortField, sortOrder]);
+
+    // Debounce search input
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebounceQuery(search);
+        }, 300);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [search]);
 
     const handleChangePage = (
         _: React.ChangeEvent<unknown>,
@@ -96,23 +117,12 @@ const Timeline: React.FC = () => {
     };
 
     useEffect(() => {
-        const fetchMovement = async () => {
-            dispatch(
-                getStockMovement({
-                    search: search,
-                    movement_type: movement_type == 'all' ? '' : movement_type,
-                    page_no: page_no,
-                    limit: limit,
-                    startDate: startDate.toISOString(),
-                    endDate: endDate.toISOString(),
-                    sortField: sortField,
-                    sortOrder: sortOrder,
-                })
-            );
-        };
-
         fetchMovement();
-    }, [dispatch, endDate, limit, movement_type, page_no, search, sortField, sortOrder, startDate]);
+    }, []);
+
+    useEffect(() => {
+        fetchMovement();
+    }, [dispatch, endDate, limit, movement_type, page_no, debounceQuery, sortField, sortOrder, startDate, fetchMovement]);
 
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -124,7 +134,7 @@ const Timeline: React.FC = () => {
                                 Inventory Timeline
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                Manage your stock, orders, and inventory levels
+                                View all stock movements including purchases, sales, and adjustments.
                             </Typography>
                         </Grid>
                     </CardContent>
@@ -212,18 +222,21 @@ const Timeline: React.FC = () => {
                                     <MenuItem value="Purchase">Purchase</MenuItem>
                                 </TextField>
                             </Grid>
-                            <Grid item xs={12} md={1}>
+                            <Grid item xs={12} md={2}>
                                 <TextField
                                     select
-                                    value={movement_type}
+                                    value={party_name}
                                     fullWidth
                                     label="Party Name"
                                     size="small"
-                                    onChange={(e) => handleStateChange('movement_type', e.target.value)}
+                                    onChange={(e) => handleStateChange('party_name', e.target.value)}
                                 >
-                                    <MenuItem value="all" sx={{ fontWeight: 600 }}>All </MenuItem>
-                                    <MenuItem value="Sales">Sales</MenuItem>
-                                    <MenuItem value="Purchase">Purchase</MenuItem>
+                                    <MenuItem value="all" sx={{ fontWeight: 600 }}>All Parties </MenuItem>
+                                    {
+                                        timelinePageMeta.unique.map((party: string) => (
+                                            <MenuItem key={party} value={party}>{party}</MenuItem>
+                                        ))
+                                    }
                                 </TextField>
                             </Grid>
                             <Grid item xs={12} md={1}>
@@ -241,13 +254,12 @@ const Timeline: React.FC = () => {
                                     <MenuItem value={100}>100</MenuItem>
                                 </TextField>
                             </Grid>
-                            <Grid item xs={12} md={1.5}>
+                            <Grid item xs={12} md={.5}>
                                 <Button
                                     variant="outlined"
                                     color="primary"
                                     size="medium"
-                                    startIcon={<RefreshOutlined />}
-                                    onClick={handleResetFilters}
+                                    onClick={() => fetchMovement()}
                                     sx={{
                                         fontWeight: '600',
                                         py: 1,
@@ -257,7 +269,7 @@ const Timeline: React.FC = () => {
                                         borderColor: '#1976d2'
                                     }}
                                 >
-                                    Reset Filters
+                                    <RefreshOutlined />
                                 </Button>
                             </Grid>
                         </Stack>
@@ -312,56 +324,72 @@ const Timeline: React.FC = () => {
                                         </TableSortLabel>
                                     </Tooltip>
                                 </TableCell>
-                                {/*<TableCell align="center" sx={{ fontWeight: '600' }}>Actions</TableCell>*/}
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {stockMovement?.map((item) => (
-                                <TableRow
-                                    key={item?._id || `item-${Math.random()}`}
-                                    sx={{
-                                        '&:hover': { bgcolor: theme.palette.mode === 'dark' ? 'rgba(182, 185, 188, 0.15)' : '#f1f8ff', },
-                                        backgroundColor: item?.voucher_type === "Purchase" ? 'rgba(244, 67, 54, 0.1)' : 'rgba(76, 175, 80, 0.1)',
-                                    }}
-                                >
-                                    <TableCell component="th" scope="row">
-                                        <Typography variant="body2" fontWeight="500">
-                                            {(item?.item || 'Unnamed Product')}
-                                        </Typography>
-                                    </TableCell>
-                                    <TableCell align="center" sx={{
-                                        backgroundColor: item?.voucher_type === "Purchase" ? 'rgba(244, 67, 54, 0.1)' : 'transparent',
-                                        fontWeight: item?.voucher_type === "Purchase" ? '600' : 'normal'
-                                    }}>
-                                        {item?.voucher_type === "Purchase" && (item?.quantity || 0)}
-                                    </TableCell>
-                                    <TableCell align="center" sx={{
-                                        backgroundColor: item?.voucher_type === "Sales" ? 'rgba(76, 175, 80, 0.1)' : 'transparent',
-                                        fontWeight: item?.voucher_type === "Sales" ? '600' : 'normal'
-                                    }}>
-                                        {item?.voucher_type === "Sales" && (item?.quantity || 0)}
-                                    </TableCell>
-                                    <TableCell sx={{ fontWeight: '500' }}>&#8377; {item?.rate || 0}</TableCell>
-                                    <TableCell>{item?.voucher_number || 'N/A'}</TableCell>
-                                    <TableCell>
-                                        <Typography variant="body2" fontWeight="500">
-                                            {item?.party_name || 'N/A'}
-                                        </Typography>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Typography variant="body2" fontWeight="500">
-                                            {item?.date ? formatDate(item.date) : 'N/A'}
-                                        </Typography>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-
-                            {(stockMovement?.length ?? 0) < 1 && (
+                            {loading ? (
+                                Array.from({ length: 5 }, (_, index) => (
+                                    <TimelineRowSkeleton key={index} />
+                                ))
+                            ) : (stockMovement?.length ?? 0) > 0 ? (
+                                stockMovement?.map((item) => (
+                                    <TableRow
+                                        key={item?._id || `item-${Math.random()}`}
+                                        sx={{
+                                            '&:hover': { bgcolor: theme.palette.mode === 'dark' ? 'rgba(182, 185, 188, 0.15)' : '#f1f8ff', },
+                                            backgroundColor: item?.voucher_type === "Purchase" ? 'rgba(244, 67, 54, 0.1)' : 'rgba(76, 175, 80, 0.1)',
+                                        }}
+                                    >
+                                        <TableCell component="th" scope="row">
+                                            <Typography variant="body2" fontWeight="500">
+                                                {(item?.item || 'Unnamed Product')}
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell align="center" sx={{
+                                            backgroundColor: item?.voucher_type === "Purchase" ? 'rgba(244, 67, 54, 0.1)' : 'transparent',
+                                            fontWeight: item?.voucher_type === "Purchase" ? '600' : 'normal'
+                                        }}>
+                                            {item?.voucher_type === "Purchase" && (item?.quantity || 0)}
+                                        </TableCell>
+                                        <TableCell align="center" sx={{
+                                            backgroundColor: item?.voucher_type === "Sales" ? 'rgba(76, 175, 80, 0.1)' : 'transparent',
+                                            fontWeight: item?.voucher_type === "Sales" ? '600' : 'normal'
+                                        }}>
+                                            {item?.voucher_type === "Sales" && (item?.quantity || 0)}
+                                        </TableCell>
+                                        <TableCell sx={{ fontWeight: '500' }}>&#8377; {item?.rate || 0}</TableCell>
+                                        <TableCell>{item?.voucher_number || 'N/A'}</TableCell>
+                                        <TableCell>
+                                            <Typography variant="body2" fontWeight="500">
+                                                {item?.party_name || 'N/A'}
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Typography variant="body2" fontWeight="500">
+                                                {item?.date ? formatDate(item.date) : 'N/A'}
+                                            </Typography>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
                                 <TableRow>
                                     <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
-                                        <Typography variant="body2" color="text.secondary">
-                                            No records found
-                                        </Typography>
+                                        <Grid item xs={12}>
+                                            <Box sx={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                alignItems: 'center',
+                                                gap: 2,
+                                                py: 4,
+                                            }}>
+                                                <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 600 }}>
+                                                    No Records Found
+                                                </Typography>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    Try adjusting your filters or search criteria, or add your sales/purchase records.
+                                                </Typography>
+                                            </Box>
+                                        </Grid>
                                     </TableCell>
                                 </TableRow>
                             )}
@@ -371,10 +399,10 @@ const Timeline: React.FC = () => {
 
                 {/* Pagination */}
                 <BottomPagination
-                    total={pageMeta.total}
+                    total={timelinePageMeta.total}
                     item="items"
-                    page={pageMeta?.page}
-                    metaPage={pageMeta.page}
+                    page={timelinePageMeta?.page}
+                    metaPage={timelinePageMeta.page}
                     rowsPerPage={limit}
                     onChange={handleChangePage}
                 />

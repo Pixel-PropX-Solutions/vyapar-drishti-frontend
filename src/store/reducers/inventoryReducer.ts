@@ -1,13 +1,20 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AuthStates } from "@/utils/enums";
-import { PageMeta, StockMovement, InventoryItem } from "@/utils/types";
+import { StockMovement, InventoryItem } from "@/utils/types";
 import { getInventoryStockItems, getStockMovement } from "@/services/inventory";
+
+interface PageMeta {
+  page: number;
+  limit: number;
+  total: number;
+  unique: string[];
+}
 
 interface InventoryState {
   authState: AuthStates;
   stockMovement: Array<StockMovement> | null;
   InventoryItems: Array<InventoryItem> | null;
-  pageMeta: PageMeta;
+  timelinePageMeta: PageMeta;
   inventoryPageMeta: {
     page: number;
     limit: number;
@@ -27,15 +34,11 @@ const initialState: InventoryState = {
   authState: AuthStates.INITIALIZING,
   stockMovement: [],
   InventoryItems: [],
-  pageMeta: {
+  timelinePageMeta: {
     page: 0,
     limit: 0,
     total: 0,
     unique: [],
-    purchase_value: 0,
-    sale_value: 0,
-    positive_stock: 0,
-    low_stock: 0,
   },
   inventoryPageMeta: {
     page: 0,
@@ -67,7 +70,7 @@ const inventorySlice = createSlice({
         getStockMovement.fulfilled,
         (state, action: PayloadAction<any>) => {
           state.stockMovement = action.payload.stockMovement;
-          state.pageMeta = action.payload.pageMeta;
+          state.timelinePageMeta = action.payload.timelinePageMeta;
           state.loading = false;
         }
       )

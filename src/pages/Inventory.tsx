@@ -35,7 +35,7 @@ import TabPanel from '@/features/upload-documents/components/TabPanel';
 import InventoryTable from '@/features/inventory/InventoryTable';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
-import { SortField, SortOrder, InventoryItem } from '@/utils/types';
+import { SortField, SortOrder } from '@/utils/types';
 import { getInventoryStockItems } from '@/services/inventory';
 import { WarningOutlined } from '@mui/icons-material';
 import { ActionButton } from "@/common/buttons/ActionButton";
@@ -57,7 +57,6 @@ const StockCard = styled(Paper)(({ theme }) => ({
 }));
 
 
-
 const Inventory: React.FC = () => {
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
@@ -67,10 +66,17 @@ const Inventory: React.FC = () => {
     const [currentTab, setCurrentTab] = useState(0);
 
     const { InventoryItems, inventoryPageMeta } = useSelector((state: RootState) => state.inventory);
-    const { user } = useSelector((state: RootState) => state.auth);
-    const currentCompanyDetails = user?.company?.find((c: any) => c._id === user.user_settings.current_company_id);
+    const { user, current_company_id } = useSelector((state: RootState) => state.auth);
+    const currentCompanyDetails = user?.company?.find((c: any) => c._id === current_company_id);
     const isInventoryFetched = useRef(false);
-
+    const [debounceQuery, setDebounceQuery] = useState('');
+    const [summaryStats, setSummaryStats] = useState({
+        zeroStockCount: 0,
+        lowStockCount: 0,
+        positiveStockCount: 0,
+        totalStockValue: 0,
+        totalPurchaseValue: 0
+    });
     const [data, setData] = useState({
         search: '',
         category: 'all',
@@ -80,7 +86,7 @@ const Inventory: React.FC = () => {
         sortField: "created_at" as SortField,
         sortOrder: "asc" as SortOrder,
     });
-
+    const { zeroStockCount, lowStockCount, positiveStockCount, totalStockValue, totalPurchaseValue } = summaryStats;
     const { search, category, stock_status, page_no, limit, sortField, sortOrder } = data;
 
     const handleSortRequest = (field: SortField) => {
@@ -120,6 +126,13 @@ const Inventory: React.FC = () => {
     };
 
     const handleStateChange = (field: string, value: any) => {
+        if (field === 'limit') {
+            setData((prevState) => ({
+                ...prevState,
+                page_no: 1,
+                [field]: value,
+            }));
+        }
         setData((prevState) => ({
             ...prevState,
             [field]: value,
@@ -143,22 +156,13 @@ const Inventory: React.FC = () => {
         fetchInventoryData(newStockStatus);
     };
 
-    // Bulk operations
-    // const handleBulkAction = (action: 'stockIn' | 'stockOut') => {
-    //     if (action === 'stockIn') {
-    //         navigate('/orders/create');
-    //     } else if (action === 'stockOut') {
-    //         navigate('/sell');
-    //     }
-    // };
-
-    const fetchInventoryData = async (status:string) => {
+    const fetchInventoryData = async (status: string) => {
         setIsLoading(true);
         try {
             await dispatch(
                 getInventoryStockItems({
                     company_id: currentCompanyDetails?._id || '',
-                    search: search,
+                    search: debounceQuery,
                     category: category === 'all' ? "" : category,
                     stock_status: status === 'all' ? "" : status,
                     page_no: page_no,
@@ -172,45 +176,56 @@ const Inventory: React.FC = () => {
         }
     };
 
+    const updateSummaryStats = () => {
+        setSummaryStats({
+            zeroStockCount: inventoryPageMeta.negative_stock || 0,
+            lowStockCount: inventoryPageMeta.low_stock || 0,
+            positiveStockCount: inventoryPageMeta.positive_stock || 0,
+            totalStockValue: inventoryPageMeta.sale_value || 0,
+            totalPurchaseValue: inventoryPageMeta.purchase_value || 0
+        });
+    };
+
     useEffect(() => {
         fetchInventoryData(stock_status);
-    }, [category, currentCompanyDetails._id, stock_status, dispatch, limit, page_no, search, sortField, sortOrder]);
+    }, []);
+
+    // Debounce search input to avoid excessive API calls
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebounceQuery(data.search);
+        }, 300); // Adjust debounce time as needed
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [data.search]);
+
+    useEffect(() => {
+        fetchInventoryData(stock_status);
+    }, [category, currentCompanyDetails._id, stock_status, dispatch, limit, page_no, debounceQuery, sortField, sortOrder]);
 
     // Reset summary stats fetch flag when company changes
     useEffect(() => {
         isInventoryFetched.current = false;
     }, [currentCompanyDetails?._id]);
 
-    // State to store summary stats that only change on initial load
-    const [summaryStats, setSummaryStats] = useState({
-        zeroStockCount: 0,
-        lowStockCount: 0,
-        positiveStockCount: 0,
-        totalStockValue: 0,
-        totalPurchaseValue: 0
-    });
-
     // Calculate summary stats only when company changes or on initial load
     useEffect(() => {
-        setIsStatsLoading(true);
-        if (!isInventoryFetched.current &&
-            currentCompanyDetails?._id
-        ) {
-            setSummaryStats({
-                zeroStockCount: inventoryPageMeta.negative_stock || 0,
-                lowStockCount: inventoryPageMeta.low_stock || 0,
-                positiveStockCount: inventoryPageMeta.positive_stock || 0,
-                totalStockValue: inventoryPageMeta.sale_value || 0,
-                totalPurchaseValue: inventoryPageMeta.purchase_value || 0
-            });
-            isInventoryFetched.current = true;
-            setIsStatsLoading(false);
-        }
-        setIsStatsLoading(false);
-    }, [currentCompanyDetails?._id, dispatch]);
+        if (!currentCompanyDetails?._id) return;
 
-    // Destructure values from summaryStats for use in the component
-    const { zeroStockCount, lowStockCount, positiveStockCount, totalStockValue, totalPurchaseValue } = summaryStats;
+        // Reset the flag when company ID changes
+        isInventoryFetched.current = false;
+
+        const timeout = setTimeout(() => {
+            if (!isInventoryFetched.current && inventoryPageMeta) {
+                updateSummaryStats();
+                isInventoryFetched.current = true;
+            }
+        }, 100);
+
+        return () => { clearTimeout(timeout); setIsStatsLoading(false); };
+    }, [currentCompanyDetails?._id, inventoryPageMeta]);
 
     return (
         <Container maxWidth={false} sx={{ mt: 3, width: '100%' }}>
@@ -305,7 +320,7 @@ const Inventory: React.FC = () => {
 
 
             {/* Stock Summary Cards with enhanced visuals */}
-            {isStatsLoading ? (
+            {(isStatsLoading || isLoading) ? (
                 <Grid container spacing={1} sx={{ mb: 2 }}>
                     <InventoryStockCardSkeleton color='#ffebee' border='5px solid #c62828' />
                     <InventoryStockCardSkeleton color='hsl(45, 92%, 90%)' border='5px solid hsl(45, 90%, 40%)' />
@@ -453,7 +468,7 @@ const Inventory: React.FC = () => {
             )}
 
             {/* Search and Filter section with enhanced UX */}
-            <Box sx={{ mb: 2 }}>
+            <Box sx={{ mb: 1 }}>
                 <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
                         <TextField
@@ -615,8 +630,6 @@ const Inventory: React.FC = () => {
                 />
             </TabPanel>
 
-            {/* Side Modal for Stock In/Out actions */}
-            {/* <SideModal drawer={drawer} setDrawer={setDrawer} /> */}
         </Container>
     );
 };

@@ -79,8 +79,8 @@ const ProductsSideModal = (props: SideModalProps) => {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const { setDrawer, drawer, setRefreshKey, product, setSelectedProduct } = props;
-    const { user, currentCompany } = useSelector((state: RootState) => state.auth);
-    const currentCompanyDetails = user?.company?.find((c: any) => c._id === user.user_settings.current_company_id);
+    const { user, currentCompany, current_company_id } = useSelector((state: RootState) => state.auth);
+    const currentCompanyDetails = user?.company?.find((c: any) => c._id === current_company_id);
     const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
 
 
@@ -196,7 +196,7 @@ const ProductsSideModal = (props: SideModalProps) => {
         checkStepCompletion();
     }, [checkStepCompletion]);
 
-    const handleChange = useCallback((field: keyof FormCreateProduct, value: string | boolean) => {
+    const handleChange = useCallback((field: keyof FormCreateProduct, value: string | boolean | number) => {
         setData((prevState: FormCreateProduct) => ({
             ...prevState,
             [field]: value

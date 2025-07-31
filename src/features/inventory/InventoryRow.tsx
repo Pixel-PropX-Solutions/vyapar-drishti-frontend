@@ -13,6 +13,7 @@ import {
     styled,
     Button,
     useTheme,
+    alpha,
 } from '@mui/material';
 
 // Icons
@@ -24,10 +25,6 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { InventoryItem } from '@/utils/types';
 import { formatDate } from '@/utils/functions';
 import { useNavigate } from 'react-router-dom';
-
-const CustomTableCell = styled(TableCell)(({ theme }) => ({
-    padding: theme.spacing(1.5),
-}));
 
 const AddSalesButton = styled(Button)(({ theme }) => ({
     background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
@@ -70,36 +67,28 @@ export const InventoryRow = (props: InventoryRowRowProps) => {
     const navigate = useNavigate();
     const { row } = props;
     const [open, setOpen] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
 
     return (
         <>
             <TableRow
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
                 sx={{
-                    '&:hover': { bgcolor: theme.palette.mode === 'dark' ? 'rgba(182, 185, 188, 0.20)' : '#f1f8ff', },
-                    backgroundColor: 'rgba(25, 118, 210, 0.08)',
-                    transition: 'background-color 0.2s',
+                    width: '100%',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
+                    boxShadow: isHovered ? `0 8px 25px ${alpha(theme.palette.primary.main, 0.15)}` : 'none',
+                    "&:hover": {
+                        bgcolor: alpha(theme.palette.primary.main, 0.02),
+                    },
+                    "& .MuiTableCell-root": {
+                        padding: '8px 16px',
+                    },
+                    borderLeft: `4px solid ${isHovered ? theme.palette.primary.main : 'transparent'}`,
                 }}
             >
-                {/* <CustomTableCell padding="checkbox">
-                    <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={onSelect}
-                        style={{
-                            cursor: 'pointer',
-                            width: '18px',
-                            height: '18px',
-                            accentColor: '#1976d2',
-                            borderRadius: '3px',
-                            border: '1.5px solid #c4c4c4',
-                            outline: 'none',
-                            transition: 'all 0.2s ease-in-out',
-                            verticalAlign: 'middle',
-                            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
-                        }}
-                    />
-                </CustomTableCell> */}
-                <CustomTableCell>
+                <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <IconButton
                             aria-label="expand row"
@@ -113,36 +102,33 @@ export const InventoryRow = (props: InventoryRowRowProps) => {
                             {row?.stock_item_name}
                         </Typography>
                     </Box>
-                </CustomTableCell>
-                <CustomTableCell>
+                </TableCell>
+                <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        {row?.current_stock <= 0 && (
+                        {row?.current_stock < 0 && (
                             <Chip
-                                size="small"
                                 label={`${row?.current_stock} ${row?.unit}`}
                                 color="error"
-                                sx={{ fontWeight: 'bold' }}
+                                sx={{ fontWeight: 'bold', px: 1, py: 1.5, }}
                             />
                         )}
-                        {(row?.current_stock > 0 && row?.current_stock < (row?.low_stock_alert)) && (
+                        {(row?.current_stock >= 0 && row?.current_stock <= (row?.low_stock_alert)) && (
                             <Chip
-                                size="small"
                                 label={`${row?.current_stock} ${row?.unit}`}
                                 color="warning"
-                                sx={{ fontWeight: 'bold' }}
+                                sx={{ fontWeight: 'bold', px: 1, py: 1.5, }}
                             />
                         )}
                         {row?.current_stock > (row?.low_stock_alert) && (
                             <Chip
-                                size="small"
                                 label={`${row?.current_stock} ${row?.unit}`}
                                 color="success"
-                                sx={{ fontWeight: 'bold' }}
+                                sx={{ fontWeight: 'bold', px: 1, py: 1.5, }}
                             />
                         )}
                     </Box>
-                </CustomTableCell>
-                <CustomTableCell>
+                </TableCell>
+                <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <Typography
                             sx={{
@@ -154,8 +140,8 @@ export const InventoryRow = (props: InventoryRowRowProps) => {
                         </Typography>
                         <Typography>{Number(row?.avg_purchase_rate).toFixed(2)}</Typography>
                     </Box>
-                </CustomTableCell>
-                <CustomTableCell>
+                </TableCell>
+                <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <Typography
                             sx={{
@@ -167,8 +153,8 @@ export const InventoryRow = (props: InventoryRowRowProps) => {
                         </Typography>
                         <Typography>{Number(row?.avg_sale_rate || row?.avg_purchase_rate).toFixed(2)}</Typography>
                     </Box>
-                </CustomTableCell>
-                <CustomTableCell>
+                </TableCell>
+                <TableCell>
                     {row.last_restock_date ?
                         (<Tooltip title={formatDate(row.last_restock_date)} arrow placement="top">
                             <Typography variant="body2">{formatDate(row.last_restock_date)}</Typography>
@@ -176,8 +162,8 @@ export const InventoryRow = (props: InventoryRowRowProps) => {
                         (<Tooltip title='Not Restocked Yet' arrow placement="top">
                             <Typography variant="body2">Not Restocked Yet</Typography>
                         </Tooltip>)}
-                </CustomTableCell>
-                <CustomTableCell>
+                </TableCell>
+                <TableCell>
                     <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
                         <AddPurchaseButton
                             startIcon={<AddCircleOutlineIcon sx={{ fontSize: 16 }} />}
@@ -194,7 +180,7 @@ export const InventoryRow = (props: InventoryRowRowProps) => {
                             Add Sales
                         </AddSalesButton>
                     </Box>
-                </CustomTableCell>
+                </TableCell>
             </TableRow>
             <TableRow>
                 <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>

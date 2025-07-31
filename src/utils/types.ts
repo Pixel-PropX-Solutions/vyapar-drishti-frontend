@@ -811,6 +811,33 @@ export interface GetCategory {
   is_deleted: boolean;
   created_at: string;
   updated_at: string;
+  stock_items_count: number;
+  stock_items: Array<{
+    _id: string;
+    stock_item_name: string;
+    company_id: string;
+    user_id: string;
+    unit: string;
+    unit_id: string;
+    alias_name: string;
+    image: File | string | null;
+    description: string;
+    gst_nature_of_goods: string;
+    gst_hsn_code: string;
+    gst_taxability: string;
+    low_stock_alert: number;
+    created_at: string;
+    updated_at: string;
+    current_stock: number;
+    avg_purchase_rate: number;
+    purchase_qty: number;
+    purchase_value: number;
+    sales_qty: number;
+    sales_value: number;
+    opening_balance: number;
+    opening_rate: number;
+    opening_value: number;
+  }>;
 }
 
 export interface UpdateCategory {

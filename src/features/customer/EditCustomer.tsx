@@ -81,8 +81,8 @@ const EditCustomer: React.FC = () => {
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [showSuccessAlert, setShowSuccessAlert] = useState(false);
     const [fetchingGST, setFetchingGST] = useState(false);
-    const { currentCompany, user } = useSelector((state: RootState) => state.auth);
-    const currentCompanyDetails = user?.company?.find((c: any) => c._id === user.user_settings.current_company_id);
+    const { currentCompany, user, current_company_id } = useSelector((state: RootState) => state.auth);
+    const currentCompanyDetails = user?.company?.find((c: any) => c._id === current_company_id);
     const { customerType_id, editingCustomer } = useSelector((state: RootState) => state.customersLedger);
     const isGSTINRequired: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst && customerType === 'Creditors';
     const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;

@@ -70,8 +70,8 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
     const [focusedField, setFocusedField] = useState<string>('');
     const [itemsList, setItemsList] = useState<{ id: string; name: string; unit: string, gst: string, hsn_code: string }[]>([]);
-    const { user } = useSelector((state: RootState) => state.auth);
-    const currentCompanyDetails = user?.company?.find((c: any) => c._id === user.user_settings.current_company_id);
+    const { user, current_company_id } = useSelector((state: RootState) => state.auth);
+    const currentCompanyDetails = user?.company?.find((c: any) => c._id === current_company_id);
     const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
     const [data, setData] = useState<Partial<InvoiceItems>>({
         item: '',
@@ -178,7 +178,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
             resetForm();
             return;
         }
-        dispatch(viewProductsWithId(user.user_settings.current_company_id || '')).then((response) => {
+        dispatch(viewProductsWithId(current_company_id || '')).then((response) => {
             if (response.meta.requestStatus === 'fulfilled') {
                 const products = response.payload;
                 setItemsList(
@@ -196,7 +196,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
             toast.error(error || "An unexpected error occurred. Please try again later.");
         });
 
-    }, [dispatch, open, user.user_settings.current_company_id]);
+    }, [dispatch, open, current_company_id]);
 
     useEffect(() => {
         if (open && item) {

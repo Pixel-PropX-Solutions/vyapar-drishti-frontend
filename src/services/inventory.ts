@@ -9,6 +9,7 @@ export const getStockMovement = createAsyncThunk(
     {
       search,
       movement_type,
+      party_name,
       page_no,
       limit,
       startDate,
@@ -20,6 +21,7 @@ export const getStockMovement = createAsyncThunk(
       startDate: string;
       endDate: string;
       movement_type: string;
+      party_name: string;
       page_no: number;
       limit: number;
       sortField: string;
@@ -29,13 +31,15 @@ export const getStockMovement = createAsyncThunk(
   ) => {
     try {
       const response = await userApi.get(
-        `/invoices/get/timeline?${search ? `search=${search}&` : ''}${movement_type ? `type=${movement_type}&` : ''}${startDate ? `start_date=${startDate}&` : ''}${endDate ? `end_date=${endDate}&` : ''}page_no=${page_no}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"}`
+        `/invoices/get/timeline?${search ? `search=${search}&` : ''}${movement_type ? `type=${movement_type}&` : ''}${party_name !== 'all' ? `party_name=${party_name}&` : ''}${startDate ? `start_date=${startDate}&` : ''}${endDate ? `end_date=${endDate}&` : ''}page_no=${page_no}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"}`
       );
+
+      console.log("View StockMovement response", response)
 
       if (response.data.success === true) {
         const stockMovement = response.data.data.docs;
-        const pageMeta = response.data.data.meta;
-        return { stockMovement, pageMeta };
+        const timelinePageMeta = response.data.data.meta;
+        return { stockMovement, timelinePageMeta };
       } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {
       return rejectWithValue(error?.response?.data?.message);

@@ -1,6 +1,7 @@
 import userApi from "@/api/api";
 import { UserSignUp } from "@/utils/types";
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { jwtDecode } from 'jwt-decode';
 
 // export const sendOTP = createAsyncThunk(
 //   "user/sendOTP",
@@ -44,13 +45,19 @@ export const login = createAsyncThunk(
 
       if (response.data.ok) {
         const accessToken = response.data.accessToken;
+         // 👇 Decode the token to get updated company ID
+        const decoded: any = jwtDecode(accessToken);
+        const current_company_id = decoded.current_company_id;
+
         localStorage.setItem("accessToken", accessToken);
-        return { accessToken };
+        localStorage.setItem("current_company_id", current_company_id);
+        return { accessToken, current_company_id };
       } else {
         return rejectWithValue("Login failed: Unknown error.");
       }
 
     } catch (error: any) {
+      console.log("Login API Error", error)
       return rejectWithValue(error?.response?.data?.message);
     }
   }
@@ -65,13 +72,16 @@ export const register = createAsyncThunk(
     try {
       const response = await userApi.post(`/auth/register`, userData);
 
-      const accessToken = response.data.accessToken;
+      if (response.data.ok) {
+        const accessToken = response.data.accessToken;
+         // 👇 Decode the token to get updated company ID
+        const decoded: any = jwtDecode(accessToken);
+        const current_company_id = decoded.current_company_id;
 
-      if (accessToken) {
         localStorage.setItem("accessToken", accessToken);
-        return { accessToken };
-      }
-      else {
+        localStorage.setItem("current_company_id", current_company_id);
+        return { accessToken, current_company_id };
+      } else {
         return rejectWithValue(
           "Registration failed: No access token received."
         );
@@ -184,6 +194,35 @@ export const resetPassword = createAsyncThunk(
   }
 );
 
+export const switchCompany = createAsyncThunk(
+  "switch/company",
+  async (
+    id: string,
+    { rejectWithValue }
+  ) => {
+    try {
+
+      const response = await userApi.post(`/user/settings/switch-company/${id}`);
+      console.log('Switch company response:', response);
+
+      if (response.data.success === true) {
+        const accessToken = response.data.accessToken;
+        // 👇 Decode the token to get updated company ID
+        const decoded: any = jwtDecode(accessToken);
+        const current_company_id = decoded.current_company_id;
+
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("current_company_id", current_company_id);
+        return { accessToken, current_company_id };
+      } else {
+        return rejectWithValue("Login failed: Unknown error.");
+      }
+    } catch (error: any) {
+      return rejectWithValue(error?.response?.data?.message);
+    }
+  }
+);
+
 export const logout = createAsyncThunk(
   "user/logout",
   async (_, { rejectWithValue }) => {
@@ -192,7 +231,7 @@ export const logout = createAsyncThunk(
 
       if (response.status === 200) {
         localStorage.removeItem("accessToken");
-        // localStorage.clear();
+        localStorage.removeItem("current_company_id");
         return response.data;
       } else {
         return rejectWithValue("Login Failed: No access token recieved.");
@@ -202,3 +241,4 @@ export const logout = createAsyncThunk(
     }
   }
 );
+

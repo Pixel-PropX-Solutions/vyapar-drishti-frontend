@@ -89,21 +89,3 @@ export const updateUserSettings = createAsyncThunk(
     }
   }
 );
-
-export const setCurrentCompany = createAsyncThunk(
-  "set/current/company",
-  async (
-    id: string,
-    { rejectWithValue }
-  ) => {
-    try {
-      const response = await userApi.put(`/user/set/company/${id}`);
-
-      if (response.data.success === true) {
-        return;
-      } else return rejectWithValue("Login Failed: No access token recieved.");
-    } catch (error: any) {
-      return rejectWithValue(error?.response?.data?.message);
-    }
-  }
-);

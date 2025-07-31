@@ -61,6 +61,8 @@ export const viewAllCategory = createAsyncThunk(
                 }`
             );
 
+            console.log("View All Category API response", response);
+
             if (response.data.success === true) {
                 const categories = response.data.data.docs;
                 const pageMeta = response.data.data.meta;

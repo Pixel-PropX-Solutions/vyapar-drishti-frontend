@@ -85,8 +85,8 @@ const ProductsListing: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [refreshKey, setRefreshKey] = useState<number>(0);
   const [drawer, setDrawer] = useState<boolean>(false);
-  const { user } = useSelector((state: RootState) => state.auth);
-  const currentCompanyDetails = user?.company?.find((c: any) => c._id === user.user_settings.current_company_id);
+  const { user, current_company_id } = useSelector((state: RootState) => state.auth);
+  const currentCompanyDetails = user?.company?.find((c: any) => c._id === current_company_id);
   const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
   const [selectedProduct, setSelectedProduct] = useState<ProductUpdate | null>(null);
   const [openCategoryModal, setOpenCategoryModal] = useState<boolean>(false);
@@ -660,10 +660,6 @@ const ProductsListing: React.FC = () => {
                       });
                   }}
                   onEdit={(category: GetCategory) => {
-                    setOpenCategoryModal(true);
-                    setSelectedCategory(category);
-                  }}
-                  onView={(category: GetCategory) => {
                     setOpenCategoryModal(true);
                     setSelectedCategory(category);
                   }}

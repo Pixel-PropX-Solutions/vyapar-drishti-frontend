@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AuthStates } from "@/utils/enums";
-import { deleteAccount, getCurrentCompany, getCurrentUser, login, logout, register } from "@/services/auth";
+import { deleteAccount, getCurrentCompany, getCurrentUser, login, logout, register, switchCompany } from "@/services/auth";
 import { GetCompany, UserSignUp } from "@/utils/types";
 
 // interface SignupData {
@@ -22,6 +22,7 @@ interface AuthState {
   isUserFetched: boolean;
   authState: AuthStates;
   accessToken: string | null;
+  current_company_id: string | null;
   loading: boolean;
   error: string | null;
 }
@@ -31,6 +32,9 @@ const initialState: AuthState = {
   email: "",
   accessToken: localStorage.getItem("accessToken")
     ? (localStorage.getItem("accessToken") as string)
+    : null,
+  current_company_id: localStorage.getItem("current_company_id")
+    ? (localStorage.getItem("current_company_id") as string)
     : null,
   authState: AuthStates.INITIALIZING,
   isUserFetched: false,
@@ -73,8 +77,8 @@ const authSlice = createSlice({
       })
       .addCase(login.fulfilled, (state, action: PayloadAction<any>) => {
         state.authState = AuthStates.AUTHENTICATED;
-        // state.email = action.payload.user.email;
         state.accessToken = action.payload.accessToken;
+        state.current_company_id = action.payload.current_company_id; // 👈 this!
         state.loading = false;
       })
       .addCase(login.rejected, (state, action) => {
@@ -82,6 +86,21 @@ const authSlice = createSlice({
         state.error = action.payload as string;
         state.loading = false;
       })
+
+      .addCase(switchCompany.pending, (state) => {
+        state.error = null;
+        state.loading = true;
+      })
+      .addCase(switchCompany.fulfilled, (state, action: PayloadAction<any>) => {
+        state.accessToken = action.payload.accessToken;
+        state.current_company_id = action.payload.current_company_id; // 👈 this!
+        state.loading = false;
+      })
+      .addCase(switchCompany.rejected, (state, action) => {
+        state.error = action.payload as string;
+        state.loading = false;
+      })
+
       .addCase(deleteAccount.pending, (state) => {
         state.authState = AuthStates.INITIALIZING;
         state.error = null;
@@ -136,8 +155,8 @@ const authSlice = createSlice({
       })
       .addCase(register.fulfilled, (state, action: PayloadAction<any>) => {
         state.authState = AuthStates.AUTHENTICATED;
-        // state.email = action.payload.user.email;
         state.accessToken = action.payload.accessToken;
+        state.current_company_id = action.payload.current_company_id; // 👈 this!
         state.loading = false;
       })
       .addCase(register.rejected, (state, action) => {

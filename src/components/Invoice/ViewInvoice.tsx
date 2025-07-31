@@ -48,9 +48,9 @@ import {
     Warning,
     ArrowBack
 } from '@mui/icons-material';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '@/store/store';
+import { useNavigate } from 'react-router-dom';
+// import { useDispatch, useSelector } from 'react-redux';
+// import { AppDispatch, RootState } from '@/store/store';
 import { formatDate } from '@/utils/functions';
 
 interface InvoiceItem {
@@ -91,13 +91,13 @@ interface InvoiceData {
 export const ViewInvoiceInfo = () => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-    const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
-    const { orderId } = useParams();
-    const dispatch = useDispatch<AppDispatch>();
+    // const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
+    // const { orderId } = useParams();
+    // const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
-    const { user } = useSelector((state: RootState) => state.auth);
+    // const { user } = useSelector((state: RootState) => state.auth);
 
-    const [isLoading, setLoading] = useState<boolean>(false);
+    const [isLoading, _setLoading] = useState<boolean>(false);
     const [snackbar, setSnackbar] = useState({
         open: false,
         message: '',

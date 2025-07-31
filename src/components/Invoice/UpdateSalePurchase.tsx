@@ -131,8 +131,8 @@ export default function UpdateSalePurchase() {
     const { currentCompany } = useSelector((state: RootState) => state.auth);
     const { invoiceData, invoiceType_id } = useSelector((state: RootState) => state.invoice);
 
-    const { user } = useSelector((state: RootState) => state.auth);
-    const currentCompanyDetails = user?.company?.find((c: any) => c._id === user.user_settings.current_company_id);
+    const { user, current_company_id } = useSelector((state: RootState) => state.auth);
+    const currentCompanyDetails = user?.company?.find((c: any) => c._id === current_company_id);
     const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
     const [isAddItemModalOpen, setAddItemModalOpen] = useState(false);
     const [item, setItem] = useState<InvoiceItems | null>(null);
@@ -327,16 +327,16 @@ export default function UpdateSalePurchase() {
     };
 
     useEffect(() => {
-        if (user.user_settings.current_company_id) {
+        if (current_company_id) {
             setData(prev => ({
                 ...prev,
-                company_id: user.user_settings.current_company_id,
+                company_id: current_company_id,
                 voucher_type: type ? type.charAt(0).toUpperCase() + type.slice(1) : '',
             }));
         }
 
         dispatch(viewAllCustomerWithType({
-            company_id: user.user_settings.current_company_id || '',
+            company_id: current_company_id || '',
             customerType: type === 'sales' ? 'Debtors' : 'Creditors',
         })).then((response) => {
             if (response.meta.requestStatus === 'fulfilled') {
@@ -349,7 +349,7 @@ export default function UpdateSalePurchase() {
             toast.error(error || "An unexpected error occurred. Please try again later.");
         });
 
-        dispatch(viewProductsWithId(user.user_settings.current_company_id || '')).then((response) => {
+        dispatch(viewProductsWithId(current_company_id || '')).then((response) => {
             if (response.meta.requestStatus === 'fulfilled') {
                 const products = response.payload;
                 setItemsList(
@@ -367,7 +367,7 @@ export default function UpdateSalePurchase() {
             toast.error(error || "An unexpected error occurred. Please try again later.");
             setIsLoading(false);
         });
-    }, [dispatch, type, user.user_settings.current_company_id, user]);
+    }, [dispatch, type, current_company_id, user]);
 
     useEffect(() => {
         dispatch(viewInvoice({
@@ -629,6 +629,7 @@ export default function UpdateSalePurchase() {
                                                 <Stack spacing={2}>
                                                     <Autocomplete
                                                         options={parties}
+                                                        disabled
                                                         getOptionLabel={(option) => option.name}
                                                         value={parties.find(p => p.id === data.party_name_id) || null}
                                                         onChange={(_, newValue) =>
@@ -645,6 +646,7 @@ export default function UpdateSalePurchase() {
                                                                 placeholder={type === 'sales' ? "Start typing for customer suggestions..." : "Start typing for supplier suggestions..."}
                                                                 variant="outlined"
                                                                 fullWidth
+
                                                                 InputProps={{
                                                                     ...params.InputProps,
                                                                     startAdornment: (
