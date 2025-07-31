@@ -6,7 +6,7 @@
   "scripts": {
     "start:user": "vite --mode user",
     "start:admin": "vite --mode admin",
-    "dev": "vite --host",
+    "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
