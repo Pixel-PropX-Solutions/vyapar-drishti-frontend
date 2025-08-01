@@ -13,12 +13,11 @@ import {
 import { Email, Lock, Visibility, VisibilityOff } from "@mui/icons-material";
 import Logo from "../../../assets/Logo.png";
 import logoText from "../../../assets/Logo_Text.png";
-import { getCurrentUser, register } from "@/services/auth";
+import { register } from "@/services/auth";
 import { AppDispatch } from "@/store/store";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { getCompany } from "@/services/company";
 import PhoneNumber from "@/common/PhoneNumber";
 
 
@@ -89,7 +88,8 @@ const RegistrationForm: React.FC = () => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validateForm()) {
-      toast.error('Please fix the form errors before submitting');
+      const firstError = Object.keys(formErrors)[0];
+      toast.error(formErrors[firstError] || "Please fix the errors in the form.");
       return;
     }
 

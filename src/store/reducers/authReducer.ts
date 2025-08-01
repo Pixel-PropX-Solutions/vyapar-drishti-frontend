@@ -3,16 +3,6 @@ import { AuthStates } from "@/utils/enums";
 import { deleteAccount, emailVerify, getCurrentCompany, getCurrentUser, login, logout, register, switchCompany } from "@/services/auth";
 import { GetCompany, UserSignUp } from "@/utils/types";
 
-// interface SignupData {
-//   firstName: string;
-//   lastName: string;
-//   email: string;
-//   password: string;
-//   role: string;
-//   confirmPassword: string;
-// }
-
-
 
 interface AuthState {
   signupData: UserSignUp;
@@ -49,6 +39,7 @@ const initialState: AuthState = {
       code: '',
       number: '',
     },
+    password: '',
   },
   loading: false,
   error: null,
