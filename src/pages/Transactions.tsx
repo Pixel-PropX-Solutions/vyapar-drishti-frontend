@@ -50,6 +50,7 @@ import { InvoicesRowSkeleton } from "@/common/skeletons/InvoicesRowSkeleton";
 import { ActionButton } from "@/common/buttons/ActionButton";
 import { BottomPagination } from "@/common/modals/BottomPagination";
 import { setInvoiceTypeId } from "@/store/reducers/invoiceReducer";
+import toast from "react-hot-toast";
 
 
 const Transactions: React.FC = () => {
@@ -60,7 +61,8 @@ const Transactions: React.FC = () => {
     // const [html, setHtml] = useState<boolean>(false);
     // const [invoiceId, setInvoiceId] = useState<string>('');
     const { invoices, loading, pageMeta, invoiceGroups } = useSelector((state: RootState) => state.invoice);
-    const { currentCompany } = useSelector((state: RootState) => state.auth);
+    const { user, current_company_id } = useSelector((state: RootState) => state.auth);
+    const currentCompanyDetails = user?.company?.find((c: any) => c._id === current_company_id);
 
     const [state, setState] = useState({
         searchQuery: "",
@@ -81,7 +83,7 @@ const Transactions: React.FC = () => {
         dispatch(
             viewAllInvoices({
                 searchQuery: searchQuery,
-                company_id: currentCompany?._id || "",
+                company_id: current_company_id || "",
                 type: type,
                 start_date: startDate.getFullYear().toString() + '-' + (startDate.getMonth() + 1).toString().padStart(2, '0') + '-' + startDate.getDate().toString().padStart(2, '0'),
                 end_date: endDate.getFullYear().toString() + '-' + (endDate.getMonth() + 1).toString().padStart(2, '0') + '-' + endDate.getDate().toString().padStart(2, '0'),
@@ -91,13 +93,13 @@ const Transactions: React.FC = () => {
                 sortOrder: sortOrder,
             })
         )
-    }, [dispatch, searchQuery, currentCompany?._id, type, startDate, endDate, page, rowsPerPage, sortField, sortOrder]);
+    }, [dispatch, searchQuery, current_company_id, type, startDate, endDate, page, rowsPerPage, sortField, sortOrder]);
 
     // Fetch stockists data from API
     useEffect(() => {
         fetchIvoices();
-        dispatch(getAllInvoiceGroups(currentCompany?._id || ""));
-    }, [searchQuery, page, rowsPerPage, is_deleted, sortField, filterState, sortOrder, dispatch, fetchIvoices, currentCompany?._id]);
+        dispatch(getAllInvoiceGroups(current_company_id || ""));
+    }, [searchQuery, page, rowsPerPage, is_deleted, sortField, filterState, sortOrder, dispatch, fetchIvoices, current_company_id]);
 
     // Handle sorting change
     const handleSortRequest = (field: CustomerSortField) => {
@@ -128,7 +130,7 @@ const Transactions: React.FC = () => {
             searchQuery: "",
             filterState: "All-States",
             is_deleted: false,
-            type: "All",
+            type: "Transactions",
             page: 1,
             startDate: new Date(),
             endDate: new Date(),
@@ -155,7 +157,7 @@ const Transactions: React.FC = () => {
     //     if (invoice.voucher_type === 'Receipt') {
     //         dispatch(printRecieptInvoices({
     //             vouchar_id: invoice._id,
-    //             company_id: currentCompany?._id || "",
+    //             company_id: current_company_id || "",
     //         })).then((response) => {
     //             if (response.meta.requestStatus === 'fulfilled') {
     //                 const payload = response.payload as { invoceHtml: string };
@@ -173,7 +175,7 @@ const Transactions: React.FC = () => {
     //     } else if (invoice.voucher_type === 'Payment') {
     //         dispatch(printPaymentInvoices({
     //             vouchar_id: invoice._id,
-    //             company_id: currentCompany?._id || "",
+    //             company_id: current_company_id || "",
     //         })).then((response) => {
     //             if (response.meta.requestStatus === 'fulfilled') {
     //                 const payload = response.payload as { invoceHtml: string };
@@ -234,6 +236,10 @@ const Transactions: React.FC = () => {
                                         startIcon={<AddCircleOutlineIcon />}
                                         color="success"
                                         onClick={() => {
+                                            if (!currentCompanyDetails?.id) {
+                                                toast.error('Please create a company first.');
+                                                return;
+                                            }
                                             dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Receipt'))?._id || ''));
                                             navigate('/transactions/create/receipt');
                                         }}
@@ -255,6 +261,10 @@ const Transactions: React.FC = () => {
                                         startIcon={<RemoveCircleOutlineIcon />}
                                         color="error"
                                         onClick={() => {
+                                            if (!currentCompanyDetails?.id) {
+                                                toast.error('Please create a company first.');
+                                                return;
+                                            }
                                             dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Payment'))?._id || ''));
                                             navigate('/transactions/create/payment');
                                         }}
@@ -557,6 +567,10 @@ const Transactions: React.FC = () => {
                                                         startIcon={<AddCircleOutlineIcon />}
                                                         color="success"
                                                         onClick={() => {
+                                                            if (!currentCompanyDetails?.id) {
+                                                                toast.error('Please create a company first.');
+                                                                return;
+                                                            }
                                                             dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Receipt'))?._id || ''));
                                                             navigate('/transactions/create/receipt');
                                                         }}
@@ -578,6 +592,10 @@ const Transactions: React.FC = () => {
                                                         startIcon={<RemoveCircleOutlineIcon />}
                                                         color="error"
                                                         onClick={() => {
+                                                            if (!currentCompanyDetails?.id) {
+                                                                toast.error('Please create a company first.');
+                                                                return;
+                                                            }
                                                             dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Payment'))?._id || ''));
                                                             navigate('/transactions/create/payment');
                                                         }}

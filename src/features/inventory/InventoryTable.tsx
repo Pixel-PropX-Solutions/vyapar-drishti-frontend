@@ -1,7 +1,6 @@
 import React from 'react';
 import {
     Box,
-    Button,
     Paper,
     Table,
     TableBody,
@@ -17,7 +16,6 @@ import {
 import { alpha, styled, useTheme } from '@mui/material/styles';
 
 // Icons
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import { SortField, SortOrder, InventoryItem, PageMeta } from '@/utils/types';
 import { InventoryRow } from './InventoryRow';
@@ -74,18 +72,11 @@ const InventoryTable = (props: InventoryTableProps) => {
                     <Box sx={{ p: 6, textAlign: 'center' }}>
                         <InventoryIcon sx={{ fontSize: 60, color: 'text.secondary', mb: 2 }} />
                         <Typography variant="h6" gutterBottom>
-                            No inventory items found
+                            No items found
                         </Typography>
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                            Try adjusting your filters or add new items to your inventory
+                            Try adjusting your filters or creating new products.
                         </Typography>
-                        <Button
-                            variant="contained"
-                            startIcon={<AddCircleOutlineIcon />}
-                            color="primary"
-                        >
-                            Add New Item
-                        </Button>
                     </Box>
                 ) : (
                     <Table sx={{ width: '100%' }}>

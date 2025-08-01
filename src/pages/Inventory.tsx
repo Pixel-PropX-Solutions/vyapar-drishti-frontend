@@ -40,6 +40,7 @@ import { getInventoryStockItems } from '@/services/inventory';
 import { WarningOutlined } from '@mui/icons-material';
 import { ActionButton } from "@/common/buttons/ActionButton";
 import InventoryStockCardSkeleton from '@/common/skeletons/InventoryStockCardSkeleton';
+import toast from 'react-hot-toast';
 
 // Styled Components with enhanced visuals
 const StockCard = styled(Paper)(({ theme }) => ({
@@ -203,7 +204,7 @@ const Inventory: React.FC = () => {
 
     useEffect(() => {
         fetchInventoryData(stock_status);
-    }, [category, currentCompanyDetails._id, stock_status, dispatch, limit, page_no, debounceQuery, sortField, sortOrder]);
+    }, [category, currentCompanyDetails?._id, stock_status, dispatch, limit, page_no, debounceQuery, sortField, sortOrder]);
 
     // Reset summary stats fetch flag when company changes
     useEffect(() => {
@@ -248,7 +249,13 @@ const Inventory: React.FC = () => {
                                 variant="contained"
                                 startIcon={<AddCircleOutlineIcon />}
                                 color="success"
-                                onClick={() => navigate('/invoices/create/purchase')}
+                                onClick={() => {
+                                    if (!currentCompanyDetails?._id) {
+                                        toast.error('Please create a company first.');
+                                        return;
+                                    }
+                                    navigate('/invoices/create/purchase');
+                                }}
                                 sx={{
                                     background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
                                     color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
@@ -265,7 +272,13 @@ const Inventory: React.FC = () => {
                                 variant="contained"
                                 startIcon={<RemoveCircleOutlineIcon />}
                                 color="error"
-                                onClick={() => navigate('/invoices/create/sales')}
+                                onClick={() => {
+                                    if (!currentCompanyDetails?._id) {
+                                        toast.error('Please create a company first.');
+                                        return;
+                                    }
+                                    navigate('/invoices/create/sales');
+                                }}
                                 sx={{
                                     background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
                                     color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',

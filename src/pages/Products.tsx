@@ -295,6 +295,10 @@ const ProductsListing: React.FC = () => {
                 color="primary"
                 startIcon={<AddCircleIcon fontSize="large" />}
                 onClick={() => {
+                  if (!currentCompanyDetails?.id) {
+                    toast.error('Please create a company first.');
+                    return;
+                  }
                   if (selectedTab === 1) {
                     setOpenCategoryModal(true);
                     setSelectedCategory(null);
@@ -598,6 +602,10 @@ const ProductsListing: React.FC = () => {
                       <Button
                         variant="contained"
                         onClick={() => {
+                          if (!currentCompanyDetails?.id) {
+                            toast.error('Please create a company first.');
+                            return;
+                          }
                           setDrawer(true);
                         }}
                         startIcon={<AddCircleIcon />}
@@ -687,6 +695,10 @@ const ProductsListing: React.FC = () => {
                   <Button
                     variant="contained"
                     onClick={() => {
+                      if (!currentCompanyDetails?.id) {
+                        toast.error('Please create a company first.');
+                        return;
+                      }
                       setOpenCategoryModal(true);
                       setSelectedCategory(null);
                     }}
@@ -779,6 +791,10 @@ const ProductsListing: React.FC = () => {
                   <Button
                     variant="contained"
                     onClick={() => {
+                      if (!currentCompanyDetails?.id) {
+                        toast.error('Please create a company first.');
+                        return;
+                      }
                       setOpenCategoryModal(true);
                       setSelectedCategory(null);
                     }}

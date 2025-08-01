@@ -48,7 +48,8 @@ import { BottomPagination } from "@/common/modals/BottomPagination";
 const CustomerLedger: React.FC = () => {
   const { customers, pageMeta, loading } = useSelector((state: RootState) => state.customersLedger);
   const { accountingGroups } = useSelector((state: RootState) => state.accountingGroup);
-  const { currentCompany } = useSelector((state: RootState) => state.auth);
+  const { user, current_company_id } = useSelector((state: RootState) => state.auth);
+  const currentCompanyDetails = user?.company?.find((c: any) => c._id === current_company_id);
   const navigate = useNavigate();
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
@@ -72,7 +73,7 @@ const CustomerLedger: React.FC = () => {
       viewAllCustomer({
         searchQuery: searchQuery,
         filterState: filterState,
-        company_id: "",
+        company_id: current_company_id || "",
         type: type,
         is_deleted: is_deleted,
         pageNumber: page,
@@ -81,7 +82,7 @@ const CustomerLedger: React.FC = () => {
         sortOrder: sortOrder,
       })
     )
-  }, [dispatch, searchQuery, filterState, type, is_deleted, page, rowsPerPage, sortField, sortOrder]);
+  }, [dispatch, searchQuery, filterState, type, current_company_id, is_deleted, page, rowsPerPage, sortField, sortOrder]);
 
   useEffect(() => {
     fetchCustomers();
@@ -108,8 +109,8 @@ const CustomerLedger: React.FC = () => {
   }, [debouncedQuery, page, rowsPerPage, is_deleted, sortField, filterState, sortOrder, dispatch, fetchCustomers]);
 
   useEffect(() => {
-    dispatch(viewAllAccountingGroups(currentCompany?._id || ""));
-  }, [currentCompany?._id, dispatch])
+    dispatch(viewAllAccountingGroups(current_company_id || ""));
+  }, [current_company_id, dispatch])
 
 
   // Handle sorting change
@@ -141,7 +142,7 @@ const CustomerLedger: React.FC = () => {
       searchQuery: "",
       filterState: "All-States",
       is_deleted: false,
-      type: "All",
+      type: "Customers",
       page: 1,
       rowsPerPage: 10,
       sortField: "created_at" as CustomerSortField,
@@ -186,6 +187,10 @@ const CustomerLedger: React.FC = () => {
                   startIcon={<AddCircleOutline />}
                   color="success"
                   onClick={() => {
+                    if (!currentCompanyDetails?.id) {
+                      toast.error('Please create a company first.');
+                      return;
+                    }
                     navigate('/customers/create/debtors');
                     dispatch(setCustomerTypeId(accountingGroups.find((group) => group.name.includes('Debtors'))?._id || ''))
                   }}
@@ -207,6 +212,10 @@ const CustomerLedger: React.FC = () => {
                   startIcon={<AddCircleOutline />}
                   color="error"
                   onClick={() => {
+                    if (!currentCompanyDetails?.id) {
+                      toast.error('Please create a company first.');
+                      return;
+                    }
                     navigate('/customers/create/creditors');
                     dispatch(setCustomerTypeId(accountingGroups.find((group) => group.name.includes('Creditors'))?._id || ''))
                   }}
@@ -489,6 +498,10 @@ const CustomerLedger: React.FC = () => {
                           startIcon={<AddCircleOutline />}
                           color="success"
                           onClick={() => {
+                            if (!currentCompanyDetails?.id) {
+                              toast.error('Please create a company first.');
+                              return;
+                            }
                             navigate('/customers/create/debtors');
                             dispatch(setCustomerTypeId(accountingGroups.find((group) => group.name.includes('Debtors'))?._id || ''))
                           }}
@@ -510,6 +523,10 @@ const CustomerLedger: React.FC = () => {
                           startIcon={<AddCircleOutline />}
                           color="error"
                           onClick={() => {
+                            if (!currentCompanyDetails?.id) {
+                              toast.error('Please create a company first.');
+                              return;
+                            }
                             navigate('/customers/create/creditors');
                             dispatch(setCustomerTypeId(accountingGroups.find((group) => group.name.includes('Creditors'))?._id || ''))
                           }}

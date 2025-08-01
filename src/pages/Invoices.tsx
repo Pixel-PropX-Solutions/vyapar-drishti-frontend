@@ -132,7 +132,7 @@ const Invoices: React.FC = () => {
       searchQuery: "",
       filterState: "All-States",
       is_deleted: false,
-      type: "All",
+      type: "Invoices",
       page: 1,
       startDate: new Date(),
       endDate: new Date(),
@@ -278,6 +278,10 @@ const Invoices: React.FC = () => {
                     startIcon={<AddCircleOutlineIcon />}
                     color="success"
                     onClick={() => {
+                      if (!currentCompanyDetails?.id) {
+                        toast.error('Please create a company first.');
+                        return;
+                      }
                       dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Sales'))?._id || ''));
                       navigate('/invoices/create/sales')
                     }}
@@ -299,6 +303,10 @@ const Invoices: React.FC = () => {
                     startIcon={<RemoveCircleOutlineIcon />}
                     color="error"
                     onClick={() => {
+                      if (!currentCompanyDetails?.id) {
+                        toast.error('Please create a company first.');
+                        return;
+                      }
                       dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Purchase'))?._id || ''));
                       navigate('/invoices/create/purchase');
                     }}
@@ -592,6 +600,10 @@ const Invoices: React.FC = () => {
                             startIcon={<AddCircleOutlineIcon />}
                             color="success"
                             onClick={() => {
+                              if (!currentCompanyDetails?.id) {
+                                toast.error('Please create a company first.');
+                                return;
+                              }
                               dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Sales'))?._id || ''));
                               navigate('/invoices/create/sales')
                             }}
@@ -613,6 +625,10 @@ const Invoices: React.FC = () => {
                             startIcon={<RemoveCircleOutlineIcon />}
                             color="error"
                             onClick={() => {
+                              if (!currentCompanyDetails?.id) {
+                                toast.error('Please create a company first.');
+                                return;
+                              }
                               dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Purchase'))?._id || ''));
                               navigate('/invoices/create/purchase');
                             }}
