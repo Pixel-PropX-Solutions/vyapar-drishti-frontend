@@ -45,7 +45,7 @@ export const login = createAsyncThunk(
 
       if (response.data.ok) {
         const accessToken = response.data.accessToken;
-         // 👇 Decode the token to get updated company ID
+        // 👇 Decode the token to get updated company ID
         const decoded: any = jwtDecode(accessToken);
         const current_company_id = decoded.current_company_id;
 
@@ -73,14 +73,14 @@ export const register = createAsyncThunk(
       const response = await userApi.post(`/auth/register`, userData);
 
       if (response.data.ok) {
-        const accessToken = response.data.accessToken;
-         // 👇 Decode the token to get updated company ID
-        const decoded: any = jwtDecode(accessToken);
-        const current_company_id = decoded.current_company_id;
+        // const accessToken = response.data.accessToken;
+        // // 👇 Decode the token to get updated company ID
+        // const decoded: any = jwtDecode(accessToken);
+        // const current_company_id = decoded.current_company_id;
 
-        localStorage.setItem("accessToken", accessToken);
-        localStorage.setItem("current_company_id", current_company_id);
-        return { accessToken, current_company_id };
+        // localStorage.setItem("accessToken", accessToken);
+        // localStorage.setItem("current_company_id", current_company_id);
+        return;
       } else {
         return rejectWithValue(
           "Registration failed: No access token received."
@@ -242,3 +242,22 @@ export const logout = createAsyncThunk(
   }
 );
 
+
+
+export const emailVerify = createAsyncThunk(
+  "user/verify/email",
+  async ({ email, token }: { email: string; token: string }, { rejectWithValue }) => {
+    try {
+      const response = await userApi.post(`/auth/verify/email?email=${email}&token=${token}`);
+      console.log("Email verification API response:", response);
+      if (response.status === 200) {
+        return response.data;
+      } else {
+        return rejectWithValue("Email verification failed.");
+      }
+    } catch (error: any) {
+      console.log("Email verification error:", error);
+      return rejectWithValue(error?.response?.data?.message);
+    }
+  }
+);

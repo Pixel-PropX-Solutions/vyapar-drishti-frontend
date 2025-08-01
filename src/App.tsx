@@ -46,6 +46,7 @@ import ContactPage from "./components/Contact/ContactPage";
 import UpdatePaymentReceipt from "./components/Invoice/UpdatePaymentReceipt";
 import { ViewInvoiceInfo } from "./components/Invoice/ViewInvoice";
 import ForgotPassword from "./pages/ForgotPassword";
+import VerifyEmail from "./pages/VerifyEmail";
 // import PromptModal from "./common/modals/PromptModal";
 
 const xThemeComponents = {
@@ -154,11 +155,11 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/customers/view/:customer_id" element={<CustomerProfile />} />
                 <Route path="/customers/create/:type" element={<EditCustomer />} />
                 <Route path="/customers/edit/:type" element={<EditCustomer />} />
-                
+
                 <Route path="/transactions" element={<Transactions />} />
                 <Route path="/transactions/create/:type" element={<PaymentReceiptInvoice />} />
                 <Route path="/transactions/update/:type/:voucher_id" element={<UpdatePaymentReceipt />} />
-                
+
                 <Route path="/invoices" element={<Invoices />} />
                 <Route path="/invoices/:invoice_id" element={<ViewInvoiceInfo />} />
                 <Route path="/invoices/create/:type" element={<SalePurchaseInvoiceCreation />} />
@@ -186,7 +187,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
             <Route path="/reset-password" element={<ForgotPassword />} />
 
             <Route path="/signup" element={<SignUpPage />} />
-            {/* <Route path="/verify/:phoneNumber" element={<VerifyOTP />} /> */}
+            <Route path="/verify" element={<VerifyEmail />} />
             {/* <Route path="/*" element={<Navigate to="/" replace />} /> */}
           </>
         )

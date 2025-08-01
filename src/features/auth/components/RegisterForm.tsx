@@ -10,7 +10,7 @@ import {
   InputAdornment,
   useTheme,
 } from "@mui/material";
-import { Email } from "@mui/icons-material";
+import { Email, Lock, Visibility, VisibilityOff } from "@mui/icons-material";
 import Logo from "../../../assets/Logo.png";
 import logoText from "../../../assets/Logo_Text.png";
 import { getCurrentUser, register } from "@/services/auth";
@@ -26,7 +26,9 @@ const RegistrationForm: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
-  // const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
+  const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
+  const [showPassword, setShowPassword] = React.useState(false);
+
 
   const [data, setData] = useState({
     first: "",
@@ -34,6 +36,7 @@ const RegistrationForm: React.FC = () => {
     email: '',
     code: '',
     number: '',
+    password: "",
   });
 
   function changeHandler(event: React.ChangeEvent<HTMLInputElement>) {
@@ -42,6 +45,10 @@ const RegistrationForm: React.FC = () => {
       [event.target.name]: event.target.value,
     }));
   }
+
+  const handleTogglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
   function changeCountryCode(
     field: string,
@@ -52,39 +59,39 @@ const RegistrationForm: React.FC = () => {
     }));
   }
 
-  // const validateForm = (): boolean => {
-  //   const errors: { [key: string]: string } = {};
+  const validateForm = (): boolean => {
+    const errors: { [key: string]: string } = {};
 
-  //   if (!data.first.trim()) {
-  //     errors.first = 'First name is required';
-  //   } else if (data.first.length < 2) {
-  //     errors.first = 'First name must be at least 2 characters';
-  //   }
+    if (!data.first.trim()) {
+      errors.first = 'First name is required';
+    } else if (data.first.length < 2) {
+      errors.first = 'First name must be at least 2 characters';
+    }
 
-  //   if (!data.email.trim()) {
-  //     errors.email = 'Email is required';
-  //   } else if (!/\S+@\S+\.\S+/.test(data.email)) {
-  //     errors.email = 'Email is invalid';
-  //   }
+    if (!data.email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(data.email)) {
+      errors.email = 'Email is invalid';
+    }
 
-  //   if (!data.code.trim()) {
-  //     errors.code = 'Country code is required';
-  //   }
+    if (!data.code.trim()) {
+      errors.code = 'Country code is required';
+    }
 
-  //   if (!data.number.trim()) {
-  //     errors.number = 'Phone number is required';
-  //   }
+    if (!data.number.trim()) {
+      errors.number = 'Phone number is required';
+    }
 
-  //   setFormErrors(errors);
-  //   return Object.keys(errors).length === 0;
-  // };
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // if (!validateForm()) {
-    //   toast.error('Please fix the form errors before submitting');
-    //   return;
-    // }
+    if (!validateForm()) {
+      toast.error('Please fix the form errors before submitting');
+      return;
+    }
 
     const userData = {
       name: {
@@ -95,21 +102,22 @@ const RegistrationForm: React.FC = () => {
       phone: {
         code: data.code,
         number: data.number
-      }
+      },
+      password: data.password,
     }
 
     toast.promise(
       dispatch(register(userData))
         .unwrap()
         .then(() => {
-          dispatch(getCurrentUser());
-          dispatch(getCompany());
-          navigate("/");
+          // dispatch(getCurrentUser());
+          // dispatch(getCompany());
+          navigate("/login");
         }),
       {
-        loading: "Creating account and logging in with the credentials ...",
-        success: <b>Login Successfully!</b>,
-        error: <b>Could not Login.</b>,
+        loading: "Creating account with the credentials ...",
+        success: <b>Account Created Successfully!</b>,
+        error: <b>Could not create account.</b>,
       }
     );
   };
@@ -244,6 +252,49 @@ const RegistrationForm: React.FC = () => {
               numberLabel="Phone Number"
               numberPlaceholder="******7548"
             />
+
+            <TextField
+              onChange={changeHandler}
+              margin="normal"
+              fullWidth
+              required
+              name="password"
+              variant="outlined"
+              value={data.password}
+              label="Password"
+              type={showPassword ? "text" : "password"}
+              id="password"
+              placeholder="Password"
+              helperText={"Enter your password"}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 1,
+                }
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Lock />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    {showPassword ? (
+                      <VisibilityOff
+                        onClick={handleTogglePasswordVisibility}
+                        style={{ cursor: "pointer" }}
+                      />
+                    ) : (
+                      <Visibility
+                        onClick={handleTogglePasswordVisibility}
+                        style={{ cursor: "pointer" }}
+                      />
+                    )}
+                  </InputAdornment>
+                ),
+              }}
+            />
+
             <Button
               type="submit"
               fullWidth

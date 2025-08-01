@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AuthStates } from "@/utils/enums";
-import { deleteAccount, getCurrentCompany, getCurrentUser, login, logout, register, switchCompany } from "@/services/auth";
+import { deleteAccount, emailVerify, getCurrentCompany, getCurrentUser, login, logout, register, switchCompany } from "@/services/auth";
 import { GetCompany, UserSignUp } from "@/utils/types";
 
 // interface SignupData {
@@ -149,18 +149,18 @@ const authSlice = createSlice({
       })
 
       .addCase(register.pending, (state) => {
-        state.authState = AuthStates.INITIALIZING;
+        // state.authState = AuthStates.INITIALIZING;
         state.error = null;
         state.loading = true;
       })
-      .addCase(register.fulfilled, (state, action: PayloadAction<any>) => {
-        state.authState = AuthStates.AUTHENTICATED;
-        state.accessToken = action.payload.accessToken;
-        state.current_company_id = action.payload.current_company_id; // 👈 this!
+      .addCase(register.fulfilled, (state, ) => {
+        // state.authState = AuthStates.AUTHENTICATED;
+        // state.accessToken = action.payload.accessToken;
+        // state.current_company_id = action.payload.current_company_id; // 👈 this!
         state.loading = false;
       })
       .addCase(register.rejected, (state, action) => {
-        state.authState = AuthStates.ERROR;
+        // state.authState = AuthStates.ERROR;
         state.error = action.payload as string;
         state.loading = false;
       })
@@ -178,6 +178,18 @@ const authSlice = createSlice({
       })
       .addCase(logout.rejected, (state, action) => {
         state.authState = AuthStates.ERROR;
+        state.error = action.payload as string;
+        state.loading = false;
+      })
+      
+      .addCase(emailVerify.pending, (state) => {
+        state.error = null;
+        state.loading = true;
+      })
+      .addCase(emailVerify.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(emailVerify.rejected, (state, action) => {
         state.error = action.payload as string;
         state.loading = false;
       })

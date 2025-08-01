@@ -65,7 +65,8 @@ export interface UserSignUp {
     last: string,
   }
   email: string,
-  phone: PhoneNumber
+  phone: PhoneNumber,
+  password: string,
 }
 
 export interface PageMeta {
