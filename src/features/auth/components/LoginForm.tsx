@@ -111,10 +111,10 @@ const LoginForm: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const errors = validateForm();
 
-    if (Object.keys(errors).length > 0) {
-      setValidationErrors(errors);
+    if (!validateForm()) {
+      const firstError = Object.values(validationErrors)[0];
+      toast.error(firstError || "Please fill in all required fields correctly.");
       return;
     }
     setIsSubmitting(true);

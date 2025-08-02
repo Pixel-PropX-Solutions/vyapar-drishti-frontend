@@ -51,7 +51,7 @@ import toast from "react-hot-toast";
 
 const CustomerProfile: React.FC = () => {
     const { customer, loading, customerInvoices, customerInvoicesMeta } = useSelector((state: RootState) => state.customersLedger);
-    const { currentCompany, user, current_company_id } = useSelector((state: RootState) => state.auth);
+    const { user, current_company_id } = useSelector((state: RootState) => state.auth);
     const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
     const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
     const gst_enable:boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;

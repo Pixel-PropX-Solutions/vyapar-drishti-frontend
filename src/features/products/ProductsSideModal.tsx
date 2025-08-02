@@ -791,7 +791,7 @@ const ProductsSideModal = (props: SideModalProps) => {
                 open={openCategoryModal}
                 onClose={() => setOpenCategoryModal(false)}
                 onCreated={async (newCategory) => {
-                    dispatch(viewAllCategories(currentCompany?._id ?? ""));
+                    dispatch(viewAllCategories(currentCompanyId ?? ""));
                     setSelectedCategoryOption({
                         label: newCategory.name,
                         value: newCategory.name,
@@ -806,7 +806,7 @@ const ProductsSideModal = (props: SideModalProps) => {
                 open={openGroupModal}
                 onClose={() => setOpenGroupModal(false)}
                 onCreated={async (newGroup) => {
-                    dispatch(viewAllInventoryGroups(currentCompany?._id ?? ""));
+                    dispatch(viewAllInventoryGroups(currentCompanyId ?? ""));
                     setSelectedGroupOption({
                         label: newGroup.name,
                         value: newGroup.name,

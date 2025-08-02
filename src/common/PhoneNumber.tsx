@@ -126,7 +126,11 @@ const PhoneNumber: React.FC<PhoneNumberProps> = ({
                 required={required}
                 margin="normal"
                 fullWidth
-                sx={{ width: numberWidth }}
+                sx={{
+                    width: numberWidth, '& .MuiOutlinedInput-root': {
+                        borderRadius: 1,
+                    }
+                }}
                 id="number"
                 label={numberLabel}
                 size={size}
@@ -145,11 +149,6 @@ const PhoneNumber: React.FC<PhoneNumberProps> = ({
                         </InputAdornment>
                     ),
                 }}
-                 sx={{
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 1,
-                }
-              }}
             />
         </Box>
     );
