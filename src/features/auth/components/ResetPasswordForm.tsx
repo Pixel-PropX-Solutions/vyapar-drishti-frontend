@@ -14,6 +14,8 @@ import {
     Fade,
     Paper,
     useTheme,
+    useMediaQuery,
+    Theme,
 } from "@mui/material";
 import {
     Person,
@@ -49,6 +51,8 @@ const ResetPasswordForm: React.FC = () => {
     const [searchParams] = useSearchParams();
     const token = searchParams.get('token');
     const email = searchParams.get('email');
+    const isTablet = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
+    const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
 
@@ -229,7 +233,7 @@ const ResetPasswordForm: React.FC = () => {
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                padding: 4,
+                padding: { xs: 1, sm: 2, md: 3, lg: 4 },
                 minHeight: "100vh",
                 backgroundColor: "background.default",
             }}
@@ -239,7 +243,7 @@ const ResetPasswordForm: React.FC = () => {
                 <Paper
                     elevation={0}
                     sx={{
-                        padding: 4,
+                        padding: { xs: 2, sm: 2, md: 3, lg: 4 },
                         borderRadius: 3,
                         backgroundColor: "background.paper",
                         border: "1px solid",
@@ -266,21 +270,21 @@ const ResetPasswordForm: React.FC = () => {
                                 src={Logo}
                                 alt="Logo"
                                 style={{
-                                    height: "50px",
+                                    height: isTablet ? '50px' : '40px',
                                     borderRadius: "50%",
                                 }}
                             />
                             <img
                                 src={logoText}
                                 alt="Logo Text"
-                                style={{ height: "40px" }}
+                                style={{ height: isTablet ? '40px' : isMobile ? '35px' : '40px', }}
                             />
                         </Box>
 
                         {/* Header */}
                         <Box sx={{ textAlign: "center", mb: 2 }}>
                             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", }}>
-                                <Security color="primary" sx={{ fontSize: 40, }} />
+                                <Security color="primary" sx={{ fontSize: { xs: 30, sm: 40,} }} />
                             </Box>
                             <Typography component="h1" variant="h4" fontWeight="bold" gutterBottom>
                                 Reset Password

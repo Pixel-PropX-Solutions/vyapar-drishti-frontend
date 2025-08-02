@@ -1,5 +1,5 @@
 import React, { useEffect, useId, useRef, useState } from "react";
-import { Box, Grid } from "@mui/material";
+import { Box, Grid, Theme, useMediaQuery } from "@mui/material";
 import centerImage from "../assets/herosection.png";
 import Logo1 from "../assets/1.png";
 import Logo2 from "../assets/2.png";
@@ -16,6 +16,7 @@ import ResetPasswordForm from "@/features/auth/components/ResetPasswordForm";
 
 const ResetPassword: React.FC = () => {
   const logoRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const isTablet = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
   const containerRef = useRef<HTMLDivElement>(null);
   const [paths, setPaths] = useState<string[]>([]);
   const [path, setPath] = useState<string>("");
@@ -173,11 +174,11 @@ const ResetPassword: React.FC = () => {
         sx={{
           background: "linear-gradient(to right bottom, #26d2d2, #006E89, #004B6B)",
           color: "white",
-          display: "flex",
+          display: { sm: 'none', xs: 'none', md: 'flex' },
           width: "100%",
           zIndex: 1,
           justifyContent: "center",
-          padding: "0 40px",
+          padding: { xs: 0, sm: 0, md: 0, lg: "0 40px", },
           flexDirection: "column",
         }}
       >
@@ -189,11 +190,11 @@ const ResetPassword: React.FC = () => {
             display: "flex",
             width: '100%',
             margin: '0 auto',
-            marginLeft: '130px',
+            marginLeft: isTablet ? '130px' : '20px',
             justifyContent: "space-between",
             alignItems: "center",
             flexDirection: "row",
-            columnGap: "130px",
+            columnGap: isTablet ? '130px' : '20px',
           }}>
           <svg
             fill="none"
@@ -338,8 +339,8 @@ const ResetPassword: React.FC = () => {
             {[Logo1, Logo2, Logo3, Logo4, Logo5, Logo6, Logo7].map((logo, index) => (
               <div key={index} ref={(el) => (logoRefs.current[index] = el)} style={{
                 zIndex: 10,
-                height: "70px",
-                width: "70px",
+                height: isTablet ? '70px' : '40px',
+                width: isTablet ? '70px' : '40px',
                 marginTop: "10px",
                 marginBottom: "10px",
               }}>
@@ -363,8 +364,8 @@ const ResetPassword: React.FC = () => {
           <div
             style={{
               zIndex: 100,
-              height: "100px",
-              width: "100px",
+              height: isTablet ? '100px' : '50px',
+              width: isTablet ? '100px' : '50px',
               objectFit: "contain",
             }}
             ref={(el) => (logoRefs.current[7] = el)}>
@@ -373,7 +374,7 @@ const ResetPassword: React.FC = () => {
               alt="Logo"
               style={{
                 borderRadius: "50%",
-                height: "100px",
+                height: isTablet ? '100px' : '50px',
                 width: "fit-content",
                 // aspectRatio: "1/1",
                 objectFit: "contain",
@@ -389,8 +390,8 @@ const ResetPassword: React.FC = () => {
               position: "relative",
               display: "flex",
               flexDirection: "column",
-              height: "200px",
-              width: "200px",
+              height: isTablet ? '200px' : '150px',
+              width: isTablet ? '200px' : '150px',
               zIndex: 100,
               overflow: "visible",
             }}
@@ -404,8 +405,8 @@ const ResetPassword: React.FC = () => {
                 left: "0",
                 filter: "drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.25))",
                 borderRadius: "10px",
-                height: "200px",
-                width: "200px",
+                height: isTablet ? '200px' : '150px',
+                width: isTablet ? '200px' : '150px',
                 objectFit: "contain",
               }}
             />
@@ -416,6 +417,7 @@ const ResetPassword: React.FC = () => {
       {/* Right Section */}
       <Grid
         item
+        xs={12}
         sm={12}
         md={6}
         sx={{
