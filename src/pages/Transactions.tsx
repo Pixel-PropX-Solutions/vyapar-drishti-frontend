@@ -62,7 +62,9 @@ const Transactions: React.FC = () => {
     // const [invoiceId, setInvoiceId] = useState<string>('');
     const { invoices, loading, pageMeta, invoiceGroups } = useSelector((state: RootState) => state.invoice);
     const { user, current_company_id } = useSelector((state: RootState) => state.auth);
-    const currentCompanyDetails = user?.company?.find((c: any) => c._id === current_company_id);
+    const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
+    
+    const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
 
     const [state, setState] = useState({
         searchQuery: "",
@@ -83,7 +85,7 @@ const Transactions: React.FC = () => {
         dispatch(
             viewAllInvoices({
                 searchQuery: searchQuery,
-                company_id: current_company_id || "",
+                company_id: currentCompanyId || "",
                 type: type,
                 start_date: startDate.getFullYear().toString() + '-' + (startDate.getMonth() + 1).toString().padStart(2, '0') + '-' + startDate.getDate().toString().padStart(2, '0'),
                 end_date: endDate.getFullYear().toString() + '-' + (endDate.getMonth() + 1).toString().padStart(2, '0') + '-' + endDate.getDate().toString().padStart(2, '0'),
@@ -93,13 +95,13 @@ const Transactions: React.FC = () => {
                 sortOrder: sortOrder,
             })
         )
-    }, [dispatch, searchQuery, current_company_id, type, startDate, endDate, page, rowsPerPage, sortField, sortOrder]);
+    }, [dispatch, searchQuery, currentCompanyId, type, startDate, endDate, page, rowsPerPage, sortField, sortOrder]);
 
     // Fetch stockists data from API
     useEffect(() => {
         fetchIvoices();
-        dispatch(getAllInvoiceGroups(current_company_id || ""));
-    }, [searchQuery, page, rowsPerPage, is_deleted, sortField, filterState, sortOrder, dispatch, fetchIvoices, current_company_id]);
+        dispatch(getAllInvoiceGroups(currentCompanyId || ""));
+    }, [searchQuery, page, rowsPerPage, is_deleted, sortField, filterState, sortOrder, dispatch, fetchIvoices, currentCompanyId]);
 
     // Handle sorting change
     const handleSortRequest = (field: CustomerSortField) => {
@@ -157,7 +159,7 @@ const Transactions: React.FC = () => {
     //     if (invoice.voucher_type === 'Receipt') {
     //         dispatch(printRecieptInvoices({
     //             vouchar_id: invoice._id,
-    //             company_id: current_company_id || "",
+    //             company_id: currentCompanyId || "",
     //         })).then((response) => {
     //             if (response.meta.requestStatus === 'fulfilled') {
     //                 const payload = response.payload as { invoceHtml: string };
@@ -175,7 +177,7 @@ const Transactions: React.FC = () => {
     //     } else if (invoice.voucher_type === 'Payment') {
     //         dispatch(printPaymentInvoices({
     //             vouchar_id: invoice._id,
-    //             company_id: current_company_id || "",
+    //             company_id: currentCompanyId || "",
     //         })).then((response) => {
     //             if (response.meta.requestStatus === 'fulfilled') {
     //                 const payload = response.payload as { invoceHtml: string };
@@ -236,7 +238,7 @@ const Transactions: React.FC = () => {
                                         startIcon={<AddCircleOutlineIcon />}
                                         color="success"
                                         onClick={() => {
-                                            if (!currentCompanyDetails?.id) {
+                                            if (!currentCompanyDetails?._id) {
                                                 toast.error('Please create a company first.');
                                                 return;
                                             }
@@ -261,7 +263,7 @@ const Transactions: React.FC = () => {
                                         startIcon={<RemoveCircleOutlineIcon />}
                                         color="error"
                                         onClick={() => {
-                                            if (!currentCompanyDetails?.id) {
+                                            if (!currentCompanyDetails?._id) {
                                                 toast.error('Please create a company first.');
                                                 return;
                                             }
@@ -567,7 +569,7 @@ const Transactions: React.FC = () => {
                                                         startIcon={<AddCircleOutlineIcon />}
                                                         color="success"
                                                         onClick={() => {
-                                                            if (!currentCompanyDetails?.id) {
+                                                            if (!currentCompanyDetails?._id) {
                                                                 toast.error('Please create a company first.');
                                                                 return;
                                                             }
@@ -592,7 +594,7 @@ const Transactions: React.FC = () => {
                                                         startIcon={<RemoveCircleOutlineIcon />}
                                                         color="error"
                                                         onClick={() => {
-                                                            if (!currentCompanyDetails?.id) {
+                                                            if (!currentCompanyDetails?._id) {
                                                                 toast.error('Please create a company first.');
                                                                 return;
                                                             }

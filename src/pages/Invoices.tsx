@@ -60,8 +60,10 @@ const Invoices: React.FC = () => {
   const [downloadHtml, setDownloadHtml] = useState<string>('');
   const [customerName, setCustomerName] = useState<string>('');
   const { invoices, loading, pageMeta, invoiceGroups } = useSelector((state: RootState) => state.invoice);
-  const { currentCompany, user, current_company_id } = useSelector((state: RootState) => state.auth);
-  const currentCompanyDetails = user?.company?.find((c: any) => c._id === current_company_id);
+  const { user, current_company_id } = useSelector((state: RootState) => state.auth);
+  const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
+  const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
+  const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
 
   const [state, setState] = useState({
     searchQuery: "",
@@ -82,7 +84,7 @@ const Invoices: React.FC = () => {
     dispatch(
       viewAllInvoices({
         searchQuery: searchQuery,
-        company_id: currentCompany?._id || "",
+        company_id: currentCompanyId || "",
         type: type,
         start_date: startDate.getFullYear().toString() + '-' + (startDate.getMonth() + 1).toString().padStart(2, '0') + '-' + startDate.getDate().toString().padStart(2, '0'),
         end_date: endDate.getFullYear().toString() + '-' + (endDate.getMonth() + 1).toString().padStart(2, '0') + '-' + endDate.getDate().toString().padStart(2, '0'),
@@ -92,16 +94,16 @@ const Invoices: React.FC = () => {
         sortOrder: sortOrder,
       })
     )
-  }, [dispatch, searchQuery, currentCompany?._id, type, startDate, endDate, page, rowsPerPage, sortField, sortOrder]);
+  }, [dispatch, searchQuery, currentCompanyId, type, startDate, endDate, page, rowsPerPage, sortField, sortOrder]);
 
   // Fetch Invoices
   useEffect(() => {
     fetchIvoices();
-  }, [searchQuery, page, rowsPerPage, is_deleted, sortField, filterState, sortOrder, dispatch, fetchIvoices, currentCompany?._id]);
+  }, [searchQuery, page, rowsPerPage, is_deleted, sortField, filterState, sortOrder, dispatch, fetchIvoices, currentCompanyId]);
 
   useEffect(() => {
-    dispatch(getAllInvoiceGroups(currentCompany?._id || ""));
-  }, [currentCompany?._id, dispatch]);
+    dispatch(getAllInvoiceGroups(currentCompanyId || ""));
+  }, [currentCompanyId, dispatch]);
 
   // Handle sorting change
   const handleSortRequest = (field: CustomerSortField) => {
@@ -158,15 +160,15 @@ const Invoices: React.FC = () => {
 
   // Handle Delete Invoice details
   const handleDeleteInvoice = (inv: GetAllVouchars) => {
-    if (currentCompanyDetails?.company_settings?.features?.enable_gst) {
-      dispatch(deleteGSTInvoice({ vouchar_id: inv._id, company_id: currentCompanyDetails._id })).unwrap().then(() => {
+    if (gst_enable) {
+      dispatch(deleteGSTInvoice({ vouchar_id: inv._id, company_id: currentCompanyId })).unwrap().then(() => {
         fetchIvoices();
         toast.success("Invoice deleted successfully!");
       }).catch((error) => {
         toast.error(error || 'An unexpected error occurred. Please try again later.');
       })
     } else {
-      dispatch(deleteInvoice({ vouchar_id: inv._id, company_id: currentCompanyDetails._id })).unwrap().then(() => {
+      dispatch(deleteInvoice({ vouchar_id: inv._id, company_id: currentCompanyId })).unwrap().then(() => {
         toast.success("Invoice deleted successfully!");
         fetchIvoices();
       }).catch((error) => {
@@ -177,10 +179,10 @@ const Invoices: React.FC = () => {
 
   const handlePrintInvoice = (invoice: GetAllVouchars) => {
     if (invoice.voucher_type === 'Sales' || invoice.voucher_type === 'Purchase') {
-      if (currentCompanyDetails?.company_settings?.features?.enable_gst) {
+      if (gst_enable) {
         dispatch(printGSTInvoices({
           vouchar_id: invoice._id,
-          company_id: currentCompany?._id || "",
+          company_id: currentCompanyId || "",
         })).then((response) => {
           if (response.meta.requestStatus === 'fulfilled') {
             const payload = response.payload as { paginated_data: Array<{ html: string, page_number: number }>, complete_data: string, download_data: string };
@@ -206,7 +208,7 @@ const Invoices: React.FC = () => {
       } else {
         dispatch(printInvoices({
           vouchar_id: invoice._id,
-          company_id: currentCompany?._id || "",
+          company_id: currentCompanyId || "",
         })).then((response) => {
           if (response.meta.requestStatus === 'fulfilled') {
             const payload = response.payload as { paginated_data: Array<{ html: string, page_number: number }>, complete_data: string, download_data: string };
@@ -278,7 +280,7 @@ const Invoices: React.FC = () => {
                     startIcon={<AddCircleOutlineIcon />}
                     color="success"
                     onClick={() => {
-                      if (!currentCompanyDetails?.id) {
+                      if (!currentCompanyDetails?._id) {
                         toast.error('Please create a company first.');
                         return;
                       }
@@ -303,7 +305,7 @@ const Invoices: React.FC = () => {
                     startIcon={<RemoveCircleOutlineIcon />}
                     color="error"
                     onClick={() => {
-                      if (!currentCompanyDetails?.id) {
+                      if (!currentCompanyDetails?._id) {
                         toast.error('Please create a company first.');
                         return;
                       }
@@ -600,7 +602,7 @@ const Invoices: React.FC = () => {
                             startIcon={<AddCircleOutlineIcon />}
                             color="success"
                             onClick={() => {
-                              if (!currentCompanyDetails?.id) {
+                              if (!currentCompanyDetails?._id) {
                                 toast.error('Please create a company first.');
                                 return;
                               }
@@ -625,7 +627,7 @@ const Invoices: React.FC = () => {
                             startIcon={<RemoveCircleOutlineIcon />}
                             color="error"
                             onClick={() => {
-                              if (!currentCompanyDetails?.id) {
+                              if (!currentCompanyDetails?._id) {
                                 toast.error('Please create a company first.');
                                 return;
                               }

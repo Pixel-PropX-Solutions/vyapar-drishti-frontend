@@ -86,7 +86,9 @@ const ProductsListing: React.FC = () => {
   const [refreshKey, setRefreshKey] = useState<number>(0);
   const [drawer, setDrawer] = useState<boolean>(false);
   const { user, current_company_id } = useSelector((state: RootState) => state.auth);
-  const currentCompanyDetails = user?.company?.find((c: any) => c._id === current_company_id);
+  const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
+  const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
+  console.log("Current Company Details", currentCompanyDetails)
   const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
   const [selectedProduct, setSelectedProduct] = useState<ProductUpdate | null>(null);
   const [openCategoryModal, setOpenCategoryModal] = useState<boolean>(false);
@@ -295,7 +297,7 @@ const ProductsListing: React.FC = () => {
                 color="primary"
                 startIcon={<AddCircleIcon fontSize="large" />}
                 onClick={() => {
-                  if (!currentCompanyDetails?.id) {
+                  if (!currentCompanyDetails?._id) {
                     toast.error('Please create a company first.');
                     return;
                   }
@@ -602,7 +604,7 @@ const ProductsListing: React.FC = () => {
                       <Button
                         variant="contained"
                         onClick={() => {
-                          if (!currentCompanyDetails?.id) {
+                          if (!currentCompanyDetails?._id) {
                             toast.error('Please create a company first.');
                             return;
                           }
@@ -695,7 +697,7 @@ const ProductsListing: React.FC = () => {
                   <Button
                     variant="contained"
                     onClick={() => {
-                      if (!currentCompanyDetails?.id) {
+                      if (!currentCompanyDetails?._id) {
                         toast.error('Please create a company first.');
                         return;
                       }
@@ -791,7 +793,7 @@ const ProductsListing: React.FC = () => {
                   <Button
                     variant="contained"
                     onClick={() => {
-                      if (!currentCompanyDetails?.id) {
+                      if (!currentCompanyDetails?._id) {
                         toast.error('Please create a company first.');
                         return;
                       }

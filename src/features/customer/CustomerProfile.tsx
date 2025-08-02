@@ -52,7 +52,9 @@ import toast from "react-hot-toast";
 const CustomerProfile: React.FC = () => {
     const { customer, loading, customerInvoices, customerInvoicesMeta } = useSelector((state: RootState) => state.customersLedger);
     const { currentCompany, user, current_company_id } = useSelector((state: RootState) => state.auth);
-    const currentCompanyDetails = user?.company?.find((c: any) => c._id === current_company_id);
+    const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
+    const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
+    const gst_enable:boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const { customer_id } = useParams();
@@ -63,7 +65,7 @@ const CustomerProfile: React.FC = () => {
     const fetchCustomersInvoices = useCallback(async () => {
         dispatch(getCustomerInvoices({
             searchQuery: debouncedQuery,
-            company_id: currentCompany?._id || "",
+            company_id: currentCompanyId || "",
             customer_id: customer_id || "",
             pageNumber: page,
             type,
@@ -73,7 +75,7 @@ const CustomerProfile: React.FC = () => {
             start_date: new Date(startDate).toLocaleDateString(),
             end_date: new Date(endDate).toLocaleDateString(),
         }));
-    }, [currentCompany?._id, customer_id, dispatch, endDate, page, rowsPerPage, debouncedQuery, sortField, sortOrder, startDate, type]);
+    }, [currentCompanyId, customer_id, dispatch, endDate, page, rowsPerPage, debouncedQuery, sortField, sortOrder, startDate, type]);
 
     useEffect(() => {
         if (customer_id) {
@@ -125,15 +127,15 @@ const CustomerProfile: React.FC = () => {
 
     // Handle Delete Invoice details
     const handleDeleteInvoice = (invId: string) => {
-        if (currentCompanyDetails?.company_settings?.features?.enable_gst) {
-            dispatch(deleteGSTInvoice({ vouchar_id: invId, company_id: currentCompanyDetails._id })).unwrap().then(() => {
+        if (gst_enable) {
+            dispatch(deleteGSTInvoice({ vouchar_id: invId, company_id: currentCompanyId })).unwrap().then(() => {
                 // fetchIvoices();
                 toast.success("Invoice deleted successfully!");
             }).catch((error) => {
                 toast.error(error || 'An unexpected error occurred. Please try again later.');
             })
         } else {
-            dispatch(deleteInvoice({ vouchar_id: invId, company_id: currentCompanyDetails._id })).unwrap().then(() => {
+            dispatch(deleteInvoice({ vouchar_id: invId, company_id: currentCompanyId })).unwrap().then(() => {
                 toast.success("Invoice deleted successfully!");
                 // fetchIvoices();
             }).catch((error) => {

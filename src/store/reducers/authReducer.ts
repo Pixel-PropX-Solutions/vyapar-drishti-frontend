@@ -58,6 +58,10 @@ const authSlice = createSlice({
       state.authState = action.payload.authState ?? state.authState;
       state.error = action.payload.error ?? state.error;
     },
+    setCurrentCompanyId(state, action: PayloadAction<string | null>) {
+      state.current_company_id = action.payload;
+      localStorage.setItem("current_company_id", action.payload || '');
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -114,6 +118,10 @@ const authSlice = createSlice({
       })
       .addCase(getCurrentUser.fulfilled, (state, action: PayloadAction<any>) => {
         state.user = action.payload.user;
+        if (state.current_company_id === null) {
+          state.current_company_id = action.payload.user?.user_settings?.current_company_id;
+          localStorage.setItem("current_company_id", action.payload.user?.user_settings?.current_company_id || '');
+        }
         // state.authState = AuthStates.AUTHENTICATED;
         state.isUserFetched = true;
 
@@ -144,7 +152,7 @@ const authSlice = createSlice({
         state.error = null;
         state.loading = true;
       })
-      .addCase(register.fulfilled, (state, ) => {
+      .addCase(register.fulfilled, (state,) => {
         // state.authState = AuthStates.AUTHENTICATED;
         // state.accessToken = action.payload.accessToken;
         // state.current_company_id = action.payload.current_company_id; // 👈 this!
@@ -172,7 +180,7 @@ const authSlice = createSlice({
         state.error = action.payload as string;
         state.loading = false;
       })
-      
+
       .addCase(emailVerify.pending, (state) => {
         state.error = null;
         state.loading = true;
@@ -187,6 +195,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { setUser, setSignupData } =
+export const { setUser, setSignupData, setCurrentCompanyId } =
   authSlice.actions;
 export default authSlice.reducer;

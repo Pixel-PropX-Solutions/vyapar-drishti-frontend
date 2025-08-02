@@ -96,8 +96,9 @@
 //     const [isDragActive, setIsDragActive] = useState(false);
 //     const [imagePreview, setImagePreview] = useState<string | null>(null);
 //     const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-//     const { currentCompany, user, current_company_id } = useSelector((state: RootState) => state.auth);
-//     const currentCompanyDetails = user?.company?.find((c :any) => c._id === current_company_id);
+//     const { user, current_company_id } = useSelector((state: RootState) => state.auth);
+//     const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
+//     const currentCompanyDetails = user?.company?.find((c :any) => c._id === currentCompanyId);
 //     const { accountingGroups } = useSelector((state: RootState) => state.accountingGroup);
 //     const [openGroupModal, setOpenGroupModal] = useState(false);
 //     const [selectedTypeOption, setSelectedTypeOption] = useState<{
@@ -456,8 +457,8 @@
 //         } else if (open && !cred) {
 //             resetForm();
 //         }
-//         dispatch(viewAllAccountingGroups(currentCompany?._id || ''));
-//     }, [open, cred, dispatch, currentCompany?._id]);
+//         dispatch(viewAllAccountingGroups(currentCompanyId || ''));
+//     }, [open, cred, dispatch, currentCompanyId]);
 
 //     useEffect(() => {
 //         setIsFormValid(validateForm());
@@ -473,7 +474,7 @@
 //         const sanitizedData: Record<string, string | File | undefined> = {
 //             name: data.name?.trim(),
 //             user_id: user?._id,
-//             company_id: currentCompany?._id,
+//             company_id: currentCompanyId,
 //         };
 
 //         if (data.email?.trim())

@@ -79,8 +79,9 @@ const ProductsSideModal = (props: SideModalProps) => {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const { setDrawer, drawer, setRefreshKey, product, setSelectedProduct } = props;
-    const { user, currentCompany, current_company_id } = useSelector((state: RootState) => state.auth);
-    const currentCompanyDetails = user?.company?.find((c: any) => c._id === current_company_id);
+    const { user, current_company_id } = useSelector((state: RootState) => state.auth);
+    const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
+    const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
     const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
 
 
@@ -257,7 +258,7 @@ const ProductsSideModal = (props: SideModalProps) => {
                 stock_item_name: data.stock_item_name.trim(),
                 unit: data.unit.trim(),
                 unit_id: data.unit_id.trim(),
-                company_id: (currentCompany?._id || '').trim(),
+                company_id: (currentCompanyId || '').trim(),
                 is_deleted: data.is_deleted === false,
                 gst_hsn_code: data.gst_hsn_code.trim(),
                 gst_taxability: data.gst_taxability.trim(),
@@ -417,12 +418,12 @@ const ProductsSideModal = (props: SideModalProps) => {
 
     // Fetch categories
     useEffect(() => {
-        dispatch(viewAllCategories(currentCompany?._id ?? ''));
-    }, [currentCompany?._id, dispatch]);
+        dispatch(viewAllCategories(currentCompanyId ?? ''));
+    }, [currentCompanyId, dispatch]);
 
     useEffect(() => {
-        dispatch(viewAllInventoryGroups(currentCompany?._id ?? ''));
-    }, [currentCompany?._id, dispatch]);
+        dispatch(viewAllInventoryGroups(currentCompanyId ?? ''));
+    }, [currentCompanyId, dispatch]);
 
     // Handle category selection
     useEffect(() => {

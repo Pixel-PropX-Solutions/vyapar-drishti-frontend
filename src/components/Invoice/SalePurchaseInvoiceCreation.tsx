@@ -128,7 +128,9 @@ export default function SalePurchaseInvoiceCreation() {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const { currentCompany, user, current_company_id } = useSelector((state: RootState) => state.auth);
-    const currentCompanyDetails = user?.company?.find((c: any) => c._id === current_company_id);
+    const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
+    
+    const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
     const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
     const { invoiceType_id } = useSelector((state: RootState) => state.invoice);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -299,16 +301,16 @@ export default function SalePurchaseInvoiceCreation() {
     };
 
     useEffect(() => {
-        if (current_company_id) {
+        if (currentCompanyId) {
             setData(prev => ({
                 ...prev,
-                company_id: current_company_id,
+                company_id: currentCompanyId,
                 voucher_type: invoiceType,
             }));
         }
 
         dispatch(viewAllCustomerWithType({
-            company_id: current_company_id || '',
+            company_id: currentCompanyId || '',
             customerType: invoiceType === 'Sales' ? 'Debtors' : 'Creditors',
         })).then((response) => {
             if (response.meta.requestStatus === 'fulfilled') {
@@ -322,7 +324,7 @@ export default function SalePurchaseInvoiceCreation() {
         });
 
         dispatch(getInvoiceCounter({
-            company_id: current_company_id || '',
+            company_id: currentCompanyId || '',
             voucher_type: invoiceType,
         })).then((response) => {
             if (response.meta.requestStatus === 'fulfilled') {
@@ -337,7 +339,7 @@ export default function SalePurchaseInvoiceCreation() {
             toast.error(error || "An unexpected error occurred. Please try again later.");
         });
 
-        dispatch(viewProductsWithId(current_company_id || '')).then((response) => {
+        dispatch(viewProductsWithId(currentCompanyId || '')).then((response) => {
             if (response.meta.requestStatus === 'fulfilled') {
                 const products = response.payload;
                 setItemsList(
@@ -354,7 +356,7 @@ export default function SalePurchaseInvoiceCreation() {
         }).catch((error) => {
             toast.error(error || "An unexpected error occurred. Please try again later.");
         });
-    }, [dispatch, current_company_id, user, invoiceType]);
+    }, [dispatch, currentCompanyId, user, invoiceType]);
 
 
     return (

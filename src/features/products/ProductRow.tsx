@@ -39,8 +39,9 @@ interface ProductRowProps {
 export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdit, onView, index }) => {
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
-    const { user } = useSelector((state: RootState) => state.auth);
-    const currentCompanyDetails = user?.company?.find((c: any) => c._id == user?.user_settings?.current_company_id);
+    const { user, current_company_id } = useSelector((state: RootState) => state.auth);
+    const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
+    const currentCompanyDetails = user?.company?.find((c: any) => c._id == currentCompanyId);
     const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [isHovered, setIsHovered] = useState(false);

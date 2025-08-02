@@ -70,6 +70,7 @@ import { ProfileHeader } from "@/common/ProfileHeader";
 import { CompanyRow } from "@/common/CompanyRow";
 import { GetCompany } from "@/utils/types";
 import toast from "react-hot-toast";
+import { setCurrentCompanyId } from "@/store/reducers/authReducer";
 
 // Main Enhanced Component
 const ProfilePage: React.FC = () => {
@@ -77,7 +78,10 @@ const ProfilePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { mode, setMode } = useColorScheme();
 
-  const { user, current_company_id } = useSelector((state: RootState) => state.auth)
+  const { user, current_company_id } = useSelector((state: RootState) => state.auth);
+  const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
+    
+  const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
   const { companies } = useSelector((state: RootState) => state.company)
 
   const [isUserEditing, setIsUserEditing] = useState(false);
@@ -86,9 +90,9 @@ const ProfilePage: React.FC = () => {
   const [editingCompany, setEditingCompany] = useState(null as GetCompany | null);
   const [darkMode, setDarkMode] = useState(false);
   // const [notifications, setNotifications] = useState({
-  //   email: true,
-  //   push: false,
-  //   sms: true,
+    //   email: true,
+    //   push: false,
+    //   sms: true,
   // });
   const [tabValue, setTabValue] = useState(0);
 
@@ -110,6 +114,8 @@ const ProfilePage: React.FC = () => {
       .unwrap()
       .then(() => {
         fetchCompleteData();
+        localStorage.removeItem("current_company_id");
+        setCurrentCompanyId(null);
         toast.success('Company deleted successfully')
       }).catch((error) => {
         toast.error(error || "An unexpected error occurred. Please try again later.");
@@ -160,7 +166,6 @@ const ProfilePage: React.FC = () => {
     fetchCompanyData();
   }, [fetchCompanyData]);
 
-  const currentCompanyDetails = user?.company?.find((c: any) => c._id === current_company_id);
 
   return (
     <Box

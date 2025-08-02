@@ -68,7 +68,8 @@ const Inventory: React.FC = () => {
 
     const { InventoryItems, inventoryPageMeta } = useSelector((state: RootState) => state.inventory);
     const { user, current_company_id } = useSelector((state: RootState) => state.auth);
-    const currentCompanyDetails = user?.company?.find((c: any) => c._id === current_company_id);
+    const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
+    const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
     const isInventoryFetched = useRef(false);
     const [debounceQuery, setDebounceQuery] = useState('');
     const [summaryStats, setSummaryStats] = useState({
@@ -109,14 +110,6 @@ const Inventory: React.FC = () => {
             sortField: "created_at" as SortField,
             sortOrder: "asc" as SortOrder,
         });
-        // setActiveFilters([]);
-
-        // Show feedback for reset
-        // setNotification({
-        //     open: true,
-        //     message: 'Filters have been reset',
-        //     severity: 'info'
-        // });
     }, []);
 
     const handleChangePage = (_: React.ChangeEvent<unknown>, newPage: number) => {

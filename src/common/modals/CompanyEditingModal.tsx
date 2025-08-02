@@ -311,7 +311,6 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
     };
 
     useEffect(() => {
-        console.log("CompanyEditingModal mounted", company);
         if (open && company) {
             setData({
                 pinCode: company.pinCode || '',
@@ -414,7 +413,8 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
         else {
             await dispatch(createCompany(formData))
                 .unwrap()
-                .then(() => {
+                .then((res) => {
+                    console.log("Company Create Response", res);
                     setIsLoading(false);
                     onClose();
                     if (onCreated)

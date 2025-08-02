@@ -49,7 +49,8 @@ const CustomerLedger: React.FC = () => {
   const { customers, pageMeta, loading } = useSelector((state: RootState) => state.customersLedger);
   const { accountingGroups } = useSelector((state: RootState) => state.accountingGroup);
   const { user, current_company_id } = useSelector((state: RootState) => state.auth);
-  const currentCompanyDetails = user?.company?.find((c: any) => c._id === current_company_id);
+  const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
+  const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
   const navigate = useNavigate();
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
@@ -73,7 +74,7 @@ const CustomerLedger: React.FC = () => {
       viewAllCustomer({
         searchQuery: searchQuery,
         filterState: filterState,
-        company_id: current_company_id || "",
+        company_id: currentCompanyId || "",
         type: type,
         is_deleted: is_deleted,
         pageNumber: page,
@@ -82,7 +83,7 @@ const CustomerLedger: React.FC = () => {
         sortOrder: sortOrder,
       })
     )
-  }, [dispatch, searchQuery, filterState, type, current_company_id, is_deleted, page, rowsPerPage, sortField, sortOrder]);
+  }, [dispatch, searchQuery, filterState, type, currentCompanyId, is_deleted, page, rowsPerPage, sortField, sortOrder]);
 
   useEffect(() => {
     fetchCustomers();
@@ -109,8 +110,8 @@ const CustomerLedger: React.FC = () => {
   }, [debouncedQuery, page, rowsPerPage, is_deleted, sortField, filterState, sortOrder, dispatch, fetchCustomers]);
 
   useEffect(() => {
-    dispatch(viewAllAccountingGroups(current_company_id || ""));
-  }, [current_company_id, dispatch])
+    dispatch(viewAllAccountingGroups(currentCompanyId || ""));
+  }, [currentCompanyId, dispatch])
 
 
   // Handle sorting change
@@ -187,7 +188,7 @@ const CustomerLedger: React.FC = () => {
                   startIcon={<AddCircleOutline />}
                   color="success"
                   onClick={() => {
-                    if (!currentCompanyDetails?.id) {
+                    if (!currentCompanyDetails?._id) {
                       toast.error('Please create a company first.');
                       return;
                     }
@@ -212,7 +213,7 @@ const CustomerLedger: React.FC = () => {
                   startIcon={<AddCircleOutline />}
                   color="error"
                   onClick={() => {
-                    if (!currentCompanyDetails?.id) {
+                    if (!currentCompanyDetails?._id) {
                       toast.error('Please create a company first.');
                       return;
                     }
@@ -498,7 +499,7 @@ const CustomerLedger: React.FC = () => {
                           startIcon={<AddCircleOutline />}
                           color="success"
                           onClick={() => {
-                            if (!currentCompanyDetails?.id) {
+                            if (!currentCompanyDetails?._id) {
                               toast.error('Please create a company first.');
                               return;
                             }
@@ -523,7 +524,7 @@ const CustomerLedger: React.FC = () => {
                           startIcon={<AddCircleOutline />}
                           color="error"
                           onClick={() => {
-                            if (!currentCompanyDetails?.id) {
+                            if (!currentCompanyDetails?._id) {
                               toast.error('Please create a company first.');
                               return;
                             }

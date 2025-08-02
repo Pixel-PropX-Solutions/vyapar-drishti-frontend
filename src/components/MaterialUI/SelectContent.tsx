@@ -35,8 +35,10 @@ const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
 export default function SelectContent() {
   const dispatch = useDispatch<AppDispatch>();
   const [isCompanyEditing, setIsCompanyEditing] = useState(false);
-  const user = useSelector((state: RootState) => state.auth.user);
-  const { current_company_id } = useSelector((state: RootState) => state.auth);
+  const { current_company_id, user } = useSelector((state: RootState) => state.auth);
+
+  const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
+ 
   const [detail, setDetails] = useState(
     {
       name: '',
@@ -45,14 +47,14 @@ export default function SelectContent() {
   const selectRef = useRef<HTMLButtonElement | null>(null);
 
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>(
-    (user?.company?.length ?? 0) === 0 ? 'Add Company' : (current_company_id || "")
+    (user?.company?.length ?? 0) === 0 ? 'Add Company' : (currentCompanyId || "")
   );
 
   const [selectOpen, setSelectOpen] = useState(false);
 
   useEffect(() => {
-    setSelectedCompanyId((user?.company?.length ?? 0) === 0 ? 'Add Company' : (current_company_id || ""));
-  }, [current_company_id, user?.company]);
+    setSelectedCompanyId((user?.company?.length ?? 0) === 0 ? 'Add Company' : (currentCompanyId || ""));
+  }, [currentCompanyId, user?.company]);
 
   const handleChange = (event: SelectChangeEvent) => {
     const value = event.target.value as string;
@@ -85,9 +87,9 @@ export default function SelectContent() {
     setSelectedCompanyId(
       (user?.company?.length ?? 0) === 0
         ? 'Add Company'
-        : current_company_id || ""
+        : currentCompanyId || ""
     );
-  }, [current_company_id, user?.company]);
+  }, [currentCompanyId, user?.company]);
 
   return (
     <>
