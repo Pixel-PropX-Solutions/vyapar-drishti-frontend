@@ -45,8 +45,9 @@ import CenterLoader from "./common/loaders/CenterLoader";
 import ContactPage from "./components/Contact/ContactPage";
 import UpdatePaymentReceipt from "./components/Invoice/UpdatePaymentReceipt";
 import { ViewInvoiceInfo } from "./components/Invoice/ViewInvoice";
-import ForgotPassword from "./pages/ForgotPassword";
 import VerifyEmail from "./pages/VerifyEmail";
+import ResetPassword from "./pages/ResetPassword";
+import ForgotPassword from "./pages/ForgotPassword";
 // import PromptModal from "./common/modals/PromptModal";
 
 const xThemeComponents = {
@@ -184,7 +185,8 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
             </Route>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/admin" element={<LoginPage />} />
-            <Route path="/reset-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
 
             <Route path="/signup" element={<SignUpPage />} />
             <Route path="/verify" element={<VerifyEmail />} />
@@ -195,10 +197,10 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
 
       </Routes>
       {!isInitialized.current &&
-        <CenterLoader />
+        <CenterLoader size={100} />
       }
       {(authState === AuthStates.INITIALIZING && user === null) &&
-        <CenterLoader />
+        <CenterLoader size={100} />
       }
       {/* <PromptModal
         open={showProfileModal}

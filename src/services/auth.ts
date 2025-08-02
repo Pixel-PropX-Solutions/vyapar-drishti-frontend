@@ -143,21 +143,18 @@ export const deleteAccount = createAsyncThunk(
   }
 );
 
-
-
 export const forgetPassword = createAsyncThunk(
-  "user/forgetPassword",
-  async ({ email }: { email: string }, { rejectWithValue }) => {
+  "user/forget/password",
+  async (email: string, { rejectWithValue }) => {
     try {
-      const response = await userApi.put("/auth/forgetPassword", {
-        email,
-      });
+      const response = await userApi.post(`/auth/forgot/password/${email}`);
+      console.log("Forgot password response:", response);
 
-      if (response.data.sucess === true) {
+      if (response.data.success === true) {
         return 1;
       } else {
         return rejectWithValue(
-          "Registration failed: No access token received."
+          "Forgot password request failed."
         );
       }
     } catch (error: any) {
@@ -167,26 +164,36 @@ export const forgetPassword = createAsyncThunk(
 );
 
 export const resetPassword = createAsyncThunk(
-  "user/resetPassword",
+  "user/reset/password",
   async (
     {
-      password,
-      confirmPassword,
+      email,
+      new_password,
       token,
-    }: { password: string; confirmPassword: string; token: string },
+    }: { email: string; new_password: string; token: string },
     { rejectWithValue }
   ) => {
     try {
-      const response = await userApi.put("/auth/resetPassword", {
-        password,
-        confirmPassword,
+      const response = await userApi.post("/auth/reset/password", {
+        email,
+        new_password,
         token,
       });
 
-      if (response.data.sucess === true) {
-        return 1;
+      console.log("Reset password response:", response);
+      if (response.data.success === true) {
+        const accessToken = response.data.accessToken;
+        // 👇 Decode the token to get updated company ID
+        const decoded: any = jwtDecode(accessToken);
+        const current_company_id = decoded.current_company_id;
+
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("current_company_id", current_company_id);
+        return { accessToken, current_company_id };
       } else {
-        return rejectWithValue("Password not updated.");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("current_company_id");
+        return rejectWithValue("Reset password failed: No access token received.");
       }
     } catch (error: any) {
       return rejectWithValue(error?.response?.data?.message);

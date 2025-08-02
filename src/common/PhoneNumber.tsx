@@ -18,6 +18,10 @@ interface PhoneNumberProps {
     required?: boolean;
     codeHandler: (field: string, value: any) => void;
     numberHandler: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    codeHelperText?: React.ReactNode;
+    numberHelperText?: React.ReactNode;
+    codeError?: boolean | undefined;
+    numberError?: boolean | undefined;
 }
 
 const PhoneNumber: React.FC<PhoneNumberProps> = ({
@@ -36,6 +40,10 @@ const PhoneNumber: React.FC<PhoneNumberProps> = ({
     gap = 2,
     codeHandler,
     numberHandler,
+    codeHelperText = '',
+    numberHelperText = '',
+    codeError = false,
+    numberError = false,
 }) => {
     return (
         <Box sx={{ display: "flex", gap: gap }}>
@@ -75,6 +83,8 @@ const PhoneNumber: React.FC<PhoneNumberProps> = ({
                             label={codeLabel}
                             name="code"
                             placeholder={codePlaceholder}
+                            error={codeError}
+                            helperText={codeHelperText}
                             InputProps={{
                                 ...params.InputProps,
                                 startAdornment: (
@@ -84,7 +94,6 @@ const PhoneNumber: React.FC<PhoneNumberProps> = ({
                                 ),
                             }}
                             margin="normal"
-                            autoComplete="off"
                         />
                     )}
                     value={code}
@@ -125,6 +134,8 @@ const PhoneNumber: React.FC<PhoneNumberProps> = ({
                 autoComplete="number"
                 onChange={numberHandler}
                 value={number}
+                error={numberError}
+                helperText={numberHelperText}
                 autoFocus
                 placeholder={numberPlaceholder}
                 InputProps={{
@@ -134,6 +145,11 @@ const PhoneNumber: React.FC<PhoneNumberProps> = ({
                         </InputAdornment>
                     ),
                 }}
+                 sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 1,
+                }
+              }}
             />
         </Box>
     );

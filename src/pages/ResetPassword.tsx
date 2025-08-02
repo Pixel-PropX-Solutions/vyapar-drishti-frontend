@@ -11,10 +11,10 @@ import Logo7 from "../assets/7.png";
 import Logo from "../assets/Logo.png";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
-import ForgotPasswordForm from "@/features/auth/components/ForgotPasswordForm";
+import ResetPasswordForm from "@/features/auth/components/ResetPasswordForm";
 
 
-const ForgotPassword: React.FC = () => {
+const ResetPassword: React.FC = () => {
   const logoRefs = useRef<(HTMLDivElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const [paths, setPaths] = useState<string[]>([]);
@@ -433,12 +433,12 @@ const ForgotPassword: React.FC = () => {
             flexDirection: "row",
           }}
         >
-          <ForgotPasswordForm />
+          <ResetPasswordForm />
         </Box>
       </Grid>
     </Grid>
   );
 };
 
-export default ForgotPassword;
+export default ResetPassword;
 

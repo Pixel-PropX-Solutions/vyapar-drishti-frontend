@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AuthStates } from "@/utils/enums";
-import { deleteAccount, emailVerify, getCurrentCompany, getCurrentUser, login, logout, register, switchCompany } from "@/services/auth";
+import { deleteAccount, emailVerify, forgetPassword, getCurrentCompany, getCurrentUser, login, logout, register, resetPassword, switchCompany } from "@/services/auth";
 import { GetCompany, UserSignUp } from "@/utils/types";
 
 
@@ -81,6 +81,24 @@ const authSlice = createSlice({
         state.error = action.payload as string;
         state.loading = false;
       })
+
+      .addCase(resetPassword.pending, (state) => {
+        state.authState = AuthStates.INITIALIZING;
+        state.error = null;
+        state.loading = true;
+      })
+      .addCase(resetPassword.fulfilled, (state, action: PayloadAction<any>) => {
+        state.authState = AuthStates.AUTHENTICATED;
+        state.accessToken = action.payload.accessToken;
+        state.current_company_id = action.payload.current_company_id; // 👈 this!
+        state.loading = false;
+      })
+      .addCase(resetPassword.rejected, (state, action) => {
+        state.authState = AuthStates.ERROR;
+        state.error = action.payload as string;
+        state.loading = false;
+      })
+
 
       .addCase(switchCompany.pending, (state) => {
         state.error = null;
@@ -176,6 +194,21 @@ const authSlice = createSlice({
         state.loading = false;
       })
       .addCase(logout.rejected, (state, action) => {
+        state.authState = AuthStates.ERROR;
+        state.error = action.payload as string;
+        state.loading = false;
+      })
+
+      .addCase(forgetPassword.pending, (state) => {
+        state.authState = AuthStates.INITIALIZING;
+        state.error = null;
+        state.loading = true;
+      })
+      .addCase(forgetPassword.fulfilled, (state) => {
+        state.authState = AuthStates.IDLE;
+        state.loading = false;
+      })
+      .addCase(forgetPassword.rejected, (state, action) => {
         state.authState = AuthStates.ERROR;
         state.error = action.payload as string;
         state.loading = false;

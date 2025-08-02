@@ -1,6 +1,6 @@
 import React, { useEffect, useId, useRef, useState } from "react";
 import RegistrationForm from "@/features/auth/components/RegisterForm";
-import { Box, Grid } from "@mui/material";
+import { Box, Grid, useTheme } from "@mui/material";
 import centerImage from "../assets/herosection.png";
 import Logo1 from "../assets/1.png";
 import Logo2 from "../assets/2.png";
@@ -14,6 +14,7 @@ import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
 const SignUpPage: React.FC = () => {
+  const theme = useTheme();
   const logoRefs = useRef<(HTMLDivElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const [paths, setPaths] = useState<string[]>([]);
@@ -455,6 +456,7 @@ const SignUpPage: React.FC = () => {
             display: "flex",
             justifyContent: "center",
             flexDirection: "row",
+            background: `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.grey[50]} 100%)`,
           }}
         >
           <RegistrationForm />
