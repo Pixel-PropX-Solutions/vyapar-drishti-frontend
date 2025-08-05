@@ -36,7 +36,7 @@ const ForgotPasswordForm: React.FC = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [isSuccess, setIsSuccess] = useState(true);
+    const [isSuccess, setIsSuccess] = useState(false);
     const [emailError, setEmailError] = useState('');
 
     const validateEmail = (email: string): boolean => {

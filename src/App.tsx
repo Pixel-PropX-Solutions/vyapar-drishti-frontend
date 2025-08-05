@@ -21,7 +21,6 @@ import { getCurrentUser } from "./services/auth";
 import LandingPage from "./components/LandingPage/LandingPage";
 import AboutPage from "./components/About/AboutPage";
 import Timeline from "./pages/Timeline";
-// import AdminInventory from "./pages/AdminInventory";
 import ViewItem from "./features/products/ViewItem";
 import CookiePolicyPage from "./components/Legal/CookiePolicy";
 import PrivacyPolicyPage from "./components/Legal/PrivacyPolicyPage";
@@ -60,7 +59,7 @@ const xThemeComponents = {
 const App: React.FC<{ themeComponents?: object }> = (props) => {
   // const [showProfileModal, setShowProfileModal] = React.useState(false);
 
-  const { authState, user, isUserFetched } = useSelector(
+  const { authState, user, isUserFetched, switchCompanyLoading, deleteCompanyLoading } = useSelector(
     (state: RootState) => state.auth
   );
   const dispatch = useDispatch<AppDispatch>();
@@ -158,6 +157,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/customers/edit/:type" element={<EditCustomer />} />
 
                 <Route path="/transactions" element={<Transactions />} />
+                {/* <Route path="/expenses" element={<Transactions />} /> */}
                 <Route path="/transactions/create/:type" element={<PaymentReceiptInvoice />} />
                 <Route path="/transactions/update/:type/:voucher_id" element={<UpdatePaymentReceipt />} />
 
@@ -197,10 +197,16 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
 
       </Routes>
       {!isInitialized.current &&
-        <CenterLoader size={100} />
+        <CenterLoader size={80} />
       }
       {(authState === AuthStates.INITIALIZING && user === null) &&
-        <CenterLoader size={100} />
+        <CenterLoader size={80} />
+      }
+      {switchCompanyLoading &&
+        <CenterLoader size={80} />
+      }
+      {deleteCompanyLoading &&
+        <CenterLoader size={80} />
       }
       {/* <PromptModal
         open={showProfileModal}

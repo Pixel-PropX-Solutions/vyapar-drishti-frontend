@@ -60,8 +60,8 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import EditUserModal from "@/features/profile/EditUserModal";
-import { deleteAccount, getCurrentUser } from "@/services/auth";
-import { deleteCompany, getAllCompanies } from "@/services/company";
+import { deleteAccount, deleteCompany, getCurrentUser } from "@/services/auth";
+import { getAllCompanies } from "@/services/company";
 import { formatDatewithTime } from "@/utils/functions";
 import CompanyEditingModal from "@/common/modals/CompanyEditingModal";
 import { InfoRow } from "@/common/InfoRow";
@@ -70,7 +70,6 @@ import { ProfileHeader } from "@/common/ProfileHeader";
 import { CompanyRow } from "@/common/CompanyRow";
 import { GetCompany } from "@/utils/types";
 import toast from "react-hot-toast";
-import { setCurrentCompanyId } from "@/store/reducers/authReducer";
 
 // Main Enhanced Component
 const ProfilePage: React.FC = () => {
@@ -80,7 +79,7 @@ const ProfilePage: React.FC = () => {
 
   const { user, current_company_id } = useSelector((state: RootState) => state.auth);
   const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
-    
+
   const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
   const { companies } = useSelector((state: RootState) => state.company)
 
@@ -89,11 +88,6 @@ const ProfilePage: React.FC = () => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [editingCompany, setEditingCompany] = useState(null as GetCompany | null);
   const [darkMode, setDarkMode] = useState(false);
-  // const [notifications, setNotifications] = useState({
-    //   email: true,
-    //   push: false,
-    //   sms: true,
-  // });
   const [tabValue, setTabValue] = useState(0);
 
 
@@ -112,10 +106,9 @@ const ProfilePage: React.FC = () => {
       deleteCompany(company_id)
     )
       .unwrap()
-      .then(() => {
+      .then((res) => {
+        console.log("Delete Company Response", res)
         fetchCompleteData();
-        localStorage.removeItem("current_company_id");
-        setCurrentCompanyId(null);
         toast.success('Company deleted successfully')
       }).catch((error) => {
         toast.error(error || "An unexpected error occurred. Please try again later.");

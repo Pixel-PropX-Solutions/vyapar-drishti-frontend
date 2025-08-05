@@ -9,7 +9,7 @@ interface Props {
 }
 
 const style = {
-    position: "absolute" as const,
+    position: "fixed" as const,
     top: "50%",
     left: "50%",
     height: "100vh",

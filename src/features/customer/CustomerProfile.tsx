@@ -72,8 +72,8 @@ const CustomerProfile: React.FC = () => {
             limit: rowsPerPage,
             sortField,
             sortOrder,
-            start_date: new Date(startDate).toLocaleDateString(),
-            end_date: new Date(endDate).toLocaleDateString(),
+            start_date: new Date(startDate).toISOString(),
+            end_date: new Date(endDate).toISOString(),
         }));
     }, [currentCompanyId, customer_id, dispatch, endDate, page, rowsPerPage, debouncedQuery, sortField, sortOrder, startDate, type]);
 

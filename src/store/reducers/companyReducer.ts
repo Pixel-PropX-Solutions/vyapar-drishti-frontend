@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { GetCompany } from "@/utils/types";
-import { createCompany, deleteCompany, getAllCompanies, getCompany } from "@/services/company";
+import { createCompany, getAllCompanies, getCompany } from "@/services/company";
 
 interface CompanyState {
     company: GetCompany | null;
@@ -32,18 +32,6 @@ const companySlice = createSlice({
                 state.loading = false;
             })
             .addCase(createCompany.rejected, (state, action) => {
-                state.error = action.payload as string;
-                state.loading = false;
-            })
-
-            .addCase(deleteCompany.pending, (state) => {
-                state.error = null;
-                state.loading = true;
-            })
-            .addCase(deleteCompany.fulfilled, (state) => {
-                state.loading = false;
-            })
-            .addCase(deleteCompany.rejected, (state, action) => {
                 state.error = action.payload as string;
                 state.loading = false;
             })

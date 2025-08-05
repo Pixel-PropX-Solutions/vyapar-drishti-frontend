@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AuthStates } from "@/utils/enums";
-import { deleteAccount, emailVerify, forgetPassword, getCurrentCompany, getCurrentUser, login, logout, register, resetPassword, switchCompany } from "@/services/auth";
+import { deleteAccount, deleteCompany, emailVerify, forgetPassword, getCurrentCompany, getCurrentUser, login, logout, register, resetPassword, switchCompany } from "@/services/auth";
 import { GetCompany, UserSignUp } from "@/utils/types";
 
 
@@ -14,6 +14,8 @@ interface AuthState {
   accessToken: string | null;
   current_company_id: string | null;
   loading: boolean;
+  switchCompanyLoading: boolean;
+  deleteCompanyLoading: boolean;
   error: string | null;
 }
 
@@ -42,6 +44,8 @@ const initialState: AuthState = {
     password: '',
   },
   loading: false,
+  switchCompanyLoading: false,
+  deleteCompanyLoading: false,
   error: null,
 };
 
@@ -58,6 +62,7 @@ const authSlice = createSlice({
       state.authState = action.payload.authState ?? state.authState;
       state.error = action.payload.error ?? state.error;
     },
+
     setCurrentCompanyId(state, action: PayloadAction<string | null>) {
       state.current_company_id = action.payload;
       localStorage.setItem("current_company_id", action.payload || '');
@@ -102,16 +107,30 @@ const authSlice = createSlice({
 
       .addCase(switchCompany.pending, (state) => {
         state.error = null;
-        state.loading = true;
+        state.switchCompanyLoading = true;
       })
       .addCase(switchCompany.fulfilled, (state, action: PayloadAction<any>) => {
         state.accessToken = action.payload.accessToken;
         state.current_company_id = action.payload.current_company_id; // 👈 this!
-        state.loading = false;
+        state.switchCompanyLoading = false;
       })
       .addCase(switchCompany.rejected, (state, action) => {
         state.error = action.payload as string;
-        state.loading = false;
+        state.switchCompanyLoading = false;
+      })
+
+      .addCase(deleteCompany.pending, (state) => {
+        state.error = null;
+        state.deleteCompanyLoading = true;
+      })
+      .addCase(deleteCompany.fulfilled, (state, action: PayloadAction<any>) => {
+        state.accessToken = action.payload.accessToken;
+        state.current_company_id = action.payload.current_company_id; // 👈 this!
+        state.deleteCompanyLoading = false;
+      })
+      .addCase(deleteCompany.rejected, (state, action) => {
+        state.error = action.payload as string;
+        state.deleteCompanyLoading = false;
       })
 
       .addCase(deleteAccount.pending, (state) => {
@@ -131,7 +150,6 @@ const authSlice = createSlice({
 
       .addCase(getCurrentUser.pending, (state) => {
         state.error = null;
-        // state.authState = AuthStates.INITIALIZING;
         state.loading = true;
       })
       .addCase(getCurrentUser.fulfilled, (state, action: PayloadAction<any>) => {
@@ -140,14 +158,12 @@ const authSlice = createSlice({
           state.current_company_id = action.payload.user?.user_settings?.current_company_id;
           localStorage.setItem("current_company_id", action.payload.user?.user_settings?.current_company_id || '');
         }
-        // state.authState = AuthStates.AUTHENTICATED;
         state.isUserFetched = true;
 
         state.loading = false;
       })
       .addCase(getCurrentUser.rejected, (state, action) => {
         state.error = action.payload as string;
-        // state.authState = AuthStates.IDLE
         state.isUserFetched = true;
         state.loading = false;
       })
@@ -166,18 +182,13 @@ const authSlice = createSlice({
       })
 
       .addCase(register.pending, (state) => {
-        // state.authState = AuthStates.INITIALIZING;
         state.error = null;
         state.loading = true;
       })
       .addCase(register.fulfilled, (state,) => {
-        // state.authState = AuthStates.AUTHENTICATED;
-        // state.accessToken = action.payload.accessToken;
-        // state.current_company_id = action.payload.current_company_id; // 👈 this!
         state.loading = false;
       })
       .addCase(register.rejected, (state, action) => {
-        // state.authState = AuthStates.ERROR;
         state.error = action.payload as string;
         state.loading = false;
       })

@@ -134,11 +134,13 @@ export const createCustomer = createAsyncThunk(
                 `/ledger/create`,
                 data
             );
+            console.log("Create Customer API Response", response);
 
             if (response.data.success === true) {
                 return;
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
+            console.log("Error in createCustomer:", error);
             return rejectWithValue(error?.response?.data?.message);
         }
     }

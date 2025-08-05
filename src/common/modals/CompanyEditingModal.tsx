@@ -58,7 +58,7 @@ interface EditUserModalProps {
     open: boolean;
     onClose: () => void;
     onUpdated?: () => Promise<void>;
-    onCreated?: () => Promise<void>;
+    onCreated?: (id: any) => Promise<void>;
     company: any;
 }
 
@@ -418,7 +418,7 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                     setIsLoading(false);
                     onClose();
                     if (onCreated)
-                        onCreated();
+                        onCreated(res);
                     if (onUpdated)
                         onUpdated();
 

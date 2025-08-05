@@ -75,21 +75,3 @@ export const updateCompany = createAsyncThunk(
     }
   }
 );
-
-export const deleteCompany = createAsyncThunk(
-  "delete/company",
-  async (
-    id: string,
-    { rejectWithValue }
-  ) => {
-    try {
-      const response = await userApi.delete(`/auth/delete/user/company/${id}`);
-
-      if (response.data.success === true) {
-        return;
-      } else return rejectWithValue("Login Failed: No access token recieved.");
-    } catch (error: any) {
-      return rejectWithValue(error?.response?.data?.message);
-    }
-  }
-);

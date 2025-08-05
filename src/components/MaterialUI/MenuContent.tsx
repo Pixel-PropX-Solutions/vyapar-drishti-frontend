@@ -12,7 +12,6 @@ import {
   useTheme
 } from '@mui/material';
 // import DashboardIcon from '@mui/icons-material/Dashboard';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 // import ChemistIcon from '@mui/icons-material/Store';
 // import StockistIcon from '@mui/icons-material/Warehouse';
 // import UploadBillIcon from '@mui/icons-material/UploadFile';
@@ -25,7 +24,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { ROLE_ENUM } from '@/utils/enums';
-import { People, Security } from '@mui/icons-material';
+import {
+  // AddCardOutlined, 
+  PaymentsOutlined, People, ReceiptOutlined, Security
+} from '@mui/icons-material';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { Collapse } from '@mui/material';
 import { useState } from 'react';
@@ -49,36 +51,17 @@ const createMainListItems = (role: string): MenuItem[] => {
   ];
 
 
-  const chemistItems: MenuItem[] = [
+  const userItems: MenuItem[] = [
     { text: "WareHouse", path: "/warehouses", icon: <InventoryIcon />, requiredRole: 'user' },
     { text: "Timeline", path: "/timeline", icon: <ViewTimelineIcon />, requiredRole: 'user' },
-    {
-      text: "Products",
-      path: "/products",
-      icon: <ProductIcon />,
-      requiredRole: 'user'
-    },
-    {
-      text: "Customers",
-      path: "/customers",
-      icon: <People />,
-      requiredRole: 'user'
-    },
-    {
-      text: "Invoices",
-      path: "/invoices",
-      icon: <LocalShippingIcon />,
-      requiredRole: 'user'
-    },
-    {
-      text: "Transactions",
-      path: "/transactions",
-      icon: <LocalShippingIcon />,
-      requiredRole: 'user'
-    }
+    { text: "Products", path: "/products", icon: <ProductIcon />, requiredRole: 'user' },
+    { text: "Customers", path: "/customers", icon: <People />, requiredRole: 'user' },
+    { text: "Invoices", path: "/invoices", icon: <ReceiptOutlined />, requiredRole: 'user' },
+    { text: "Transactions", path: "/transactions", icon: <PaymentsOutlined />, requiredRole: 'user' },
+    // { text: "Expenses", path: "/expenses", icon: <AddCardOutlined />, requiredRole: 'user' }
   ];
 
-  // const chemistItems: MenuItem[] = [
+  // const userItems: MenuItem[] = [
   // { text: "Dashboard", path: "/dashboard", icon: <DashboardIcon />, requiredRole: 'user' },
   //   { text: "Inventory", path: "/inventory", icon: <InventoryIcon />, requiredRole: 'user' },
   //   { text: "Timeline", path: "/timeline", icon: <ViewTimelineIcon />, requiredRole: 'user' },
@@ -94,7 +77,7 @@ const createMainListItems = (role: string): MenuItem[] => {
   // ];
 
   if (role === ROLE_ENUM.USER)
-    return chemistItems;
+    return userItems;
   else if (role === ROLE_ENUM.ADMIN)
     return adminItems;
   else {

@@ -1,4 +1,6 @@
 import axios, { AxiosResponse, InternalAxiosRequestConfig } from "axios";
+import { jwtDecode } from 'jwt-decode';
+
 
 interface Token {
     accessToken: string;
@@ -16,6 +18,9 @@ userApi.interceptors.response.use(
         if (response.data.accessToken && response.data.refreshToken) {
             localStorage.setItem("accessToken", response.data.accessToken);
             localStorage.setItem("refreshToken", response.data.refreshToken);
+            const decoded: any = jwtDecode(response.data.accessToken);
+            const current_company_id = decoded.current_company_id;
+            localStorage.setItem("current_company_id", current_company_id);
         }
         return response;
     },
@@ -29,14 +34,17 @@ userApi.interceptors.response.use(
             originalRequest._retry = true;
 
             try {
-                const {data} = await axios.post<Token>(
+                const { data } = await axios.post<Token>(
                     // `${import.meta.env.VITE_BACKEND_BASE_URL}/auth/refresh`,
                     `${import.meta.env.VITE_LOCAL_BACKEND_BASE_URL}/auth/refresh`,
                     {},
-                    {withCredentials : true}
+                    { withCredentials: true }
                 );
                 localStorage.setItem("accessToken", data.accessToken);
                 localStorage.setItem("refreshToken", data.refreshToken);
+                const decoded: any = jwtDecode(data.accessToken);
+                const current_company_id = decoded.current_company_id;
+                localStorage.setItem("current_company_id", current_company_id);
 
                 userApi.defaults.headers.common[
                     "Authorization"
@@ -49,6 +57,7 @@ userApi.interceptors.response.use(
                 console.error("Token refresh failed:", refreshError);
                 localStorage.removeItem("accessToken");
                 localStorage.removeItem("refreshToken");
+                localStorage.removeItem("current_company_id");
                 window.location.href = "/";
             }
         }

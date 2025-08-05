@@ -11,13 +11,14 @@ import { alpha, styled } from '@mui/material/styles';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import CompanyEditingModal from '@/common/modals/CompanyEditingModal';
 import { getCurrentCompany, getCurrentUser, switchCompany } from '@/services/auth';
 import { getAllCompanies } from '@/services/company';
 // import { updateUserSettings } from '@/services/user';
 import { getAvatarColor, getInitials } from '@/utils/functions';
 import toast from 'react-hot-toast';
+import { setCurrentCompanyId } from '@/store/reducers/authReducer';
 
 const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
   borderRadius: 2,
@@ -37,8 +38,16 @@ export default function SelectContent() {
   const [isCompanyEditing, setIsCompanyEditing] = useState(false);
   const { current_company_id, user } = useSelector((state: RootState) => state.auth);
 
-  const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
- 
+  const currentCompanyId = useMemo(() => {
+    return (
+      current_company_id ||
+      localStorage.getItem("current_company_id") ||
+      user?.user_settings?.current_company_id ||
+      ''
+    );
+  }, [current_company_id, user]);
+
+
   const [detail, setDetails] = useState(
     {
       name: '',
@@ -221,7 +230,9 @@ export default function SelectContent() {
           setIsCompanyEditing(false);
         }}
         company={null}
-        onCreated={async () => {
+        onCreated={async (id) => {
+          dispatch(setCurrentCompanyId(id));
+          localStorage.setItem("current_company_id", id);
           setIsCompanyEditing(false);
           dispatch(getCurrentUser());
           dispatch(getCurrentCompany());

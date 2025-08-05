@@ -127,6 +127,34 @@ export const getCurrentCompany = createAsyncThunk(
   }
 );
 
+export const deleteCompany = createAsyncThunk(
+  "delete/company",
+  async (
+    id: string,
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await userApi.delete(`/auth/delete/user/company/${id}`);
+      console.log("Delete Company Response:", response);
+
+      if (response.data.success === true) {
+        const accessToken = response.data.accessToken;
+        // 👇 Decode the token to get updated company ID
+        const company_id = response.data.company_id;
+        const decoded: any = jwtDecode(accessToken);
+        const current_company_id = decoded.current_company_id;
+
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("current_company_id", current_company_id);
+        return { accessToken, current_company_id, company_id };
+      } else return rejectWithValue("Login Failed: No access token recieved.");
+    } catch (error: any) {
+      return rejectWithValue(error?.response?.data?.message);
+    }
+  }
+);
+
+
 export const deleteAccount = createAsyncThunk(
   "delete/account",
   async (_, { rejectWithValue }) => {
