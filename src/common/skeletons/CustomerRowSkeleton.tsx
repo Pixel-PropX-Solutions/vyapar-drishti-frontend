@@ -36,9 +36,9 @@ export const CustomerRowSkeleton: React.FC = () => (
         </TableCell>
         <TableCell align="right">
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
-                <Skeleton variant="circular" width={32} height={28} />
-                <Skeleton variant="circular" width={32} height={28} />
-                <Skeleton variant="circular" width={32} height={28} />
+                <Skeleton variant="rectangular" width={28} height={28} sx={{ borderRadius: 1 }} />
+                <Skeleton variant="rectangular" width={28} height={28} sx={{ borderRadius: 1 }} />
+                <Skeleton variant="rectangular" width={28} height={28} sx={{ borderRadius: 1 }} />
             </Box>
         </TableCell>
     </TableRow>

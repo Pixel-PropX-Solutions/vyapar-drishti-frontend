@@ -36,7 +36,7 @@ import { CustomerSortField, SortOrder, GetUserLedgers } from "@/utils/types";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { useNavigate } from "react-router-dom";
-import { deleteCustomer, viewAllCustomer } from "@/services/customers";
+import { deleteCustomer, viewAllCustomer, viewAllCustomerWithTypes } from "@/services/customers";
 import { CustomerRowSkeleton } from "@/common/skeletons/CustomerRowSkeleton";
 import { CustomerRow } from "@/features/customer/CustomerRow";
 import { viewAllAccountingGroups } from "@/services/accountingGroup";
@@ -87,6 +87,7 @@ const CustomerLedger: React.FC = () => {
 
   useEffect(() => {
     fetchCustomers();
+    dispatch(viewAllCustomerWithTypes({ company_id: currentCompanyId, customerTypes: ["Bank Accounts", "Cash-in-Hand"] }))
   }, []);
 
 

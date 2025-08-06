@@ -18,13 +18,26 @@ import {
     Fade,
     Zoom,
     Alert,
+    Menu,
+    MenuItem,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { GetUserLedgers } from "@/utils/types";
-import { Email, PeopleAlt, Phone, Today } from "@mui/icons-material";
+import {
+    AddCircle,
+    Close,
+    Email,
+    MoreVert,
+    PeopleAlt,
+    Phone,
+    RemoveCircle,
+    Today
+} from "@mui/icons-material";
 import { formatDate } from "@/utils/functions";
+import MenuButton from "@/components/MaterialUI/MenuButton";
+import ExpenseIncomeSideModal from "@/common/modals/ExpenseIncomeSideModal";
 
 interface CustomerRowProps {
     cus: GetUserLedgers;
@@ -38,7 +51,19 @@ interface CustomerRowProps {
 export const CustomerRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit, onView, index }) => {
     const theme = useTheme();
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+    const [openExpenseIncomeModal, setOpenExpenseIncomeModal] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
+    const [type, setType] = useState<'expense' | 'income' | null>(null);
+    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+    const open = Boolean(anchorEl);
+
+    const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
 
     const confirmDelete = () => {
         onDelete(cus?._id ?? '');
@@ -85,7 +110,7 @@ export const CustomerRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit,
                         },
                         borderLeft: `4px solid ${isHovered ? theme.palette.primary.main : 'transparent'}`,
                     }}
-                    onClick={() => onView(cus)}
+                // onClick={() => onView(cus)}
                 >
                     {/* Customer Info */}
                     <TableCell sx={{ pl: 3, pr: 1 }}>
@@ -266,26 +291,103 @@ export const CustomerRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit,
                                     </IconButton>
                                 </Tooltip>
 
-                                <Tooltip title="Delete Customer" arrow>
-                                    <IconButton
-                                        size="small"
+                                <>
+                                    <MenuButton
+                                        data-screenshot="toggle-mode"
                                         onClick={(e) => {
-                                            setOpenDeleteDialog(true);
                                             e.stopPropagation();
+                                            handleClick(e);
                                         }}
-                                        sx={{
-                                            bgcolor: alpha(theme.palette.error.main, 0.1),
-                                            color: theme.palette.error.main,
-                                            transition: 'all 0.3s ease',
-                                            '&:hover': {
-                                                bgcolor: alpha(theme.palette.error.main, 0.2),
-                                                transform: 'scale(1.1)',
+                                        disableRipple
+                                        size="small"
+                                        aria-label="Open notifications"
+                                        aria-controls={open ? "notifications-menu" : undefined}
+                                        aria-haspopup="true"
+                                        aria-expanded={open ? "true" : undefined}
+                                    >
+                                        <MoreVert />
+                                    </MenuButton>
+                                    <Menu
+                                        anchorEl={anchorEl}
+                                        id="notifications-menu"
+                                        open={open}
+                                        onClose={handleClose}
+                                        onClick={handleClose}
+                                        slotProps={{
+                                            paper: {
+                                                variant: "outlined",
+
+                                                elevation: 0,
+                                                sx: {
+                                                    my: "4px",
+                                                    maxHeight: "400px",
+                                                    overflowY: "auto",
+                                                    borderColor: theme.palette.primary.main,
+                                                },
                                             },
                                         }}
+                                        transformOrigin={{ horizontal: "right", vertical: "top" }}
+                                        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
                                     >
-                                        <DeleteIcon fontSize="small" />
-                                    </IconButton>
-                                </Tooltip>
+                                        <MenuItem
+                                            sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 1,
+                                                py: .5
+                                            }}
+                                            onClick={(e) => {
+                                                handleClose();
+                                                setType('income');
+                                                setOpenExpenseIncomeModal(true);
+                                                e.stopPropagation();
+                                            }}
+                                        >
+                                            <AddCircle fontSize="small" sx={{ color: theme.palette.success.main }} />
+                                            <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.success.main }}>
+                                                You Got
+                                            </Typography>
+                                        </MenuItem>
+
+                                        <MenuItem
+                                            sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 1,
+                                                py: .5
+                                            }}
+                                            onClick={(e) => {
+                                                handleClose();
+                                                setType('expense');
+                                                setOpenExpenseIncomeModal(true);
+                                                e.stopPropagation();
+                                            }}
+                                        >
+                                            <RemoveCircle fontSize="small" sx={{ color: theme.palette.error.light }} />
+                                            <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.error.light }}>
+                                                You give
+                                            </Typography>
+                                        </MenuItem>
+
+                                        <MenuItem
+                                            sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 1,
+                                                py: .5
+                                            }}
+                                            onClick={(e) => {
+                                                setOpenDeleteDialog(true);
+                                                e.stopPropagation();
+                                            }}
+                                        >
+                                            <DeleteIcon fontSize="small" />
+                                            <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', }}>
+                                                Delete
+                                            </Typography>
+                                        </MenuItem>
+                                    </Menu>
+                                </>
                             </Box>
                         </Zoom>
                     </TableCell>
@@ -308,13 +410,37 @@ export const CustomerRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit,
                     sx={{
                         display: 'flex',
                         alignItems: 'center',
+                        justifyContent: 'space-between',
                         gap: 2,
                         color: theme.palette.error.main,
                         fontWeight: 600,
                     }}
                 >
-                    <DeleteIcon />
-                    Delete {cus.ledger_name}?
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <DeleteIcon />
+                        Delete {cus.ledger_name}?
+                    </Box>
+                    <Tooltip title="Close" arrow>
+                        <IconButton
+                            size="medium"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenDeleteDialog(false);
+                            }}
+                            sx={{
+                                bgcolor: alpha(theme.palette.warning.main, 0.1),
+                                color: theme.palette.warning.main,
+                                transition: 'all 0.3s ease',
+                                '&:hover': {
+                                    bgcolor: alpha(theme.palette.warning.main, 0.2),
+                                    transform: 'scale(1.1)',
+                                },
+                            }}
+                        >
+                            <Close fontSize="medium" />
+                        </IconButton>
+                    </Tooltip>
+
                 </DialogTitle>
                 <DialogContent>
                     <Alert severity="warning" sx={{ mb: 2 }}>
@@ -343,6 +469,15 @@ export const CustomerRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit,
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            <ExpenseIncomeSideModal
+                open={openExpenseIncomeModal}
+                customerName={cus.ledger_name}
+                customerId={cus._id}
+                type={type}
+                closingBalance={cus.total_amount}
+                onClose={() => setOpenExpenseIncomeModal(false)}
+            />
         </>
     );
 };

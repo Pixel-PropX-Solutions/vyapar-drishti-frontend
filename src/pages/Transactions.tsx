@@ -63,7 +63,7 @@ const Transactions: React.FC = () => {
     const { invoices, loading, pageMeta, invoiceGroups } = useSelector((state: RootState) => state.invoice);
     const { user, current_company_id } = useSelector((state: RootState) => state.auth);
     const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
-    
+
     const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
 
     const [state, setState] = useState({
@@ -255,7 +255,7 @@ const Transactions: React.FC = () => {
                                             },
                                         }}
                                     >
-                                        Reciept
+                                        Income
                                     </ActionButton>
 
                                     <ActionButton
@@ -280,7 +280,7 @@ const Transactions: React.FC = () => {
                                             },
                                         }}
                                     >
-                                        Payment
+                                        Expense
                                     </ActionButton>
                                 </Box>
                             </Grid>
