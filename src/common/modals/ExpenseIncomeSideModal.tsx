@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
     Box,
     TextField,
@@ -41,9 +41,8 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import toast from "react-hot-toast";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/store/store";
-import dayjs, { Dayjs } from 'dayjs';
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 import { ActionButton } from "../buttons/ActionButton";
 
 interface CreateInventoryGroupModalProps {
@@ -74,7 +73,6 @@ const ExpenseIncomeSideModal: React.FC<CreateInventoryGroupModalProps> = ({
 }) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const dispatch = useDispatch<AppDispatch>();
     const { customerTypes } = useSelector((state: RootState) => state.customersLedger)
     const [isLoading, setIsLoading] = useState(false);
     const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
@@ -126,7 +124,7 @@ const ExpenseIncomeSideModal: React.FC<CreateInventoryGroupModalProps> = ({
     const resetForm = () => {
         setData({
             amount: 0,
-            date: dayjs(),
+            date: new Date().toISOString().split('T')[0],
             notes: '',
             sendSms: false,
             sendEmail: false,
@@ -147,7 +145,7 @@ const ExpenseIncomeSideModal: React.FC<CreateInventoryGroupModalProps> = ({
             const sanitizedData: any = {
                 amount: data.amount,
                 notes: data.notes.trim(),
-                date: data.date?.format('YYYY-MM-DD'),
+                date: data.date,
                 customer_id: customerId,
                 send_sms: data.sendSms,
                 send_email: data.sendEmail,
@@ -162,7 +160,6 @@ const ExpenseIncomeSideModal: React.FC<CreateInventoryGroupModalProps> = ({
                     formData.append(key, value.toString());
                 }
             });
-            formData.append('company_id', currentCompany?._id || '');
 
             // Simulate API call
             await new Promise(resolve => setTimeout(resolve, 2000));
