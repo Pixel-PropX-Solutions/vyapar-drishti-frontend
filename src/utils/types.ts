@@ -13,6 +13,14 @@ export type SortField =
   | "available_product_price"
   | "company_name";
 
+
+export type InventorySortField =
+  | "created_at"
+  | 'stock_item_name'
+  | 'last_restock_date'
+  | "current_stock";
+
+
 export type ProductSortField =
   | "stock_item_name"
   | 'selling_price'

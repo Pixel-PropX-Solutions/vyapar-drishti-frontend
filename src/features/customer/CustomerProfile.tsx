@@ -36,7 +36,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { getCustomer, getCustomerInvoices } from "@/services/customers";
 import { useNavigate, useParams } from "react-router-dom";
-import { getInitials } from "@/utils/functions";
+import { formatLocalDate, getInitials } from "@/utils/functions";
 import { ActionButton } from "@/common/buttons/ActionButton";
 import { setCustomersFilters, setEditingCustomer } from "@/store/reducers/customersReducer";
 import { CustomerInvoicesRow } from "./CustomerInvoicesRow";
@@ -54,12 +54,13 @@ const CustomerProfile: React.FC = () => {
     const { user, current_company_id } = useSelector((state: RootState) => state.auth);
     const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
     const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
-    const gst_enable:boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
+    const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const { customer_id } = useParams();
     const theme = useTheme();
     const { searchQuery, page, rowsPerPage, startDate, endDate, type, sortField, sortOrder } = useSelector((state: RootState) => state.customersLedger.customersFilters);
+
     const [debouncedQuery, setDebouncedQuery] = useState("");
 
     const fetchCustomersInvoices = useCallback(async () => {
@@ -72,8 +73,8 @@ const CustomerProfile: React.FC = () => {
             limit: rowsPerPage,
             sortField,
             sortOrder,
-            start_date: new Date(startDate).toISOString(),
-            end_date: new Date(endDate).toISOString(),
+            start_date: formatLocalDate(new Date(startDate)),
+            end_date: formatLocalDate(new Date(endDate)),
         }));
     }, [currentCompanyId, customer_id, dispatch, endDate, page, rowsPerPage, debouncedQuery, sortField, sortOrder, startDate, type]);
 
@@ -100,10 +101,8 @@ const CustomerProfile: React.FC = () => {
 
     // Fetch customers when debouncedQuery or other filters change
     useEffect(() => {
-        if (debouncedQuery) {
-            fetchCustomersInvoices();
-        }
-    }, [debouncedQuery, page, rowsPerPage, sortField, sortOrder, type, fetchCustomersInvoices]);
+        fetchCustomersInvoices();
+    }, [currentCompanyId, customer_id, dispatch, endDate, page, rowsPerPage, debouncedQuery, sortField, sortOrder, startDate, type, fetchCustomersInvoices]);
 
     // Handle sorting change
     const handleSortRequest = (field: string) => {

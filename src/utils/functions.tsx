@@ -183,3 +183,21 @@ export function capitalizeInput(value: string, mode: 'off' | 'sentences' | 'word
   if (mode === 'sentences') return value.replace(/(^|[.!?]\s+)([a-z])/g, (_m, p1, p2) => p1 + p2.toUpperCase());
   return value;
 };
+
+export const formatLocalDate = (date: Date): string => {
+  const pad = (n: number): string => n.toString().padStart(2, '0');
+  return (
+    date.getFullYear() +
+    '-' +
+    pad(date.getMonth() + 1) +
+    '-' +
+    pad(date.getDate()) +
+    'T' +
+    pad(date.getHours()) +
+    ':' +
+    pad(date.getMinutes()) +
+    ':' +
+    pad(date.getSeconds()) +
+    '.000Z'
+  );
+};

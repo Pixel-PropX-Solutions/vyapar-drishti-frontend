@@ -52,7 +52,7 @@ const initialState: CustomerState = {
         searchQuery: "",
         type: "all",
         page: 1,
-        startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString(),
+        startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString( ),
         endDate: new Date().toISOString(),
         rowsPerPage: 10,
         sortField: "date",

@@ -60,12 +60,13 @@ const AddPurchaseButton = styled(Button)(({ theme }) => ({
 
 interface InventoryRowRowProps {
     row: InventoryItem;
+    serial: number;
 }
 
 export const InventoryRow = (props: InventoryRowRowProps) => {
     const theme = useTheme();
     const navigate = useNavigate();
-    const { row } = props;
+    const { row, serial } = props;
     const [open, setOpen] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
 
@@ -90,6 +91,9 @@ export const InventoryRow = (props: InventoryRowRowProps) => {
             >
                 <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Typography variant="body2" sx={{ mr: 1 }}>
+                            {serial}
+                        </Typography>
                         <IconButton
                             aria-label="expand row"
                             size="small"
@@ -98,10 +102,13 @@ export const InventoryRow = (props: InventoryRowRowProps) => {
                         >
                             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
                         </IconButton>
-                        <Typography variant="body1" fontWeight="medium">
-                            {row?.stock_item_name}
-                        </Typography>
+
                     </Box>
+                </TableCell>
+                <TableCell>
+                    <Typography variant="body1" fontWeight="medium">
+                        {row?.stock_item_name}
+                    </Typography>
                 </TableCell>
                 <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>

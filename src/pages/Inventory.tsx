@@ -35,8 +35,8 @@ import TabPanel from '@/features/upload-documents/components/TabPanel';
 import InventoryTable from '@/features/inventory/InventoryTable';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
-import { SortField, SortOrder } from '@/utils/types';
-import { getInventoryStockItems } from '@/services/inventory';
+import { InventorySortField, SortOrder } from '@/utils/types';
+import { getInventoryItems, getInventoryStats } from '@/services/inventory';
 import { WarningOutlined } from '@mui/icons-material';
 import { ActionButton } from "@/common/buttons/ActionButton";
 import InventoryStockCardSkeleton from '@/common/skeletons/InventoryStockCardSkeleton';
@@ -57,7 +57,6 @@ const StockCard = styled(Paper)(({ theme }) => ({
     borderRadius: 12,
 }));
 
-
 const Inventory: React.FC = () => {
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
@@ -66,7 +65,7 @@ const Inventory: React.FC = () => {
     const [isStatsLoading, setIsStatsLoading] = useState(false);
     const [currentTab, setCurrentTab] = useState(0);
 
-    const { InventoryItems, inventoryPageMeta } = useSelector((state: RootState) => state.inventory);
+    const { InventoryItems, inventoryPageMeta, statsData } = useSelector((state: RootState) => state.inventory);
     const { user, current_company_id } = useSelector((state: RootState) => state.auth);
     const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
     const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
@@ -82,16 +81,17 @@ const Inventory: React.FC = () => {
     const [data, setData] = useState({
         search: '',
         category: 'all',
+        group: 'all',
         stock_status: 'all',
         page_no: 1,
         limit: 10,
-        sortField: "created_at" as SortField,
+        sortField: "created_at" as InventorySortField,
         sortOrder: "asc" as SortOrder,
     });
     const { zeroStockCount, lowStockCount, positiveStockCount, totalStockValue, totalPurchaseValue } = summaryStats;
-    const { search, category, stock_status, page_no, limit, sortField, sortOrder } = data;
+    const { search, category, group, stock_status, page_no, limit, sortField, sortOrder } = data;
 
-    const handleSortRequest = (field: SortField) => {
+    const handleSortRequest = (field: InventorySortField) => {
         const isAsc = sortField === field && sortOrder === "asc";
         setData((prevState) => ({
             ...prevState,
@@ -104,10 +104,11 @@ const Inventory: React.FC = () => {
         setData({
             search: '',
             category: 'all',
+            group: 'all',
             stock_status: 'all',
             page_no: 1,
             limit: 10,
-            sortField: "created_at" as SortField,
+            sortField: "created_at" as InventorySortField,
             sortOrder: "asc" as SortOrder,
         });
     }, []);
@@ -154,10 +155,11 @@ const Inventory: React.FC = () => {
         setIsLoading(true);
         try {
             await dispatch(
-                getInventoryStockItems({
+                getInventoryItems({
                     company_id: currentCompanyDetails?._id || '',
                     search: debounceQuery,
                     category: category === 'all' ? "" : category,
+                    group: group === 'all' ? "" : group,
                     stock_status: status === 'all' ? "" : status,
                     page_no: page_no,
                     limit: limit,
@@ -170,19 +172,16 @@ const Inventory: React.FC = () => {
         }
     };
 
-    const updateSummaryStats = () => {
-        setSummaryStats({
-            zeroStockCount: inventoryPageMeta.negative_stock || 0,
-            lowStockCount: inventoryPageMeta.low_stock || 0,
-            positiveStockCount: inventoryPageMeta.positive_stock || 0,
-            totalStockValue: inventoryPageMeta.sale_value || 0,
-            totalPurchaseValue: inventoryPageMeta.purchase_value || 0
-        });
-    };
 
     useEffect(() => {
         fetchInventoryData(stock_status);
     }, []);
+
+    useEffect(() => {
+        setIsStatsLoading(true);
+        dispatch(getInventoryStats(currentCompanyDetails?._id || ''))
+            .finally(() => setIsStatsLoading(false));
+    }, [currentCompanyDetails?._id]);
 
     // Debounce search input to avoid excessive API calls
     useEffect(() => {
@@ -197,7 +196,7 @@ const Inventory: React.FC = () => {
 
     useEffect(() => {
         fetchInventoryData(stock_status);
-    }, [category, currentCompanyDetails?._id, stock_status, dispatch, limit, page_no, debounceQuery, sortField, sortOrder]);
+    }, [category, group, currentCompanyDetails?._id, stock_status, dispatch, limit, page_no, debounceQuery, sortField, sortOrder]);
 
     // Reset summary stats fetch flag when company changes
     useEffect(() => {
@@ -207,22 +206,27 @@ const Inventory: React.FC = () => {
     // Calculate summary stats only when company changes or on initial load
     useEffect(() => {
         if (!currentCompanyDetails?._id) return;
-
-        // Reset the flag when company ID changes
+        setIsStatsLoading(true);
         isInventoryFetched.current = false;
 
         const timeout = setTimeout(() => {
-            if (!isInventoryFetched.current && inventoryPageMeta) {
-                updateSummaryStats();
+            if (!isInventoryFetched.current && statsData) {
+                setSummaryStats({
+                    zeroStockCount: (statsData.negative_stock || 0) + (statsData.zero_stock || 0),
+                    lowStockCount: statsData.low_stock || 0,
+                    positiveStockCount: statsData.positive_stock || 0,
+                    totalStockValue: statsData.sale_value || 0,
+                    totalPurchaseValue: statsData.purchase_value || 0
+                });
                 isInventoryFetched.current = true;
             }
         }, 100);
 
         return () => { clearTimeout(timeout); setIsStatsLoading(false); };
-    }, [currentCompanyDetails?._id, inventoryPageMeta]);
+    }, [currentCompanyDetails?._id, statsData]);
 
     return (
-        <Container maxWidth={false} sx={{ mt: 3, width: '100%' }}>
+        <Container maxWidth={false} sx={{ mt: 3, width: '100%', scrollBehavior: 'smooth' }}>
             {/* Header Section with enhanced styling */}
             <Card sx={{ mb: 2, p: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.05)', borderRadius: '12px' }}>
                 <CardContent>
@@ -326,7 +330,7 @@ const Inventory: React.FC = () => {
 
 
             {/* Stock Summary Cards with enhanced visuals */}
-            {(isStatsLoading || isLoading) ? (
+            {(isStatsLoading) ? (
                 <Grid container spacing={1} sx={{ mb: 2 }}>
                     <InventoryStockCardSkeleton color='#ffebee' border='5px solid #c62828' />
                     <InventoryStockCardSkeleton color='hsl(45, 92%, 90%)' border='5px solid hsl(45, 90%, 40%)' />
@@ -514,32 +518,28 @@ const Inventory: React.FC = () => {
                             onChange={(e) => handleStateChange('category', e.target.value)}
                         >
                             <MenuItem value="all">All Categories</MenuItem>
-                            {inventoryPageMeta?.unique?.map((cat, index) => (
+                            {inventoryPageMeta?.unique_categories?.map((cat, index) => (
                                 <MenuItem key={index} value={cat}>
                                     {cat}
                                 </MenuItem>
                             ))}
                         </TextField>
                     </Grid>
-
                     <Grid item xs={12} md={1.5}>
                         <TextField
                             select
-                            value={stock_status}
+                            value={group}
                             fullWidth
-                            label="Stock Status"
+                            label="group"
                             size="small"
-                            onChange={(e) => handleStateChange('stock_status', e.target.value)}
+                            onChange={(e) => handleStateChange('group', e.target.value)}
                         >
-                            <MenuItem value="all" sx={{ fontWeight: 600 }}>All Items</MenuItem>
-                            <MenuItem value="zero"
-                                sx={{ color: theme.palette.mode === 'dark' ? 'rgb(255, 0, 0)' : theme.palette.error.main, fontWeight: 600 }}>Zero Stock</MenuItem>
-                            <MenuItem value="low"
-                                sx={{ color: theme.palette.mode === 'dark' ? theme.palette.warning.light : theme.palette.warning.main, fontWeight: 600 }}
-                            >Low Stock</MenuItem>
-                            <MenuItem value="positive"
-                                sx={{ color: theme.palette.mode === 'dark' ? 'rgb(0, 255, 13)' : theme.palette.success.main, fontWeight: 600 }}>Well Stock</MenuItem>
-
+                            <MenuItem value="all">All Groups</MenuItem>
+                            {inventoryPageMeta?.unique_groups?.map((cat, index) => (
+                                <MenuItem key={index} value={cat}>
+                                    {cat}
+                                </MenuItem>
+                            ))}
                         </TextField>
                     </Grid>
 

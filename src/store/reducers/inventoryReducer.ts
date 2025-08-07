@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AuthStates } from "@/utils/enums";
 import { StockMovement, InventoryItem } from "@/utils/types";
-import { getInventoryStockItems, getStockMovement } from "@/services/inventory";
+import { getInventoryItems, getInventoryStats, getStockMovement } from "@/services/inventory";
 
 interface PageMeta {
   page: number;
@@ -19,12 +19,16 @@ interface InventoryState {
     page: number;
     limit: number;
     total: number;
+    unique_categories: string[];
+    unique_groups: string[];
+  };
+  statsData: {
     sale_value: number;
     purchase_value: number;
     positive_stock: number;
     negative_stock: number;
+    zero_stock: number;
     low_stock: number;
-    unique: string[];
   };
   loading: boolean;
   error: string | null;
@@ -44,12 +48,16 @@ const initialState: InventoryState = {
     page: 0,
     limit: 0,
     total: 0,
+    unique_groups: [],
+    unique_categories: [],
+  },
+  statsData: {
     sale_value: 0,
     purchase_value: 0,
     positive_stock: 0,
     negative_stock: 0,
-    low_stock: 0,
-    unique:[]
+    zero_stock: 0,
+    low_stock: 0
   },
   loading: false,
   error: null,
@@ -79,22 +87,39 @@ const inventorySlice = createSlice({
         state.loading = false;
       })
 
-      .addCase(getInventoryStockItems.pending, (state) => {
+      .addCase(getInventoryItems.pending, (state) => {
         state.error = null;
         state.loading = true;
       })
       .addCase(
-        getInventoryStockItems.fulfilled,
+        getInventoryItems.fulfilled,
         (state, action: PayloadAction<any>) => {
           state.InventoryItems = action.payload.InventoryItems;
           state.inventoryPageMeta = action.payload.inventoryPageMeta;
           state.loading = false;
         }
       )
-      .addCase(getInventoryStockItems.rejected, (state, action) => {
+      .addCase(getInventoryItems.rejected, (state, action) => {
         state.error = action.payload as string;
         state.loading = false;
-      });
+      })
+
+
+      .addCase(getInventoryStats.pending, (state) => {
+        state.error = null;
+        state.loading = true;
+      })
+      .addCase(
+        getInventoryStats.fulfilled,
+        (state, action: PayloadAction<any>) => {
+          state.statsData = action.payload.statsData;
+          state.loading = false;
+        }
+      )
+      .addCase(getInventoryStats.rejected, (state, action) => {
+        state.error = action.payload as string;
+        state.loading = false;
+      })
   },
 });
 

@@ -44,9 +44,10 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { InvoicesRowSkeleton } from "@/common/skeletons/InvoicesRowSkeleton";
 import { ActionButton } from "@/common/buttons/ActionButton";
-import { setInvoiceTypeId } from "@/store/reducers/invoiceReducer";
+import { setInvoicesFilters, setInvoiceTypeId } from "@/store/reducers/invoiceReducer";
 import toast from "react-hot-toast";
 import { BottomPagination } from "@/common/modals/BottomPagination";
+import { formatLocalDate } from "@/utils/functions";
 
 
 const Invoices: React.FC = () => {
@@ -64,42 +65,43 @@ const Invoices: React.FC = () => {
   const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
   const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
   const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
+  const { searchQuery, filterState, page, rowsPerPage, startDate, endDate, type, sortField, sortOrder } = useSelector((state: RootState) => state.invoice.invoicesFilters);
+  const [debouncedQuery, setDebouncedQuery] = useState(searchQuery);
 
-  const [state, setState] = useState({
-    searchQuery: "",
-    filterState: "All-States",
-    is_deleted: false,
-    type: "Invoices",
-    page: 1,
-    startDate: new Date(),
-    endDate: new Date(),
-    rowsPerPage: 10,
-    sortField: "created_at" as CustomerSortField,
-    sortOrder: "desc" as SortOrder,
-  });
-
-  const { searchQuery, filterState, page, is_deleted, rowsPerPage, startDate, endDate, type, sortField, sortOrder } = state;
-
-  const fetchIvoices = useCallback(async () => {
+  const fetchInvoices = useCallback(async () => {
     dispatch(
       viewAllInvoices({
-        searchQuery: searchQuery,
+        searchQuery: debouncedQuery,
         company_id: currentCompanyId || "",
         type: type,
-        start_date: startDate.getFullYear().toString() + '-' + (startDate.getMonth() + 1).toString().padStart(2, '0') + '-' + startDate.getDate().toString().padStart(2, '0'),
-        end_date: endDate.getFullYear().toString() + '-' + (endDate.getMonth() + 1).toString().padStart(2, '0') + '-' + endDate.getDate().toString().padStart(2, '0'),
+        start_date: formatLocalDate(new Date(startDate)),
+        end_date: formatLocalDate(new Date(endDate)),
         pageNumber: page,
         limit: rowsPerPage,
         sortField: sortField,
         sortOrder: sortOrder,
       })
     )
-  }, [dispatch, searchQuery, currentCompanyId, type, startDate, endDate, page, rowsPerPage, sortField, sortOrder]);
+  }, [dispatch, debouncedQuery, currentCompanyId, type, startDate, endDate, page, rowsPerPage, sortField, sortOrder]);
 
   // Fetch Invoices
   useEffect(() => {
-    fetchIvoices();
-  }, [searchQuery, page, rowsPerPage, is_deleted, sortField, filterState, sortOrder, dispatch, fetchIvoices, currentCompanyId]);
+    fetchInvoices();
+  }, []);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 300);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchQuery]);
+
+  useEffect(() => {
+    fetchInvoices();
+  }, [debouncedQuery, page, rowsPerPage, sortField, filterState, sortOrder, dispatch, currentCompanyId, fetchInvoices]);
 
   useEffect(() => {
     dispatch(getAllInvoiceGroups(currentCompanyId || ""));
@@ -108,11 +110,10 @@ const Invoices: React.FC = () => {
   // Handle sorting change
   const handleSortRequest = (field: CustomerSortField) => {
     const isAsc = sortField === field && sortOrder === "asc";
-    setState((prevState) => ({
-      ...prevState,
+    dispatch(setInvoicesFilters({
       sortOrder: isAsc ? "desc" : "asc",
       sortField: field
-    }))
+    }));
   };
 
   // Handle pagination change
@@ -120,34 +121,29 @@ const Invoices: React.FC = () => {
     _: React.ChangeEvent<unknown>,
     newPage: number
   ) => {
-
-    setState((prevState) => ({
-      ...prevState,
+    dispatch(setInvoicesFilters({
       page: newPage
     }))
-    // setPage(newPage);
   };
 
   // Reset filters
   const handleResetFilters = useCallback(() => {
-    setState({
+    dispatch(setInvoicesFilters({
       searchQuery: "",
       filterState: "All-States",
-      is_deleted: false,
       type: "Invoices",
       page: 1,
-      startDate: new Date(),
-      endDate: new Date(),
+      startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString(),
+      endDate: new Date().toISOString(),
       rowsPerPage: 10,
       sortField: "created_at" as CustomerSortField,
       sortOrder: "asc" as SortOrder,
-    });
+    }));
   }, []);
 
   // managing searchQuery, filterState, page, rowsPerPage
   const handleStateChange = (field: string, value: any) => {
-    setState((prevState) => ({
-      ...prevState,
+    dispatch(setInvoicesFilters({
       [field]: value
     }))
   }
@@ -162,7 +158,7 @@ const Invoices: React.FC = () => {
   const handleDeleteInvoice = (inv: GetAllVouchars) => {
     if (gst_enable) {
       dispatch(deleteGSTInvoice({ vouchar_id: inv._id, company_id: currentCompanyId })).unwrap().then(() => {
-        fetchIvoices();
+        fetchInvoices();
         toast.success("Invoice deleted successfully!");
       }).catch((error) => {
         toast.error(error || 'An unexpected error occurred. Please try again later.');
@@ -170,7 +166,7 @@ const Invoices: React.FC = () => {
     } else {
       dispatch(deleteInvoice({ vouchar_id: inv._id, company_id: currentCompanyId })).unwrap().then(() => {
         toast.success("Invoice deleted successfully!");
-        fetchIvoices();
+        fetchInvoices();
       }).catch((error) => {
         toast.error(error || 'An unexpected error occurred. Please try again later.');
       })
@@ -351,7 +347,7 @@ const Invoices: React.FC = () => {
 
           <DatePicker
             label="Start Date"
-            value={startDate}
+            value={new Date(startDate)}
             format="dd/MM/yyyy"
             views={["year", "month", "day"]}
             onChange={(newValue) => handleStateChange("startDate", newValue)}
@@ -374,7 +370,7 @@ const Invoices: React.FC = () => {
           />
           <DatePicker
             label="End Date"
-            value={endDate}
+            value={new Date(endDate)}
             format="dd/MM/yyyy"
             views={["year", "month", "day"]}
             onChange={(newValue) => handleStateChange("endDate", newValue)}

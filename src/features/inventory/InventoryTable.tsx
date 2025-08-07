@@ -17,9 +17,18 @@ import { alpha, styled, useTheme } from '@mui/material/styles';
 
 // Icons
 import InventoryIcon from '@mui/icons-material/Inventory';
-import { SortField, SortOrder, InventoryItem, PageMeta } from '@/utils/types';
+import { InventorySortField, SortOrder, InventoryItem } from '@/utils/types';
 import { InventoryRow } from './InventoryRow';
 import { BottomPagination } from '@/common/modals/BottomPagination';
+
+interface inventoryPageMeta {
+    page: number;
+    limit: number;
+    total: number;
+    unique_categories: string[];
+    unique_groups: string[];
+};
+
 
 // Styled Components with enhanced visuals
 const CustomTableCell = styled(TableCell)(({ theme }) => ({
@@ -29,13 +38,13 @@ const CustomTableCell = styled(TableCell)(({ theme }) => ({
 
 interface InventoryTableProps {
     stockItems: InventoryItem[];
-    sortRequest: (field: SortField) => void;
+    sortRequest: (field: InventorySortField) => void;
     stateChange: (key: string, value: string) => void;
     isLoading?: boolean;
     limit: number;
-    sortField: SortField;
+    sortField: InventorySortField;
     sortOrder: SortOrder;
-    pageMeta: PageMeta;
+    pageMeta: inventoryPageMeta;
     pageChange: (event: React.ChangeEvent<unknown>, page: number) => void;
 }
 
@@ -59,8 +68,8 @@ const InventoryTable = (props: InventoryTableProps) => {
                     <Box sx={{ p: 2 }}>
                         {[1, 2, 3, 4, 5].map((item) => (
                             <Box key={item} sx={{ display: 'flex', my: 2, px: 2 }}>
-                                {/* <Skeleton variant="rectangular" width={24} height={30} sx={{ mr: 2 }} /> */}
-                                <Skeleton variant="text" width="40%" height={30} sx={{ mr: 2 }} />
+                                <Skeleton variant="text" width="5%" height={30} sx={{ mr: 2 }} />
+                                <Skeleton variant="text" width="35%" height={30} sx={{ mr: 2 }} />
                                 <Skeleton variant="text" width="10%" height={30} sx={{ mr: 2 }} />
                                 <Skeleton variant="text" width="15%" height={30} sx={{ mr: 2 }} />
                                 <Skeleton variant="text" width="15%" height={30} sx={{ mr: 2 }} />
@@ -92,11 +101,14 @@ const InventoryTable = (props: InventoryTableProps) => {
                                 },
                             }}>
                                 <CustomTableCell sx={{ fontWeight: '600' }}>
+                                    Sr. No.
+                                </CustomTableCell>
+                                <CustomTableCell sx={{ fontWeight: '600' }}>
                                     <Tooltip title="Sort by Product Name" arrow>
                                         <TableSortLabel
-                                            active={sortField === "product_name"}
-                                            direction={sortField === "product_name" ? sortOrder : "asc"}
-                                            onClick={() => sortRequest("product_name")}
+                                            active={sortField === "stock_item_name"}
+                                            direction={sortField === "stock_item_name" ? sortOrder : "asc"}
+                                            onClick={() => sortRequest("stock_item_name")}
                                         >
                                             Product Name
                                         </TableSortLabel>
@@ -105,34 +117,26 @@ const InventoryTable = (props: InventoryTableProps) => {
                                 <CustomTableCell sx={{ fontWeight: '600', whiteSpace: 'nowrap' }}>
                                     <Tooltip title="Sort by Quantity" arrow>
                                         <TableSortLabel
-                                            active={sortField === "available_quantity"}
-                                            direction={sortField === "available_quantity" ? sortOrder : "asc"}
-                                            onClick={() => sortRequest("available_quantity")}
+                                            active={sortField === "current_stock"}
+                                            direction={sortField === "current_stock" ? sortOrder : "asc"}
+                                            onClick={() => sortRequest("current_stock")}
                                         >
                                             Qty
                                         </TableSortLabel>
                                     </Tooltip>
                                 </CustomTableCell>
                                 <CustomTableCell sx={{ fontWeight: '600', whiteSpace: 'nowrap' }}>
-                                    <Tooltip title="Sort by Purchase Price" arrow>
-                                        <TableSortLabel
-                                            active={sortField === "available_product_price"}
-                                            direction={sortField === "available_product_price" ? sortOrder : "asc"}
-                                            onClick={() => sortRequest("available_product_price")}
-                                        >
-                                            Purchase Rate
-                                        </TableSortLabel>
-                                    </Tooltip>
+                                    Purchase Rate
                                 </CustomTableCell>
                                 <CustomTableCell sx={{ fontWeight: '600', whiteSpace: 'nowrap' }}>
                                     Sale Rate
                                 </CustomTableCell>
                                 <CustomTableCell sx={{ fontWeight: '600' }}>
-                                    <Tooltip title="Sort by Last Updated Date" arrow>
+                                    <Tooltip title="Sort by Last Restock Date" arrow>
                                         <TableSortLabel
-                                            active={sortField === "created_at"}
-                                            direction={sortField === "created_at" ? sortOrder : "asc"}
-                                            onClick={() => sortRequest("created_at")}
+                                            active={sortField === "last_restock_date"}
+                                            direction={sortField === "last_restock_date" ? sortOrder : "asc"}
+                                            onClick={() => sortRequest("last_restock_date")}
                                         >
                                             Last Restocked
                                         </TableSortLabel>
@@ -144,12 +148,16 @@ const InventoryTable = (props: InventoryTableProps) => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {stockItems?.map((item) => (
-                                <InventoryRow
-                                    key={item._id}
-                                    row={item}
-                                />
-                            ))}
+                            {stockItems?.map((item, index) => {
+                                const serial = index + 1 + (pageMeta?.page - 1) * limit;
+                                return (
+                                    <InventoryRow
+                                        key={item._id}
+                                        row={item}
+                                        serial={serial}
+                                    />
+                                )
+                            })}
                         </TableBody>
                     </Table>
                 )}

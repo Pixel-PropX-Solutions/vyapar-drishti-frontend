@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AuthStates } from "@/utils/enums";
-import { GetAllInvoiceGroups, GetAllVouchars, GetInvoiceData, PageMeta } from "@/utils/types";
+import { GetAllInvoiceGroups, GetAllVouchars, GetInvoiceData, PageMeta, SortOrder } from "@/utils/types";
 import { deleteGSTInvoice, deleteInvoice, updateInvoice, viewAllInvoiceGroups, viewAllInvoices, viewInvoice } from "@/services/invoice";
 import { getAllInvoiceGroups } from "@/services/invoice";
 
@@ -19,6 +19,17 @@ interface InvoiceState {
     pageMeta: PageMeta;
     loading: boolean;
     error: string | null;
+    invoicesFilters: {
+        searchQuery: string,
+        type: string,
+        filterState: string,
+        page: number,
+        startDate: string,
+        endDate: string,
+        rowsPerPage: number,
+        sortField: string,
+        sortOrder: SortOrder,
+    }
 }
 
 const initialState: InvoiceState = {
@@ -43,6 +54,17 @@ const initialState: InvoiceState = {
     },
     loading: false,
     error: null,
+    invoicesFilters: {
+        searchQuery: "",
+        type: "Invoices",
+        filterState: "All-States",
+        page: 1,
+        startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString(),
+        endDate: new Date().toISOString(),
+        rowsPerPage: 10,
+        sortField: "date",
+        sortOrder: "asc" as SortOrder,
+    }
 };
 
 const invoiceSlice = createSlice({
@@ -54,6 +76,12 @@ const invoiceSlice = createSlice({
         },
         setInvoiceTypeId: (state, action: PayloadAction<string | null>) => {
             state.invoiceType_id = action.payload;
+        },
+        setInvoicesFilters: (state, action: PayloadAction<Partial<InvoiceState['invoicesFilters']>>) => {
+            state.invoicesFilters = {
+                ...state.invoicesFilters,
+                ...action.payload,
+            };
         }
     },
     extraReducers: (builder) => {
@@ -143,7 +171,7 @@ const invoiceSlice = createSlice({
                 state.error = action.payload as string;
                 state.loading = false;
             })
-            
+
             .addCase(deleteGSTInvoice.pending, (state) => {
                 state.error = null;
                 state.loading = true;
@@ -159,5 +187,5 @@ const invoiceSlice = createSlice({
     },
 });
 
-export const { setEditingInvoice, setInvoiceTypeId } = invoiceSlice.actions;
+export const { setEditingInvoice, setInvoiceTypeId, setInvoicesFilters } = invoiceSlice.actions;
 export default invoiceSlice.reducer;
