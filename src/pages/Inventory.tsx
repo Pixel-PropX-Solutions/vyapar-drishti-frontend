@@ -51,7 +51,6 @@ const StockCard = styled(Paper)(({ theme }) => ({
     justifyContent: 'space-between',
     transition: 'transform 0.2s, box-shadow 0.2s',
     '&:hover': {
-        transform: 'translateY(-4px)',
         boxShadow: theme.shadows[4],
     },
     borderRadius: 12,
@@ -172,15 +171,24 @@ const Inventory: React.FC = () => {
         }
     };
 
+    const fetchInventoryStats = async () => {
+        setIsStatsLoading(true);
+        try {
+            await dispatch(
+                getInventoryStats(currentCompanyDetails?._id || '')
+            );
+        } finally {
+            setIsStatsLoading(false);
+        }
+    };
+
 
     useEffect(() => {
         fetchInventoryData(stock_status);
     }, []);
 
     useEffect(() => {
-        setIsStatsLoading(true);
-        dispatch(getInventoryStats(currentCompanyDetails?._id || ''))
-            .finally(() => setIsStatsLoading(false));
+        fetchInventoryStats();
     }, [currentCompanyDetails?._id]);
 
     // Debounce search input to avoid excessive API calls
@@ -209,20 +217,18 @@ const Inventory: React.FC = () => {
         setIsStatsLoading(true);
         isInventoryFetched.current = false;
 
-        const timeout = setTimeout(() => {
-            if (!isInventoryFetched.current && statsData) {
-                setSummaryStats({
-                    zeroStockCount: (statsData.negative_stock || 0) + (statsData.zero_stock || 0),
-                    lowStockCount: statsData.low_stock || 0,
-                    positiveStockCount: statsData.positive_stock || 0,
-                    totalStockValue: statsData.sale_value || 0,
-                    totalPurchaseValue: statsData.purchase_value || 0
-                });
-                isInventoryFetched.current = true;
-            }
-        }, 100);
-
-        return () => { clearTimeout(timeout); setIsStatsLoading(false); };
+        if (!isInventoryFetched.current && statsData) {
+            setSummaryStats({
+                zeroStockCount: (statsData.negative_stock || 0) + (statsData.zero_stock || 0),
+                lowStockCount: statsData.low_stock || 0,
+                positiveStockCount: statsData.positive_stock || 0,
+                totalStockValue: statsData.sale_value || 0,
+                totalPurchaseValue: statsData.purchase_value || 0
+            });
+            isInventoryFetched.current = true;
+            setIsStatsLoading(false);
+        }
+        setIsStatsLoading(false);
     }, [currentCompanyDetails?._id, statsData]);
 
     return (
@@ -345,21 +351,30 @@ const Inventory: React.FC = () => {
                             bgcolor: '#ffebee',
                             borderLeft: '5px solid #c62828'
                         }}>
-                            <Box>
-                                <Typography variant="subtitle2" sx={{ color: theme.palette.grey[600] }} gutterBottom>
-                                    Zero Stock Items
-                                </Typography>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: theme.palette.common.black }}>
-                                    {zeroStockCount > 0 && <WarningAmberIcon color="error" />}
-                                    <Typography variant="h4" component="div" fontWeight="bold">
-                                        {zeroStockCount} Items
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                <Box>
+                                    <Typography variant="subtitle2" sx={{ color: theme.palette.grey[600] }} gutterBottom>
+                                        Zero Stock Items
                                     </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: theme.palette.common.black }}>
+                                        {zeroStockCount > 0 && <WarningAmberIcon color="error" />}
+                                        <Typography variant="h4" component="div" fontWeight="bold">
+                                            {zeroStockCount} Items
+                                        </Typography>
+                                    </Box>
+                                    {zeroStockCount > 0 && (
+                                        <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block' }}>
+                                            Items that are out of stock and need immediate attention.
+                                        </Typography>
+                                    )}
                                 </Box>
-                                {zeroStockCount > 0 && (
-                                    <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block' }}>
-                                        Some items are out of stock, please restock them
-                                    </Typography>
-                                )}
+                                <Tooltip
+                                    title="Zero stock items are those that have no available quantity left in inventory. These items include both negative stock (where sales have occurred without sufficient stock) and items that have zero stock."
+                                    arrow
+                                    placement="top"
+                                >
+                                    <InfoOutlinedIcon fontSize="small" color="warning" sx={{ cursor: 'pointer' }} />
+                                </Tooltip>
                             </Box>
                         </StockCard>
                     </Grid>
@@ -380,7 +395,7 @@ const Inventory: React.FC = () => {
                                 </Box>
                                 {lowStockCount > 0 && (
                                     <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block' }}>
-                                        Attention required! Some items need restocking
+                                        Items that are running low and need restocking soon.
                                     </Typography>
                                 )}
                             </Box>
@@ -402,9 +417,9 @@ const Inventory: React.FC = () => {
                                         {positiveStockCount} Items
                                     </Typography>
                                 </Box>
-                                <Typography variant="caption" color="success.dark" sx={{ mt: 1, display: 'block' }}>
-                                    Well stocked items ready for sale
-                                </Typography>
+                                {positiveStockCount > 0 && <Typography variant="caption" color="success.dark" sx={{ mt: 1, display: 'block' }}>
+                                    Items that are well-stocked and available for sale.
+                                </Typography>}
                             </Box>
                         </StockCard>
                     </Grid>
@@ -428,7 +443,7 @@ const Inventory: React.FC = () => {
                                         </Typography>
                                     </Box>
                                     <Typography variant="caption" sx={{ mt: 1, display: 'block', color: theme.palette.primary.main }}>
-                                        Potential revenue at current prices
+                                        Total estimated sales value of sold stock
                                     </Typography>
                                 </Box>
                                 <Tooltip
@@ -461,7 +476,7 @@ const Inventory: React.FC = () => {
                                         </Typography>
                                     </Box>
                                     <Typography variant="caption" color="warning.dark" sx={{ mt: 1, display: 'block' }}>
-                                        Total investment in current stock
+                                        Total estimated purchase value of stock
                                     </Typography>
                                 </Box>
                                 <Tooltip

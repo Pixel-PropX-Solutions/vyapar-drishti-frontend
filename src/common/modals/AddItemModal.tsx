@@ -449,6 +449,14 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
                                             handleInputChange('item_id', '');
                                         }
                                     }}
+                                    filterOptions={(options, { inputValue }) => {
+                                        const normalizedInput = inputValue.replace(/\s+/g, '').toLowerCase();
+                                        return options.filter(option => {
+                                            const label = typeof option === 'string' ? option : option?.name || '';
+                                            const normalizedLabel = label.replace(/\s+/g, '').toLowerCase();
+                                            return normalizedLabel.includes(normalizedInput);
+                                        });
+                                    }}
                                     renderInput={(params) => (
                                         <TextField
                                             {...params}

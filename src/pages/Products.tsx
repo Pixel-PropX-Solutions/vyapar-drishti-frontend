@@ -51,6 +51,7 @@ const ProductsListing: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { stockItems, stockItemsMeta } = useSelector((state: RootState) => state.product);
+  console.log("Stock Items", stockItems);
   const { categories, pageMeta: categoryPageMeta } = useSelector((state: RootState) => state.category);
   const { inventoryGroups, inventoryGroupPageMeta } = useSelector((state: RootState) => state.inventoryGroup);
   const [products, setProducts] = useState<GetStockItem[]>([]);
@@ -88,8 +89,8 @@ const ProductsListing: React.FC = () => {
   const { user, current_company_id } = useSelector((state: RootState) => state.auth);
   const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
   const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
-  console.log("Current Company Details", currentCompanyDetails)
   const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
+
   const [selectedProduct, setSelectedProduct] = useState<ProductUpdate | null>(null);
   const [openCategoryModal, setOpenCategoryModal] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<UpdateCategory | null>(null);
@@ -524,21 +525,11 @@ const ProductsListing: React.FC = () => {
                     </TableSortLabel>
                   </Tooltip>
                 </TableCell>
-                {/* <TableCell align="center" sx={{ px: 1 }}>
-                  <Tooltip title="Sort by Item Quantity" arrow>
-                    <TableSortLabel
-                    >
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                        Unit
-                      </Typography>
-                    </TableSortLabel>
-                  </Tooltip>
-                </TableCell> */}
-                <TableCell align="center" sx={{ px: 1 }}>
+                {!gst_enable && <TableCell align="center" sx={{ px: 1 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                    Low Stock ALert
+                    Low Stock Alert
                   </Typography>
-                </TableCell>
+                </TableCell>}
                 {gst_enable && <TableCell align="center" sx={{ px: 1 }}>
                   <Tooltip title="Sort by Bar-Code" arrow>
                     <TableSortLabel
@@ -565,7 +556,12 @@ const ProductsListing: React.FC = () => {
                 </TableCell>
                 <TableCell align="center" sx={{ px: 1 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                    Closing Stock
+                    Closing Stock QTY
+                  </Typography>
+                </TableCell>
+                <TableCell align="center" sx={{ px: 1 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                    Closing Stock Value
                   </Typography>
                 </TableCell>
                 <TableCell align="center" >
@@ -826,6 +822,7 @@ const ProductsListing: React.FC = () => {
         rowsPerPage={rowsPerPage}
         onChange={handlePageChange}
       />}
+
       {selectedTab === 1 && <BottomPagination
         total={categoryPageMeta.total}
         item="categories"
@@ -834,6 +831,7 @@ const ProductsListing: React.FC = () => {
         rowsPerPage={rowsPerPage}
         onChange={handlePageChange}
       />}
+
       {selectedTab === 2 && <BottomPagination
         total={inventoryGroupPageMeta.total}
         item="groups"

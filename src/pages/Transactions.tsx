@@ -30,13 +30,14 @@ import {
     PeopleAlt,
     Today,
 } from "@mui/icons-material";
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+// import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+// import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import { CustomerSortField, SortOrder, GetAllVouchars } from "@/utils/types";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { useNavigate } from "react-router-dom";
 import {
+    deleteInvoice,
     // printPaymentInvoices, printRecieptInvoices, 
     viewAllInvoices
 } from "@/services/invoice";
@@ -47,7 +48,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { InvoicesRowSkeleton } from "@/common/skeletons/InvoicesRowSkeleton";
-import { ActionButton } from "@/common/buttons/ActionButton";
+// import { ActionButton } from "@/common/buttons/ActionButton";
 import { BottomPagination } from "@/common/modals/BottomPagination";
 import { setInvoiceTypeId } from "@/store/reducers/invoiceReducer";
 import toast from "react-hot-toast";
@@ -64,7 +65,7 @@ const Transactions: React.FC = () => {
     const { user, current_company_id } = useSelector((state: RootState) => state.auth);
     const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
 
-    const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
+    // const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
 
     const [state, setState] = useState({
         searchQuery: "",
@@ -81,7 +82,7 @@ const Transactions: React.FC = () => {
 
     const { searchQuery, filterState, page, is_deleted, rowsPerPage, startDate, endDate, type, sortField, sortOrder } = state;
 
-    const fetchIvoices = useCallback(async () => {
+    const fetchTransactions = useCallback(async () => {
         dispatch(
             viewAllInvoices({
                 searchQuery: searchQuery,
@@ -99,9 +100,9 @@ const Transactions: React.FC = () => {
 
     // Fetch stockists data from API
     useEffect(() => {
-        fetchIvoices();
+        fetchTransactions();
         dispatch(getAllInvoiceGroups(currentCompanyId || ""));
-    }, [searchQuery, page, rowsPerPage, is_deleted, sortField, filterState, sortOrder, dispatch, fetchIvoices, currentCompanyId]);
+    }, [searchQuery, page, rowsPerPage, is_deleted, sortField, filterState, sortOrder, dispatch, fetchTransactions, currentCompanyId]);
 
     // Handle sorting change
     const handleSortRequest = (field: CustomerSortField) => {
@@ -233,7 +234,7 @@ const Transactions: React.FC = () => {
                                 }}
                             >
                                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                                    <ActionButton
+                                    {/* <ActionButton
                                         variant="contained"
                                         startIcon={<AddCircleOutlineIcon />}
                                         color="success"
@@ -281,7 +282,7 @@ const Transactions: React.FC = () => {
                                         }}
                                     >
                                         Expense
-                                    </ActionButton>
+                                    </ActionButton> */}
                                 </Box>
                             </Grid>
                         </Paper>
@@ -539,8 +540,12 @@ const Transactions: React.FC = () => {
                                             navigate(`/transactions/update/${inv.voucher_type.toLowerCase()}/${inv._id}`);
                                         }}
                                         onDelete={async () => {
-                                            // await deleteCustomer(cred._id);
-                                            // fetchCustomers();
+                                            dispatch(deleteInvoice({ vouchar_id: inv._id, company_id: currentCompanyId })).unwrap().then(() => {
+                                                toast.success("Transaction deleted successfully!");
+                                                fetchTransactions();
+                                            }).catch((error) => {
+                                                toast.error(error || 'An unexpected error occurred. Please try again later.');
+                                            })
                                         }}
                                         onPrint={() => { }}
 
@@ -563,7 +568,7 @@ const Transactions: React.FC = () => {
                                                     alignItems: "center",
                                                 }}
                                             >
-                                                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                                                {/* <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                                                     <ActionButton
                                                         variant="contained"
                                                         startIcon={<AddCircleOutlineIcon />}
@@ -613,7 +618,7 @@ const Transactions: React.FC = () => {
                                                     >
                                                         Payment
                                                     </ActionButton>
-                                                </Box>
+                                                </Box> */}
                                             </Grid>
                                         </Box>
                                     </TableCell>

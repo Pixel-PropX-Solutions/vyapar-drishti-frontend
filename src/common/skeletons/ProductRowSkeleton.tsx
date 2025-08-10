@@ -32,12 +32,15 @@ export const ProductRowSkeleton: React.FC = () => {
             {/* <TableCell align="center">
                 <Skeleton variant="text" width={80} height={20} sx={{ mx: 'auto' }} />
             </TableCell> */}
-            <TableCell align="center">
+            {!gst_enable && <TableCell align="center">
                 <Skeleton variant="text" width={80} height={20} sx={{ mx: 'auto' }} />
-            </TableCell>
+            </TableCell>}
             {gst_enable && <TableCell align="center">
                 <Skeleton variant="text" width={60} height={20} sx={{ mx: 'auto' }} />
             </TableCell>}
+            <TableCell align="center">
+                <Skeleton variant="text" width={80} height={20} sx={{ mx: 'auto' }} />
+            </TableCell>
             <TableCell align="center">
                 <Skeleton variant="text" width={80} height={20} sx={{ mx: 'auto' }} />
             </TableCell>

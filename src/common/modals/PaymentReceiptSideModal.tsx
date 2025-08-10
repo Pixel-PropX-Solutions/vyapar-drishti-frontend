@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Box,
     TextField,
@@ -41,14 +41,16 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import toast from "react-hot-toast";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
 import { ActionButton } from "../buttons/ActionButton";
+import { createInvoice, getInvoiceCounter } from "@/services/invoice";
+import { useNavigate } from "react-router-dom";
 
 interface CreateInventoryGroupModalProps {
     open: boolean;
     onClose: () => void;
-    type: 'expense' | 'income' | null;
+    type: 'payment' | 'receipt' | null;
     customerName: string;
     customerId: string;
     closingBalance: number;
@@ -61,9 +63,10 @@ interface InventoryGroupFormData {
     sendSms: boolean;
     sendEmail: boolean;
     accounts: string;
+    transactionNumber: string;
 }
 
-const ExpenseIncomeSideModal: React.FC<CreateInventoryGroupModalProps> = ({
+const PaymentReceiptSideModal: React.FC<CreateInventoryGroupModalProps> = ({
     open,
     onClose,
     type,
@@ -72,8 +75,12 @@ const ExpenseIncomeSideModal: React.FC<CreateInventoryGroupModalProps> = ({
     closingBalance,
 }) => {
     const theme = useTheme();
+    const dispatch = useDispatch<AppDispatch>();
+    const navigate = useNavigate();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const { customerTypes } = useSelector((state: RootState) => state.customersLedger)
+    const { customerTypes } = useSelector((state: RootState) => state.customersLedger);
+    const { invoiceType_id } = useSelector((state: RootState) => state.invoice);
+    const { current_company_id } = useSelector((state: RootState) => state.auth);
     const [isLoading, setIsLoading] = useState(false);
     const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
     const [data, setData] = useState<InventoryGroupFormData>({
@@ -83,9 +90,10 @@ const ExpenseIncomeSideModal: React.FC<CreateInventoryGroupModalProps> = ({
         sendSms: false,
         sendEmail: false,
         accounts: 'Cash',
+        transactionNumber: '',
     });
 
-    const isIncome = type === 'income';
+    const isReceipt = type === 'receipt';
 
     const validateForm = (): boolean => {
         const errors: { [key: string]: string } = {};
@@ -106,7 +114,10 @@ const ExpenseIncomeSideModal: React.FC<CreateInventoryGroupModalProps> = ({
         return Object.keys(errors).length === 0;
     };
 
-    const handleInputChange = (field: keyof InventoryGroupFormData, value: any) => {
+    const handleInputChange = (
+        field: keyof InventoryGroupFormData,
+        value: any
+    ) => {
         setData(prev => ({
             ...prev,
             [field]: value
@@ -129,6 +140,7 @@ const ExpenseIncomeSideModal: React.FC<CreateInventoryGroupModalProps> = ({
             sendSms: false,
             sendEmail: false,
             accounts: 'Cash',
+            transactionNumber: '',
         });
         setFormErrors({});
     };
@@ -140,38 +152,53 @@ const ExpenseIncomeSideModal: React.FC<CreateInventoryGroupModalProps> = ({
         }
 
         setIsLoading(true);
+        const accounting = [
+            {
+                vouchar_id: '',
+                ledger: customerName,
+                ledger_id: customerId,
+                amount: !isReceipt ? -data.amount : data.amount,
+            },
+            {
+                vouchar_id: '',
+                ledger: data.accounts,
+                ledger_id: customerTypes.find(c => c.ledger_name === data.accounts)?._id || '',
+                amount: !isReceipt ? data.amount : -data.amount,
+            },
+        ];
 
-        try {
-            const sanitizedData: any = {
-                amount: data.amount,
-                notes: data.notes.trim(),
-                date: data.date,
-                customer_id: customerId,
-                send_sms: data.sendSms,
-                send_email: data.sendEmail,
-                type: type,
-            };
+        const payload = {
+            voucher_type: type === 'receipt' ? 'Receipt' : 'Payment',
+            voucher_type_id: invoiceType_id || '',
+            date: data.date,
+            voucher_number: data.transactionNumber || '',
+            party_name: customerName,
+            party_name_id: customerId ?? '',
+            narration: data.notes,
+            company_id: '',
+            reference_number: "",
+            reference_date: "",
+            place_of_supply: "",
+            mode_of_transport: "",
+            vehicle_number: "",
+            status: "",
+            due_date: "",
+            accounting,
+            items: []
+        };
 
-            const formData = new FormData();
-            Object.entries(sanitizedData).forEach(([key, value]) => {
-                if (typeof value === 'boolean') {
-                    formData.append(key, value ? 'true' : 'false');
-                } else if (value !== null && value !== undefined) {
-                    formData.append(key, value.toString());
-                }
-            });
-
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
-            toast.success(`Payment ${isIncome ? 'received' : 'given'} successfully!`);
+        dispatch(createInvoice(payload)).then(() => {
+            toast.success(`Payment ${isReceipt ? 'received' : 'given'} successfully!`);
             resetForm();
             onClose();
-        } catch (error) {
-            toast.error('Failed to process payment');
-        } finally {
             setIsLoading(false);
-        }
+            navigate('/transactions');
+        }).catch((error) => {
+            setIsLoading(false);
+            toast.error(error || "Failed to add transaction. 🚫");
+        }).finally(() => {
+            setIsLoading(false);
+        })
     };
 
     const formatCurrency = (amount: number) => {
@@ -193,6 +220,20 @@ const ExpenseIncomeSideModal: React.FC<CreateInventoryGroupModalProps> = ({
         if (balance < 0) return <Warning fontSize="small" />;
         return <BalanceIcon fontSize="small" />;
     };
+
+    useEffect(() => {
+        dispatch(getInvoiceCounter({
+            company_id: current_company_id || '',
+            voucher_type: type === 'receipt' ? 'Receipt' : 'Payment',
+        })).then((response) => {
+            if (response.meta.requestStatus === 'fulfilled') {
+                handleInputChange('transactionNumber', response.payload.current_number || '');
+            }
+        }).catch((error) => {
+            toast.error(error || "An unexpected error occurred. Please try again later.");
+        });
+    }, [dispatch, current_company_id, type]);
+
 
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -236,8 +277,8 @@ const ExpenseIncomeSideModal: React.FC<CreateInventoryGroupModalProps> = ({
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    borderBottom: `2px solid ${isIncome ? theme.palette.success.main : theme.palette.error.main}`,
-                    background: `linear-gradient(135deg, ${isIncome ? theme.palette.success.main : theme.palette.error.main}20 0%, ${isIncome ? theme.palette.success.light : theme.palette.error.light}15 100%)`,
+                    borderBottom: `2px solid ${isReceipt ? theme.palette.success.main : theme.palette.error.main}`,
+                    background: `linear-gradient(135deg, ${isReceipt ? theme.palette.success.main : theme.palette.error.main}20 0%, ${isReceipt ? theme.palette.success.light : theme.palette.error.light}15 100%)`,
                     backdropFilter: 'blur(20px)',
                     position: 'sticky',
                     top: 0,
@@ -264,7 +305,7 @@ const ExpenseIncomeSideModal: React.FC<CreateInventoryGroupModalProps> = ({
                         <Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <Typography variant="h6" fontWeight={700}>
-                                    {isIncome ? 'Payment Received Cash' : 'Payment Given Cash'}
+                                    {isReceipt ? 'Payment Received Cash' : 'Payment Given Cash'}
                                 </Typography>
                             </Box>
                         </Box>
@@ -277,8 +318,8 @@ const ExpenseIncomeSideModal: React.FC<CreateInventoryGroupModalProps> = ({
                             size="small"
                             variant="outlined"
                             sx={{
-                                borderColor: isIncome ? theme.palette.success.main : theme.palette.error.main,
-                                color: isIncome ? theme.palette.success.main : theme.palette.error.main,
+                                borderColor: isReceipt ? theme.palette.success.main : theme.palette.error.main,
+                                color: isReceipt ? theme.palette.success.main : theme.palette.error.main,
                             }}
                         />
                     )}
@@ -555,7 +596,7 @@ const ExpenseIncomeSideModal: React.FC<CreateInventoryGroupModalProps> = ({
                                 Reset Form
                             </Button>
 
-                            {isIncome ? (
+                            {isReceipt ? (
                                 <ActionButton
                                     variant="contained"
                                     startIcon={isLoading ? <Timeline className="animate-spin" /> : <AddCircleOutlineIcon />}
@@ -610,4 +651,4 @@ const ExpenseIncomeSideModal: React.FC<CreateInventoryGroupModalProps> = ({
     );
 };
 
-export default ExpenseIncomeSideModal;
+export default PaymentReceiptSideModal;

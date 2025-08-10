@@ -661,6 +661,7 @@ export interface GetStockItem {
   opening_balance: number,
   opening_rate: number,
   opening_value: number,
+  avg_purchase_rate: number,
   low_stock_alert: number | null,
   created_at: string,
   updated_at: string,

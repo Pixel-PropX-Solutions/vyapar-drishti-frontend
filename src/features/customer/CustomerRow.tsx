@@ -37,7 +37,10 @@ import {
 } from "@mui/icons-material";
 import { formatDate } from "@/utils/functions";
 import MenuButton from "@/components/MaterialUI/MenuButton";
-import ExpenseIncomeSideModal from "@/common/modals/ExpenseIncomeSideModal";
+import PaymentReceiptSideModal from "@/common/modals/PaymentReceiptSideModal";
+import { setInvoiceTypeId } from "@/store/reducers/invoiceReducer";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
 
 interface CustomerRowProps {
     cus: GetUserLedgers;
@@ -50,10 +53,12 @@ interface CustomerRowProps {
 
 export const CustomerRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit, onView, index }) => {
     const theme = useTheme();
+    const dispatch = useDispatch<AppDispatch>();
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [openExpenseIncomeModal, setOpenExpenseIncomeModal] = useState(false);
+    const { invoiceGroups } = useSelector((state: RootState) => state.invoice);
     const [isHovered, setIsHovered] = useState(false);
-    const [type, setType] = useState<'expense' | 'income' | null>(null);
+    const [type, setType] = useState<'payment' | 'receipt' | null>(null);
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
@@ -337,8 +342,9 @@ export const CustomerRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit,
                                                 py: .5
                                             }}
                                             onClick={(e) => {
+                                                dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Receipt'))?._id || ''));
                                                 handleClose();
-                                                setType('income');
+                                                setType('receipt');
                                                 setOpenExpenseIncomeModal(true);
                                                 e.stopPropagation();
                                             }}
@@ -358,7 +364,8 @@ export const CustomerRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit,
                                             }}
                                             onClick={(e) => {
                                                 handleClose();
-                                                setType('expense');
+                                                dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Payment'))?._id || ''));
+                                                setType('payment');
                                                 setOpenExpenseIncomeModal(true);
                                                 e.stopPropagation();
                                             }}
@@ -470,7 +477,7 @@ export const CustomerRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit,
                 </DialogActions>
             </Dialog>
 
-            <ExpenseIncomeSideModal
+            <PaymentReceiptSideModal
                 open={openExpenseIncomeModal}
                 customerName={cus.ledger_name}
                 customerId={cus._id}

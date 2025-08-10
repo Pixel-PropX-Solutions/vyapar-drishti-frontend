@@ -26,6 +26,7 @@ import { viewProduct } from "@/services/products";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { getAvatarColor, getInitials } from "@/utils/functions";
+import { CurrencyRupee } from "@mui/icons-material";
 
 interface ProductRowProps {
     product: GetStockItem;
@@ -119,23 +120,8 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                         </Box>
                     </TableCell>
 
-                    {/* Product Unit */}
-                    {/* <TableCell align="center" sx={{ px: 1 }}>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                            <Typography
-                                variant="body1"
-                                sx={{
-                                    fontWeight: 700,
-                                    color: theme.palette.text.primary,
-                                }}
-                            >
-                                {product.unit || '-'}
-                            </Typography>
-                        </Box>
-                    </TableCell> */}
-
                     {/* Product Low Stock Alert */}
-                    <TableCell align="center" sx={{ px: 1 }}>
+                    {!gst_enable &&<TableCell align="center" sx={{ px: 1 }}>
                         <Typography
                             variant="body1"
                             sx={{
@@ -145,7 +131,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                         >
                             {product.low_stock_alert || 0}
                         </Typography>
-                    </TableCell>
+                    </TableCell>}
 
                     {/* Product HSN/SAC Code */}
                     {gst_enable && <TableCell align="center" sx={{ px: 1 }}>
@@ -173,7 +159,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                         </Typography>
                     </TableCell>
 
-                    {/* Product Closing Balance */}
+                    {/* Product Closing Quantity */}
                     <TableCell align="center" sx={{ px: 1 }}>
                         <Typography
                             variant="body1"
@@ -183,6 +169,20 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                             }}
                         >
                             {product?.current_stock} {product.unit}
+                        </Typography>
+                    </TableCell>
+
+                    {/* Product Closing Balance */}
+                    <TableCell align="center" sx={{ px: 1 }}>
+                        <Typography
+                            variant="body1"
+                            sx={{
+                                fontWeight: 600,
+                                color: theme.palette.text.primary,
+                            }}
+                        >
+                            <CurrencyRupee sx={{ fontSize: '0.875rem', verticalAlign: 'middle', mr: 1 }} />
+                            {(((product?.avg_purchase_rate + product?.opening_rate) * product?.current_stock) / 2).toFixed(2)}
                         </Typography>
                     </TableCell>
 

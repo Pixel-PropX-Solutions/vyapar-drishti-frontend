@@ -44,6 +44,7 @@ import { ActionButton } from "@/common/buttons/ActionButton";
 import { setCustomerTypeId, setEditingCustomer } from "@/store/reducers/customersReducer";
 import toast from "react-hot-toast";
 import { BottomPagination } from "@/common/modals/BottomPagination";
+import { getAllInvoiceGroups } from "@/services/invoice";
 
 const CustomerLedger: React.FC = () => {
   const { customers, pageMeta, loading } = useSelector((state: RootState) => state.customersLedger);
@@ -87,6 +88,7 @@ const CustomerLedger: React.FC = () => {
 
   useEffect(() => {
     fetchCustomers();
+    dispatch(getAllInvoiceGroups(currentCompanyId || ""));
     dispatch(viewAllCustomerWithTypes({ company_id: currentCompanyId, customerTypes: ["Bank Accounts", "Cash-in-Hand"] }))
   }, []);
 

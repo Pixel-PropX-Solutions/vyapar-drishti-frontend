@@ -105,6 +105,7 @@ export const getCurrentUser = createAsyncThunk(
         return { user };
       } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {
+      console.log("Get current user error:", error);
       return rejectWithValue(error?.response?.data?.message);
     }
   }
