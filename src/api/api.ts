@@ -13,6 +13,18 @@ const userApi = axios.create({
     withCredentials: true,
 });
 
+// Add request interceptor to always send financial year
+userApi.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+    const year = localStorage.getItem("financial_year") || new Date().getFullYear().toString();
+
+    if (!config.params) {
+        config.params = {};
+    }
+    config.params.financial_year = year;
+
+    return config;
+}, (error) => Promise.reject(error));
+
 userApi.interceptors.response.use(
     (response: AxiosResponse): AxiosResponse => {
         if (response.data.accessToken && response.data.refreshToken) {

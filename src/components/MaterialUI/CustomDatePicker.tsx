@@ -14,13 +14,13 @@ import {
 
 interface ButtonFieldProps
   extends UseDateFieldProps<Dayjs, false>,
-    BaseSingleInputFieldProps<
-      Dayjs | null,
-      Dayjs,
-      FieldSection,
-      false,
-      DateValidationError
-    > {
+  BaseSingleInputFieldProps<
+    Dayjs | null,
+    Dayjs,
+    FieldSection,
+    false,
+    DateValidationError
+  > {
   setOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -52,24 +52,24 @@ export function ButtonField(props: ButtonFieldProps) {
 }
 
 export default function CustomDatePicker() {
-  const [value, setValue] = React.useState<Dayjs | null>(dayjs("2023-04-17"));
-  const [open, setOpen] = React.useState(false);
+  // const [value, setValue] = React.useState<Dayjs | null>(dayjs(new Date()));
+  // const [open, setOpen] = React.useState(false);
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <DatePicker
-        value={value}
-        label={value == null ? null : value.format("MMM DD, YYYY")}
-        onChange={(newValue) => setValue(newValue)}
+        value={dayjs(new Date())}
+        label={dayjs(new Date()) == null ? null : dayjs(new Date()).format("MMM DD, YYYY")}
+        // onChange={(newValue) => setValue(newValue)}
         slots={{ field: ButtonField }}
         slotProps={{
-          field: { setOpen } as any,
+          // field: { setOpen } as any,
           nextIconButton: { size: "small" },
           previousIconButton: { size: "small" },
         }}
-        open={open}
-        onClose={() => setOpen(false)}
-        onOpen={() => setOpen(true)}
+        // open={open}
+        // onClose={() => setOpen(false)}
+        // onOpen={() => setOpen(true)}
         views={["year", "month", "day"]}
       />
     </LocalizationProvider>

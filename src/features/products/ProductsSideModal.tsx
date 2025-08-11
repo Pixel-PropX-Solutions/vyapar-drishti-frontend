@@ -254,7 +254,9 @@ const ProductsSideModal = (props: SideModalProps) => {
 
         setIsLoading(true);
         try {
-            const sanitizedData: FormCreateProduct = {
+            // Calculate opening_value
+            const opening_value = (Number(data.opening_balance) || 0) * (Number(data.opening_rate) || 0);
+            const sanitizedData: Record<string, any> = {
                 stock_item_name: data.stock_item_name.trim(),
                 unit: data.unit.trim(),
                 unit_id: data.unit_id.trim(),
@@ -264,26 +266,21 @@ const ProductsSideModal = (props: SideModalProps) => {
                 gst_taxability: data.gst_taxability.trim(),
                 gst_percentage: data.gst_percentage.trim(),
                 low_stock_alert: data.low_stock_alert,
+                opening_balance: data.opening_balance,
+                opening_rate: data.opening_rate,
+                opening_value, // Ensure opening_value is included
             };
 
             // Add optional fields
             Object.entries(data).forEach(([key, value]) => {
-                if (key !== 'stock_item_name' && key !== 'unit' && key !== 'unit_id' && key !== 'company_id' && key !== 'is_deleted') {
-                    if (value && value !== '' && value !== 0) {
-                        (sanitizedData as any)[key] = value;
-                    }
+                if (!(key in sanitizedData)) {
+                    sanitizedData[key] = value;
                 }
             });
 
             const formData = new FormData();
             Object.entries(sanitizedData).forEach(([key, value]) => {
-                if (typeof value === 'boolean') {
-                    formData.append(key, value ? 'true' : 'false');
-                } else if (value instanceof Blob) {
-                    formData.append(key, value);
-                } else if (typeof value === 'string' || typeof value === 'number') {
-                    formData.append(key, value.toString());
-                }
+                formData.append(key, value as any);
             });
 
             if (product && product._id) {

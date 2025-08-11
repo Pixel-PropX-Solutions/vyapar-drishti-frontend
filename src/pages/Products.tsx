@@ -525,11 +525,11 @@ const ProductsListing: React.FC = () => {
                     </TableSortLabel>
                   </Tooltip>
                 </TableCell>
-                {!gst_enable && <TableCell align="center" sx={{ px: 1 }}>
+                {/* {!gst_enable && <TableCell align="center" sx={{ px: 1 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
                     Low Stock Alert
                   </Typography>
-                </TableCell>}
+                </TableCell>} */}
                 {gst_enable && <TableCell align="center" sx={{ px: 1 }}>
                   <Tooltip title="Sort by Bar-Code" arrow>
                     <TableSortLabel
@@ -557,6 +557,11 @@ const ProductsListing: React.FC = () => {
                 <TableCell align="center" sx={{ px: 1 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
                     Closing Stock QTY
+                  </Typography>
+                </TableCell>
+                <TableCell align="center" sx={{ px: 1 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                    Closing Stock Rate
                   </Typography>
                 </TableCell>
                 <TableCell align="center" sx={{ px: 1 }}>

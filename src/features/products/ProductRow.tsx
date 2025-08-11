@@ -46,6 +46,8 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
     const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
+    const closingValue = (((product?.purchase_value + product?.opening_value) / (product?.purchase_qty + product?.opening_balance)) * product?.current_stock) || 0;
+    const closingRate = (((product?.purchase_value + product?.opening_value) / (product?.purchase_qty + product?.opening_balance)) || 0).toFixed(2);
 
     const confirmDelete = () => {
         onDelete(product?._id ?? '');
@@ -121,7 +123,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                     </TableCell>
 
                     {/* Product Low Stock Alert */}
-                    {!gst_enable &&<TableCell align="center" sx={{ px: 1 }}>
+                    {/* {!gst_enable && <TableCell align="center" sx={{ px: 1 }}>
                         <Typography
                             variant="body1"
                             sx={{
@@ -131,7 +133,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                         >
                             {product.low_stock_alert || 0}
                         </Typography>
-                    </TableCell>}
+                    </TableCell>} */}
 
                     {/* Product HSN/SAC Code */}
                     {gst_enable && <TableCell align="center" sx={{ px: 1 }}>
@@ -172,6 +174,20 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                         </Typography>
                     </TableCell>
 
+                    {/* Product Closing Rate */}
+                    <TableCell align="center" sx={{ px: 1 }}>
+                        <Typography
+                            variant="body1"
+                            sx={{
+                                fontWeight: 600,
+                                color: theme.palette.text.primary,
+                            }}
+                        >
+                            <CurrencyRupee sx={{ fontSize: '0.875rem', verticalAlign: 'middle', mr: 1 }} />
+                            {closingRate}
+                        </Typography>
+                    </TableCell>
+
                     {/* Product Closing Balance */}
                     <TableCell align="center" sx={{ px: 1 }}>
                         <Typography
@@ -182,7 +198,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                             }}
                         >
                             <CurrencyRupee sx={{ fontSize: '0.875rem', verticalAlign: 'middle', mr: 1 }} />
-                            {(((product?.avg_purchase_rate + product?.opening_rate) * product?.current_stock) / 2).toFixed(2)}
+                            {closingValue.toFixed(2)}
                         </Typography>
                     </TableCell>
 
