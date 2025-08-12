@@ -106,10 +106,7 @@ const CustomerLedger: React.FC = () => {
 
   // Fetch stockists data from API
   useEffect(() => {
-    if (debouncedQuery) {
-      fetchCustomers();
-    }
-
+    fetchCustomers();
   }, [debouncedQuery, page, rowsPerPage, is_deleted, sortField, filterState, sortOrder, dispatch, fetchCustomers]);
 
   useEffect(() => {
@@ -132,12 +129,10 @@ const CustomerLedger: React.FC = () => {
     _: React.ChangeEvent<unknown>,
     newPage: number
   ) => {
-
     setState((prevState) => ({
       ...prevState,
       page: newPage
     }))
-    // setPage(newPage);
   };
 
   // Reset filters
