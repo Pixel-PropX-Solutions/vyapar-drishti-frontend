@@ -131,7 +131,7 @@ axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 ### Once installed and running:
 
 1. **Login or Register**
-   - Visit [http://localhost:3000](http://localhost:3000).
+   - Visit [https://vyapar-drishti.vercel.app](https://vyapar-drishti.vercel.app/).
    - Fill up the info and sign up and login.
 
 2. **Chemist Dashboard**
@@ -171,8 +171,8 @@ axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 1. **Clone the repository:**
 
 ```bash
-git clone [https://github.com/tohidkhan2464/vyapar-drishti-frontend.git](https://github.com/tohidkhan2464/vyapar-drishti-frontend)
-cd vyapar-drishti
+git clone https://github.com/tohidkhan2464/vyapar-drishti-frontend.git
+cd vyapar-drishti-frontend
 ```
 
 2. **Install dependencies:**
