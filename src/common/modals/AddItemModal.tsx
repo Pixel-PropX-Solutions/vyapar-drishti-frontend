@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
     Box,
     TextField,
@@ -84,6 +84,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
         gst_amount: 0,
     });
     const [totalAmount, setTotalAmount] = useState(0);
+    const autoCompleteInputRef = useRef<HTMLInputElement>(null);
 
     // Validation function
     const validateForm = (formData = data) => {
@@ -173,6 +174,15 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
         setFormErrors({});
         setShowValidation(false);
     };
+
+    useEffect(() => {
+        if (open) {
+            setTimeout(() => {
+                autoCompleteInputRef.current?.focus();
+                setFocusedField('item');
+            }, 100); // slight delay ensures input is mounted
+        }
+    }, [open]);
 
     useEffect(() => {
         if (!open) {
@@ -343,6 +353,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
                     backgroundColor: theme.palette.background.default,
                     backgroundImage: `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${alpha(theme.palette.primary.main, 0.02)} 100%)`,
                     overflow: 'hidden',
+
                 }
             }}
             sx={{
@@ -460,6 +471,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
                                     renderInput={(params) => (
                                         <TextField
                                             {...params}
+                                            inputRef={autoCompleteInputRef}
                                             placeholder="Start typing for items suggestions..."
                                             variant="outlined"
                                             fullWidth
@@ -503,166 +515,172 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
                                     }}
                                     isOptionEqualToValue={(option, value) => option.id === value.id}
                                 />
-                                {formFields.map((field, index) => {
-                                    // For quantity field, set type and step based on unit type
-                                    let inputType = 'text';
-                                    let inputStep = undefined;
-                                    if (field.key === 'quantity') {
-                                        const selectedItem = itemsList.find(item => item.id === data.item_id);
-                                        const unitType = units.find(unit => unit.value === selectedItem?.unit)?.si_representation;
-                                        inputType = 'number';
-                                        inputStep = unitType === 'integer' ? '1' : '0.01';
-                                    }
-                                    let value = undefined;
-                                    if (field.key === 'total-amount') {
-                                        value = totalAmount;
-                                    } else {
-                                        value = data[field.key as keyof InvoiceItems] || '';
-                                    }
+                                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                                    {formFields.map((field, index) => {
+                                        // For quantity field, set type and step based on unit type
+                                        let inputType = 'text';
+                                        let inputStep = undefined;
+                                        if (field.key === 'quantity') {
+                                            const selectedItem = itemsList.find(item => item.id === data.item_id);
+                                            const unitType = units.find(unit => unit.value === selectedItem?.unit)?.si_representation;
+                                            inputType = 'number';
+                                            inputStep = unitType === 'integer' ? '1' : '0.01';
+                                        }
+                                        let value = undefined;
+                                        if (field.key === 'total-amount') {
+                                            value = totalAmount;
+                                        } else {
+                                            value = data[field.key as keyof InvoiceItems] || '';
+                                        }
 
-                                    return (
-                                        <TextField
-                                            key={index + field.key}
-                                            fullWidth
-                                            label={field.label}
-                                            placeholder={field.placeholder}
-                                            value={value}
-                                            onChange={(e) => handleInputChange(field.key as keyof InvoiceItems, e.target.value)}
-                                            error={!!formErrors[field.key]}
-                                            helperText={formErrors[field.key] || field.description}
-                                            required={field.required}
-                                            onFocus={() => setFocusedField(field.key)}
-                                            onBlur={() => setFocusedField('')}
-                                            disabled={isLoading || field.disabled}
-                                            type={inputType}
-                                            inputProps={inputStep ? { step: inputStep, min: 0 } : { min: 0 }}
-                                            InputProps={{
-                                                startAdornment: (
-                                                    <InputAdornment position="start">
-                                                        <Box sx={{
-                                                            p: 0.5,
-                                                            borderRadius: 1,
-                                                            backgroundColor: focusedField === field.key
-                                                                ? alpha(theme.palette.primary.main, 0.1)
-                                                                : 'transparent',
-                                                            transition: 'all 0.3s ease',
-                                                            display: 'flex',
-                                                            alignItems: 'center'
-                                                        }}>
-                                                            <field.icon
-                                                                color={formErrors[field.key] ? 'error' :
-                                                                    focusedField === field.key ? 'primary' : 'action'}
-                                                                sx={{ fontSize: 20 }}
+                                        return (
+                                            <TextField
+                                                key={index + field.key}
+                                                fullWidth
+                                                label={field.label}
+                                                placeholder={field.placeholder}
+                                                value={value}
+                                                onChange={(e) => handleInputChange(field.key as keyof InvoiceItems, e.target.value)}
+                                                error={!!formErrors[field.key]}
+                                                helperText={formErrors[field.key] || field.description}
+                                                required={field.required}
+                                                onFocus={() => setFocusedField(field.key)}
+                                                onBlur={() => setFocusedField('')}
+                                                disabled={isLoading || field.disabled}
+                                                type={inputType}
+                                                inputProps={inputStep ? { step: inputStep, min: 0 } : { min: 0 }}
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <Box sx={{
+                                                                p: 0.5,
+                                                                borderRadius: 1,
+                                                                backgroundColor: focusedField === field.key
+                                                                    ? alpha(theme.palette.primary.main, 0.1)
+                                                                    : 'transparent',
+                                                                transition: 'all 0.3s ease',
+                                                                display: 'flex',
+                                                                alignItems: 'center'
+                                                            }}>
+                                                                <field.icon
+                                                                    color={formErrors[field.key] ? 'error' :
+                                                                        focusedField === field.key ? 'primary' : 'action'}
+                                                                    sx={{ fontSize: 20 }}
+                                                                />
+                                                            </Box>
+                                                        </InputAdornment>
+                                                    ),
+                                                    endAdornment: field.required && (
+                                                        <InputAdornment position="end">
+                                                            <Chip
+                                                                label="Required"
+                                                                size="small"
+                                                                color="primary"
+                                                                variant="outlined"
+                                                                sx={{
+                                                                    fontSize: '0.7rem',
+                                                                    height: 20,
+                                                                    opacity: focusedField === field.key ? 1 : 0.6,
+                                                                    transition: 'opacity 0.3s ease'
+                                                                }}
                                                             />
-                                                        </Box>
-                                                    </InputAdornment>
-                                                ),
-                                                endAdornment: field.required && (
-                                                    <InputAdornment position="end">
-                                                        <Chip
-                                                            label="Required"
-                                                            size="small"
-                                                            color="primary"
-                                                            variant="outlined"
-                                                            sx={{
-                                                                fontSize: '0.7rem',
-                                                                height: 20,
-                                                                opacity: focusedField === field.key ? 1 : 0.6,
-                                                                transition: 'opacity 0.3s ease'
-                                                            }}
-                                                        />
-                                                    </InputAdornment>
-                                                )
-                                            }}
-                                            sx={{
-                                                '& .MuiOutlinedInput-root': {
-                                                    borderRadius: 1,
-                                                    backgroundColor: focusedField === field.key
-                                                        ? alpha(theme.palette.primary.main, 0.02)
-                                                        : alpha(theme.palette.background.paper, 0.5),
-                                                },
-                                                '& .MuiFormHelperText-root': {
-                                                    marginLeft: 0,
-                                                    marginTop: 1,
-                                                    fontSize: '0.75rem',
-                                                    color: formErrors[field.key]
-                                                        ? theme.palette.error.main
-                                                        : alpha(theme.palette.text.secondary, 0.7)
-                                                }
-                                            }}
-                                        />
-                                    );
-                                })}
-                            </Stack>
+                                                        </InputAdornment>
+                                                    )
+                                                }}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: 1,
+                                                        backgroundColor: focusedField === field.key
+                                                            ? alpha(theme.palette.primary.main, 0.02)
+                                                            : alpha(theme.palette.background.paper, 0.5),
+                                                    },
+                                                    '& .MuiFormHelperText-root': {
+                                                        marginLeft: 0,
+                                                        marginTop: 1,
+                                                        fontSize: '0.75rem',
+                                                        color: formErrors[field.key]
+                                                            ? theme.palette.error.main
+                                                            : alpha(theme.palette.text.secondary, 0.7)
+                                                    }
+                                                }}
+                                            />
+                                        );
+                                    })}
+                                </Box>
 
-                            <Box sx={{
-                                display: 'flex',
-                                justifyContent: 'flex-end',
-                                gap: 2,
-                                mt: 5,
-                                pt: 3,
-                                borderTop: `1px solid ${alpha(theme.palette.divider, 0.5)}`
-                            }}>
-                                <Button
-                                    variant="outlined"
-                                    color="secondary"
-                                    onClick={onClose}
-                                    startIcon={<Close />}
-                                    sx={{
-                                        textTransform: 'none',
-                                        fontWeight: 600,
-                                        borderRadius: 2,
-                                        px: 3,
-                                        py: 1.5,
-                                        borderColor: alpha(theme.palette.secondary.main, 0.3),
-                                        backgroundColor: alpha(theme.palette.background.paper, 0.8),
-                                        backdropFilter: 'blur(10px)',
-                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                        '&:hover': {
-                                            backgroundColor: alpha(theme.palette.secondary.main, 0.08),
-                                            borderColor: theme.palette.secondary.main,
-                                        }
-                                    }}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={handleSubmit}
-                                    disabled={Object.keys(formErrors).length > 0 || isLoading}
-                                    startIcon={isLoading ?
-                                        <CircularProgress size={20} color="inherit" /> :
-                                        <Save />
-                                    }
-                                    sx={{
-                                        textTransform: 'none',
-                                        fontWeight: 600,
-                                        borderRadius: 2,
-                                        px: 4,
-                                        py: 1.5,
-                                        background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                                        boxShadow: `0 4px 20px ${alpha(theme.palette.primary.main, 0.3)}`,
-                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                        '&:hover': {
-                                            background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
-                                            borderColor: theme.palette.common.white,
-                                        },
-                                        '&:disabled': {
-                                            background: alpha(theme.palette.action.disabled, 0.12),
-                                            color: theme.palette.action.disabled,
-                                            boxShadow: 'none',
-                                            transform: 'none',
-                                        }
-                                    }}
-                                >
-                                    {isLoading ? 'Adding...' :
-                                        item === null ? "Add Item" : 'Update Item'}
-                                </Button>
-                            </Box>
+                            </Stack>
                         </Paper>
                     </Grow>
                 </Box>
+            </Box>
+            <Box sx={{
+                position: 'sticky',
+                bottom: 0,
+                right: 0,
+                // width:'100%',
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: 2,
+                py: 2,
+                mx: 2,
+                borderTop: `1px solid ${alpha(theme.palette.divider, 0.5)}`
+            }}>
+                <Button
+                    variant="outlined"
+                    color="secondary"
+                    onClick={onClose}
+                    startIcon={<Close />}
+                    sx={{
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        borderRadius: 2,
+                        px: 3,
+                        py: 1.5,
+                        borderColor: alpha(theme.palette.secondary.main, 0.3),
+                        backgroundColor: alpha(theme.palette.background.paper, 0.8),
+                        backdropFilter: 'blur(10px)',
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        '&:hover': {
+                            backgroundColor: alpha(theme.palette.secondary.main, 0.08),
+                            borderColor: theme.palette.secondary.main,
+                        }
+                    }}
+                >
+                    Cancel
+                </Button>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleSubmit}
+                    disabled={Object.keys(formErrors).length > 0 || isLoading}
+                    startIcon={isLoading ?
+                        <CircularProgress size={20} color="inherit" /> :
+                        <Save />
+                    }
+                    sx={{
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        borderRadius: 2,
+                        px: 4,
+                        py: 1.5,
+                        background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                        boxShadow: `0 4px 20px ${alpha(theme.palette.primary.main, 0.3)}`,
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        '&:hover': {
+                            background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                            borderColor: theme.palette.common.white,
+                        },
+                        '&:disabled': {
+                            background: alpha(theme.palette.action.disabled, 0.12),
+                            color: theme.palette.action.disabled,
+                            boxShadow: 'none',
+                            transform: 'none',
+                        }
+                    }}
+                >
+                    {isLoading ? 'Adding...' :
+                        item === null ? "Add Item" : 'Update Item'}
+                </Button>
             </Box>
         </Drawer>
     );

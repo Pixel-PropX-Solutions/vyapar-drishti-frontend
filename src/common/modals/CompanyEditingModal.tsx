@@ -51,7 +51,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import countries from "@/internals/data/CountriesStates.json";
-import { ActionButton } from "../buttons/ActionButton";
+import ActionButtonSuccess from "../buttons/ActionButtonSuccess";
 
 
 interface EditUserModalProps {
@@ -1308,24 +1308,12 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                                         <AccountBalance />
                                         Bank Information
                                     </Typography>
-                                    <ActionButton
-                                        variant="contained"
-                                        startIcon={<AddCircleOutline />}
-                                        color="success"
+                                    <ActionButtonSuccess
                                         onClick={() => setAddBank(!addBank)}
                                         disabled={isLoading}
-                                        sx={{
-                                            background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
-                                            color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
-                                            border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
-                                            '&:hover': {
-                                                color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                                                background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
-                                            },
-                                        }}
-                                    >
-                                        {addBank ? 'Hide Bank Information' : 'Add Bank Information'}
-                                    </ActionButton>
+                                        startIcon={<AddCircleOutline />}
+                                        text={addBank ? 'Hide Bank Information' : 'Add Bank Information'}
+                                    />
                                 </Box>
                                 <Divider sx={{ mb: 3 }} />
 

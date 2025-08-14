@@ -141,6 +141,25 @@ export const getProduct = createAsyncThunk(
   }
 );
 
+
+export const getProductTimeline = createAsyncThunk(
+  "view/product/timeline",
+  async ({ product_id, company_id }: { product_id: string, company_id: string }, { rejectWithValue }) => {
+    try {
+      const response = await userApi.get(`product/get/timeline/${product_id}?company_id=${company_id}`);
+
+      console.log("Get Product Timeline API Response", response);
+
+      if (response.data.success === true) {
+        const timeline = response.data.data[0];
+        return { timeline };
+      } else return rejectWithValue("Login Failed: No access token recieved.");
+    } catch (error: any) {
+      return rejectWithValue(error?.response?.data?.message);
+    }
+  }
+);
+
 export const viewProductsWithId = createAsyncThunk(
   "view/products/withId",
   async (company_id: string, { rejectWithValue }) => {

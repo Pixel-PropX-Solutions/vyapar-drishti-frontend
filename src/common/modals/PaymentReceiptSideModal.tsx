@@ -43,9 +43,10 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
-import { ActionButton } from "../buttons/ActionButton";
 import { createInvoice, getInvoiceCounter } from "@/services/invoice";
 import { useNavigate } from "react-router-dom";
+import ActionButtonSuccess from "../buttons/ActionButtonSuccess";
+import ActionButtonCancel from "../buttons/ActionButtonCancel";
 
 interface CreateInventoryGroupModalProps {
     open: boolean;
@@ -597,51 +598,25 @@ const PaymentReceiptSideModal: React.FC<CreateInventoryGroupModalProps> = ({
                             </Button>
 
                             {isReceipt ? (
-                                <ActionButton
-                                    variant="contained"
-                                    startIcon={isLoading ? <Timeline className="animate-spin" /> : <AddCircleOutlineIcon />}
-                                    color="success"
-                                    fullWidth={isMobile}
-                                    disabled={isLoading || !data.amount || data.amount <= 0 || !data.date}
+                                <ActionButtonSuccess
                                     onClick={handleSubmit}
-                                    sx={{
-                                        background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
-                                        color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
-                                        border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
-                                        '&:hover': {
-                                            color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                                            background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
-                                        },
-                                    }}
-                                >
-                                    {isLoading
+                                    startIcon={isLoading ? <Timeline className="animate-spin" /> : <AddCircleOutlineIcon />}
+                                    disabled={isLoading || !data.amount || data.amount <= 0 || !data.date}
+                                    text={isLoading
                                         ? 'Recording Receipt...'
                                         : 'Record  Receipt'
                                     }
-                                </ActionButton>
+                                />
                             ) : (
-                                <ActionButton
-                                    variant="contained"
+                                <ActionButtonCancel
                                     startIcon={isLoading ? <Timeline className="animate-spin" /> : <AddCircleOutlineIcon />}
-                                    color="error"
-                                    fullWidth={isMobile}
                                     disabled={isLoading || !data.amount || data.amount <= 0 || !data.date}
                                     onClick={handleSubmit}
-                                    sx={{
-                                        background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
-                                        color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
-                                        border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#c62828'}`,
-                                        '&:hover': {
-                                            color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                                            background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
-                                        },
-                                    }}
-                                >
-                                    {isLoading
-                                        ? `Recording Payment...`
-                                        : `Record Payment`
+                                    text={isLoading
+                                        ? 'Recording Payment...'
+                                        : 'Record Payment'
                                     }
-                                </ActionButton>
+                                />
                             )}
                         </Stack>
                     </Stack>

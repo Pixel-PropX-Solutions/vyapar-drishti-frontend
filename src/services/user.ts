@@ -3,27 +3,24 @@ import userApi from "@/api/api";
 import { CreateBasicUser } from "@/utils/types";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
-export const createUser = createAsyncThunk(
-  "create/BasicUser",
+export const getEntityName = createAsyncThunk(
+  "get/entity/name",
   async (
     {
-      email,
-      role,
+      entity,
+      id,
     }: {
-      email: string;
-      role: string;
+      entity: string;
+      id: string;
     },
     { rejectWithValue }
   ) => {
     try {
-      const response = await adminApi.post("/create/user", {
-        email,
-        role,
-      });
+      const response = await userApi.get(`user/entity-name/${entity}/${id}`);
 
       if (response.data.success === true) {
-        const id = response.data.id;
-        return { id };
+        const name = response.data.data;
+        return { name };
       } else return rejectWithValue("Login Failed: No access token recieved.");
     } catch (error: any) {
       return rejectWithValue(error?.response?.data?.message);

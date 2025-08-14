@@ -31,7 +31,7 @@ import {
 } from "@mui/icons-material";
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
-import { CustomerSortField, SortOrder, GetAllVouchars } from "@/utils/types";
+import { SortOrder, GetAllVouchars, InvoicesSortField } from "@/utils/types";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { useNavigate } from "react-router-dom";
@@ -43,7 +43,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { InvoicesRowSkeleton } from "@/common/skeletons/InvoicesRowSkeleton";
-import { ActionButton } from "@/common/buttons/ActionButton";
+import { ActionButton } from "@/common/buttons/ActionButton1";
 import { setInvoicesFilters, setInvoiceTypeId } from "@/store/reducers/invoiceReducer";
 import toast from "react-hot-toast";
 import { BottomPagination } from "@/common/modals/BottomPagination";
@@ -108,7 +108,7 @@ const Invoices: React.FC = () => {
   }, [currentCompanyId, dispatch]);
 
   // Handle sorting change
-  const handleSortRequest = (field: CustomerSortField) => {
+  const handleSortRequest = (field: InvoicesSortField) => {
     const isAsc = sortField === field && sortOrder === "asc";
     dispatch(setInvoicesFilters({
       sortOrder: isAsc ? "desc" : "asc",
@@ -136,7 +136,7 @@ const Invoices: React.FC = () => {
       startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString(),
       endDate: new Date().toISOString(),
       rowsPerPage: 10,
-      sortField: "created_at" as CustomerSortField,
+      sortField: "created_at" as InvoicesSortField,
       sortOrder: "asc" as SortOrder,
     }));
   }, []);
@@ -150,7 +150,6 @@ const Invoices: React.FC = () => {
 
   // Handle view invoice details
   const handleViewInvoice = (inv: GetAllVouchars) => {
-    toast.success(`Viewing ${inv.voucher_type} invoice Coming Soon`);
     navigate(`/invoices/${inv._id}`);
   };
 
@@ -481,9 +480,9 @@ const Invoices: React.FC = () => {
                 <TableCell align="left" sx={{ px: 1 }}>
                   <Tooltip title="Sort by State" arrow>
                     <TableSortLabel
-                      active={sortField === "state"}
-                      direction={sortField === "state" ? sortOrder : "asc"}
-                      onClick={() => handleSortRequest("state")}
+                      active={sortField === "date"}
+                      direction={sortField === "date" ? sortOrder : "asc"}
+                      onClick={() => handleSortRequest("date")}
                     >
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
                         <Today fontSize="small" />
@@ -497,9 +496,9 @@ const Invoices: React.FC = () => {
                 <TableCell align="left" sx={{ px: 1 }}>
                   <Tooltip title="Sort by Name">
                     <TableSortLabel
-                      active={sortField === "name"}
-                      direction={sortField === "name" ? sortOrder : "asc"}
-                      onClick={() => handleSortRequest("name")}
+                      active={sortField === "party_name"}
+                      direction={sortField === "party_name" ? sortOrder : "asc"}
+                      onClick={() => handleSortRequest("party_name")}
                     >
                       <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
                         Customer Information
@@ -509,11 +508,11 @@ const Invoices: React.FC = () => {
                 </TableCell>
 
                 <TableCell align="left" sx={{ px: 1 }}>
-                  <Tooltip title="Sort by Item Quantity" arrow>
+                  <Tooltip title="Sort by Invoice Type" arrow>
                     <TableSortLabel
-                    // active={sortField === "name"}
-                    // direction={sortField === "name" ? sortOrder : "asc"}
-                    // onClick={() => handleSortRequest("name")}
+                    active={sortField === "voucher_type"}
+                    direction={sortField === "voucher_type" ? sortOrder : "asc"}
+                    onClick={() => handleSortRequest("voucher_type")}
                     >
                       <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
                         Invoice Type
@@ -525,9 +524,9 @@ const Invoices: React.FC = () => {
                 <TableCell align="left" sx={{ px: 1 }}>
                   <Tooltip title="Sort by State" arrow sx={{ mx: 'auto' }}>
                     <TableSortLabel
-                      active={sortField === "state"}
-                      direction={sortField === "state" ? sortOrder : "asc"}
-                      onClick={() => handleSortRequest("state")}
+                      active={sortField === "voucher_number"}
+                      direction={sortField === "voucher_number" ? sortOrder : "asc"}
+                      onClick={() => handleSortRequest("voucher_number")}
                       sx={{ mx: 'auto' }}
                     >
                       <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem', mx: 'auto' }}>

@@ -38,7 +38,7 @@ import { AppDispatch, RootState } from '@/store/store';
 import { InventorySortField, SortOrder } from '@/utils/types';
 import { getInventoryItems, getInventoryStats } from '@/services/inventory';
 import { WarningOutlined } from '@mui/icons-material';
-import { ActionButton } from "@/common/buttons/ActionButton";
+import { ActionButton } from "@/common/buttons/ActionButton1";
 import InventoryStockCardSkeleton from '@/common/skeletons/InventoryStockCardSkeleton';
 import toast from 'react-hot-toast';
 
@@ -242,7 +242,7 @@ const Inventory: React.FC = () => {
                                 Inventory Management
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                Track and manage your pharmacy inventory in real-time
+                                Includes the items which have been added to at least a single invoice.
                             </Typography>
                         </Box>
 

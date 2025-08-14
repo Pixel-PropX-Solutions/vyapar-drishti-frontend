@@ -37,7 +37,6 @@ import {
     LocalShipping,
     AddCard,
     Edit,
-    Cancel,
     Timeline,
 } from "@mui/icons-material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -51,8 +50,9 @@ import { createInvoice, createInvoiceWithGST, getInvoiceCounter } from '@/servic
 import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import AddItemModal from '@/common/modals/AddItemModal';
-import { ActionButton } from '@/common/buttons/ActionButton';
 import { capitalizeInput } from '@/utils/functions';
+import ActionButtonSuccess from '@/common/buttons/ActionButtonSuccess';
+import ActionButtonCancel from '@/common/buttons/ActionButtonCancel';
 
 // Interfaces
 interface InvoiceItems {
@@ -129,7 +129,7 @@ export default function SalePurchaseInvoiceCreation() {
     const navigate = useNavigate();
     const { currentCompany, user, current_company_id } = useSelector((state: RootState) => state.auth);
     const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
-    
+
     const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
     const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
     const { invoiceType_id } = useSelector((state: RootState) => state.invoice);
@@ -392,44 +392,18 @@ export default function SalePurchaseInvoiceCreation() {
                             gap: 2,
                         }}
                     >
-                        <ActionButton
-                            variant="contained"
-                            startIcon={<Cancel />}
-                            color="error"
+                        <ActionButtonCancel
                             onClick={() => {
                                 navigate(-1);
                             }}
                             disabled={isLoading}
-                            sx={{
-                                background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
-                                color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
-                                border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#c62828'}`,
-                                '&:hover': {
-                                    color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                                    background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
-                                },
-                            }}
-                        >
-                            Cancel
-                        </ActionButton>
-                        <ActionButton
-                            variant="contained"
-                            startIcon={isLoading ? <Timeline className="animate-spin" /> : <AddCircleOutline />}
-                            color="success"
+                        />
+                        <ActionButtonSuccess
                             onClick={handleSubmit}
                             disabled={isLoading}
-                            sx={{
-                                background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
-                                color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
-                                border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
-                                '&:hover': {
-                                    color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                                    background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
-                                },
-                            }}
-                        >
-                            {isLoading ? `Creating...` : `Create Invoice ${(type ? type.charAt(0).toUpperCase() + type.slice(1) : '')}`}
-                        </ActionButton>
+                            startIcon={isLoading ? <Timeline className="animate-spin" /> : <AddCircleOutline />}
+                            text={isLoading ? `Creating...` : `Create Invoice ${(type ? type.charAt(0).toUpperCase() + type.slice(1) : '')}`}
+                        />
                     </Grid>
                 </Box>
 
@@ -809,44 +783,20 @@ export default function SalePurchaseInvoiceCreation() {
                                                     <TableCell align="right">
                                                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1 }}>
                                                             <Tooltip title="Edit Item">
-                                                                <ActionButton
-                                                                    variant="contained"
-                                                                    color="success"
+                                                                <ActionButtonSuccess
                                                                     onClick={() => {
                                                                         setItem(item);
                                                                         setAddItemModalOpen(true);
                                                                     }}
-                                                                    sx={{
-                                                                        background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
-                                                                        color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
-                                                                        border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
-                                                                        '&:hover': {
-                                                                            color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                                                                            background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
-                                                                        },
-                                                                    }}
-                                                                >
-                                                                    <Edit />
-                                                                </ActionButton>
+                                                                    text={<Edit />}
+                                                                />
                                                             </Tooltip>
 
                                                             <Tooltip title="Remove Item">
-                                                                <ActionButton
-                                                                    variant="contained"
-                                                                    color="error"
+                                                                <ActionButtonCancel
                                                                     onClick={() => handleRemoveItem(index)}
-                                                                    sx={{
-                                                                        background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
-                                                                        color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
-                                                                        border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#c62828'}`,
-                                                                        '&:hover': {
-                                                                            color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                                                                            background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
-                                                                        },
-                                                                    }}
-                                                                >
-                                                                    <Delete />
-                                                                </ActionButton>
+                                                                    text={<Delete />}
+                                                                />
                                                             </Tooltip>
                                                         </Box>
                                                     </TableCell>
@@ -1140,44 +1090,18 @@ export default function SalePurchaseInvoiceCreation() {
                             </Box>
 
                             <Box sx={{ my: 1, width: '100%', display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-                                <ActionButton
-                                    variant="contained"
-                                    startIcon={<Cancel />}
-                                    color="error"
+                                <ActionButtonCancel
                                     onClick={() => {
                                         navigate(-1);
                                     }}
                                     disabled={isLoading}
-                                    sx={{
-                                        background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
-                                        color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
-                                        border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#c62828'}`,
-                                        '&:hover': {
-                                            color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                                            background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
-                                        },
-                                    }}
-                                >
-                                    Cancel
-                                </ActionButton>
-                                <ActionButton
-                                    variant="contained"
-                                    startIcon={isLoading ? <Timeline className="animate-spin" /> : <AddCircleOutline />}
-                                    color="success"
+                                />
+                                <ActionButtonSuccess
                                     onClick={handleSubmit}
                                     disabled={isLoading}
-                                    sx={{
-                                        background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
-                                        color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
-                                        border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
-                                        '&:hover': {
-                                            color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                                            background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
-                                        },
-                                    }}
-                                >
-                                    {isLoading ? `Creating...` : `Create Invoice ${(type ? type.charAt(0).toUpperCase() + type.slice(1) : '')}`}
-                                </ActionButton>
+                                    startIcon={isLoading ? <Timeline className="animate-spin" /> : <AddCircleOutline />}
+                                    text={isLoading ? `Creating...` : `Create Invoice ${(type ? type.charAt(0).toUpperCase() + type.slice(1) : '')}`}
+                                />
                             </Box>
                         </Box>
                     </CardContent>

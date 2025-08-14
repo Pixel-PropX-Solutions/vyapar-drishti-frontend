@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Typography,
@@ -23,7 +23,6 @@ import {
   CardContent,
   CardActions,
   IconButton,
-  Snackbar,
   LinearProgress,
   Badge,
   Container,
@@ -44,7 +43,6 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
 import HistoryIcon from "@mui/icons-material/History";
 import InfoIcon from "@mui/icons-material/Info";
-import ShareIcon from "@mui/icons-material/Share";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
@@ -54,8 +52,8 @@ import TimelineIcon from "@mui/icons-material/Timeline";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
-import { deleteProduct, getProduct, viewProduct } from "@/services/products";
-import { GetItem, ProductUpdate } from "@/utils/types";
+import { deleteProduct, getProduct, getProductTimeline, viewProduct } from "@/services/products";
+import { ProductUpdate } from "@/utils/types";
 import toast from "react-hot-toast";
 import { formatDate, getAvatarColor, getInitials } from "@/utils/functions";
 import ProductsSideModal from "./ProductsSideModal";
@@ -65,7 +63,7 @@ interface HistoryEntry {
   action: string;
   details: string;
   user: string;
-  type: "stock" | "price" | "info" | "create";
+  type: "Purchase" | "Sales";
 }
 
 export default function ViewItem() {
@@ -75,75 +73,41 @@ export default function ViewItem() {
   const dispatch = useDispatch<AppDispatch>();
   // const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const { item } = useSelector((state: RootState) => state.product);
-
+  const { item, timeline } = useSelector((state: RootState) => state.product);
   const { currentCompany } = useSelector((state: RootState) => state.auth);
   const [activeTab, setActiveTab] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  // const [isBookmarked, setIsBookmarked] = useState(false);
-  const [showCopySnackbar, setShowCopySnackbar] = useState(false);
   const [expandedSection, setExpandedSection] = useState<string | null>('basic');
   const [drawer, setDrawer] = useState<boolean>(false);
   const [selectedProduct, setSelectedProduct] = useState<ProductUpdate | null>(
     null
   );
 
-  const [data, setData] = useState<GetItem>({
-    company_id: "",
-    unit_id: "",
-    alias_name: "",
-    category: "",
-    category_id: "",
-    group: "",
-    group_id: "",
-    image: "",
-    description: "",
-    gst_nature_of_goods: "",
-    gst_hsn_code: "",
-    gst_taxability: "",
-    low_stock_alert: 0,
-    created_at: "",
-    updated_at: "",
-    current_stock: 0,
-    avg_purchase_rate: 0,
-    purchase_qty: 0,
-    purchase_value: 0,
-    sales_qty: 0,
-    sales_value: 0,
-    _id: "",
-    stock_item_name: "",
-    user_id: "",
-    unit: "",
-    opening_balance: 0,
-    opening_rate: 0,
-    opening_value: 0,
-  });
-
-  // Enhanced history data with types
-  const historyData: HistoryEntry[] = [
-    // {
-    //   date: "2025-02-20",
-    //   action: "Stock Update",
-    //   details: "Added 50 units to inventory",
-    //   user: "John Doe",
-    //   type: "stock",
-    // },
-  ];
+  // const historyData: HistoryEntry[] = [
+  //   {
+  //     date: "2025-02-20",
+  //     action: "Stock Update",
+  //     details: "Added 50 units to inventory",
+  //     user: "John Doe",
+  //     type: "stock",
+  //   },
+  // ];
 
   // Calculate stock status
   const getStockStatus = () => {
-    const quantity = data.current_stock ?? 0;
-    const alertLevel = data.low_stock_alert || 3;
+    if (!item)
+      return { status: "Loading...", color: "info", severity: "info" as const };
+    const status = item?.stock_status ?? '';
 
-    if (quantity < 1)
+    if (status == 'zero' || status === 'negative')
       return {
         status: "Out of Stock",
         color: "error",
         severity: "error" as const,
       };
-    if (quantity <= alertLevel)
+    if (status === 'low')
       return {
         status: "Low Stock",
         color: "warning",
@@ -170,19 +134,34 @@ export default function ViewItem() {
           toast.error(error || "An unexpected error occurred. Please try again later.")
           setIsLoading(false);
         });
+      dispatch(getProductTimeline({ product_id: id ?? '', company_id: currentCompany?._id ?? '' }))
+      // .unwrap()
+      // .then(() => {
+      //   setIsLoading(false);
+      // })
+      // .catch((error) => {
+      //   toast.error(error || "An unexpected error occurred. Please try again later.")
+      //   setIsLoading(false);
+      // });
     };
     fetchProduct();
   }, [id, dispatch, refreshKey, currentCompany?._id]);
 
-  useEffect(() => {
-    if (item) {
-      setData(item);
-    }
-  }, [item]);
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
   };
+
+  const timelineData: HistoryEntry[] = useMemo(() => {
+    return timeline?.timeline?.map((entry: any) => ({
+      date: entry.date,
+      action: entry.voucher_type,
+      details: entry.voucher_type === 'Purchase'
+        ? `Purchased ${entry.quantity} units at ₹${entry.rate} each` : `Sold ${entry.quantity} units at ₹${entry.rate} each`,
+      user: entry.party_name,
+      type: entry.voucher_type,
+    }));
+  }, [timeline]);
 
   const handleEdit = () => {
     setDrawer(true);
@@ -194,18 +173,18 @@ export default function ViewItem() {
     setOpenDeleteDialog(true);
   };
 
-  const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href);
-    toast.success("Product link copied to clipboard");
-  };
+  // const handleShare = () => {
+  //   navigator.clipboard.writeText(window.location.href);
+  //   toast.success("Product link copied to clipboard");
+  // };
 
   const handleCopyId = () => {
-    navigator.clipboard.writeText(data._id);
-    setShowCopySnackbar(true);
+    navigator.clipboard.writeText(item._id);
+    toast.success("Product ID copied to clipboard");
   };
 
   const confirmDelete = () => {
-    dispatch(deleteProduct({ id: data._id, company_id: data.company_id })).unwrap().then(() => {
+    dispatch(deleteProduct({ id: item._id, company_id: item.company_id })).unwrap().then(() => {
       toast.success('Product deleted successfully.')
       setOpenDeleteDialog(false);
       navigate("/products");
@@ -216,14 +195,10 @@ export default function ViewItem() {
 
   const getHistoryIcon = (type: string) => {
     switch (type) {
-      case "stock":
+      case "Purchase":
         return <InventoryIcon />;
-      case "price":
+      case "Sales":
         return <CurrencyExchangeIcon />;
-      case "info":
-        return <InfoIcon />;
-      case "create":
-        return <MedicationIcon />;
       default:
         return <HistoryIcon />;
     }
@@ -232,6 +207,26 @@ export default function ViewItem() {
   const toggleSection = (section: string) => {
     setExpandedSection(expandedSection === section ? null : section);
   };
+
+  const calculateProfitMargin = useMemo(() => {
+    if (!item) return "0.00";
+    const totalPurchaseQty = (item.purchase_qty || 0) + (item.opening_balance || 0);
+    // Use opening_rate for opening_balance if opening_value is null
+    const openingValue = (item.opening_balance || 0) * (item.opening_rate || 0);
+    const totalPurchaseValueFixed = (item.purchase_value || 0) + openingValue;
+    const avgPurchaseRate = totalPurchaseQty > 0
+      ? totalPurchaseValueFixed / totalPurchaseQty
+      : item.avg_purchase_rate || item.opening_rate || 0;
+
+    // Margin profit calculation: ((avg_sale_rate - avgPurchaseRate) / avg_sale_rate) * 100
+    const mp = item.sales_value
+      ? 100 * ((item.avg_sale_rate
+        - avgPurchaseRate) || 0) / (item.avg_sale_rate
+          || 1)
+      : 0;
+    return mp.toFixed(2);
+  }, [item]);
+
 
   if (isLoading) {
     return (
@@ -281,7 +276,7 @@ export default function ViewItem() {
           >
             <Typography variant="body2">
               <strong>{stockStatus.status}:</strong> Only{" "}
-              {data.current_stock} units remaining
+              {item.current_stock} units remaining
             </Typography>
           </Alert>
         </Fade>
@@ -309,18 +304,18 @@ export default function ViewItem() {
             >
               <Box sx={{ display: "flex", alignItems: "center", flex: 1 }}>
                 <Avatar
-                  src={typeof data?.image === "string" && data.image ? data.image : undefined}
+                  src={typeof item?.image === "string" && item.image ? item.image : undefined}
                   sx={{
                     width: 60,
                     height: 60,
-                    bgcolor: getAvatarColor(data.stock_item_name),
+                    bgcolor: getAvatarColor(item.stock_item_name),
                     fontSize: '1rem',
                     fontWeight: 700,
-                    boxShadow: `0 4px 12px ${alpha(getAvatarColor(data.stock_item_name), 0.3)}`,
+                    boxShadow: `0 4px 12px ${alpha(getAvatarColor(item.stock_item_name), 0.3)}`,
                     mr: 2,
                   }}
                 >
-                  {(getInitials(data.stock_item_name))}
+                  {(getInitials(item.stock_item_name))}
                 </Avatar>
                 <Box>
                   <Typography
@@ -335,7 +330,7 @@ export default function ViewItem() {
                       mb: 1,
                     }}
                   >
-                    {data.stock_item_name}
+                    {item.stock_item_name}
                   </Typography>
                   <Box
                     sx={{
@@ -347,7 +342,7 @@ export default function ViewItem() {
                   >
                     <Chip
                       icon={<CategoryIcon />}
-                      label={data.category || "Uncategorized"}
+                      label={item.category || "Uncategorized"}
                       color="primary"
                       variant="outlined"
                       size="small"
@@ -355,7 +350,7 @@ export default function ViewItem() {
                     />
                     <Chip
                       icon={<InventoryIcon />}
-                      label={data.unit}
+                      label={item.unit}
                       variant="outlined"
                       size="small"
                       sx={{ px: 1 }}
@@ -371,7 +366,7 @@ export default function ViewItem() {
               </Box>
 
               <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-                <Box sx={{ textAlign: "center", border: `1px solid ${theme.palette.divider}`, px: 2, py:1, borderRadius: 1, backgroundColor: theme.palette.primary.light }}>
+                <Box sx={{ textAlign: "center", border: `1px solid ${theme.palette.divider}`, px: 2, py: 1, borderRadius: 1, backgroundColor: theme.palette.primary.light }}>
                   <Typography variant="body2" color="text.secondary" gutterBottom>
                     Selling Price
                   </Typography>
@@ -381,26 +376,26 @@ export default function ViewItem() {
                       fontWeight: 700,
                       color: "success.main",
                     }}
-                  >{data.sales_qty > 0 ? <>
-                    &#8377; {data.sales_value}
+                  >{item.sales_qty > 0 ? <>
+                    &#8377; {item.sales_value}
                   </> : 'No Sale Yet'}
                   </Typography>
                 </Box>
-                <Box sx={{ textAlign: "center", border: `1px solid ${theme.palette.divider}`, px: 2, py:1, borderRadius: 1, backgroundColor: theme.palette.secondary.light }}>
+                <Box sx={{ textAlign: "center", border: `1px solid ${theme.palette.divider}`, px: 2, py: 1, borderRadius: 1, backgroundColor: theme.palette.secondary.light }}>
                   <Typography variant="body2" color="text.secondary" gutterBottom>
                     Purchase Price
                   </Typography>
                   <Typography variant="h6" color="text.primary">
-                    {data.purchase_qty > 0 ? <>
-                      &#8377; {data.purchase_value}
-                    </> : "No Purchase Yet"}
+                    {item.purchase_qty > 0 ? <>
+                      &#8377; {item.purchase_value}
+                    </> : "Not Purchased"}
                   </Typography>
                 </Box>
-                <Tooltip title="Share Product">
+                {/* <Tooltip title="Share Product">
                   <IconButton onClick={handleShare} color="primary">
                     <ShareIcon />
                   </IconButton>
-                </Tooltip>
+                </Tooltip> */}
               </Box>
             </Box>
 
@@ -422,13 +417,13 @@ export default function ViewItem() {
               }}
             >
               <Tab
-                label="Product Details"
-                icon={<InfoIcon />}
+                label="Activity History"
+                icon={<HistoryIcon />}
                 iconPosition="start"
               />
               <Tab
-                label="Activity History"
-                icon={<HistoryIcon />}
+                label="Product Details"
+                icon={<InfoIcon />}
                 iconPosition="start"
               />
             </Tabs>
@@ -475,20 +470,20 @@ export default function ViewItem() {
                     zIndex: 1,
                   }}
                 >
-                  {!data?.image ? (
+                  {!item?.image ? (
                     <Avatar
-                      src={typeof data?.image === "string" && data.image ? data.image : undefined}
+                      src={typeof item?.image === "string" && item.image ? item.image : undefined}
                       sx={{
                         width: 100,
                         height: 100,
-                        bgcolor: getAvatarColor(data.stock_item_name),
+                        bgcolor: getAvatarColor(item.stock_item_name),
                         fontSize: '2rem',
                         fontWeight: 700,
-                        boxShadow: `0 4px 12px ${alpha(getAvatarColor(data.stock_item_name), 0.3)}`,
+                        boxShadow: `0 4px 12px ${alpha(getAvatarColor(item.stock_item_name), 0.3)}`,
                         mr: 2,
                       }}
                     >
-                      {(getInitials(data.stock_item_name))}
+                      {(getInitials(item.stock_item_name))}
                     </Avatar>
                   ) : (
                     <Box
@@ -502,8 +497,8 @@ export default function ViewItem() {
                       }}
                     >
                       <img
-                        src={typeof data?.image === "string" ? data.image : undefined}
-                        alt={data.stock_item_name}
+                        src={typeof item?.image === "string" ? item.image : undefined}
+                        alt={item.stock_item_name}
                         style={{
                           width: "100%",
                           height: "100%",
@@ -517,7 +512,7 @@ export default function ViewItem() {
                 </Box>
                 {/* Floating Stock Badge */}
                 <Badge
-                  badgeContent={`${data.current_stock} units`}
+                  badgeContent={`${item.current_stock} units`}
                   color={stockStatus.color as any}
                   sx={{
                     position: "absolute",
@@ -550,14 +545,9 @@ export default function ViewItem() {
                     >
                       <TrendingUpIcon color="success" sx={{ mb: 1 }} />
                       <Typography variant="h6" color="success.main">
-                        {data.sales_qty > 0 ? <>
+                        {item.sales_qty > 0 ? <>
                           &#8377;{" "}
-                          {(
-                            ((data.sales_value ?? 0 - (data?.purchase_value ?? 0)) /
-                              (data?.purchase_value ?? 1)) *
-                            100
-                          ).toFixed(2)}
-                          %
+                          {calculateProfitMargin} %
                         </> : "No Sale yet"}
 
                       </Typography>
@@ -578,8 +568,8 @@ export default function ViewItem() {
                     >
                       <ShoppingCartIcon color="primary" sx={{ mb: 1 }} />
                       <Typography variant="h6" color="primary.main">
-                        {data.purchase_qty > 0
-                          ? <> &#8377; {((data.current_stock ?? 0) * (data.avg_purchase_rate ?? 1)).toFixed(2)}</>
+                        {item.purchase_qty > 0
+                          ? <> &#8377; {((item.current_stock ?? 0) * (item.avg_purchase_rate ?? 1)).toFixed(2)}</>
                           : "No Purchase Yet"
                         }
 
@@ -601,7 +591,7 @@ export default function ViewItem() {
                       startIcon={<EditIcon />}
                       onClick={async () => {
                         setDrawer(true);
-                        await dispatch(viewProduct({ product_id: data._id, company_id: currentCompany?._id || '' }))
+                        await dispatch(viewProduct({ product_id: item._id, company_id: currentCompany?._id || '' }))
                           .unwrap().then((res) => {
                             setSelectedProduct(res.product);
                             toast.success("Product details fetched successfully!");
@@ -656,8 +646,175 @@ export default function ViewItem() {
 
         {/* Right Column - Tab Content */}
         <Grid item xs={12} md={7}>
-          {/* Product Details Tab */}
+          {/* History Tab */}
           {activeTab === 0 && (
+            <Fade in={true} timeout={900}>
+              <Card
+                elevation={0}
+                sx={{
+                  borderRadius: 1,
+                  border: `1px solid ${theme.palette.divider}`,
+                  height: "100%",
+                }}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Typography
+                    variant="h6"
+                    color="primary.main"
+                    sx={{ display: "flex", alignItems: "center", mb: 3 }}
+                  >
+                    <TimelineIcon sx={{ mr: 1 }} /> Activity Timeline
+                  </Typography>
+
+                  <List sx={{ p: 0 }}>
+                    {timelineData.map((entry, index) => (
+                      <Fade
+                        in={true}
+                        style={{ transitionDelay: `${index * 150}ms` }}
+                        key={index}
+                      >
+                        <ListItem
+                          sx={{
+                            p: 0,
+                            mb: 2,
+                            borderRadius: 1,
+                          }}
+                        >
+                          <Paper
+                            elevation={0}
+                            sx={{
+                              width: "100%",
+                              p: 2,
+                              border: `1px solid ${theme.palette.divider}`,
+                              borderRadius: 1,
+                              position: "relative",
+                              overflow: "hidden",
+                              "&::before": {
+                                content: '""',
+                                position: "absolute",
+                                left: 0,
+                                top: 0,
+                                bottom: 0,
+                                width: 4,
+                                bgcolor:
+                                  entry.type === "Purchase"
+                                    ? "success.main"
+                                    : "warning.main",
+                              },
+                              "&:hover": {
+                                bgcolor: "background.default",
+                                boxShadow: theme.shadows[4],
+                              },
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "flex-start",
+                                gap: 2,
+                              }}
+                            >
+                              <Avatar
+                                sx={{
+                                  width: 40,
+                                  height: 40,
+                                  bgcolor:
+                                    entry.type === "Purchase"
+                                      ? "success.light"
+                                      : "warning.light",
+                                }}
+                              >
+                                {getHistoryIcon(entry.type)}
+                              </Avatar>
+
+                              <Box sx={{ flex: 1 }}>
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "flex-start",
+                                    mb: 1,
+                                  }}
+                                >
+                                  <Typography
+                                    variant="subtitle1"
+                                    fontWeight={600}
+                                    color="text.primary"
+                                  >
+                                    {entry.action}
+                                  </Typography>
+                                  <Chip
+                                    label={formatDate(entry.date)}
+                                    size="small"
+                                    variant="outlined"
+                                    sx={{ ml: 1 }}
+                                  />
+                                </Box>
+
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                  sx={{ mb: 1 }}
+                                >
+                                  {entry.details}
+                                </Typography>
+
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 1,
+                                  }}
+                                >
+                                  <Avatar
+                                    sx={{
+                                      width: 24,
+                                      height: 24,
+                                      fontSize: "0.75rem",
+                                    }}
+                                  >
+                                    {getInitials(entry.user)}
+                                  </Avatar>
+                                  <Typography
+                                    variant="caption"
+                                    color="text.secondary"
+                                  >
+                                    {entry.type === 'Purchase' ? 'Purchased from' : 'Sold to'} {entry.user}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </Box>
+                          </Paper>
+                        </ListItem>
+                      </Fade>
+                    ))}
+                  </List>
+
+                  {timelineData.length === 0 && (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        py: 6,
+                        color: "text.secondary",
+                      }}
+                    >
+                      <HistoryIcon sx={{ fontSize: 64, mb: 2, opacity: 0.5 }} />
+                      <Typography variant="body2">
+                        Product activities will appear here once actions are
+                        performed.
+                      </Typography>
+                    </Box>
+                  )}
+                </CardContent>
+              </Card>
+            </Fade>
+          )}
+
+          {/* Product Details Tab */}
+          {activeTab === 1 && (
             <Fade in={true} timeout={900}>
               <Card
                 elevation={0}
@@ -719,7 +876,7 @@ export default function ViewItem() {
                                 Category
                               </Typography>
                               <Typography variant="body1" fontWeight={500}>
-                                {data.category || "Not specified"}
+                                {item.category || "Not specified"}
                               </Typography>
                             </Grid>
                             <Grid item xs={12} sm={6}>
@@ -731,7 +888,7 @@ export default function ViewItem() {
                                 Unit
                               </Typography>
                               <Typography variant="body1" fontWeight={500}>
-                                {data.unit || "Not specified"}
+                                {item.unit || "Not specified"}
                               </Typography>
                             </Grid>
                             <Grid item xs={12} sm={6}>
@@ -743,7 +900,7 @@ export default function ViewItem() {
                                 HSN Code
                               </Typography>
                               <Typography variant="body1" fontWeight={500}>
-                                {data.gst_hsn_code || "Not specified"}
+                                {item.gst_hsn_code || "Not specified"}
                               </Typography>
                             </Grid>
                             <Grid item xs={12} sm={6}>
@@ -755,7 +912,7 @@ export default function ViewItem() {
                                 Taxability
                               </Typography>
                               <Typography variant="body1" fontWeight={500}>
-                                {data.gst_taxability || "Not specified"}
+                                {item.gst_taxability || "Not specified"}
                               </Typography>
                             </Grid>
                           </Grid>
@@ -807,8 +964,8 @@ export default function ViewItem() {
                                 variant="body1"
                                 fontWeight={700}
                                 color="text.primary"
-                              >{data.purchase_qty > 0
-                                ? <>&#8377; {data.purchase_value}</>
+                              >{item.purchase_qty > 0
+                                ? <>&#8377; {item.purchase_value}</>
                                 : 'No Purchase Yet'}
                               </Typography>
                             </Grid>
@@ -824,8 +981,8 @@ export default function ViewItem() {
                                 variant="body1"
                                 fontWeight={700}
                                 color="success.main"
-                              >{data.purchase_qty > 0
-                                ? <> &#8377; {data.sales_value}</>
+                              >{item.purchase_qty > 0
+                                ? <> &#8377; {item.sales_value}</>
                                 : 'No Sale Yet'}
                               </Typography>
                             </Grid>
@@ -838,13 +995,13 @@ export default function ViewItem() {
                                 Current Stock
                               </Typography>
                               <Typography variant="body1" fontWeight={500}>
-                                {data.current_stock} units
+                                {item.current_stock} units
                               </Typography>
                               <LinearProgress
                                 variant="determinate"
                                 value={Math.min(
-                                  ((data?.current_stock ?? 1) /
-                                    ((data?.low_stock_alert ?? 1) * 3)) *
+                                  ((item?.current_stock ?? 1) /
+                                    ((item?.low_stock_alert ?? 0))) *
                                   100,
                                   100
                                 )}
@@ -861,7 +1018,7 @@ export default function ViewItem() {
                                 Low Stock Alert
                               </Typography>
                               <Typography variant="body1" fontWeight={500}>
-                                {data.low_stock_alert ?? 5} units
+                                {item.low_stock_alert ?? 5} units
                               </Typography>
                             </Grid>
                           </Grid>
@@ -901,7 +1058,7 @@ export default function ViewItem() {
                       <Collapse in={expandedSection === "description"}>
                         <Box sx={{ p: 2 }}>
                           <Typography variant="body1" sx={{ mb: 2 }}>
-                            {data.description || "No description available"}
+                            {item.description || "No description available"}
                           </Typography>
 
                           <Box sx={{ mt: 2 }}>
@@ -930,7 +1087,7 @@ export default function ViewItem() {
                                   mr: 1,
                                 }}
                               >
-                                {data._id}
+                                {item._id}
                               </Typography>
                               <Tooltip title="Copy ID">
                                 <IconButton size="small" onClick={handleCopyId}>
@@ -943,191 +1100,6 @@ export default function ViewItem() {
                       </Collapse>
                     </Paper>
                   </Stack>
-                </CardContent>
-              </Card>
-            </Fade>
-          )}
-
-          {/* History Tab */}
-          {activeTab === 1 && (
-            <Fade in={true} timeout={900}>
-              <Card
-                elevation={0}
-                sx={{
-                  borderRadius: 1,
-                  border: `1px solid ${theme.palette.divider}`,
-                  height: "100%",
-                }}
-              >
-                <CardContent sx={{ p: 3 }}>
-                  <Typography
-                    variant="h6"
-                    color="primary.main"
-                    sx={{ display: "flex", alignItems: "center", mb: 3 }}
-                  >
-                    <TimelineIcon sx={{ mr: 1 }} /> Activity Timeline
-                  </Typography>
-
-                  <List sx={{ p: 0 }}>
-                    {historyData.map((entry, index) => (
-                      <Fade
-                        in={true}
-                        style={{ transitionDelay: `${index * 150}ms` }}
-                        key={index}
-                      >
-                        <ListItem
-                          sx={{
-                            p: 0,
-                            mb: 2,
-                            borderRadius: 1,
-                            transition: "all 0.3s ease",
-                            "&:hover": {
-                              transform: "translateX(8px)",
-                            },
-                          }}
-                        >
-                          <Paper
-                            elevation={0}
-                            sx={{
-                              width: "100%",
-                              p: 2,
-                              border: `1px solid ${theme.palette.divider}`,
-                              borderRadius: 1,
-                              position: "relative",
-                              overflow: "hidden",
-                              "&::before": {
-                                content: '""',
-                                position: "absolute",
-                                left: 0,
-                                top: 0,
-                                bottom: 0,
-                                width: 4,
-                                bgcolor:
-                                  entry.type === "stock"
-                                    ? "success.main"
-                                    : entry.type === "price"
-                                      ? "warning.main"
-                                      : entry.type === "info"
-                                        ? "info.main"
-                                        : "primary.main",
-                              },
-                              "&:hover": {
-                                bgcolor: "background.default",
-                                boxShadow: theme.shadows[4],
-                              },
-                            }}
-                          >
-                            <Box
-                              sx={{
-                                display: "flex",
-                                alignItems: "flex-start",
-                                gap: 2,
-                              }}
-                            >
-                              <Avatar
-                                sx={{
-                                  width: 40,
-                                  height: 40,
-                                  bgcolor:
-                                    entry.type === "stock"
-                                      ? "success.main"
-                                      : entry.type === "price"
-                                        ? "warning.main"
-                                        : entry.type === "info"
-                                          ? "info.main"
-                                          : "primary.main",
-                                }}
-                              >
-                                {getHistoryIcon(entry.type)}
-                              </Avatar>
-
-                              <Box sx={{ flex: 1 }}>
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    alignItems: "flex-start",
-                                    mb: 1,
-                                  }}
-                                >
-                                  <Typography
-                                    variant="subtitle1"
-                                    fontWeight={600}
-                                    color="text.primary"
-                                  >
-                                    {entry.action}
-                                  </Typography>
-                                  <Chip
-                                    label={formatDate(entry.date)}
-                                    size="small"
-                                    variant="outlined"
-                                    sx={{ ml: 1 }}
-                                  />
-                                </Box>
-
-                                <Typography
-                                  variant="body2"
-                                  color="text.secondary"
-                                  sx={{ mb: 1 }}
-                                >
-                                  {entry.details}
-                                </Typography>
-
-                                <Box
-                                  sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 1,
-                                  }}
-                                >
-                                  <Avatar
-                                    sx={{
-                                      width: 24,
-                                      height: 24,
-                                      fontSize: "0.75rem",
-                                    }}
-                                  >
-                                    {entry.user
-                                      .split(" ")
-                                      .map((n) => n[0])
-                                      .join("")}
-                                  </Avatar>
-                                  <Typography
-                                    variant="caption"
-                                    color="text.secondary"
-                                  >
-                                    by {entry.user}
-                                  </Typography>
-                                </Box>
-                              </Box>
-                            </Box>
-                          </Paper>
-                        </ListItem>
-                      </Fade>
-                    ))}
-                  </List>
-
-                  {historyData.length === 0 && (
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        py: 6,
-                        color: "text.secondary",
-                      }}
-                    >
-                      <HistoryIcon sx={{ fontSize: 64, mb: 2, opacity: 0.5 }} />
-                      <Typography variant="h6" gutterBottom>
-                        Comming in future updates
-                      </Typography>
-                      {/* <Typography variant="body2">
-                        Product activities will appear here once actions are
-                        performed.
-                      </Typography> */}
-                    </Box>
-                  )}
                 </CardContent>
               </Card>
             </Fade>
@@ -1156,7 +1128,7 @@ export default function ViewItem() {
             <Box>
               <Typography variant="h6">Delete Product</Typography>
               <Typography variant="body2" color="text.secondary">
-                {data.stock_item_name}
+                {item.stock_item_name}
               </Typography>
             </Box>
           </Box>
@@ -1164,7 +1136,7 @@ export default function ViewItem() {
 
         <DialogContent>
           <Alert severity="warning" sx={{ mb: 2, borderRadius: 2 }}>
-            This action cannot be undone. All product data will be permanently
+            This action cannot be undone. All product item will be permanently
             deleted.
           </Alert>
 
@@ -1183,7 +1155,7 @@ export default function ViewItem() {
               <ListItemIcon sx={{ minWidth: 32 }}>
                 <InventoryIcon fontSize="small" />
               </ListItemIcon>
-              <ListItemText primary="Current stock and inventory data" />
+              <ListItemText primary="Current stock and inventory item" />
             </ListItem>
             <ListItem sx={{ py: 0 }}>
               <ListItemIcon sx={{ minWidth: 32 }}>
@@ -1213,22 +1185,6 @@ export default function ViewItem() {
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Copy Success Snackbar */}
-      <Snackbar
-        open={showCopySnackbar}
-        autoHideDuration={3000}
-        onClose={() => setShowCopySnackbar(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          onClose={() => setShowCopySnackbar(false)}
-          severity="success"
-          sx={{ borderRadius: 2 }}
-        >
-          Product ID copied to clipboard!
-        </Alert>
-      </Snackbar>
 
       <ProductsSideModal
         drawer={drawer}

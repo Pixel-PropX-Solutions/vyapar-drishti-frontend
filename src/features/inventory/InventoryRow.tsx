@@ -112,21 +112,21 @@ export const InventoryRow = (props: InventoryRowRowProps) => {
                 </TableCell>
                 <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        {row?.current_stock < 0 && (
+                        {['zero', 'negative'].includes(row?.stock_status) && (
                             <Chip
                                 label={`${row?.current_stock} ${row?.unit}`}
                                 color="error"
                                 sx={{ fontWeight: 'bold', px: 1, py: 1.5, }}
                             />
                         )}
-                        {(row?.current_stock >= 0 && row?.current_stock <= (row?.low_stock_alert)) && (
+                        {row?.stock_status === 'low' && (
                             <Chip
                                 label={`${row?.current_stock} ${row?.unit}`}
                                 color="warning"
                                 sx={{ fontWeight: 'bold', px: 1, py: 1.5, }}
                             />
                         )}
-                        {row?.current_stock > (row?.low_stock_alert) && (
+                        {row?.stock_status === 'positive' && (
                             <Chip
                                 label={`${row?.current_stock} ${row?.unit}`}
                                 color="success"

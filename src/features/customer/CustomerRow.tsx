@@ -115,7 +115,7 @@ export const CustomerRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit,
                         },
                         borderLeft: `4px solid ${isHovered ? theme.palette.primary.main : 'transparent'}`,
                     }}
-                // onClick={() => onView(cus)}
+                    onClick={() => onView(cus)}
                 >
                     {/* Customer Info */}
                     <TableCell sx={{ pl: 3, pr: 1 }}>
@@ -227,10 +227,10 @@ export const CustomerRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit,
                             variant="body1"
                             sx={{
                                 fontWeight: 700,
-                                color: cus.is_positive ? theme.palette.success.main : theme.palette.error.main,
+                                color: cus.total_amount < 0 ? theme.palette.success.main : theme.palette.error.main,
                             }}
                         >
-                            {cus.total_amount}{cus.is_positive ? ' DR' : ' CR'}
+                            {Math.abs(cus.total_amount)}{cus.total_amount < 0 ? ' DR' : ' CR'}
                         </Typography>
                     </TableCell>
 

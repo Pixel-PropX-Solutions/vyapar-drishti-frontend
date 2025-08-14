@@ -68,7 +68,7 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, o
                         },
                         borderLeft: `4px solid ${isHovered ? theme.palette.primary.main : 'transparent'}`,
                     }}
-                    onClick={() => onView(inv)}
+                    onClick={() => onView(inv._id)}
                 >
                     {/* Serial No */}
                     <TableCell align="left" sx={{ pl: 3, }}>
@@ -76,7 +76,6 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, o
                             variant="body1"
                             sx={{
                                 fontWeight: 600,
-                                // fontSize: '0.95rem',
                                 color: theme.palette.text.primary,
                                 mb: 0.5,
                                 transition: 'color 0.3s ease',
@@ -94,7 +93,6 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, o
                                 variant="body1"
                                 sx={{
                                     fontWeight: 600,
-                                    // fontSize: '1rem',
                                     color: theme.palette.text.primary,
                                 }}
                             >
@@ -109,7 +107,6 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, o
                             variant="subtitle2"
                             sx={{
                                 fontWeight: 600,
-                                // fontSize: '0.95rem',
                                 color: theme.palette.text.primary,
                                 mb: 0.5,
                                 transition: 'color 0.3s ease',
@@ -125,7 +122,6 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, o
                             variant="body1"
                             sx={{
                                 fontWeight: 700,
-                                // fontSize: '1rem',
                                 color: theme.palette.text.primary,
                             }}
                         >
@@ -146,12 +142,11 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, o
                                 variant="body1"
                                 sx={{
                                     fontWeight: 700,
-                                    // fontSize: '1rem',
                                     color: ['Purchase', 'Sales'].includes(inv.voucher_type) ?
                                         inv.status === 'Paid' ? theme.palette.success.main : inv.status === 'Unpaid' ? theme.palette.error.main : inv.status === 'Partially Paid' ? theme.palette.warning.main : theme.palette.text.primary : theme.palette.text.primary,
                                 }}
                             >
-                                {['Purchase', 'Sales'].includes(inv.voucher_type) ? inv.status ? inv.status : 'Status Unknown' : ""}
+                                {['Purchase', 'Sales'].includes(inv.voucher_type) ? inv.status ? inv.status : '-' : '-'}
                             </Typography>
                         </Box>
                     </TableCell>
@@ -162,7 +157,6 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, o
                             variant="body1"
                             sx={{
                                 fontWeight: 600,
-                                // fontSize: '1rem',
                                 color: theme.palette.text.secondary,
                             }}
                         >
@@ -173,13 +167,12 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, o
                     {/* Debit Invoice amount */}
                     <TableCell align="right" sx={{ px: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                            {inv.is_deemed_positive && <Typography
+                            {(inv.amount < 0) && <Typography
                                 variant="body1"
                                 sx={{
                                     fontWeight: 700,
-                                    // fontSize: '1.1rem',
                                     mr: 0.5,
-                                    color: !inv.is_deemed_positive ? theme.palette.success.main : theme.palette.error.main,
+                                    color: theme.palette.error.main,
                                 }}
                             >
                                 &#8377;
@@ -188,11 +181,10 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, o
                                 variant="body1"
                                 sx={{
                                     fontWeight: 700,
-                                    // fontSize: '1.1rem',
-                                    color: !inv.is_deemed_positive ? theme.palette.success.main : theme.palette.error.main,
+                                    color: theme.palette.error.main,
                                 }}
                             >
-                                {inv.is_deemed_positive ? Math.abs(inv.amount) : " "}
+                                {inv.amount < 0 ? Math.abs(inv.amount) : " "}
                             </Typography>
                         </Box>
                     </TableCell>
@@ -200,13 +192,12 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, o
                     {/* Credit Invoice amount */}
                     <TableCell align="right" sx={{ px: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                            {!inv.is_deemed_positive && <Typography
+                            {!(inv.amount < 0) && <Typography
                                 variant="body1"
                                 sx={{
                                     fontWeight: 700,
-                                    // fontSize: '1.1rem',
                                     mr: 0.5,
-                                    color: inv.is_deemed_positive ? theme.palette.error.main : theme.palette.success.main,
+                                    color: theme.palette.success.main,
                                 }}
                             >
                                 &#8377;
@@ -215,11 +206,10 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, o
                                 variant="body1"
                                 sx={{
                                     fontWeight: 700,
-                                    // fontSize: '1.1rem',
-                                    color: inv.is_deemed_positive ? theme.palette.error.main : theme.palette.success.main,
+                                    color: theme.palette.success.main,
                                 }}
                             >
-                                {inv.is_deemed_positive ? " " : inv.amount}
+                                {inv.amount < 0 ? "" : Math.abs(inv.amount)}
                             </Typography>
                         </Box>
                     </TableCell>

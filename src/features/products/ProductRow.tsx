@@ -47,7 +47,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const closingValue = (((product?.purchase_value + product?.opening_value) / (product?.purchase_qty + product?.opening_balance)) * product?.current_stock) || 0;
-    const closingRate = (((product?.purchase_value + product?.opening_value) / (product?.purchase_qty + product?.opening_balance)) || 0).toFixed(2);
+    const closingRate = closingValue ? (((product?.purchase_value + product?.opening_value) / (product?.purchase_qty + product?.opening_balance)) || 0).toFixed(2) : (0).toFixed(2);
 
     const confirmDelete = () => {
         onDelete(product?._id ?? '');

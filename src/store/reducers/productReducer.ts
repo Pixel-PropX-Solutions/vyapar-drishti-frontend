@@ -9,15 +9,17 @@ import {
   viewProduct,
   getProduct,
   viewAllStockItems,
+  getProductTimeline,
   // viewProductsWithId,
 } from "@/services/products";
-import { PageMeta, GetProduct, ProductCreate, UploadData, ProductUpdate, GetItem, GetStockItem } from "@/utils/types";
+import { PageMeta, GetProduct, ProductCreate, UploadData, ProductUpdate, GetStockItem } from "@/utils/types";
 
 interface ProductState {
   authState: AuthStates;
   productData: ProductCreate | null;
   product: ProductUpdate | null;
-  item: GetItem | null;
+  item: any | null;
+  timeline: any | null;
   uploadData: UploadData | null;
   // productsListing: Array<ProductListing> | null;
   productsData: Array<GetProduct> | null;
@@ -44,6 +46,7 @@ const initialState: ProductState = {
   productData: null,
   product: null,
   item: null,
+  timeline: null,
   uploadData: null,
   loading: false,
   deletionModal: false,
@@ -112,6 +115,19 @@ const productSlice = createSlice({
         state.loading = false;
       })
       .addCase(getProduct.rejected, (state, action) => {
+        state.error = action.payload as string;
+        state.loading = false;
+      })
+      
+      .addCase(getProductTimeline.pending, (state) => {
+        state.error = null;
+        state.loading = true;
+      })
+      .addCase(getProductTimeline.fulfilled, (state, action: PayloadAction<any>) => {
+        state.timeline = action.payload.timeline;
+        state.loading = false;
+      })
+      .addCase(getProductTimeline.rejected, (state, action) => {
         state.error = action.payload as string;
         state.loading = false;
       })

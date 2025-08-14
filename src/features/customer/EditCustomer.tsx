@@ -22,7 +22,6 @@ import {
     CheckCircle,
     Save,
     AccountBalance,
-    Cancel,
     AddCircleOutlined,
     Image,
 } from "@mui/icons-material";
@@ -32,12 +31,13 @@ import { AppDispatch, RootState } from "@/store/store";
 import { createCustomer, updateCustomer } from "@/services/customers";
 import countries from "@/internals/data/CountriesStates.json";
 import { useNavigate, useParams } from "react-router-dom";
-import { ActionButton } from "@/common/buttons/ActionButton";
 import { capitalizeInput } from "@/utils/functions";
 import ImageUpload from "@/common/ImageUpload";
 import { SectionCard } from "./sectionCard";
 import { setEditingCustomer } from "@/store/reducers/customersReducer";
 import PhoneNumber from "@/common/PhoneNumber";
+import ActionButtonCancel from "@/common/buttons/ActionButtonCancel";
+import ActionButtonSuccess from "@/common/buttons/ActionButtonSuccess";
 
 
 interface CustomerFormData {
@@ -409,45 +409,19 @@ const EditCustomer: React.FC = () => {
                                 gap: 2,
                             }}
                         >
-                            <ActionButton
-                                variant="contained"
-                                startIcon={<Cancel />}
-                                color="error"
+                            <ActionButtonCancel
                                 onClick={() => {
                                     dispatch(setEditingCustomer(null));
                                     navigate(-1);
                                 }}
                                 disabled={isLoading}
-                                sx={{
-                                    background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
-                                    color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
-                                    border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#c62828'}`,
-                                    '&:hover': {
-                                        color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                                        background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
-                                    },
-                                }}
-                            >
-                                Cancel
-                            </ActionButton>
-                            <ActionButton
-                                variant="contained"
-                                startIcon={isLoading ? <Timeline className="animate-spin" /> : editingCustomer ? <Save /> : <AddCircleOutlined />}
-                                color="success"
+                            />
+                            <ActionButtonSuccess
                                 onClick={handleSubmit}
                                 disabled={isLoading || !isFormValid}
-                                sx={{
-                                    background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
-                                    color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
-                                    border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
-                                    '&:hover': {
-                                        color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                                        background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
-                                    },
-                                }}
-                            >
-                                {isLoading ? editingCustomer ? `Updating...` : `Creating...` : editingCustomer ? `Update ${customerType}` : `Create ${customerType}`}
-                            </ActionButton>
+                                startIcon={isLoading ? <Timeline className="animate-spin" /> : editingCustomer ? <Save /> : <AddCircleOutlined />}
+                                text={isLoading ? editingCustomer ? `Updating...` : `Creating...` : editingCustomer ? `Update ${customerType}` : `Create ${customerType}`}
+                            />
                             <Slide direction="down" in={showSuccessAlert} mountOnEnter unmountOnExit>
                                 <Alert
                                     severity="success"
@@ -587,7 +561,7 @@ const EditCustomer: React.FC = () => {
                                             placeholder="Select country"
                                             size="small"
                                             id="mailing_country"
-                                            label={`Country (Required)`}
+                                            label={`Country ${gst_enable ? '(Required)' : ''}`}
                                             autoComplete="off"
                                             error={!!validationErrors.mailing_country}
                                             helperText={validationErrors.mailing_country || "Country for mailing address"}
@@ -646,7 +620,7 @@ const EditCustomer: React.FC = () => {
                                             placeholder="Select state"
                                             disabled={!data.mailing_country}
                                             size="small"
-                                            label={`State (Required)`}
+                                            label={`State ${gst_enable ? '(Required)' : ''}`}
                                             autoComplete="off"
                                             error={!!validationErrors.mailing_state}
                                             helperText={validationErrors.mailing_state || "State for address"}
@@ -673,51 +647,6 @@ const EditCustomer: React.FC = () => {
                             </FormControl>
                         </Box>
                     </Box>
-                    {!gst_enable && <FormControl fullWidth sx={{ mt: 2 }}>
-                        <TextField
-                            fullWidth
-                            size="small"
-                            label={`GSTIN Number (${isGSTINRequired ? 'Required' : 'Optional'})`}
-                            placeholder="27XXXXXXXXXXXX"
-                            value={data.gstin || ''}
-                            required={isGSTINRequired}
-                            onChange={(e) => handleInputChange('gstin', capitalizeInput(e.target.value, 'characters'))}
-                            error={!!validationErrors.gstin}
-                            helperText={validationErrors.gstin || "15-digit GSTIN number"}
-                            InputProps={{
-                                sx: {
-                                    borderRadius: 1,
-                                    padding: '0',
-                                    paddingLeft: '8px',
-                                },
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <Button
-                                            variant="contained"
-                                            color="success"
-                                            onClick={handlefetchGSTINDetails}
-                                            disabled={fetchingGST}
-                                            sx={{
-                                                borderRadius: '8px',
-                                                fontWeight: 600,
-                                                transition: 'all 0.2s',
-                                                boxShadow: 'none',
-                                                height: "2.2rem",
-                                                background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
-                                                color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
-                                                '&:hover': {
-                                                    color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                                                    background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
-                                                },
-                                            }}
-                                        >
-                                            {fetchingGST ? <Timeline className="animate-spin" /> : `Fetch Details`}
-                                        </Button>
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-                    </FormControl>}
                 </SectionCard>
 
                 <SectionCard
@@ -732,7 +661,7 @@ const EditCustomer: React.FC = () => {
                             <TextField
                                 fullWidth
                                 size="small"
-                                label="Contact Person Name (If any)"
+                                label="Contact Person Name"
                                 placeholder="Enter contact person name"
                                 value={data.mailing_name || ''}
                                 onChange={(e) => handleInputChange('mailing_name', capitalizeInput(e.target.value, 'words'))}
@@ -763,7 +692,7 @@ const EditCustomer: React.FC = () => {
                             <TextField
                                 fullWidth
                                 size="small"
-                                label="Contact Email (Optional)"
+                                label="Contact Email"
                                 type="email"
                                 margin="normal"
                                 placeholder="john@example.com"
@@ -788,7 +717,7 @@ const EditCustomer: React.FC = () => {
                                 fullWidth
                                 size="small"
                                 // margin="normal"
-                                label="Street Address (Optional)"
+                                label="Street Address"
                                 placeholder="123 Main St, Apt 4B"
                                 value={data.mailing_address || ''}
                                 onChange={(e) => handleInputChange('mailing_address', capitalizeInput(e.target.value, 'words'))}
@@ -807,7 +736,7 @@ const EditCustomer: React.FC = () => {
                                 size="small"
                                 type="number"
                                 margin="normal"
-                                label="Postal Code (Optional)"
+                                label="Postal Code"
                                 inputMode="numeric"
                                 placeholder="90210"
                                 value={data.mailing_pincode || ''}
@@ -862,7 +791,7 @@ const EditCustomer: React.FC = () => {
                         <TextField
                             fullWidth
                             size="small"
-                            label="Bank Name (Optional)"
+                            label="Bank Name"
                             placeholder="e.g. State Bank of India"
                             value={data.bank_name || ''}
                             onChange={(e) => handleInputChange('bank_name', capitalizeInput(e.target.value, 'words'))}
@@ -881,7 +810,7 @@ const EditCustomer: React.FC = () => {
                                     fullWidth
                                     size="small"
                                     margin="normal"
-                                    label="Account Holder Name (Optional)"
+                                    label="Account Holder Name"
                                     placeholder="John Doe"
                                     value={data.account_holder || ''}
                                     onChange={(e) => handleInputChange('account_holder', capitalizeInput(e.target.value, 'characters'))}
@@ -899,7 +828,7 @@ const EditCustomer: React.FC = () => {
                                     fullWidth
                                     size="small"
                                     margin="normal"
-                                    label="Account Number (Optional)"
+                                    label="Account Number"
                                     placeholder="123456789012"
                                     value={data.account_number || ''}
                                     onChange={(e) => handleInputChange('account_number', e.target.value)}
@@ -919,7 +848,7 @@ const EditCustomer: React.FC = () => {
                                 <TextField
                                     fullWidth
                                     size="small"
-                                    label="IFSC Code (Optional)"
+                                    label="IFSC Code"
                                     placeholder="e.g. SBIN0001234"
                                     value={data.bank_ifsc || ''}
                                     onChange={(e) => handleInputChange('bank_ifsc', capitalizeInput(e.target.value, 'characters'))}
@@ -939,7 +868,7 @@ const EditCustomer: React.FC = () => {
                                 <TextField
                                     fullWidth
                                     size="small"
-                                    label="Bank Branch (Optional)"
+                                    label="Bank Branch"
                                     placeholder="Main Branch, Downtown"
                                     value={data.bank_branch || ''}
                                     onChange={(e) => handleInputChange('bank_branch', capitalizeInput(e.target.value, 'words'))}
@@ -968,45 +897,19 @@ const EditCustomer: React.FC = () => {
                 alignItems: 'center',
                 backgroundColor: theme.palette.background.paper,
             }}>
-                <ActionButton
-                    variant="contained"
-                    startIcon={<Cancel />}
-                    color="error"
+                <ActionButtonCancel
                     onClick={() => {
                         dispatch(setEditingCustomer(null));
                         navigate(-1);
                     }}
                     disabled={isLoading}
-                    sx={{
-                        background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
-                        color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
-                        border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#c62828'}`,
-                        '&:hover': {
-                            color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                            background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
-                        },
-                    }}
-                >
-                    Cancel
-                </ActionButton>
-                <ActionButton
-                    variant="contained"
-                    startIcon={isLoading ? <Timeline className="animate-spin" /> : editingCustomer ? <Save /> : <AddCircleOutlined />}
-                    color="success"
+                />
+                <ActionButtonSuccess
                     onClick={handleSubmit}
                     disabled={isLoading || !isFormValid}
-                    sx={{
-                        background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
-                        color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
-                        border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
-                        '&:hover': {
-                            color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                            background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
-                        },
-                    }}
-                >
-                    {isLoading ? editingCustomer ? `Updating...` : `Creating...` : editingCustomer ? `Update ${customerType}` : `Create ${customerType}`}
-                </ActionButton>
+                    startIcon={isLoading ? <Timeline className="animate-spin" /> : editingCustomer ? <Save /> : <AddCircleOutlined />}
+                    text={isLoading ? editingCustomer ? `Updating...` : `Creating...` : editingCustomer ? `Update ${customerType}` : `Create ${customerType}`}
+                />
             </Box>
         </Box>
     );

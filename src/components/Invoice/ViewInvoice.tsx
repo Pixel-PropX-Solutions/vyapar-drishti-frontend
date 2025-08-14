@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
     Box,
     Grid,
@@ -14,8 +14,6 @@ import {
     Divider,
     Card,
     CardContent,
-    IconButton,
-    Tooltip,
     useTheme,
     useMediaQuery,
     alpha,
@@ -26,8 +24,6 @@ import {
     Zoom,
     Avatar,
     LinearProgress,
-    Snackbar,
-    Alert
 } from '@mui/material';
 import {
     Print,
@@ -46,99 +42,27 @@ import {
     Assessment,
     CheckCircle,
     Warning,
-    ArrowBack
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
-// import { useDispatch, useSelector } from 'react-redux';
-// import { AppDispatch, RootState } from '@/store/store';
+import { useParams } from 'react-router-dom';
 import { formatDate } from '@/utils/functions';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '@/store/store';
+import { ActionButton } from '@/common/buttons/ActionButton';
+import toast from 'react-hot-toast';
+import { viewInvoice } from '@/services/invoice';
 
-interface InvoiceItem {
-    id: string;
-    name: string;
-    hsn: string;
-    quantity: number;
-    rate: number;
-    gstRate: number;
-    gstAmount: number;
-    totalAmount: number;
-}
-
-interface InvoiceData {
-    id: string;
-    invoiceNumber: string;
-    date: string;
-    status: 'paid' | 'pending' | 'overdue' | 'cancelled';
-    customer: {
-        name: string;
-        type: string;
-        address: string;
-        city: string;
-        state: string;
-        phone: string;
-        email: string;
-    };
-    summary: {
-        subtotal: number;
-        discount: number;
-        totalTax: number;
-        additionalCharges: number;
-        grandTotal: number;
-    };
-    items: InvoiceItem[];
-}
 
 export const ViewInvoiceInfo = () => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-    // const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
-    // const { orderId } = useParams();
-    // const dispatch = useDispatch<AppDispatch>();
-    const navigate = useNavigate();
-    // const { user } = useSelector((state: RootState) => state.auth);
+    const { invoice_id } = useParams();
+    const dispatch = useDispatch<AppDispatch>();
+    const { current_company_id, user } = useSelector((state: RootState) => state.auth);
+    const { invoiceData } = useSelector((state: RootState) => state.invoice);
+    const currentCompanyDetails = user?.company?.find((company: any) => company._id === current_company_id);
+    const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
 
     const [isLoading, _setLoading] = useState<boolean>(false);
-    const [snackbar, setSnackbar] = useState({
-        open: false,
-        message: '',
-        severity: 'success' as 'success' | 'error' | 'warning' | 'info'
-    });
-
-    // Mock data - replace with actual data fetching
-    const invoiceData: InvoiceData = {
-        id: 'PUR-0001',
-        invoiceNumber: 'PUR-0001',
-        date: '2025-03-02',
-        status: 'paid',
-        customer: {
-            name: 'Tohid Khan',
-            type: 'Creditors',
-            address: 'Near JNV Rajsamand',
-            city: 'Rajsamand',
-            state: 'Rajasthan',
-            phone: '+91 1234567890',
-            email: 'tohid.khan@example.com'
-        },
-        summary: {
-            subtotal: 1200,
-            discount: 0,
-            totalTax: 120,
-            additionalCharges: 0,
-            grandTotal: 1320
-        },
-        items: [
-            {
-                id: '1',
-                name: 'HLV HF DLX',
-                hsn: '123212',
-                quantity: 10,
-                rate: 120,
-                gstRate: 10,
-                gstAmount: 120,
-                totalAmount: 1320
-            }
-        ]
-    };
 
     const getStatusColor = (status: string) => {
         switch (status.toLowerCase()) {
@@ -157,51 +81,12 @@ export const ViewInvoiceInfo = () => {
         }
     };
 
+    useEffect(() => {
+        dispatch(viewInvoice({ vouchar_id: invoice_id || '', company_id: current_company_id || '' }))
+    }, [current_company_id, dispatch, invoice_id]);
     const handleAction = useCallback((action: string) => {
-        setSnackbar({
-            open: true,
-            message: `${action} action initiated successfully`,
-            severity: 'info'
-        });
+        toast.success(`${action} action initiated successfully`);
     }, []);
-
-    const handleCloseSnackbar = () => {
-        setSnackbar(prev => ({ ...prev, open: false }));
-    };
-
-    type PaletteColor = 'primary' | 'secondary' | 'success' | 'error' | 'info' | 'warning';
-
-    const ActionButton = ({
-        icon,
-        title,
-        color,
-        onClick
-    }: {
-        icon: React.ReactNode;
-        title: string;
-        color: PaletteColor;
-        onClick: () => void;
-    }) => (
-        <Tooltip title={title} arrow placement="top">
-            <IconButton
-                size={isMobile ? "small" : "medium"}
-                onClick={onClick}
-                sx={{
-                    bgcolor: alpha(theme.palette[color].main, 0.1),
-                    color: theme.palette[color].main,
-                    border: `1px solid ${alpha(theme.palette[color].main, 0.2)}`,
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    '&:hover': {
-                        bgcolor: alpha(theme.palette[color].main, 0.15),
-                        transform: 'translateY(-2px)',
-                        boxShadow: `0 4px 12px ${alpha(theme.palette[color].main, 0.3)}`,
-                    },
-                }}
-            >
-                {icon}
-            </IconButton>
-        </Tooltip>
-    );
 
     return (
         <Container maxWidth="xl" sx={{ py: 3 }}>
@@ -210,11 +95,12 @@ export const ViewInvoiceInfo = () => {
                 <Paper
                     elevation={0}
                     sx={{
-                        p: 3,
-                        mb: 3,
+                        px: 3,
+                        py: 1,
+                        mb: 2,
                         background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.secondary.main, 0.05)} 100%)`,
-                        border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-                        borderRadius: 2
+                        border: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+                        borderRadius: 1
                     }}
                 >
                     <Box sx={{
@@ -225,16 +111,7 @@ export const ViewInvoiceInfo = () => {
                         gap: 2
                     }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <IconButton
-                                onClick={() => navigate(-1)}
-                                sx={{
-                                    bgcolor: alpha(theme.palette.grey[500], 0.1),
-                                    '&:hover': { bgcolor: alpha(theme.palette.grey[500], 0.2) }
-                                }}
-                            >
-                                <ArrowBack />
-                            </IconButton>
-                            <Avatar sx={{ bgcolor: theme.palette.primary.main, width: 48, height: 48 }}>
+                            <Avatar sx={{ bgcolor: theme.palette.primary.main, width: 40, height: 40 }}>
                                 <Receipt />
                             </Avatar>
                             <Box>
@@ -242,13 +119,13 @@ export const ViewInvoiceInfo = () => {
                                     <Skeleton width={200} height={40} />
                                 ) : (
                                     <>
-                                        <Typography variant="h4" component="h1" fontWeight="bold">
-                                            Invoice {invoiceData.invoiceNumber}
+                                        <Typography variant="h6" fontWeight="bold">
+                                            Invoice {invoiceData?.voucher_number || 'Loading...'}
                                         </Typography>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                             <CalendarToday fontSize="small" color="action" />
                                             <Typography variant="body2" color="text.secondary">
-                                                Created on {formatDate(invoiceData.date)}
+                                                Created on {formatDate(invoiceData?.date || '')}
                                             </Typography>
                                         </Box>
                                     </>
@@ -298,25 +175,15 @@ export const ViewInvoiceInfo = () => {
                 {/* Invoice Information */}
                 <Grid item xs={12} lg={4}>
                     <Zoom in timeout={600}>
-                        <Card
-                            variant="outlined"
-                            sx={{
-                                height: '100%',
-                                transition: 'all 0.3s ease',
-                                '&:hover': {
-                                    boxShadow: theme.shadows[4],
-                                    transform: 'translateY(-2px)'
-                                }
-                            }}
-                        >
-                            <CardContent sx={{ p: 3 }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                        <Card variant="outlined" >
+                            <CardContent sx={{ p: 1 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                                     <Assessment color="primary" />
-                                    <Typography variant="h6" fontWeight="bold">
+                                    <Typography variant="subtitle1" fontWeight="bold">
                                         Invoice Information
                                     </Typography>
                                 </Box>
-                                <Divider sx={{ mb: 3 }} />
+                                <Divider sx={{ mb: 1 }} />
 
                                 {isLoading ? (
                                     <Box sx={{ '& > *': { mb: 2 } }}>
@@ -325,45 +192,47 @@ export const ViewInvoiceInfo = () => {
                                         ))}
                                     </Box>
                                 ) : (
-                                    <Stack spacing={3}>
-                                        <Box>
+                                    <Stack spacing={2}>
+                                        {invoiceData?.status && <Box>
                                             <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                                                 Invoice Status
                                             </Typography>
-                                            {getStatusIcon(invoiceData.status) ? (
+                                            {getStatusIcon(invoiceData?.status || '') ? (
                                                 <Chip
-                                                    icon={getStatusIcon(invoiceData.status)}
-                                                    label={invoiceData.status.toUpperCase()}
-                                                    color={getStatusColor(invoiceData.status) as any}
+                                                    icon={getStatusIcon(invoiceData?.status || '')}
+                                                    label={invoiceData?.status.toUpperCase()}
+                                                    color={getStatusColor(invoiceData?.status || '') as any}
                                                     variant="filled"
                                                     sx={{ fontWeight: 'bold' }}
                                                 />
                                             ) : (
                                                 <Chip
-                                                    label={invoiceData.status.toUpperCase()}
-                                                    color={getStatusColor(invoiceData.status) as any}
+                                                    label={invoiceData?.status.toUpperCase()}
+                                                    color={getStatusColor(invoiceData?.status || '') as any}
                                                     variant="filled"
                                                     sx={{ fontWeight: 'bold' }}
                                                 />
                                             )}
-                                        </Box>
+                                        </Box>}
 
-                                        <Box>
-                                            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                                                Invoice Date
-                                            </Typography>
-                                            <Typography variant="body1" fontWeight="medium">
-                                                {formatDate(invoiceData.date)}
-                                            </Typography>
-                                        </Box>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <Box>
+                                                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                                                    Invoice Date
+                                                </Typography>
+                                                <Typography variant="body1" fontWeight="medium">
+                                                    {formatDate(invoiceData?.date || '')}
+                                                </Typography>
+                                            </Box>
 
-                                        <Box>
-                                            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                                                Last Updated
-                                            </Typography>
-                                            <Typography variant="body1" fontWeight="medium">
-                                                {formatDate(invoiceData.date)}
-                                            </Typography>
+                                            <Box>
+                                                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                                                    Last Updated
+                                                </Typography>
+                                                <Typography variant="body1" fontWeight="medium">
+                                                    {formatDate(invoiceData?.updated_at || '')}
+                                                </Typography>
+                                            </Box>
                                         </Box>
                                     </Stack>
                                 )}
@@ -375,25 +244,20 @@ export const ViewInvoiceInfo = () => {
                 {/* Customer Information */}
                 <Grid item xs={12} lg={4}>
                     <Zoom in timeout={800}>
-                        <Card
-                            variant="outlined"
-                            sx={{
-                                height: '100%',
-                                transition: 'all 0.3s ease',
-                                '&:hover': {
-                                    boxShadow: theme.shadows[4],
-                                    transform: 'translateY(-2px)'
-                                }
-                            }}
-                        >
-                            <CardContent sx={{ p: 3 }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                                    <Person color="primary" />
-                                    <Typography variant="h6" fontWeight="bold">
-                                        Bill To
+                        <Card variant="outlined" >
+                            <CardContent sx={{ p: 1 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, justifyContent: 'space-between' }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Person color="primary" />
+                                        <Typography variant="subtitle1" fontWeight="bold">
+                                            Bill To
+                                        </Typography>
+                                    </Box>
+                                    <Typography variant="subtitle1" fontWeight="bold" >
+                                        {invoiceData?.party_details?.ledger_name || ''}
                                     </Typography>
                                 </Box>
-                                <Divider sx={{ mb: 3 }} />
+                                <Divider sx={{ mb: 1 }} />
 
                                 {isLoading ? (
                                     <Box sx={{ '& > *': { mb: 2 } }}>
@@ -403,43 +267,31 @@ export const ViewInvoiceInfo = () => {
                                     </Box>
                                 ) : (
                                     <Stack spacing={2}>
-                                        <Box>
-                                            <Typography variant="h6" fontWeight="bold" gutterBottom>
-                                                {invoiceData.customer.name}
-                                            </Typography>
-                                            <Chip
-                                                label={invoiceData.customer.type}
-                                                size="small"
-                                                color="secondary"
-                                                variant="outlined"
-                                            />
-                                        </Box>
-
-                                        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                                        {invoiceData?.party_details?.mailing_address && <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
                                             <LocationOn fontSize="small" color="action" sx={{ mt: 0.5 }} />
                                             <Box>
                                                 <Typography variant="body2" color="text.secondary">
-                                                    {invoiceData.customer.address}
+                                                    {invoiceData?.party_details?.mailing_address || ''}
                                                 </Typography>
                                                 <Typography variant="body2" color="text.secondary">
-                                                    {invoiceData.customer.city}, {invoiceData.customer.state}
+                                                    {invoiceData?.party_details?.mailing_state}, {invoiceData?.party_details?.mailing_country || ''}
                                                 </Typography>
                                             </Box>
-                                        </Box>
+                                        </Box>}
 
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        {invoiceData?.party_details?.phone?.number && <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                             <Phone fontSize="small" color="action" />
                                             <Typography variant="body2">
-                                                {invoiceData.customer.phone}
+                                                {invoiceData?.party_details?.phone?.code || ''} {invoiceData?.party_details?.phone?.number || ''}
                                             </Typography>
-                                        </Box>
+                                        </Box>}
 
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        {invoiceData?.party_details?.email && <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                             <Email fontSize="small" color="action" />
                                             <Typography variant="body2">
-                                                {invoiceData.customer.email}
+                                                {invoiceData?.party_details?.email || ''}
                                             </Typography>
-                                        </Box>
+                                        </Box>}
                                     </Stack>
                                 )}
                             </CardContent>
@@ -455,21 +307,16 @@ export const ViewInvoiceInfo = () => {
                             sx={{
                                 height: '100%',
                                 background: `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.05)} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`,
-                                transition: 'all 0.3s ease',
-                                '&:hover': {
-                                    boxShadow: theme.shadows[4],
-                                    transform: 'translateY(-2px)'
-                                }
                             }}
                         >
-                            <CardContent sx={{ p: 3 }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                            <CardContent sx={{ p: 1 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                                     <AttachMoney color="primary" />
-                                    <Typography variant="h6" fontWeight="bold">
+                                    <Typography variant="subtitle1" fontWeight="bold">
                                         Invoice Summary
                                     </Typography>
                                 </Box>
-                                <Divider sx={{ mb: 3 }} />
+                                <Divider sx={{ mb: 1 }} />
 
                                 {isLoading ? (
                                     <Box sx={{ '& > *': { mb: 2 } }}>
@@ -478,18 +325,18 @@ export const ViewInvoiceInfo = () => {
                                         ))}
                                     </Box>
                                 ) : (
-                                    <Stack spacing={2}>
+                                    <Stack spacing={1}>
                                         {[
-                                            { label: 'Sub-total', value: `₹${invoiceData.summary.subtotal}` },
-                                            { label: 'Discount', value: `₹${invoiceData.summary.discount}` },
-                                            { label: 'Total Tax', value: `₹${invoiceData.summary.totalTax}` },
-                                            { label: 'Additional Charges', value: `₹${invoiceData.summary.additionalCharges}` }
+                                            { label: 'Sub-total', value: `₹${invoiceData?.inventory?.reduce((acc, item) => acc + item.amount, 0)}` },
+                                            // { label: 'Discount', value: `₹${invoiceData.summary.discount}` },
+                                            // { label: 'Total Tax', value: `₹${invoiceData.summary.totalTax}` },
+                                            // { label: 'Additional Charges', value: `₹${invoiceData.summary.additionalCharges}` }
                                         ].map((item, index) => (
                                             <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <Typography variant="body2" color="text.secondary">
+                                                <Typography variant="inherit" color="text.secondary">
                                                     {item.label}
                                                 </Typography>
-                                                <Typography variant="body1" fontWeight="medium">
+                                                <Typography variant="inherit" fontWeight="medium">
                                                     {item.value}
                                                 </Typography>
                                             </Box>
@@ -509,7 +356,7 @@ export const ViewInvoiceInfo = () => {
                                                 Grand Total
                                             </Typography>
                                             <Typography variant="h6" fontWeight="bold" color="success.main">
-                                                ₹{invoiceData.summary.grandTotal}
+                                                ₹{Math.abs(invoiceData?.accounting_entries.find(entry => entry.ledger === invoiceData?.party_name)?.amount || 0)}
                                             </Typography>
                                         </Box>
                                     </Stack>
@@ -523,8 +370,8 @@ export const ViewInvoiceInfo = () => {
                 <Grid item xs={12}>
                     <Fade in timeout={1200}>
                         <Card variant="outlined">
-                            <CardContent sx={{ p: 3 }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+                            <CardContent sx={{ p: 1 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                                     <Business color="primary" />
                                     <Typography variant="h6" fontWeight="bold">
                                         Invoice Items
@@ -545,8 +392,7 @@ export const ViewInvoiceInfo = () => {
                                         component={Paper}
                                         variant="outlined"
                                         sx={{
-                                            maxHeight: 600,
-                                            borderRadius: 2,
+                                            borderRadius: 1,
                                             '& .MuiTableHead-root': {
                                                 bgcolor: alpha(theme.palette.primary.main, 0.05)
                                             }
@@ -556,19 +402,19 @@ export const ViewInvoiceInfo = () => {
                                             <TableHead>
                                                 <TableRow>
                                                     <TableCell sx={{ fontWeight: 'bold' }}>Product</TableCell>
-                                                    <TableCell align="center" sx={{ fontWeight: 'bold' }}>HSN/SAC</TableCell>
+                                                    {gst_enable && <TableCell align="center" sx={{ fontWeight: 'bold' }}>HSN/SAC</TableCell>}
                                                     <TableCell align="center" sx={{ fontWeight: 'bold' }}>Qty</TableCell>
                                                     <TableCell align="right" sx={{ fontWeight: 'bold' }}>Rate (₹)</TableCell>
                                                     <TableCell align="right" sx={{ fontWeight: 'bold' }}>Price (₹)</TableCell>
-                                                    <TableCell align="center" sx={{ fontWeight: 'bold' }}>GST %</TableCell>
-                                                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>GST (₹)</TableCell>
+                                                    {gst_enable && <TableCell align="center" sx={{ fontWeight: 'bold' }}>GST %</TableCell>}
+                                                    {gst_enable && <TableCell align="right" sx={{ fontWeight: 'bold' }}>GST (₹)</TableCell>}
                                                     <TableCell align="right" sx={{ fontWeight: 'bold' }}>Total (₹)</TableCell>
                                                 </TableRow>
                                             </TableHead>
                                             <TableBody>
-                                                {invoiceData.items.map((item, index) => (
+                                                {invoiceData?.inventory.map((item, index) => (
                                                     <TableRow
-                                                        key={item.id + index}
+                                                        key={item._id + index}
                                                         hover
                                                         sx={{
                                                             '&:hover': {
@@ -578,16 +424,16 @@ export const ViewInvoiceInfo = () => {
                                                     >
                                                         <TableCell>
                                                             <Typography variant="body2" fontWeight="medium">
-                                                                {item.name}
+                                                                {item.item}
                                                             </Typography>
                                                         </TableCell>
-                                                        <TableCell align="center">
+                                                        {gst_enable && <TableCell align="center">
                                                             <Chip
-                                                                label={item.hsn}
+                                                                label={item.hsn_code}
                                                                 size="small"
                                                                 variant="outlined"
                                                             />
-                                                        </TableCell>
+                                                        </TableCell>}
                                                         <TableCell align="center">
                                                             <Typography variant="body2" fontWeight="medium">
                                                                 {item.quantity}
@@ -595,18 +441,18 @@ export const ViewInvoiceInfo = () => {
                                                         </TableCell>
                                                         <TableCell align="right">₹{item.rate}</TableCell>
                                                         <TableCell align="right">₹{item.rate * item.quantity}</TableCell>
-                                                        <TableCell align="center">
+                                                        {gst_enable && <TableCell align="center">
                                                             <Chip
-                                                                label={`${item.gstRate}%`}
+                                                                label={`${item.gst}%`}
                                                                 size="small"
                                                                 color="info"
                                                                 variant="filled"
                                                             />
-                                                        </TableCell>
-                                                        <TableCell align="right">₹{item.gstAmount}</TableCell>
+                                                        </TableCell>}
+                                                        {gst_enable && <TableCell align="right">₹{(parseFloat(item.gst_amount ?? '') ?? 0).toFixed(2)}</TableCell>}
                                                         <TableCell align="right">
                                                             <Typography variant="body1" fontWeight="bold" color="success.main">
-                                                                ₹{item.totalAmount}
+                                                                ₹{(item.amount ?? 0).toFixed(2)}
                                                             </Typography>
                                                         </TableCell>
                                                     </TableRow>
@@ -614,11 +460,11 @@ export const ViewInvoiceInfo = () => {
 
                                                 {/* Total Row */}
                                                 <TableRow sx={{ bgcolor: alpha(theme.palette.success.main, 0.05) }}>
-                                                    <TableCell colSpan={7} align="right" sx={{ fontWeight: 'bold', fontSize: '1.1em' }}>
+                                                    <TableCell colSpan={gst_enable ? 7 : 4} align="right" sx={{ fontWeight: 'bold', fontSize: '1.1em' }}>
                                                         Grand Total:
                                                     </TableCell>
                                                     <TableCell align="right" sx={{ fontWeight: 'bold', fontSize: '1.2em', color: 'success.main' }}>
-                                                        ₹{invoiceData.summary.grandTotal}
+                                                        ₹{Math.abs(invoiceData?.accounting_entries.find(entry => entry.ledger === invoiceData?.party_name)?.amount || 0)}
                                                     </TableCell>
                                                 </TableRow>
                                             </TableBody>
@@ -630,18 +476,6 @@ export const ViewInvoiceInfo = () => {
                     </Fade>
                 </Grid>
             </Grid>
-
-            {/* Snackbar for notifications */}
-            <Snackbar
-                open={snackbar.open}
-                autoHideDuration={3000}
-                onClose={handleCloseSnackbar}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-            >
-                <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} variant="filled">
-                    {snackbar.message}
-                </Alert>
-            </Snackbar>
         </Container>
     );
 };

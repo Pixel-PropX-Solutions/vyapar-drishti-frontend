@@ -56,6 +56,13 @@ export type CustomerSortField =
   | 'type'
   | "created_at";
 
+export type InvoicesSortField =
+  | "date"
+  | 'voucher_type'
+  | 'party_name'
+  | 'voucher_number'
+  | "created_at";
+
 
 export type SortOrder = "asc" | "desc";
 
@@ -190,6 +197,19 @@ export interface GetCustomerInvoices {
   reference_number: string,
   place_of_supply: string,
   customer: string
+}
+
+export interface GetCustomerProfile {
+  _id: string,
+  ledger_name: string,
+  parent: string,
+  phone: PhoneNumber,
+  email: string,
+  gstin: string,
+  opening_balance: number,
+  total_amount: number,
+  total_debit: number,
+  total_credit: number,
 }
 
 export interface CustomersList {
@@ -556,12 +576,14 @@ export interface ProductUpdate {
 
 export interface GetInvoiceData {
   _id: string,
-  company_id: string,
-  user_id: string,
-  date: string,
-  voucher_number: string,
-  voucher_type: string,
   voucher_type_id: string,
+  voucher_type: string,
+  voucher_number: string,
+  vehicle_number: string,
+  user_id: string,
+
+  company_id: string,
+  date: string,
   narration: string,
   party_name: string,
   party_name_id: string,
@@ -569,7 +591,6 @@ export interface GetInvoiceData {
   reference_number: string,
   place_of_supply: string,
   mode_of_transport: string,
-  vehicle_number: string,
   status: string,
   due_date: string,
   is_invoice: number,
@@ -578,6 +599,38 @@ export interface GetInvoiceData {
   is_order_voucher: number,
   created_at: string,
   updated_at: string,
+  party_details: {
+    account_holder: string,
+    account_number: string,
+    alias: string,
+    bank_name: string,
+    bank_branch: string,
+    bank_ifsc: string,
+    company_id: string,
+    created_at: string,
+    updated_at: string,
+    email: string,
+    phone: PhoneNumber,
+    gst_registration_type: string,
+    gst_supply_type: string,
+    gstin: string,
+    image: string | File | null,
+    is_deleted: boolean,
+    is_deemed_positive: boolean,
+    is_revenue: boolean,
+    ledger_name: string,
+    mailing_address: string,
+    mailing_name: string,
+    mailing_pincode: string,
+    mailing_state: string,
+    mailing_country: string,
+    parent: string,
+    qr_image: string,
+    user_id: string,
+    parent_id: string,
+    opening_balance: number,
+    _id: string,
+  },
   inventory: [
     {
       _id: string,
@@ -593,6 +646,7 @@ export interface GetInvoiceData {
       godown_id: string,
       order_number: string | null,
       order_due_date: string | null,
+      hsn_code?: string,
       gst?: string,
       gst_amount?: string,
       created_at: string,
@@ -921,4 +975,5 @@ export interface InventoryItem {
   description?: string;
   low_stock_alert: number;
   last_restock_date: string;
+  stock_status: string;
 }

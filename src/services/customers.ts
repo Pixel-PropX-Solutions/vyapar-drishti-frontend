@@ -169,9 +169,17 @@ export const updateCustomer = createAsyncThunk(
 
 export const getCustomer = createAsyncThunk(
     "get/customer",
-    async (customer_id: string, { rejectWithValue }) => {
+    async ({
+        id,
+        start_date,
+        end_date,
+    }: {
+        id: string;
+        start_date: string;
+        end_date: string;
+    }, { rejectWithValue }) => {
         try {
-            const response = await userApi.get(`/ledger/view/${customer_id}`);
+            const response = await userApi.get(`/ledger/view/${id}?start_date=${start_date}&end_date=${end_date}`);
 
             console.log("Get Customer API Response", response);
 

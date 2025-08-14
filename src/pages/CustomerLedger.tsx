@@ -40,7 +40,7 @@ import { deleteCustomer, viewAllCustomer, viewAllCustomerWithTypes } from "@/ser
 import { CustomerRowSkeleton } from "@/common/skeletons/CustomerRowSkeleton";
 import { CustomerRow } from "@/features/customer/CustomerRow";
 import { viewAllAccountingGroups } from "@/services/accountingGroup";
-import { ActionButton } from "@/common/buttons/ActionButton";
+import { ActionButton } from "@/common/buttons/ActionButton1";
 import { setCustomerTypeId, setEditingCustomer } from "@/store/reducers/customersReducer";
 import toast from "react-hot-toast";
 import { BottomPagination } from "@/common/modals/BottomPagination";
@@ -160,7 +160,7 @@ const CustomerLedger: React.FC = () => {
 
   // Handle view stockist details
   const handleViewCustomer = (cus: GetUserLedgers) => {
-    navigate(`/customers/view/${cus._id}`)
+    navigate(`/customers/${cus._id}`)
   };
 
   const filteredCustomers = customers;

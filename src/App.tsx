@@ -15,7 +15,7 @@ import {
   treeViewCustomizations,
 } from "./theme/customizations";
 import Products from "./pages/Products";
-import CreateUserProfile from "./features/profile/createUser";
+// import CreateUserProfile from "./features/profile/createUser";
 import CreateProduct from "./features/products/createProduct";
 import { getCurrentUser } from "./services/auth";
 import LandingPage from "./components/LandingPage/LandingPage";
@@ -134,7 +134,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 {/* <Route path="/upload" element={<UploadDocuments />} /> */}
                 {/* <Route path="/settings" element={<Settings />} /> */}
                 <Route path="/about" element={<AboutPage />} />
-                <Route path="/create/user" element={<CreateUserProfile />} />
+                {/* <Route path="/create/user" element={<CreateUserProfile />} /> */}
                 <Route path="/customers" element={<CustomerLedger />} />
                 {/* <Route path="/*" element={<Navigate to="/" replace />} /> */}
 
@@ -152,7 +152,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/timeline" element={<Timeline />} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/customers" element={<CustomerLedger />} />
-                <Route path="/customers/view/:customer_id" element={<CustomerProfile />} />
+                <Route path="/customers/:customer_id" element={<CustomerProfile />} />
                 <Route path="/customers/create/:type" element={<EditCustomer />} />
                 <Route path="/customers/edit/:type" element={<EditCustomer />} />
 

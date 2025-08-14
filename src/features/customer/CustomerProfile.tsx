@@ -37,7 +37,7 @@ import { AppDispatch, RootState } from "@/store/store";
 import { getCustomer, getCustomerInvoices } from "@/services/customers";
 import { useNavigate, useParams } from "react-router-dom";
 import { formatLocalDate, getInitials } from "@/utils/functions";
-import { ActionButton } from "@/common/buttons/ActionButton";
+import { ActionButton } from "@/common/buttons/ActionButton1";
 import { setCustomersFilters, setEditingCustomer } from "@/store/reducers/customersReducer";
 import { CustomerInvoicesRow } from "./CustomerInvoicesRow";
 import { SortOrder } from "@/utils/types";
@@ -80,9 +80,12 @@ const CustomerProfile: React.FC = () => {
 
     useEffect(() => {
         if (customer_id) {
-            dispatch(getCustomer(customer_id));
+            dispatch(getCustomer({
+                id: customer_id, start_date: formatLocalDate(new Date(startDate)),
+                end_date: formatLocalDate(new Date(endDate)),
+            }));
         }
-    }, [dispatch, customer_id]);
+    }, [dispatch, customer_id, startDate, endDate]);
 
     useEffect(() => {
         fetchCustomersInvoices();
@@ -276,7 +279,7 @@ const CustomerProfile: React.FC = () => {
                         value={new Date(startDate)}
                         format="dd/MM/yyyy"
                         views={["year", "month", "day"]}
-                        onChange={(newValue) => handleStateChange("startDate", newValue)}
+                        onChange={(newValue) => handleStateChange("startDate", newValue ? newValue.toISOString() : "")}
                         slotProps={{
                             textField: {
 
@@ -299,7 +302,7 @@ const CustomerProfile: React.FC = () => {
                         value={new Date(endDate)}
                         format="dd/MM/yyyy"
                         views={["year", "month", "day"]}
-                        onChange={(newValue) => handleStateChange("endDate", newValue)}
+                        onChange={(newValue) => handleStateChange("endDate", newValue ? newValue.toISOString() : "")}
                         slotProps={{
                             textField: {
                                 size: "small",
@@ -521,7 +524,7 @@ const CustomerProfile: React.FC = () => {
                                         inv={inv}
                                         index={index + 1 + (page - 1) * rowsPerPage}
                                         onView={() => {
-                                            // handleViewInvoice(inv)
+                                            navigate(`/invoices/${inv.vouchar_id}`);
                                         }}
                                         onEdit={() => {
                                             navigate(`/invoices/update/${inv.voucher_type.toLowerCase()}/${inv.vouchar_id}`);
@@ -567,42 +570,41 @@ const CustomerProfile: React.FC = () => {
                                         <TableCell colSpan={5} sx={{ textAlign: "center", }}>
                                         </TableCell>
                                         <TableCell colSpan={1} sx={{ textAlign: "left", }}>
-                                            <Typography variant="body1" color="text.primary" sx={{ fontWeight: 600, textDecoration: 'underline' }}>
-                                                Current Total
+                                            <Typography variant="body1" color="text.primary" sx={{ fontWeight: 600, textDecoration: 'underline', whiteSpace: 'nowrap' }}>
+                                                Opening Balance
                                             </Typography>
                                         </TableCell>
                                         <TableCell align="right" colSpan={1} >
                                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                                {!customer.is_deemed_positive && <Typography
+                                                {customer.opening_balance < 0 && <Typography
                                                     variant="body1"
                                                     sx={{
                                                         fontWeight: 700,
                                                         mr: 0.5,
-                                                        color: customer.is_deemed_positive ? theme.palette.success.main : theme.palette.error.main,
+                                                        color: theme.palette.error.main,
                                                     }}
                                                 >
                                                     &#8377;
                                                 </Typography>}
-                                                <Typography variant="body1" sx={{ fontWeight: 600, color: customer.is_deemed_positive ? theme.palette.success.main : theme.palette.error.main, }}>
-                                                    {customerInvoices.reduce((acc, inv) => acc + (inv.is_deemed_positive ? Math.abs(inv.amount) : 0), 0)}
+                                                <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.error.main, }}>
+                                                    {customer.opening_balance < 0 ? Math.abs(customer.opening_balance) : ''}
                                                 </Typography>
                                             </Box>
                                         </TableCell>
-                                        <TableCell align="right" colSpan={1} >
+                                        <TableCell align="right" colSpan={1}>
                                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                                {!customer.is_deemed_positive && <Typography
+                                                {!(customer.opening_balance < 0) && <Typography
                                                     variant="body1"
                                                     sx={{
                                                         fontWeight: 700,
-                                                        // fontSize: '1.1rem',
                                                         mr: 0.5,
-                                                        color: customer.is_deemed_positive ? theme.palette.error.main : theme.palette.success.main,
+                                                        color: theme.palette.success.main,
                                                     }}
                                                 >
                                                     &#8377;
                                                 </Typography>}
-                                                <Typography variant="body1" sx={{ fontWeight: 600, color: customer.is_deemed_positive ? theme.palette.error.main : theme.palette.success.main, }}>
-                                                    {customerInvoices.reduce((acc, inv) => acc + (inv.is_deemed_positive ? 0 : Math.abs(inv.amount)), 0)}
+                                                <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.success.main, }}>
+                                                    {customer.opening_balance < 0 ? '' : Math.abs(customer.opening_balance)}
                                                 </Typography>
                                             </Box>
                                         </TableCell>
@@ -618,41 +620,89 @@ const CustomerProfile: React.FC = () => {
                                         </TableCell>
                                         <TableCell colSpan={1} sx={{ textAlign: "left", }}>
                                             <Typography variant="body1" color="text.primary" sx={{ fontWeight: 600, textDecoration: 'underline' }}>
-                                                Closing Balance
+                                                Current Total
                                             </Typography>
                                         </TableCell>
                                         <TableCell align="right" colSpan={1} >
-                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                                {customer.is_deemed_positive && <Typography
-                                                    variant="body1"
-                                                    sx={{
-                                                        fontWeight: 700,
-                                                        mr: 0.5,
-                                                        color: customer.is_deemed_positive ? theme.palette.success.main : theme.palette.error.main,
-                                                    }}
-                                                >
-                                                    &#8377;
-                                                </Typography>}
-                                                <Typography variant="body1" sx={{ fontWeight: 600, color: customer.is_deemed_positive ? theme.palette.success.main : theme.palette.error.main, }}>
-                                                    {customer.is_deemed_positive ? customer.total_amount : ''}
-                                                </Typography>
-                                            </Box>
-                                        </TableCell>
-                                        <TableCell align="right" colSpan={1}>
                                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
                                                 {!customer.is_deemed_positive && <Typography
                                                     variant="body1"
                                                     sx={{
                                                         fontWeight: 700,
-                                                        // fontSize: '1.1rem',
                                                         mr: 0.5,
-                                                        color: customer.is_deemed_positive ? theme.palette.error.main : theme.palette.success.main,
+                                                        color: theme.palette.error.main,
                                                     }}
                                                 >
                                                     &#8377;
                                                 </Typography>}
-                                                <Typography variant="body1" sx={{ fontWeight: 600, color: customer.is_deemed_positive ? theme.palette.error.main : theme.palette.success.main, }}>
-                                                    {customer.is_deemed_positive ? '' : customer.total_amount}
+                                                <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.error.main, }}>
+                                                    {Math.abs(customer.total_debit)}
+                                                </Typography>
+                                            </Box>
+                                        </TableCell>
+                                        <TableCell align="right" colSpan={1} >
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                                                {!customer.is_deemed_positive && <Typography
+                                                    variant="body1"
+                                                    sx={{
+                                                        fontWeight: 700,
+                                                        mr: 0.5,
+                                                        color: theme.palette.success.main,
+                                                    }}
+                                                >
+                                                    &#8377;
+                                                </Typography>}
+                                                <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.success.main, }}>
+                                                    {Math.abs(customer.total_credit)}
+                                                </Typography>
+                                            </Box>
+                                        </TableCell>
+                                        <TableCell colSpan={1} sx={{ textAlign: "center", }}>
+                                        </TableCell>
+                                    </TableRow>
+                                    <TableRow sx={{
+                                        "& .MuiTableCell-root": {
+                                            padding: '8px 16px',
+                                        },
+                                    }}>
+                                        <TableCell colSpan={5} sx={{ textAlign: "center", }}>
+                                        </TableCell>
+                                        <TableCell colSpan={1} sx={{ textAlign: "left", }}>
+                                            <Typography variant="body1" color="text.primary" sx={{ fontWeight: 600, textDecoration: 'underline', whiteSpace: 'nowrap' }}>
+                                                Closing Balance
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell align="right" colSpan={1} >
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                                                {customer.total_amount < 0 && <Typography
+                                                    variant="body1"
+                                                    sx={{
+                                                        fontWeight: 700,
+                                                        mr: 0.5,
+                                                        color: theme.palette.error.main,
+                                                    }}
+                                                >
+                                                    &#8377;
+                                                </Typography>}
+                                                <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.error.main, }}>
+                                                    {customer.total_amount < 0 ? Math.abs(customer.total_amount) : ''}
+                                                </Typography>
+                                            </Box>
+                                        </TableCell>
+                                        <TableCell align="right" colSpan={1}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                                                {!(customer.total_amount < 0) && <Typography
+                                                    variant="body1"
+                                                    sx={{
+                                                        fontWeight: 700,
+                                                        mr: 0.5,
+                                                        color: theme.palette.success.main,
+                                                    }}
+                                                >
+                                                    &#8377;
+                                                </Typography>}
+                                                <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.success.main, }}>
+                                                    {customer.total_amount < 0 ? '' : Math.abs(customer.total_amount)}
                                                 </Typography>
                                             </Box>
                                         </TableCell>

@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AuthStates } from "@/utils/enums";
-import { GetAllInvoiceGroups, GetAllVouchars, GetInvoiceData, PageMeta, SortOrder } from "@/utils/types";
+import { GetAllInvoiceGroups, GetAllVouchars, GetInvoiceData, InvoicesSortField, PageMeta, SortOrder } from "@/utils/types";
 import { deleteGSTInvoice, deleteInvoice, updateInvoice, viewAllInvoiceGroups, viewAllInvoices, viewInvoice } from "@/services/invoice";
 import { getAllInvoiceGroups } from "@/services/invoice";
 
@@ -27,7 +27,7 @@ interface InvoiceState {
         startDate: string,
         endDate: string,
         rowsPerPage: number,
-        sortField: string,
+        sortField: InvoicesSortField,
         sortOrder: SortOrder,
     }
 }
@@ -63,7 +63,7 @@ const initialState: InvoiceState = {
         endDate: new Date().toISOString(),
         rowsPerPage: 10,
         sortField: "date",
-        sortOrder: "asc" as SortOrder,
+        sortOrder: "desc" as SortOrder,
     }
 };
 

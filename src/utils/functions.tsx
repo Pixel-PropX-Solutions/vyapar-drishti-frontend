@@ -201,3 +201,7 @@ export const formatLocalDate = (date: Date): string => {
     '.000Z'
   );
 };
+
+export const getFYyear = (fy: string): string => {
+  return `FY: ${fy.slice(0, 4)} - ${parseInt(fy.slice(0, 4), 10) + 1}`;
+}

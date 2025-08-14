@@ -16,7 +16,7 @@ import CompanyEditingModal from '@/common/modals/CompanyEditingModal';
 import { getCurrentCompany, getCurrentUser, switchCompany } from '@/services/auth';
 import { getAllCompanies } from '@/services/company';
 // import { updateUserSettings } from '@/services/user';
-import { getAvatarColor, getInitials } from '@/utils/functions';
+import { getAvatarColor, getFYyear, getInitials } from '@/utils/functions';
 import toast from 'react-hot-toast';
 import { setCurrentCompanyId } from '@/store/reducers/authReducer';
 
@@ -150,7 +150,7 @@ export default function SelectContent() {
             >
               {(getInitials(company.company_name))}
             </Avatar>
-            <ListItemText secondary={user?.name?.first + " " + user?.name?.last || 'User'} primary={company.company_name} />
+            <ListItemText secondary={getFYyear(company?.financial_year_start)} primary={company.company_name} />
           </StyledMenuItem>
         ))
           : (
