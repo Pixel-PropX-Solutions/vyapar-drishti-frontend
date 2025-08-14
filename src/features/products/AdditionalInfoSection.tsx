@@ -86,18 +86,20 @@ const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({
         const value = event.target.value;
         const unitType = units.find(unit => unit.value === data?.unit)?.si_representation;
 
-        let quantity = value;
         if (unitType === 'integer') {
             // Only allow whole numbers
-            const intVal = Math.max(0, Math.floor(Number(quantity)));
-            quantity = intVal.toString();
+            if (/^\d*$/.test(value)) {
+                handleChange(field, value);
+            }
         } else if (unitType === 'decimal') {
-            // Allow up to two decimals
-            let floatVal = Math.max(0, parseFloat(quantity));
-            floatVal = Math.round(floatVal * 100) / 100;
-            quantity = floatVal.toFixed(2);
+            // Allow up to 3 decimal places
+            if (/^\d*\.?\d{0,3}$/.test(value)) {
+                handleChange(field, value);
+            }
+        } else {
+            // fallback: allow any number
+            handleChange(field, value);
         }
-        handleChange(field, Number(quantity));
     };
 
 
@@ -273,7 +275,11 @@ const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({
                                     value={data.low_stock_alert || ''}
                                     onChange={handleNumberChange('low_stock_alert')}
                                     type="text"
-                                    inputMode="decimal"
+                                    inputProps={{
+                                        step: units.find(unit => unit.value === data.unit)?.si_representation === 'integer' ? 1 : 0.01,
+                                        min: 0
+                                    }}
+                                    // inputMode="decimal"
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">
@@ -334,7 +340,10 @@ const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({
                                     value={data.opening_balance || ''}
                                     onChange={handleNumberChange('opening_balance')}
                                     type="text"
-                                    inputMode="decimal"
+                                    inputProps={{
+                                        step: units.find(unit => unit.value === data.unit)?.si_representation === 'integer' ? 1 : 0.01,
+                                        min: 0
+                                    }}
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">
@@ -372,12 +381,9 @@ const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({
                                     label="Opening Rate"
                                     placeholder="Enter cost per unit"
                                     value={data.opening_rate || ''}
-                                    onChange={handleNumberChange('opening_rate')}
+                                    onChange={(e) => handleChange('opening_rate', e.target.value)}
                                     type="number"
-                                    inputProps={{
-                                        step: units.find(unit => unit.value === data.unit)?.si_representation === 'integer' ? 1 : 0.01,
-                                        min: 0
-                                    }}
+
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">

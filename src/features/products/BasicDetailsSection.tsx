@@ -64,6 +64,8 @@ const BasicDetailsSection: React.FC<BasicDetailsSectionProps> = ({
         setSelectedUnitOption(newValue);
         handleChange('unit', newValue?.value || '');
         handleChange('unit_id', newValue?.id || '');
+        handleChange('low_stock_alert', '');
+        handleChange('opening_balance', '');
     };
 
     const handleDragEnter = (e: React.DragEvent) => {
