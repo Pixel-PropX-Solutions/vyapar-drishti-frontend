@@ -1,10 +1,9 @@
-# DristiDocs
-
-DristiDocs is a smart AI-powered pharmacy management platform designed to automate inventory control, order tracking, and document-based data extraction for chemists and administrators. This repository contains the **frontend** codebase built using **React.js**, **TypeScript**, and **Material UI**, optimized for a clean, responsive, and role-based interface.
+# Vyapar Drishti
+Vyapar Drishti is a smart AI-powered billing and inventory management platform designed to automate inventory control, bills tracking, and document-based data extraction for users and administrators. This repository contains the **frontend** codebase built using **React.js**, **TypeScript**, and **Material UI**, optimized for a clean, responsive, and role-based interface.
 
 ## 🔍 Overview
 
-The DristiDocs frontend acts as the client-side layer of the full-stack pharmacy system, providing role-specific views for **Admins** and **Chemists**. It includes modules for managing inventory, creating and reviewing orders, uploading invoices for AI-powered extraction (via OpenAI API), and generating insights through visual dashboards.
+The Vyapar Drishti frontend acts as the client-side layer of the full-stack pharmacy system, providing role-specific views for **Admins** and **Users**. It includes modules for managing inventory, creating and reviewing bills, uploading invoices for AI-powered extraction (via Gemini API), and generating insights through visual dashboards (for admin).
 
 ## 🚀 Live Demo
 
@@ -41,11 +40,11 @@ Coming soon...
 ## ✅ Functional Requirements
 
 1. **Role-Based Dashboards**
-   - Admin: Manage users, stockists, inventory, and analytics
-   - Chemist: Create orders, track stock, upload bills, manage sales
+   - Admin: Manage users, and analytics
+   - Users: Create bills, create products, track stock, upload bills, manage sales
 
 2. **Document Upload Integration**
-   - Uploads go to the backend which forwards to OpenAI API
+   - Uploads go to the backend which forwards to Gemini API
    - Results displayed in form for review before submission
 
 3. **Real-Time Inventory Sync**
@@ -95,11 +94,11 @@ Coming soon...
 
 ## ⚛️ State Management
 
-DristiDocs uses **Redux Toolkit** for global state management, ensuring consistent data flow across the app. Each feature module (e.g., orders, inventory, auth) has its own slice, defined with actions and reducers.
+Vyapar Drishti uses **Redux Toolkit** for global state management, ensuring consistent data flow across the app. Each feature module (e.g., invoices, inventory, auth) has its own slice, defined with actions and reducers.
 
 - **Global State:**  
   - `authSlice`: Handles user login state and JWT tokens.
-  - `orderSlice`: Stores order list, status, and active order details.
+  - `invoicesSlice`: Stores invoice list, status, and active invioce details.
   - `inventorySlice`: Manages inventory records and stock updates.
 
 - **Local State:**  
@@ -132,18 +131,18 @@ axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 ### Once installed and running:
 
 1. **Login or Register**
-   - Visit [http://localhost:3000](http://localhost:3000).
-   - Choose "Chemist" or "Admin" role and authenticate.
+   - Visit [https://vyapar-drishti.vercel.app](https://vyapar-drishti.vercel.app/).
+   - Fill up the info and sign up and login.
 
 2. **Chemist Dashboard**
    - **Navigate to Inventory** to view and update stock.
-   - **Use Orders** to view past orders or create new ones.
+   - **Use Invoices** to view past invoices or create new ones.
    - **Use Upload Bills** to upload a PDF/image and extract data.
+   - **Use Customers** to add new customers or vendors.
 
 3. **Admin Dashboard**
-   - **Access Manage Chemists** to view or deactivate accounts.
-   - **Use Stockist Management** to add new vendors.
-   - **View order trends, inventory movement, and analytics.**
+   - **Access Manage Users** to view or deactivate accounts.
+   - **View user trends, users movement, and analytics.**
 
 4. **Uploading a Bill**
    - Navigate to **Upload Bills**.
@@ -151,9 +150,8 @@ axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
    - Confirm to update inventory instantly.
 
 5. **Creating Orders**
-   - Click **New Order**, select stockist, add products, and submit.
-   - Track status under **Pending Orders** and **Shipped Orders**.
-
+   - Click **New Invoices**, select customer, add products, and submit.
+   
 6. **Secure Session**
    - JWT token is saved locally (e.g., in `localStorage`).
    - Sessions auto-expire, and users must log in again after expiration.
@@ -173,8 +171,8 @@ axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 1. **Clone the repository:**
 
 ```bash
-git clone https://github.com/tohidkhan2464/DristiDocs.git
-cd DristiDocs/frontend
+git clone https://github.com/tohidkhan2464/vyapar-drishti-frontend.git
+cd vyapar-drishti-frontend
 ```
 
 2. **Install dependencies:**
