@@ -219,7 +219,7 @@ export const InventoryRow = (props: InventoryRowRowProps) => {
                                             <strong>Group:</strong> {row?.group || 'N/A'}
                                         </Typography>
                                         <Typography variant="body2">
-                                            <strong>HSN/SAC:</strong> {row?.gst_hsn_code || 'N/A'}
+                                            <strong>HSN/SAC:</strong> {row?.hsn_code || 'N/A'}
                                         </Typography>
                                         <Typography variant="body2">
                                             <strong>Alias :</strong> {row?.alias_name || 'No alias available'}

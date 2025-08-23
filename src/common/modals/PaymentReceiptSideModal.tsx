@@ -182,8 +182,16 @@ const PaymentReceiptSideModal: React.FC<CreateInventoryGroupModalProps> = ({
             place_of_supply: "",
             mode_of_transport: "",
             vehicle_number: "",
-            status: "",
+            status: "Paid",
             due_date: "",
+            paid_amount: data.amount,
+            total: data.amount,
+            discount: 0,
+            total_amount: data.amount,
+            total_tax: 0,
+            additional_charge: 0,
+            roundoff: 0,
+            grand_total: data.amount,
             accounting,
             items: []
         };

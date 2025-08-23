@@ -21,7 +21,16 @@ import {
     Avatar,
     useTheme,
     alpha,
-    Stack
+    Stack,
+    Fade,
+    Slide,
+    Chip,
+    Divider,
+    IconButton,
+    LinearProgress,
+    Backdrop,
+    CircularProgress,
+    Collapse,
 } from "@mui/material";
 import {
     Inventory,
@@ -30,15 +39,25 @@ import {
     Receipt,
     AddCircleOutline,
     LocalOffer,
-    PeopleAlt,
     Info,
-    LocationOn,
     Commute,
-    LocalShipping,
-    AddCard,
     Edit,
+    Timeline,
     Cancel,
-    Timeline
+    Save,
+    Preview,
+    Business,
+    Today,
+    Description,
+    Calculate,
+    TrendingUp,
+    Assignment,
+    ExpandLess,
+    ExpandMore,
+    CurrencyRupee,
+    AccountBalance,
+    PeopleAltOutlined,
+    DateRange,
 } from "@mui/icons-material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -47,11 +66,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { viewAllCustomerWithType } from '@/services/customers';
 import { viewProductsWithId } from '@/services/products';
-import { updateGSTInvoice, updateInvoice, viewInvoice } from '@/services/invoice';
+import { updateInvoice, updateTaxInvoice, viewInvoice } from '@/services/invoice';
 import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { capitalizeInput } from '@/utils/functions';
 import AddItemModal from '@/common/modals/AddItemModal';
+import { capitalizeInput, formatLocalDate } from '@/utils/functions';
 import ActionButtonSuccess from '@/common/buttons/ActionButtonSuccess';
 import ActionButtonCancel from '@/common/buttons/ActionButtonCancel';
 
@@ -61,12 +80,15 @@ interface InvoiceItems {
     vouchar_id: string;
     item: string;
     item_id: string;
+    unit: string;
+    hsn_code?: string;
     quantity: number;
     rate: number;
     amount: number;
-    gst?: number;
-    gst_amount?: number;
-
+    discount_amount: number;
+    tax_rate?: number;
+    tax_amount?: number;
+    total_amount: number;
 }
 
 interface InvoiceAccounting {
@@ -77,38 +99,37 @@ interface InvoiceAccounting {
     amount: number;
 }
 
-// Mode of Transport Options
-const modeOfTransportOptions = [
-    { label: 'By Road', value: 'By Road' },
-    { label: 'By Rail', value: 'By Rail' },
-    { label: 'By Air', value: 'By Air' },
-    { label: 'By Sea', value: 'By Sea' },
-];
+// Enhanced Styled Components
+type GradientType = 'primary' | 'secondary' | 'success' | 'warning' | 'glass' | 'error' | 'info';
 
-const paymentStatusOptions = [
-    { label: 'Paid', value: 'Paid' },
-    { label: 'Unpaid', value: 'Unpaid' },
-    { label: 'Partially Paid', value: 'Partially Paid' },
-];
+interface GradientCardProps {
+    children: React.ReactNode;
+    gradient?: GradientType;
+    sx?: object;
+    [key: string]: any;
+}
 
-// Styled Components
-const StyledCard = ({
-    children,
-    ...props
-}: React.PropsWithChildren<{ sx?: object } & React.ComponentProps<typeof Card>>) => {
+const GradientCard = ({ children, gradient = 'primary', ...props }: GradientCardProps) => {
     const theme = useTheme();
+
+    const gradients: Record<GradientType, string> = {
+        primary: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.2)} 0%, ${alpha(theme.palette.primary.main, 0.35)} 100%)`,
+        secondary: `linear-gradient(135deg, ${alpha(theme.palette.secondary.main, 0.2)} 0%, ${alpha(theme.palette.secondary.main, 0.35)} 100%)`,
+        success: `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.2)} 0%, ${alpha(theme.palette.success.main, 0.35)} 100%)`,
+        warning: `linear-gradient(135deg, ${alpha(theme.palette.warning.main, 0.2)} 0%, ${alpha(theme.palette.warning.main, 0.35)} 100%)`,
+        error: `linear-gradient(135deg, ${alpha(theme.palette.error.main, 0.15)} 0%, ${alpha(theme.palette.error.main, 0.3)} 100%)`,
+        info: `linear-gradient(135deg, ${alpha(theme.palette.info.main, 0.15)} 0%, ${alpha(theme.palette.info.main, 0.3)} 100%)`,
+        glass: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.9)} 0%, ${alpha(theme.palette.background.paper, 0.95)} 100%)`
+    };
+
     return (
         <Card
             elevation={0}
             sx={{
                 borderRadius: 1,
-                // border: `1px solid ${alpha(theme.palette.primary.dark, 1)}`,
-                background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.8)} 0%, ${alpha(theme.palette.background.paper, 1)} 100%)`,
-                backdropFilter: 'blur(10px)',
-                // transition: 'all 0.3s ease-in-out',
-                // '&:hover': {
-                //   borderColor: alpha(theme.palette.primary.dark, 1),
-                // },
+                background: gradients[gradient],
+                backdropFilter: 'blur(20px)',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 ...props.sx
             }}
             {...props}
@@ -118,28 +139,110 @@ const StyledCard = ({
     );
 };
 
+
+const AnimatedTextField = ({ ...props }: any) => {
+
+    return (
+        <TextField
+            {...props}
+            sx={{
+                '& .MuiOutlinedInput-root': {
+                    borderRadius: '4px',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                        '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor: 'primary.main',
+                            borderWidth: 2,
+                        },
+                    },
+                    '&.Mui-focused': {
+                        '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor: 'primary.main',
+                            borderWidth: 2,
+                        },
+                    },
+                },
+                '& .MuiInputLabel-root': {
+                    fontWeight: 500,
+                },
+                ...props.sx
+            }}
+        />
+    );
+};
+
+const StatusChip = ({ status, ...props }: any) => {
+    const getStatusConfig = (status: string) => {
+        switch (status?.toLowerCase()) {
+            case 'paid':
+                return { color: 'success', icon: '✓' };
+            case 'unpaid':
+                return { color: 'error', icon: '⏳' };
+            case 'partially paid':
+                return { color: 'warning', icon: '⏱' };
+            default:
+                return { color: 'default', icon: '❓' };
+        }
+    };
+
+    const config = getStatusConfig(status);
+
+    return (
+        <Chip
+            label={`${config.icon} ${status}`}
+            color={config.color as any}
+            variant="outlined"
+            size="small"
+            sx={{
+                fontWeight: 600,
+                '& .MuiChip-label': {
+                    px: 1.5,
+                },
+            }}
+            {...props}
+        />
+    );
+};
+
+// Mode of Transport Options with enhanced visuals
+const modeOfTransportOptions = [
+    { label: '🚗 By Road', value: 'By Road', icon: '🚗' },
+    { label: '🚂 By Rail', value: 'By Rail', icon: '🚂' },
+    { label: '✈️ By Air', value: 'By Air', icon: '✈️' },
+    { label: '🚢 By Sea', value: 'By Sea', icon: '🚢' },
+];
+
+const paymentStatusOptions = [
+    { label: '✅ Paid', value: 'Paid', color: 'success' },
+    { label: '⏳ Unpaid', value: 'Unpaid', color: 'error' },
+    { label: '⏱ Partially Paid', value: 'Partially Paid', color: 'warning' },
+];
+
 // Main Component
-export default function UpdateSalePurchase() {
+export default function SalePurchaseInvoiceCreation() {
     const { type, voucher_id } = useParams();
     const [isLoading, setIsLoading] = useState(false);
     const [parties, setParties] = useState<{ id: string; name: string; }[]>([]);
     const [date, setDate] = useState(new Date());
-    const [itemsList, setItemsList] = useState<{ id: string; name: string; unit: string, gst: string, hsn_code: string }[]>([]);
+    const [dueDate, setDueDate] = useState(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
+    const invoiceType = type === "sales" ? "Sales" : type === "purchase" ? "Purchase" : "";
+    const [itemsList, setItemsList] = useState<{ id: string; name: string; unit: string, tax_rate: string, hsn_code: string }[]>([]);
     const theme = useTheme();
+    const [showSummary, setShowSummary] = useState(false);
+
+    const [expandedTotals, setExpandedTotals] = useState(true);
 
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
-    const { currentCompany } = useSelector((state: RootState) => state.auth);
-    const { invoiceData, invoiceType_id } = useSelector((state: RootState) => state.invoice);
-
-    const { user, current_company_id } = useSelector((state: RootState) => state.auth);
+    const { currentCompany, user, current_company_id } = useSelector((state: RootState) => state.auth);
     const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
 
     const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
-    const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
+    const tax_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_tax;
+    const { invoiceData, invoiceType_id } = useSelector((state: RootState) => state.invoice);
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [isAddItemModalOpen, setAddItemModalOpen] = useState(false);
     const [item, setItem] = useState<InvoiceItems | null>(null);
-    const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
     const [data, setData] = useState({
         _id: '',
@@ -147,7 +250,7 @@ export default function UpdateSalePurchase() {
         date: '',
         voucher_type: "",
         voucher_type_id: "",
-        voucher_number: "",
+        voucher_number: '',
         party_name: "",
         party_name_id: "",
         narration: "",
@@ -156,12 +259,40 @@ export default function UpdateSalePurchase() {
         place_of_supply: "",
         mode_of_transport: "",
         vehicle_number: "",
-        status: "",
         due_date: "",
+        status: "",
+        paid_amount: 0,
+        total: 0,
+        discount: 0,
+        total_amount: 0,
+        total_tax: 0,
+        additional_charge: 0,
+        roundoff: 0,
+        grand_total: 0,
         accounting: [] as InvoiceAccounting[],
         items: [] as InvoiceItems[],
     });
 
+    // Enhanced validation with better UX
+    const validateForm = () => {
+        const newErrors: { [key: string]: string } = {};
+
+        if (!date) newErrors.date = "Please select a valid date";
+        if (!data.party_name.trim()) newErrors.partyName = `Please select a ${type === 'sales' ? 'customer' : 'supplier'}`;
+        if (data.items.length <= 0) newErrors.items = "Please add at least one item to continue";
+
+        setErrors(newErrors);
+
+        // Smooth scroll to first error
+        if (Object.keys(newErrors).length > 0) {
+            const firstErrorElement = document.querySelector(`[name="${Object.keys(newErrors)[0]}"]`);
+            if (firstErrorElement) {
+                firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        return Object.keys(newErrors).length === 0;
+    };
 
     const handleAddItem = () => {
         setItem(null);
@@ -180,63 +311,153 @@ export default function UpdateSalePurchase() {
             ...prevState,
             [field]: value,
         }));
+
+        // Clear errors when user starts typing
+        if (errors[field]) {
+            setErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[field];
+                return newErrors;
+            });
+        }
     };
 
-    const calculateTotals = React.useCallback(() => {
-        const subtotal = data.items.reduce((sum, item) => sum + (item.amount || 0), 0).toFixed(2);
-        const gstTotal = data.items.reduce((sum, item) => sum + (item.gst_amount || 0), 0).toFixed(2);
-        const grandTotal = (parseFloat(subtotal) + parseFloat(gstTotal)).toFixed(2);
-        return { subtotal, grandTotal, gstTotal };
-    }, [data.items]);
+    // Calculate totals for display only (do not update state here)
+    const totals = React.useMemo(() => {
+        const total = data.items.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+        const discount = data.items.reduce((sum, item) => sum + Number(item.discount_amount || 0), 0);
+        const total_amount = Number(total) - Number(discount);
+        const total_tax = data.items.reduce((sum, item) => sum + Number(item.tax_amount || 0), 0);
+        const additional_charge = Number(data.additional_charge || 0);
+        const subtotal1 = data.items.reduce((sum, item) => sum + Number(item.total_amount || 0), 0);
+        // const subtotal2 = (total_amount + total_tax);
+        // if (subtotal1 !== subtotal2) {
+        //     toast.error(`Subtotal mismatch: ${subtotal1} !== ${subtotal2}`);
+        //     console.warn(`Subtotal mismatch: ${subtotal1} !== ${subtotal2}`);
+        // }
+        const subtotal = subtotal1 + additional_charge;
+        const roundoff = Math.round(subtotal) - subtotal;
+        const grandTotal = (total_amount + total_tax + additional_charge + roundoff);
+        return {
+            total: Number(total).toFixed(2),
+            discount: Number(discount).toFixed(2),
+            total_amount: Number(total_amount).toFixed(2),
+            total_tax: Number(total_tax).toLocaleString('en-IN', { minimumFractionDigits: 2 }),
+            additional_charge: Number(additional_charge).toLocaleString('en-IN', { minimumFractionDigits: 2 }),
+            roundoff: Number(roundoff).toFixed(2),
+            grandTotal: Number(grandTotal).toFixed(2)
+        };
+    }, [data]);
 
-    const { grandTotal } = calculateTotals();
+    // Destructure for use in JSX
+    const { total, discount, total_amount, total_tax, additional_charge, roundoff, grandTotal } = totals;
 
+    // Enhanced submit handler with better loading states
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!validateForm()) {
+            return;
+        }
+
         setIsLoading(true);
 
-        if (currentCompanyDetails?.company_settings?.features?.enable_gst) {
-            const dataToSend = {
-                ...data,
-                vouchar_id: data._id || '',
-                user_id: user._id,
-                company_id: currentCompany?._id || '',
-                date: data.date,
-                voucher_type: data.voucher_type,
-                voucher_type_id: invoiceType_id || '',
-                voucher_number: data.voucher_number,
-                party_name: data.party_name,
-                party_name_id: data.party_name_id,
-                narration: data.narration || '',
-                reference_number: data.reference_number || '',
-                reference_date: data.reference_date || '',
-                place_of_supply: data.place_of_supply || '',
-                mode_of_transport: data.mode_of_transport || '',
-                vehicle_number: data.vehicle_number || '',
-                status: data.status || '',
-                due_date: data.due_date || '',
-                items: data.items.map(item => ({
-                    ...item,
-                    entry_id: item.entry_id || '',
-                    vouchar_id: data._id,
-                    item: item.item,
-                    item_id: item.item_id,
-                    quantity: item.quantity,
-                    rate: item.rate,
-                    amount: item.amount,
-                    gst_rate: item.gst?.toString() || '0',
-                    gst_amount: item.gst_amount || 0,
-                    additional_amount: 0,
-                    discount_amount: 0,
-                    godown: '',
-                    godown_id: '',
-                    order_number: '',
-                    order_due_date: '',
-                    hsn_code: itemsList.find((p) => p.id === item.item_id)?.hsn_code || '',
+        try {
+            if (tax_enable) {
+                const dataToSend = {
+                    ...data,
+                    date: data.date,
+                    vouchar_id: data._id || '',
+                    user_id: user?._id || '',
+                    company_id: currentCompany?._id || '',
+                    voucher_type_id: invoiceType_id || '',
+                    party_name_id: data.party_name_id,
+                    mode_of_transport: data.mode_of_transport,
+                    vehicle_number: data.vehicle_number,
+                    place_of_supply: data.place_of_supply,
+                    status: data.status,
+                    paid_amount: data.paid_amount,
+                    due_date: data.due_date,
+                    additional_charge: Number(additional_charge),
+                    discount: Number(discount),
+                    total: Number(total),
+                    total_amount: Number(total_amount),
+                    total_tax: Number(total_tax),
+                    roundoff: Number(roundoff),
+                    grand_total: Number(grandTotal),
+                    items: data.items.map(item => ({
+                        ...item,
+                        entry_id: item.entry_id || '',
+                        vouchar_id: data._id,
+                        hsn_code: itemsList.find((p) => p.id === item.item_id)?.hsn_code || '',
+                        unit: itemsList.find((p) => p.id === item.item_id)?.unit || '',
+                        quantity: item.quantity || 1,
+                        rate: item.rate || 0,
+                        amount: item.amount || 0,
+                        discount_amount: item.discount_amount,
+                        tax_rate: item.tax_rate || 0,
+                        tax_amount: Number(item.tax_amount?.toFixed(2)) || 0,
+                        total_amount: Number(item.total_amount?.toFixed(2)) || 0,
+                        godown: '',
+                        godown_id: '',
+                    })),
+                    accounting:
+                        data.accounting.map(acc => {
+                            let amount = 0;
+                            if (type?.toLowerCase() === 'purchase') {
+                                amount = acc.ledger === data.party_name ? Number(grandTotal) : -Number(grandTotal);
+                            } else if (type?.toLowerCase() === 'sales') {
+                                amount = acc.ledger === data.party_name ? -Number(grandTotal) : Number(grandTotal);
+                            }
+                            return {
+                                entry_id: acc.entry_id || '',
+                                vouchar_id: data._id,
+                                ledger: acc.ledger,
+                                ledger_id: acc.ledger_id,
+                                amount,
+                            };
+                        }),
+                };
 
-                })),
-                accounting:
-                    data.accounting.map(acc => {
+                await dispatch(updateTaxInvoice(dataToSend));
+                toast.success("🎉 Invoice updated successfully!");
+                navigate('/invoices', { replace: true });
+            } else {
+                const dataToSend = {
+                    ...data,
+                    date: data.date,
+                    vouchar_id: data._id || '',
+                    user_id: user?._id || '',
+                    company_id: currentCompany?._id || '',
+                    voucher_type_id: invoiceType_id || '',
+                    party_name_id: data.party_name_id,
+                    mode_of_transport: data.mode_of_transport,
+                    vehicle_number: data.vehicle_number,
+                    place_of_supply: data.place_of_supply,
+                    status: data.status,
+                    paid_amount: data.paid_amount,
+                    due_date: data.due_date,
+                    additional_charge: Number(additional_charge),
+                    discount: Number(discount),
+                    total: Number(total),
+                    total_amount: Number(total_amount),
+                    total_tax: Number(total_tax),
+                    roundoff: Number(roundoff),
+                    grand_total: Number(grandTotal),
+                    items: data.items.map(item => ({
+                        ...item,
+                        entry_id: item.entry_id || '',
+                        vouchar_id: data._id,
+                        item_id: item.item_id || '',
+                        quantity: item.quantity || 1,
+                        rate: item.rate || 0,
+                        amount: item.amount || 0,
+                        discount_amount: item.discount_amount || 0,
+                        total_amount: Number(item.total_amount?.toFixed(2)) || 0,
+                        godown: '',
+                        godown_id: '',
+                    })),
+                    accounting: data.accounting.map(acc => {
                         let amount = 0;
                         if (type?.toLowerCase() === 'purchase') {
                             amount = acc.ledger === data.party_name ? Number(grandTotal) : -Number(grandTotal);
@@ -251,84 +472,23 @@ export default function UpdateSalePurchase() {
                             amount,
                         };
                     }),
-            }
+                };
 
-
-
-            dispatch(updateGSTInvoice(dataToSend)).then(() => {
-                toast.success("Invoice updated successfully!");
-                setIsLoading(false);
+                await dispatch(updateInvoice(dataToSend));
+                toast.success("🎉 Invoice updated successfully!");
                 navigate('/invoices', { replace: true });
-            }).catch((error) => {
-                setIsLoading(false);
-                toast.error(error || "An unexpected error occurred. Please try again later.");
-            });
-        }
-        else {
-            const dataToSend = {
-                vouchar_id: data._id || '',
-                user_id: user._id,
-                company_id: currentCompany?._id || '',
-                date: date.toISOString().split('T')[0],
-                voucher_type: data.voucher_type,
-                voucher_type_id: invoiceType_id || '',
-                voucher_number: data.voucher_number,
-                party_name: data.party_name,
-                party_name_id: data.party_name_id,
-                narration: data.narration || '',
-                reference_number: data.reference_number || '',
-                reference_date: data.reference_date || '',
-                place_of_supply: data.place_of_supply || '',
-                mode_of_transport: data.mode_of_transport || '',
-                vehicle_number: data.vehicle_number || '',
-                status: data.status || '',
-                due_date: data.due_date || '',
-                accounting:
-                    data.accounting.map(acc => {
-                        let amount = 0;
-                        if (type?.toLowerCase() === 'purchase') {
-                            amount = acc.ledger === data.party_name ? Number(grandTotal) : -Number(grandTotal);
-                        } else if (type?.toLowerCase() === 'sales') {
-                            amount = acc.ledger === data.party_name ? -Number(grandTotal) : Number(grandTotal);
-                        }
-                        return {
-                            entry_id: acc.entry_id || '',
-                            vouchar_id: data._id,
-                            ledger: acc.ledger,
-                            ledger_id: acc.ledger_id,
-                            amount,
-                        };
-                    }),
-                items: data.items.map(item => ({
-                    entry_id: item.entry_id || '',
-                    vouchar_id: data._id,
-                    item: item.item,
-                    item_id: item.item_id,
-                    quantity: item.quantity,
-                    rate: item.rate,
-                    amount: item.amount,
-                    additional_amount: 0,
-                    discount_amount: 0,
-                    godown: '',
-                    godown_id: '',
-                    order_number: '',
-                    order_due_date: '',
-                })),
             }
-
-
-            dispatch(updateInvoice(dataToSend)).then(() => {
-                setIsLoading(false);
-                toast.success("Invoice updated successfully!");
-                navigate('/invoices', { replace: true });
-            }).catch((error) => {
-                setIsLoading(false);
-                toast.error(error || "An unexpected error occurred. Please try again later.");
-            });
+        } catch (error) {
+            toast.error("❌ Failed to create invoice. Please try again.");
+            console.error(error);
+        } finally {
+            setIsLoading(false);
         }
-
     };
 
+
+
+    // Load initial data with enhanced loading states
     useEffect(() => {
         if (currentCompanyId) {
             setData(prev => ({
@@ -338,46 +498,48 @@ export default function UpdateSalePurchase() {
             }));
         }
 
-        dispatch(viewAllCustomerWithType({
-            company_id: currentCompanyId || '',
-            customerType: type === 'sales' ? 'Debtors' : 'Creditors',
-        })).then((response) => {
-            if (response.meta.requestStatus === 'fulfilled') {
-                const ledgersWithType = response.payload;
-                setParties(ledgersWithType.map((part: any) => ({ name: part.ledger_name, id: part._id })));
-            }
-        }
-        ).catch((error) => {
-            setIsLoading(false);
-            toast.error(error || "An unexpected error occurred. Please try again later.");
-        });
+        const loadData = async () => {
+            try {
+                // Load customers/suppliers
+                const customerResponse = await dispatch(viewAllCustomerWithType({
+                    company_id: currentCompanyId || '',
+                    customerType: invoiceType === 'Sales' ? 'Debtors' : 'Creditors',
+                }));
 
-        dispatch(viewProductsWithId(currentCompanyId || '')).then((response) => {
-            if (response.meta.requestStatus === 'fulfilled') {
-                const products = response.payload;
-                setItemsList(
-                    products.map((product: any) => ({
-                        name: product.stock_item_name,
-                        id: product._id,
-                        unit: product.unit,
-                        gst: product.rate,
-                        hsn_code: product.hsn_code || ''
-                    }))
-                );
+                if (customerResponse.meta.requestStatus === 'fulfilled') {
+                    const ledgersWithType = customerResponse.payload;
+                    setParties(ledgersWithType.map((part: any) => ({ name: part.ledger_name, id: part._id })));
+                }
+
+                // Load products
+                const productsResponse = await dispatch(viewProductsWithId(currentCompanyId || ''));
+                if (productsResponse.meta.requestStatus === 'fulfilled') {
+                    const products = productsResponse.payload;
+                    setItemsList(
+                        products.map((product: any) => ({
+                            name: product.stock_item_name,
+                            id: product._id,
+                            unit: product.unit,
+                            tax_rate: product.tax_rate || 0,
+                            hsn_code: product.hsn_code || ''
+                        }))
+                    );
+                }
+            } catch (error) {
+                console.error("Failed to load initial data:", error);
+                toast.error("Failed to load data. Please refresh the page.");
             }
-            return response;
-        }).catch((error) => {
-            toast.error(error || "An unexpected error occurred. Please try again later.");
-            setIsLoading(false);
-        });
-    }, [dispatch, type, currentCompanyId, user]);
+        };
+
+        loadData();
+    }, [dispatch, currentCompanyId, user, invoiceType, type]);
 
     useEffect(() => {
         dispatch(viewInvoice({
             vouchar_id: voucher_id || '',
-            company_id: currentCompany?._id || '',
+            company_id: currentCompanyId || '',
         }));
-    }, [dispatch, currentCompany?._id, voucher_id, gst_enable]);
+    }, [dispatch, currentCompanyId, voucher_id, tax_enable]);
 
     useEffect(() => {
         if (invoiceData) {
@@ -386,7 +548,7 @@ export default function UpdateSalePurchase() {
                 company_id: invoiceData.company_id,
                 date: invoiceData.date,
                 voucher_type: invoiceData.voucher_type,
-                voucher_type_id: invoiceData.voucher_type_id,
+                voucher_type_id: invoiceData.voucher_type_id || '',
                 voucher_number: invoiceData.voucher_number,
                 party_name: invoiceData.party_name,
                 party_name_id: invoiceData.party_name_id,
@@ -398,6 +560,14 @@ export default function UpdateSalePurchase() {
                 vehicle_number: invoiceData.vehicle_number || '',
                 status: invoiceData.status || '',
                 due_date: invoiceData.due_date || '',
+                paid_amount: invoiceData.paid_amount || 0,
+                total: invoiceData.total || 0,
+                discount: invoiceData.discount || 0,
+                total_amount: invoiceData.total_amount || 0,
+                total_tax: invoiceData.total_tax || 0,
+                additional_charge: invoiceData.additional_charge || 0,
+                roundoff: invoiceData.roundoff || 0,
+                grand_total: invoiceData.grand_total || 0,
                 accounting: invoiceData.accounting_entries.map((acc) => ({
                     entry_id: acc._id || '',
                     vouchar_id: acc.vouchar_id || '',
@@ -410,11 +580,15 @@ export default function UpdateSalePurchase() {
                     vouchar_id: item.vouchar_id || '',
                     item: item.item || '',
                     item_id: item.item_id || '',
+                    unit: item.unit || '',
+                    hsn_code: item.hsn_code || '',
                     quantity: item.quantity || 1,
                     rate: item.rate || 0.0,
-                    gst: parseInt(item?.gst ?? '') || 0,
-                    gst_amount: parseFloat(item?.gst_amount ?? '') || 0.0,
                     amount: item.amount || 0.0,
+                    discount_amount: item.discount_amount || 0.0,
+                    tax_rate: item.tax_rate || 0.0,
+                    tax_amount: item.tax_amount || 0.0,
+                    total_amount: item.total_amount || 0.0,
                 })),
             });
             setDate(new Date(invoiceData.date));
@@ -422,144 +596,287 @@ export default function UpdateSalePurchase() {
     }, [invoiceData]);
 
     return (
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <Container maxWidth="xl" sx={{ py: 4 }}>
-                {/* Header Section */}
-                <Box sx={{ mb: 2, display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                        <Avatar
-                            sx={{
-                                bgcolor: 'primary.main',
-                                width: 36,
-                                height: 36,
-                                mr: 1
-                            }}
-                        >
-                            <Receipt sx={{ fontSize: 24 }} />
-                        </Avatar>
-                        <Box>
-                            <Typography variant="h6" fontWeight="700" color="primary.main">
-                                Create Invoice
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                Create professional invoices with ease
-                            </Typography>
-                        </Box>
-                    </Box>
-                    <Grid
+        <LocalizationProvider dateAdapter={AdapterDateFns} >
+            {/* Loading Backdrop */}
+            <Backdrop
+                sx={{
+                    color: '#fff',
+                    zIndex: (theme) => theme.zIndex.drawer + 1,
+                    backdropFilter: 'blur(8px)',
+                }}
+                open={isLoading}
+            >
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                    <CircularProgress color="inherit" size={60} thickness={4} />
+                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                        Updating your invoice...
+                    </Typography>
+                    <LinearProgress
                         sx={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            gap: 2,
+                            width: 300,
+                            height: 8,
+                            borderRadius: 4,
+                            '& .MuiLinearProgress-bar': {
+                                borderRadius: 4,
+                            }
                         }}
-                    >
-                        <ActionButtonCancel
-                            onClick={() => {
-                                navigate(-1);
-                            }}
-                            disabled={isLoading}
-                            startIcon={<Cancel />}
-                        />
-                        <ActionButtonSuccess
-                            onClick={handleSubmit}
-                            disabled={isLoading}
-                            startIcon={isLoading ? <Timeline className="animate-spin" /> : <AddCircleOutline />}
-                            text={isLoading ? `Updating...` : `Update Invoice ${(type ? type.charAt(0).toUpperCase() + type.slice(1) : '')}`}
-                        />
-                    </Grid>
+                    />
                 </Box>
+            </Backdrop>
 
-                {/* Main Form */}
-                <StyledCard>
-                    <CardContent sx={{ p: 2 }}>
-                        <Box display="flex" alignItems="center" mb={3}>
-                            <Receipt color="primary" sx={{ mr: 1 }} />
-                            <Typography variant="h6">Invoice Details {(type ? type.charAt(0).toUpperCase() + type.slice(1) : '')}</Typography>
-                        </Box>
-                        <Box component="form" onSubmit={handleSubmit}>
-                            <Box>
-                                <Grid container spacing={3}>
-                                    <Grid item xs={12} md={6}>
-                                        <StyledCard>
-                                            <CardContent>
+            <Container maxWidth={false} sx={{ py: 4, minHeight: '100vh' }}>
+                {/* Enhanced Header Section */}
+                <Slide direction="down" in={true} timeout={800}>
+                    <Box sx={{ mb: 4, }}>
+                        <GradientCard gradient="glass" sx={{ mb: 3 }}>
+                            <CardContent sx={{ p: 0 }}>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                        <Avatar
+                                            sx={{
+                                                bgcolor: 'primary.main',
+                                                width: 56,
+                                                height: 56,
+                                                mr: 3,
+                                                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                                                boxShadow: theme.shadows[8],
+                                            }}
+                                        >
+                                            <Receipt sx={{ fontSize: 28 }} />
+                                        </Avatar>
+                                        <Box>
+                                            <Typography variant="h4" fontWeight="800" color="primary.main" sx={{ mb: 1 }}>
+                                                Update {invoiceType} Invoice
+                                            </Typography>
+                                            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                                                <Chip icon={<Business />} label={currentCompany?.name || 'Company'} size="small" />
+                                                <Chip icon={<Today />} label={formatLocalDate(date).split('T')[0].split('-').reverse().join('-')} size="small" />
+                                                {tax_enable && <Chip icon={<Assignment />} label="TAX Enabled" color="success" size="small" />}
+                                            </Box>
+                                        </Box>
+                                    </Box>
 
+                                    <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                                        <Button
+                                            variant="outlined"
+                                            startIcon={<Preview />}
+                                            onClick={() => setShowSummary(!showSummary)}
+                                            sx={{
+                                                borderRadius: 2,
+                                                textTransform: 'none',
+                                                fontWeight: 600,
+                                                px: 3
+                                            }}
+                                        >
+                                            {showSummary ? 'Hide' : 'Show'} Summary
+                                        </Button>
+                                        <ActionButtonCancel
+                                            onClick={() => navigate(-1)}
+                                            startIcon={<Cancel />}
+                                            disabled={isLoading}
+                                        />
+                                        <ActionButtonSuccess
+                                            onClick={handleSubmit}
+                                            disabled={isLoading || data.items.length === 0}
+                                            startIcon={isLoading ? <Timeline className="animate-spin" /> : <Save />}
+                                            text={isLoading ? `Updating...` : `Update Invoice`}
+                                        />
+                                    </Box>
+                                </Box>
+                            </CardContent>
+                        </GradientCard>
+                    </Box>
+                </Slide>
 
-                                                <Stack direction={'row'} spacing={2}>
-                                                    <TextField
+                {/* Quick Summary Sidebar */}
+                <Slide direction="left" in={showSummary} timeout={400}>
+                    <Box sx={{
+                        position: 'fixed',
+                        right: showSummary ? 24 : -400,
+                        top: 120,
+                        width: 350,
+                        zIndex: 1200,
+                        transition: 'right 0.3s ease',
+                        maxHeight: 'calc(100vh - 140px)',
+                        overflowY: 'auto',
+                        boxShadow: theme.shadows[4],
+                        borderRadius: 2,
+                        border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
+
+                    }}>
+                        <GradientCard gradient="warning" sx={{ backdropFilter: 'blur(20px)' }}>
+                            <CardContent>
+                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                    <Calculate color="primary" sx={{ mr: 1 }} />
+                                    <Typography variant="h6" fontWeight="700">
+                                        Invoice Summary
+                                    </Typography>
+                                    <IconButton size="small" onClick={() => setShowSummary(false)} sx={{ ml: 'auto' }}>
+                                        <Cancel fontSize="small" />
+                                    </IconButton>
+                                </Box>
+                                <Divider sx={{ mb: 2 }} />
+
+                                <Stack spacing={2}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <Typography variant="body2" color="text.secondary">Items:</Typography>
+                                        <Typography variant="body2" fontWeight="600">{data.items.length}</Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <Typography variant="body2" color="text.secondary">Subtotal:</Typography>
+                                        <Typography variant="body2" fontWeight="600">₹ {total}</Typography>
+                                    </Box>
+                                    {tax_enable && (
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                            <Typography variant="body2" color="text.secondary">Tax Total:</Typography>
+                                            <Typography variant="body2" fontWeight="600">₹ {total_tax}</Typography>
+                                        </Box>
+                                    )}
+                                    <Divider />
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <Typography variant="h6" fontWeight="700">Grand Total:</Typography>
+                                        <Typography variant="h6" fontWeight="700" color="primary.main">₹ {grandTotal}</Typography>
+                                    </Box>
+
+                                    {data.party_name && (
+                                        <Box sx={{ mt: 2, p: 2, bgcolor: alpha(theme.palette.success.main, 0.1), borderRadius: 2 }}>
+                                            <Typography variant="body2" color="text.secondary">Customer:</Typography>
+                                            <Typography variant="body1" fontWeight="600">{data.party_name}</Typography>
+                                        </Box>
+                                    )}
+
+                                    {data.status && (
+                                        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                                            <StatusChip status={data.status} />
+                                        </Box>
+                                    )}
+                                </Stack>
+                            </CardContent>
+                        </GradientCard>
+                    </Box>
+                </Slide>
+
+                {/* Main Form Content */}
+                <Box>
+                    {/* Invoice Details Section */}
+                    <GradientCard gradient="primary" sx={{ mb: 4, border: `1px solid ${alpha(theme.palette.primary.main, 0.2)}` }}>
+                        <CardContent sx={{ p: 0 }}>
+                            {/* Section Header */}
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <Avatar sx={{ bgcolor: 'primary.main', mr: 2, width: 40, height: 40 }}>
+                                        <Receipt />
+                                    </Avatar>
+                                    <Box>
+                                        <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
+                                            Invoice Details
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            Basic Invoice details
+                                        </Typography>
+                                    </Box>
+                                </Box>
+
+                                {/* <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" spacing={2}>
+                                    <Button
+                                        variant="contained"
+                                        startIcon={<AddCircleOutline />}
+                                        onClick={() => { }}
+                                        sx={{
+                                            borderRadius: 2,
+                                            textTransform: 'none',
+                                            fontWeight: 600,
+                                            px: 3,
+                                            py: 1,
+                                            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                                            boxShadow: theme.shadows[4],
+                                            '&:hover': {
+                                                transform: 'translateY(-1px)',
+                                                boxShadow: theme.shadows[8],
+                                            }
+                                        }}
+                                    >
+                                        Create New Customer
+                                    </Button>
+                                </Stack> */}
+                            </Box>
+
+                            <Grid container spacing={4}>
+                                {/* Left Column - Invoice Details */}
+                                <Grid item xs={12} lg={6}>
+                                    <GradientCard gradient="glass">
+                                        <CardContent sx={{ p: 0 }}>
+                                            <Stack spacing={0}>
+
+                                                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                                                    <AnimatedTextField
                                                         label="Invoice Number"
                                                         fullWidth
                                                         value={data.voucher_number}
-                                                        onChange={(e) => handleChange('voucher_number', e.target.value)}
+                                                        onChange={invoiceType === "Sales" ? undefined : (e: React.ChangeEvent<HTMLInputElement>) => handleChange('voucher_number', e.target.value)}
                                                         name="voucher_number"
+                                                        disabled
                                                         variant="outlined"
                                                         InputProps={{
                                                             startAdornment: (
                                                                 <InputAdornment position="start">
-                                                                    <LocalOffer color="action" />
+                                                                    <Receipt color="primary" />
                                                                 </InputAdornment>
                                                             ),
                                                         }}
+                                                        sx={{ flex: 1 }}
                                                     />
-
-                                                    <DatePicker
-                                                        label="Date"
-                                                        value={date}
-                                                        format="dd/MM/yyyy"
-                                                        maxDate={new Date()}
-                                                        views={["year", "month", "day"]}
-                                                        onChange={(value) => {
-                                                            setDate(value || new Date());
-                                                            if (errors.date) {
-                                                                setErrors(prev => {
-                                                                    const newErrors = { ...prev };
-                                                                    delete newErrors.date;
-                                                                    return newErrors;
-                                                                });
-                                                            }
-                                                        }}
-                                                        slotProps={{
-                                                            textField: {
-                                                                fullWidth: true,
-                                                                sx: {
-                                                                    '& .MuiOutlinedInput-root': {
-                                                                        // borderRadius: '8px'
-                                                                    },
-                                                                    '& .MuiInputAdornment-root .MuiButtonBase-root': {
-                                                                        border: 'none',
-                                                                        boxShadow: 'none'
-                                                                    }
-                                                                },
-                                                                onFocus: () => {
+                                                    <Box sx={{ flex: 1 }}>
+                                                        <DatePicker
+                                                            label="Invoice Date"
+                                                            value={date}
+                                                            format="dd/MM/yyyy"
+                                                            maxDate={new Date()}
+                                                            minDate={new Date(new Date().getFullYear(), 3, 1)}
+                                                            views={["year", "month", "day"]}
+                                                            onChange={(value) => {
+                                                                setDate(value || new Date());
+                                                                if (errors.date) {
                                                                     setErrors(prev => {
                                                                         const newErrors = { ...prev };
                                                                         delete newErrors.date;
                                                                         return newErrors;
                                                                     });
+                                                                }
+                                                            }}
+                                                            slotProps={{
+                                                                textField: {
+                                                                    fullWidth: true,
+                                                                    sx: {
+                                                                        '& .MuiOutlinedInput-root': {
+                                                                            // borderRadius: '8px'
+                                                                        },
+                                                                        '& .MuiInputAdornment-root .MuiButtonBase-root': {
+                                                                            border: 'none',
+                                                                            boxShadow: 'none'
+                                                                        }
+                                                                    },
+                                                                    InputProps: {
+                                                                        startAdornment: (
+                                                                            <InputAdornment position="start">
+                                                                                <DateRange color="primary" />
+                                                                            </InputAdornment>
+                                                                        ),
+                                                                    },
+                                                                    onFocus: () => {
+                                                                        setErrors(prev => {
+                                                                            const newErrors = { ...prev };
+                                                                            delete newErrors.date;
+                                                                            return newErrors;
+                                                                        });
+                                                                    },
                                                                 },
-                                                            },
-                                                        }}
-                                                    />
+                                                            }}
+                                                        />
+                                                    </Box>
+
                                                 </Stack>
-
-                                                {gst_enable && <Stack direction={'row'} spacing={2} sx={{ mt: 2 }}>
-                                                    <TextField
-                                                        label="Place of Supply"
-                                                        fullWidth
-                                                        value={data.place_of_supply}
-                                                        onChange={(e) => handleChange('place_of_supply', capitalizeInput(e.target.value, 'words'))}
-                                                        name="place_of_supply"
-                                                        variant="outlined"
-                                                        InputProps={{
-                                                            startAdornment: (
-                                                                <InputAdornment position="start">
-                                                                    <LocationOn color="action" />
-                                                                </InputAdornment>
-                                                            ),
-                                                        }}
-                                                        sx={{ maxWidth: '50%' }}
-                                                    />
-
+                                                {tax_enable && <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 2 }}>
                                                     <Autocomplete
                                                         options={modeOfTransportOptions}
                                                         getOptionLabel={(option) => option.label}
@@ -596,70 +913,118 @@ export default function UpdateSalePurchase() {
                                                             },
                                                         }}
                                                     />
-                                                </Stack>}
-                                            </CardContent>
-                                        </StyledCard>
-                                    </Grid>
 
-                                    <Grid item xs={12} md={6}>
-                                        <StyledCard>
-                                            <CardContent>
-                                                <Stack spacing={2}>
+                                                    <AnimatedTextField
+                                                        label={data.mode_of_transport === 'By Road' ? "Vehicle Number" : data.mode_of_transport === 'By Rail' ? "Train Number" : data.mode_of_transport === 'By Air' ? "Flight Number" : data.mode_of_transport === 'By Sea' ? "Container Number" : 'Vehicle Number'}
+                                                        value={data.vehicle_number}
+                                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange('vehicle_number', capitalizeInput(e.target.value, 'characters'))}
+                                                        name="vehicle_number"
+                                                        variant="outlined"
+                                                        fullWidth
+                                                        InputProps={{
+                                                            startAdornment: (
+                                                                <InputAdornment position="start">
+                                                                    <Commute color="primary" />
+                                                                </InputAdornment>
+                                                            ),
+                                                        }}
+                                                    />
+                                                </Stack>}
+
+                                            </Stack>
+                                        </CardContent>
+                                    </GradientCard>
+                                </Grid>
+                                {/* Right Column - Additional Details */}
+                                <Grid item xs={12} lg={6}>
+                                    <GradientCard gradient="glass">
+                                        <CardContent>
+                                            <Stack >
+                                                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                                                     <Autocomplete
                                                         options={parties}
                                                         disabled
                                                         getOptionLabel={(option) => option.name}
                                                         value={parties.find(p => p.id === data.party_name_id) || null}
-                                                        onChange={(_, newValue) =>
-                                                            setData(prev => ({
-                                                                ...prev,
-                                                                party_name: newValue ? newValue.name : '',
-                                                                party_name_id: newValue ? newValue.id : ''
-                                                            }))
-                                                        }
+                                                        onChange={(_, newValue) => {
+                                                            handleChange('party_name', newValue?.name || '');
+                                                            handleChange('party_name_id', newValue?.id || '');
+                                                            setErrors(prev => ({ ...prev, partyName: '' })); // Clear error
+                                                        }}
                                                         renderInput={(params) => (
-                                                            <TextField
+                                                            <AnimatedTextField
                                                                 {...params}
-                                                                label={type === 'sales' ? "Select Customer" : "Select Supplier"}
-                                                                placeholder={type === 'sales' ? "Start typing for customer suggestions..." : "Start typing for supplier suggestions..."}
+                                                                label="Customer"
                                                                 variant="outlined"
                                                                 fullWidth
-
+                                                                error={!!errors.partyName}
+                                                                helperText={errors.partyName}
                                                                 InputProps={{
                                                                     ...params.InputProps,
                                                                     startAdornment: (
                                                                         <InputAdornment position="start">
-                                                                            <PeopleAlt color="primary" />
+                                                                            <PeopleAltOutlined color="primary" />
                                                                         </InputAdornment>
                                                                     ),
                                                                 }}
                                                             />
                                                         )}
-                                                        sx={{
-                                                            '& .MuiAutocomplete-endAdornment': {
-                                                                display: 'none'
-                                                            }
-                                                        }}
+                                                        sx={{ flex: 1 }}
                                                     />
+                                                    <Box sx={{ width: '50%' }}>
+                                                        <AnimatedTextField
+                                                            label="Paid Amount"
+                                                            type="number"
+                                                            fullWidth
+                                                            value={data.paid_amount}
+                                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange('paid_amount', e.target.value)}
+                                                            name="paid_amount"
+                                                            variant="outlined"
+                                                            InputProps={{
+                                                                startAdornment: (
+                                                                    <InputAdornment position="start">
+                                                                        <CurrencyRupee color='primary' />
+                                                                    </InputAdornment>
+                                                                ),
+                                                            }}
+                                                            sx={{ flex: 1 }}
+                                                        />
+                                                    </Box>
                                                 </Stack>
-
-                                                {gst_enable && <Stack direction={'row'} spacing={2} sx={{ mt: 2 }}>
-                                                    <TextField
-                                                        label={data.mode_of_transport === 'By Road' ? "Vehicle Number" : data.mode_of_transport === 'By Rail' ? "Train Number" : data.mode_of_transport === 'By Air' ? "Flight Number" : data.mode_of_transport === 'By Sea' ? "Container Number" : 'Vehicle Number'}
-                                                        fullWidth
-                                                        value={data.vehicle_number}
-                                                        onChange={(e) => handleChange('vehicle_number', capitalizeInput(e.target.value, 'characters'))}
-                                                        name="vehicle_number"
-                                                        variant="outlined"
-                                                        InputProps={{
-                                                            startAdornment: (
-                                                                <InputAdornment position="start">
-                                                                    <LocalShipping color="action" />
-                                                                </InputAdornment>
-                                                            ),
-                                                        }}
-                                                    />
-
+                                                {tax_enable && <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 2 }}>
+                                                    <Box sx={{ width: '50%' }}>
+                                                        <DatePicker
+                                                            label="Due Date"
+                                                            value={dueDate}
+                                                            format="dd/MM/yyyy"
+                                                            minDate={new Date()}
+                                                            views={["year", "month", "day"]}
+                                                            onChange={(value) => {
+                                                                setDueDate(value || new Date());
+                                                            }}
+                                                            slotProps={{
+                                                                textField: {
+                                                                    fullWidth: true,
+                                                                    InputProps: {
+                                                                        startAdornment: (
+                                                                            <InputAdornment position="start">
+                                                                                <DateRange color="primary" />
+                                                                            </InputAdornment>
+                                                                        ),
+                                                                    },
+                                                                    sx: {
+                                                                        '& .MuiOutlinedInput-root': {
+                                                                            flex: 1
+                                                                        },
+                                                                        '& .MuiInputAdornment-root .MuiButtonBase-root': {
+                                                                            border: 'none',
+                                                                            boxShadow: 'none'
+                                                                        }
+                                                                    },
+                                                                },
+                                                            }}
+                                                        />
+                                                    </Box>
                                                     <Autocomplete
                                                         options={paymentStatusOptions}
                                                         getOptionLabel={(option) => option.label}
@@ -673,20 +1038,20 @@ export default function UpdateSalePurchase() {
                                                         renderInput={(params) => (
                                                             <TextField
                                                                 {...params}
-                                                                label="Payment Status"
+                                                                label="Status"
                                                                 variant="outlined"
                                                                 fullWidth
                                                                 InputProps={{
                                                                     ...params.InputProps,
                                                                     startAdornment: (
                                                                         <InputAdornment position="start">
-                                                                            <AddCard color="action" />
+                                                                            <Commute color="primary" />
                                                                         </InputAdornment>
                                                                     ),
                                                                 }}
                                                             />
                                                         )}
-                                                        sx={{ width: '100%' }}
+                                                        sx={{ width: '50%', }}
                                                         componentsProps={{
                                                             paper: {
                                                                 sx: {
@@ -697,258 +1062,441 @@ export default function UpdateSalePurchase() {
                                                         }}
                                                     />
                                                 </Stack>}
-                                            </CardContent>
-                                        </StyledCard>
-                                    </Grid>
+                                            </Stack>
+                                        </CardContent>
+                                    </GradientCard>
                                 </Grid>
-                            </Box>
+                            </Grid>
+                        </CardContent>
+                    </GradientCard>
 
-                            <Box>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', my: 2 }}>
-                                    <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
-                                        <Inventory sx={{ mr: 2, color: 'primary.main' }} />
-                                        Invoice Items
-                                    </Typography>
+                    {/* Invoice Items Section */}
+                    <GradientCard gradient="secondary" sx={{ mb: 4 }}>
+                        <CardContent sx={{ p: 0 }}>
+                            {/* Section Header */}
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <Avatar sx={{ bgcolor: 'secondary.main', mr: 2, width: 40, height: 40 }}>
+                                        <Inventory />
+                                    </Avatar>
+                                    <Box>
+                                        <Typography variant="h5" fontWeight="700" color="secondary.main">
+                                            Invoice Items
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            {data.items.length === 0
+                                                ? 'No items added yet - click "Add Items" to get started'
+                                                : `${data.items.length} item${data.items.length > 1 ? 's' : ''} • Total: ₹${grandTotal}`
+                                            }
+                                        </Typography>
+                                    </Box>
+                                </Box>
+
+                                <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" spacing={2}>
                                     <Button
                                         variant="contained"
                                         startIcon={<AddCircleOutline />}
                                         onClick={handleAddItem}
-                                        sx={{ borderRadius: 1 }}
+                                        sx={{
+                                            borderRadius: 2,
+                                            textTransform: 'none',
+                                            fontWeight: 600,
+                                            px: 3,
+                                            py: 1,
+                                            background: `linear-gradient(135deg, ${theme.palette.secondary.main} 0%, ${theme.palette.secondary.dark} 100%)`,
+                                            boxShadow: theme.shadows[4],
+                                            '&:hover': {
+                                                transform: 'translateY(-1px)',
+                                                boxShadow: theme.shadows[8],
+                                            }
+                                        }}
                                     >
                                         Add Items
                                     </Button>
-                                </Box>
 
+                                    {data.items.length > 0 && (
+                                        <Chip
+                                            icon={<TrendingUp fontSize='large' />}
+                                            label={`₹${grandTotal} Total`}
+                                            color="success"
+                                            variant="filled"
+                                            sx={{
+                                                fontWeight: 700,
+                                                fontSize: '2rem',
+                                                height: 50,
+                                                px: 2,
+                                                py: 2.5,
+                                                border: `2px solid ${alpha(theme.palette.success.main, 0.7)}`,
+                                            }}
+                                        />
+                                    )}
+                                </Stack>
+                            </Box>
+
+                            {/* Enhanced Items Table */}
+                            <GradientCard gradient="glass">
                                 <TableContainer
-                                    component={Paper}
                                     sx={{
                                         borderRadius: 1,
                                         overflow: "hidden",
-                                        boxShadow: theme.shadows[4],
-                                        border: `1px solid ${alpha(theme.palette.divider, 0.1)}`
+                                        border: `1px solid ${alpha(theme.palette.divider, 0.3)}`,
+                                        '& .MuiTableCell-root': {
+                                            borderBottom: `1px solid ${alpha(theme.palette.divider, 0.05)}`,
+                                        }
                                     }}
                                 >
-                                    <Table>
+                                    <Table sx={{ minWidth: 800 }}>
                                         <TableHead>
-                                            <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1) }}>
-                                                <TableCell align="left" >
+                                            <TableRow
+                                                sx={{
+                                                    background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 0%, ${alpha(theme.palette.secondary.main, 0.1)} 100%)`,
+                                                    '& .MuiTableCell-root': {
+                                                        fontWeight: 700,
+                                                        fontSize: '0.95rem',
+                                                        color: theme.palette.primary.main,
+                                                        border: 'none',
+                                                        py: 2,
+                                                    }
+                                                }}
+                                            >
+                                                <TableCell align="left" sx={{ minWidth: 200 }}>
                                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                        <Inventory />
-                                                        <Typography variant="body1" fontWeight="bold">
-                                                            Item
-                                                        </Typography>
+                                                        <Inventory fontSize="small" />
+                                                        Item Details
                                                     </Box>
                                                 </TableCell>
-                                                <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '1rem' }}>
-                                                    <Typography variant="body1" fontWeight="bold">
-                                                        Quantity
-                                                    </Typography>
+                                                <TableCell align="center" sx={{ minWidth: 100 }}>
+                                                    Quantity
                                                 </TableCell>
-                                                <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '1rem' }}>
-                                                    <Typography variant="body1" fontWeight="bold">
-                                                        Rate (&#8377;)
-                                                    </Typography>
+                                                <TableCell align="center" sx={{ minWidth: 120 }}>
+                                                    Rate (₹)
                                                 </TableCell>
-                                                {currentCompanyDetails?.company_settings?.features?.enable_gst && (
+                                                <TableCell align="center" sx={{ minWidth: 120 }}>
+                                                    Price (₹)
+                                                </TableCell>
+                                                <TableCell align="center" sx={{ minWidth: 120 }}>
+                                                    Discount (₹)
+                                                </TableCell>
+                                                {tax_enable && (
                                                     <>
-                                                        <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '1rem' }}>
-                                                            <Typography variant="body1" fontWeight="bold">
-                                                                GST (%)
-                                                            </Typography>
+                                                        <TableCell align="center" sx={{ minWidth: 100 }}>
+                                                            Tax (%)
                                                         </TableCell>
-                                                        <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '1rem' }}>
-                                                            <Typography variant="body1" fontWeight="bold">
-                                                                GST (&#8377;)
-                                                            </Typography>
+                                                        <TableCell align="center" sx={{ minWidth: 120 }}>
+                                                            Tax Amount (₹)
                                                         </TableCell>
                                                     </>
                                                 )}
-                                                <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '1rem' }}>
-                                                    <Typography variant="body1" fontWeight="bold">
-                                                        Amount (&#8377;)
-                                                    </Typography>
+                                                <TableCell align="center" sx={{ minWidth: 140 }}>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                                                        <TrendingUp fontSize="small" />
+                                                        Total (₹)
+                                                    </Box>
                                                 </TableCell>
-                                                {currentCompanyDetails?.company_settings?.features?.enable_gst && (
-                                                    <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '1rem' }}>
-                                                        <Typography variant="body1" fontWeight="bold">
-                                                            Total (&#8377;)
-                                                        </Typography>
-                                                    </TableCell>
-                                                )}
-                                                <TableCell align="right" sx={{ fontWeight: 'bold', fontSize: '1rem' }}>
-                                                    <Typography variant="body1" fontWeight="bold">
-                                                        Actions
-                                                    </Typography>
+                                                <TableCell align="center" sx={{ minWidth: 120 }}>
+                                                    Actions
                                                 </TableCell>
                                             </TableRow>
                                         </TableHead>
+
                                         <TableBody>
                                             {data.items.map((item, index) => (
-                                                <TableRow sx={{
-                                                    "& .MuiTableCell-root": {
-                                                        padding: '8px 16px',
-                                                    },
-                                                }} key={index}>
+                                                <Fade key={index} in={true} timeout={300 + (index * 100)}>
+                                                    <TableRow
+                                                        sx={{
+                                                            '&:hover': {
+                                                                bgcolor: alpha(theme.palette.primary.main, 0.02),
+                                                                transform: 'scale(1.001)',
+                                                            },
+                                                            transition: 'all 0.2s ease',
+                                                            '& .MuiTableCell-root': {
+                                                                py: 2,
+                                                            },
+                                                        }}
+                                                    >
+                                                        <TableCell align="left">
+                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                                <Avatar
+                                                                    sx={{
+                                                                        width: 36,
+                                                                        height: 36,
+                                                                        bgcolor: 'primary.main',
+                                                                        fontSize: '0.8rem',
+                                                                        fontWeight: 600
+                                                                    }}
+                                                                >
+                                                                    {(itemsList.find((p) => p.id === item.item_id)?.name || item.item).charAt(0).toUpperCase()}
+                                                                </Avatar>
+                                                                <Box>
+                                                                    <Typography variant="body1" fontWeight="600" color="text.primary">
+                                                                        {itemsList.find((p) => p.id === item.item_id)?.name || item.item}
+                                                                    </Typography>
+                                                                    <Typography variant="caption" color="text.secondary">
+                                                                        Unit: {itemsList.find((p) => p.id === item.item_id)?.unit || 'pcs'}
+                                                                    </Typography>
+                                                                </Box>
+                                                            </Box>
+                                                        </TableCell>
+
+                                                        <TableCell align="center">
+                                                            <Chip
+                                                                label={item.quantity}
+                                                                size="small"
+                                                                sx={{
+                                                                    bgcolor: alpha(theme.palette.info.main, 0.1),
+                                                                    color: 'info.main',
+                                                                    fontWeight: 600,
+                                                                    minWidth: 60
+                                                                }}
+                                                            />
+                                                        </TableCell>
+
+                                                        <TableCell align="center">
+                                                            <Typography variant="body1" fontWeight="600" color="text.primary">
+                                                                ₹{Number(item.rate).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                            </Typography>
+                                                        </TableCell>
+
+                                                        <TableCell align="center">
+                                                            <Typography variant="body1" fontWeight="600" color="text.primary">
+                                                                ₹{Number(item.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                            </Typography>
+                                                        </TableCell>
+
+                                                        <TableCell align="center">
+                                                            <Typography variant="body1" fontWeight="600" color="text.primary">
+                                                                ₹{Number(item.discount_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                            </Typography>
+                                                        </TableCell>
+
+                                                        {tax_enable && (
+                                                            <>
+                                                                <TableCell align="center">
+                                                                    <Chip
+                                                                        label={`${itemsList.find((p) => p.id === item.item_id)?.tax_rate || 0}%`}
+                                                                        size="small"
+                                                                        color="warning"
+                                                                        sx={{ fontWeight: 600, minWidth: 60 }}
+                                                                    />
+                                                                </TableCell>
+
+                                                                <TableCell align="center">
+                                                                    <Typography variant="body1" fontWeight="600" color="warning.main">
+                                                                        ₹{Number(item.tax_amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                                    </Typography>
+                                                                </TableCell>
+                                                            </>
+                                                        )}
+
+                                                        <TableCell align="center">
+                                                            <Box
+                                                                sx={{
+                                                                    display: 'inline-flex',
+                                                                    alignItems: 'center',
+                                                                    px: 2,
+                                                                    py: 1,
+                                                                    bgcolor: alpha(theme.palette.success.main, 0.1),
+                                                                    borderRadius: 2,
+                                                                    border: `1px solid ${alpha(theme.palette.success.main, 0.3)}`,
+                                                                }}
+                                                            >
+                                                                <Typography variant="body1" fontWeight="700" color="success.main">
+                                                                    ₹{Number(item.total_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                                </Typography>
+                                                            </Box>
+                                                        </TableCell>
+                                                        <TableCell align="center">
+                                                            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
+                                                                <Tooltip title="Edit Item" arrow>
+                                                                    <IconButton
+                                                                        size="small"
+                                                                        onClick={() => {
+                                                                            setItem(item);
+                                                                            setAddItemModalOpen(true);
+                                                                        }}
+                                                                        sx={{
+                                                                            bgcolor: alpha(theme.palette.primary.main, 0.1),
+                                                                            color: 'primary.main',
+                                                                            '&:hover': {
+                                                                                bgcolor: alpha(theme.palette.primary.main, 0.2),
+                                                                                transform: 'scale(1.1)',
+                                                                            },
+                                                                            transition: 'all 0.2s ease'
+                                                                        }}
+                                                                    >
+                                                                        <Edit fontSize="small" />
+                                                                    </IconButton>
+                                                                </Tooltip>
+
+                                                                <Tooltip title="Remove Item" arrow>
+                                                                    <IconButton
+                                                                        size="small"
+                                                                        onClick={() => handleRemoveItem(index)}
+                                                                        sx={{
+                                                                            bgcolor: alpha(theme.palette.error.main, 0.1),
+                                                                            color: 'error.main',
+                                                                            '&:hover': {
+                                                                                bgcolor: alpha(theme.palette.error.main, 0.2),
+                                                                                transform: 'scale(1.1)',
+                                                                            },
+                                                                            transition: 'all 0.2s ease'
+                                                                        }}
+                                                                    >
+                                                                        <Delete fontSize="small" />
+                                                                    </IconButton>
+                                                                </Tooltip>
+                                                            </Box>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                </Fade>
+                                            ))}
+
+                                            {/* Totals Row */}
+                                            {data.items.length > 0 && (
+                                                <TableRow
+                                                    sx={{
+                                                        borderTop: `3px solid ${theme.palette.primary.main}`,
+                                                        background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.secondary.main, 0.05)} 100%)`,
+                                                        '& .MuiTableCell-root': {
+                                                            border: 'none',
+                                                        },
+                                                    }}
+                                                >
                                                     <TableCell align="left">
-                                                        <Typography variant="body2" color="text.primary" gutterBottom>
-                                                            {itemsList.find((p) => p.id === item.item_id)?.name || item.item}
-                                                        </Typography>
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                            <Calculate color="primary" />
+                                                            <Typography variant="h6" fontWeight="700" color="primary.main">
+                                                                Subtotals
+                                                            </Typography>
+                                                        </Box>
                                                     </TableCell>
+
                                                     <TableCell align="center">
-                                                        <Typography variant="body2" color="text.primary" gutterBottom>
-                                                            {item.quantity}
+                                                        <Typography variant="h6" fontWeight="700" color="success.main">
+                                                            {Number(data.items.reduce((total, item) => total + (Number(item.quantity) || 0), 0)).toLocaleString('en-IN', { minimumFractionDigits: 2 })} Units
                                                         </Typography>
                                                     </TableCell>
+
                                                     <TableCell align="center">
-                                                        <Typography variant="body2" color="text.primary" gutterBottom>
-                                                            {item.rate}
+                                                        <Typography color="text.secondary">—</Typography>
+                                                    </TableCell>
+
+                                                    <TableCell align="center">
+                                                        <Typography variant="h6" fontWeight="700" color="text.primary">
+                                                            ₹ {Number(data.items.reduce((total, item) => total + (item.amount || 0), 0)).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                                         </Typography>
                                                     </TableCell>
-                                                    {currentCompanyDetails?.company_settings?.features?.enable_gst && (
+
+                                                    <TableCell align="center">
+                                                        <Typography variant="h6" fontWeight="700" color="text.primary">
+                                                            ₹ {Number(data.items.reduce((total, item) => total + Number(item.discount_amount || 0), 0)).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                        </Typography>
+                                                    </TableCell>
+
+                                                    {tax_enable && (
                                                         <>
                                                             <TableCell align="center">
-                                                                <Typography variant="body2" color="text.primary" gutterBottom>
-                                                                    {itemsList.find((p) => p.id === item.item_id)?.gst || 0} %
-                                                                </Typography>
+                                                                <Typography color="text.secondary">—</Typography>
                                                             </TableCell>
                                                             <TableCell align="center">
-                                                                <Typography variant="body2" color="text.primary" gutterBottom>
-                                                                    &#8377; {item.gst_amount?.toFixed(2) || '0.00'}
+                                                                <Typography variant="h6" fontWeight="700" color="warning.main">
+                                                                    ₹ {Number(data.items.reduce((total, item) => total + Number(item.tax_amount || 0), 0)).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                                                 </Typography>
                                                             </TableCell>
                                                         </>
                                                     )}
 
                                                     <TableCell align="center">
-                                                        <Typography variant="body2" color="text.primary" gutterBottom>
-                                                            &#8377; {item.amount?.toFixed(2) || '0.00'}
-                                                        </Typography>
-                                                    </TableCell>
-                                                    {currentCompanyDetails?.company_settings?.features?.enable_gst && (
-                                                        <TableCell align="center">
-                                                            <Box
-                                                                sx={{
-                                                                    py: 1,
-                                                                    bgcolor: alpha(theme.palette.success.main, 0.1),
-                                                                    borderRadius: 1,
-                                                                    border: `1px solid ${alpha(theme.palette.success.main, 0.5)}`,
-                                                                    textAlign: 'center',
-                                                                    fontWeight: 'bold',
-                                                                    color: 'success.main',
-                                                                }}
-                                                            >
-                                                                <Typography variant="body2" color="text.primary" gutterBottom>
-                                                                    &#8377; {(Number(item.amount) + Number(item.gst_amount ?? 0)).toFixed(2)}
-                                                                </Typography>
-                                                            </Box>
-                                                        </TableCell>
-                                                    )}
-                                                    <TableCell align="right">
-                                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1 }}>
-                                                            <Tooltip title="Edit Item">
-                                                                <ActionButtonSuccess
-                                                                    onClick={() => {
-                                                                        setItem(item);
-                                                                        setAddItemModalOpen(true);
-                                                                    }}
-                                                                    text={<Edit />}
-                                                                />
-                                                            </Tooltip>
-
-                                                            <Tooltip title="Remove Item">
-                                                                <ActionButtonCancel
-                                                                    onClick={() => handleRemoveItem(index)}
-                                                                    text={<Delete />}
-                                                                />
-                                                            </Tooltip>
+                                                        <Box
+                                                            sx={{
+                                                                display: 'inline-flex',
+                                                                alignItems: 'center',
+                                                                px: 2,
+                                                                py: .5,
+                                                                bgcolor: alpha(theme.palette.success.main, 0.15),
+                                                                borderRadius: 2,
+                                                                border: `2px solid ${alpha(theme.palette.success.main, 0.5)}`,
+                                                            }}
+                                                        >
+                                                            <Typography variant="h6" fontWeight="700" color="success.main">
+                                                                ₹ {Number(data.items.reduce((total, item) => total + Number(item.total_amount || 0), 0)).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                            </Typography>
                                                         </Box>
                                                     </TableCell>
+
+                                                    <TableCell align="center">
+                                                        <Button
+                                                            variant="contained"
+                                                            startIcon={<AddCircleOutline />}
+                                                            onClick={handleAddItem}
+                                                            size="small"
+                                                            sx={{
+                                                                borderRadius: 1,
+                                                                textTransform: 'none',
+                                                                fontWeight: 600,
+                                                            }}
+                                                        >
+                                                            Add More
+                                                        </Button>
+                                                    </TableCell>
                                                 </TableRow>
-                                            ))}
-
-                                            {data.items.length > 0 && (
-                                                <>
-                                                    <TableRow sx={{
-                                                        fontWeight: 'bold',
-                                                        borderTop: `2px solid ${theme.palette.primary.main}`,
-                                                        '& .MuiTableCell-root': {
-                                                            padding: '8px 8px',
-                                                        },
-                                                    }}>
-                                                        <TableCell align="left">
-                                                            <Typography variant="h6" color="text.secondary" gutterBottom marginLeft={1}>
-                                                                Sub-Totals
-                                                            </Typography>
-                                                        </TableCell>
-                                                        <TableCell align="center">
-                                                            {data.items.reduce((total, item) => total + (Number(item.quantity) || 0), 0)} units
-                                                        </TableCell>
-                                                        <TableCell align="center">
-
-                                                        </TableCell>
-                                                        {currentCompanyDetails?.company_settings?.features?.enable_gst && (
-                                                            <>
-                                                                <TableCell align="center"></TableCell>
-                                                                <TableCell align="center">
-                                                                    &#8377; {Number(data.items.reduce((total, item) => total + (item.gst_amount || 0), 0)).toFixed(2)}
-                                                                </TableCell>
-                                                            </>
-                                                        )}
-                                                        <TableCell align="center">
-                                                            &#8377; {Number(data.items.reduce((total, item) => total + (item.amount || 0), 0)).toFixed(2)}
-                                                        </TableCell>
-                                                        {currentCompanyDetails?.company_settings?.features?.enable_gst && (
-                                                            <TableCell align="center">
-                                                                <Box
-                                                                    sx={{
-                                                                        py: 1,
-                                                                        bgcolor: alpha(theme.palette.success.main, 0.1),
-                                                                        borderRadius: 1,
-                                                                        border: `1px solid ${alpha(theme.palette.success.main, 0.5)}`,
-                                                                        textAlign: 'center',
-                                                                        fontWeight: 'bold',
-                                                                        color: 'success.main',
-                                                                    }}
-                                                                >
-                                                                    &#8377; {(data.items.reduce((total, item) => total + (item.amount || 0), 0) + data.items.reduce((total, item) => total + (item.gst_amount || 0), 0)).toFixed(2)}
-                                                                </Box>
-                                                            </TableCell>
-                                                        )}
-                                                        <TableCell align="right">
-                                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1 }}>
-                                                                <Tooltip title="Add Item">
-                                                                    <Button
-                                                                        variant="contained"
-                                                                        startIcon={<AddCircleOutline />}
-                                                                        onClick={handleAddItem}
-                                                                        sx={{ borderRadius: 1 }}
-                                                                    >
-                                                                        Add more Items
-                                                                    </Button>
-                                                                </Tooltip>
-                                                            </Box>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                </>
                                             )}
+
+                                            {/* Empty State */}
                                             {data.items.length === 0 && (
                                                 <TableRow>
-                                                    <TableCell colSpan={currentCompanyDetails?.company_settings?.features?.enable_gst ? 8 : 5} align="center">
-                                                        <Box py={1} textAlign="center">
-                                                            <Inventory sx={{ fontSize: 56, color: 'text.disabled', mb: 1 }} />
-                                                            <Typography variant="h6" color="text.secondary" gutterBottom>
-                                                                No items added yet
-                                                            </Typography>
-                                                            <Typography variant="body2" color="text.secondary" mb={2}>
-                                                                Click "Add Items" to start building your invoice
-                                                            </Typography>
+                                                    <TableCell
+                                                        colSpan={tax_enable ? 9 : 7}
+                                                        align="center"
+                                                        sx={{ py: 4, border: 'none' }}
+                                                    >
+                                                        <Box sx={{
+                                                            display: 'flex',
+                                                            flexDirection: 'column',
+                                                            alignItems: 'center',
+                                                            gap: 3,
+                                                        }}>
+                                                            <Avatar
+                                                                sx={{
+                                                                    width: 80,
+                                                                    height: 80,
+                                                                    bgcolor: alpha(theme.palette.primary.main, 0.1),
+                                                                    color: 'primary.main'
+                                                                }}
+                                                            >
+                                                                <Inventory sx={{ fontSize: 40 }} />
+                                                            </Avatar>
+
+                                                            <Box sx={{ textAlign: 'center' }}>
+                                                                <Typography variant="h6" color="text.secondary" gutterBottom fontWeight="600">
+                                                                    No items added yet
+                                                                </Typography>
+                                                                <Typography variant="body2" color="text.secondary" sx={{ mb: 1, maxWidth: 400 }}>
+                                                                    Start building your invoice by adding products or services.
+                                                                    You can add quantities, rates, and tax information.
+                                                                </Typography>
+                                                            </Box>
+
                                                             <Button
                                                                 variant="contained"
+                                                                size="large"
                                                                 startIcon={<Add />}
                                                                 onClick={handleAddItem}
-                                                                sx={{ borderRadius: 1 }}
+                                                                sx={{
+                                                                    borderRadius: 2,
+                                                                    textTransform: 'none',
+                                                                    fontWeight: 700,
+                                                                    px: 4,
+                                                                    py: 1.5,
+                                                                    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+                                                                    boxShadow: theme.shadows[8],
+                                                                    '&:hover': {
+                                                                        transform: 'translateY(-2px)',
+                                                                        boxShadow: theme.shadows[12],
+                                                                    }
+                                                                }}
                                                             >
-                                                                Add Items to the invoice
+                                                                Add Your First Item
                                                             </Button>
                                                         </Box>
                                                     </TableCell>
@@ -957,178 +1505,472 @@ export default function UpdateSalePurchase() {
                                         </TableBody>
                                     </Table>
                                 </TableContainer>
+                            </GradientCard>
 
-                                {/* <Box sx={{ my: 2, display: 'flex', justifyContent: 'space-between' }}>
-                                          <TextField
-                                              label="Additional Charges"
-                                              fullWidth
-                                              size='small'
-                                              // value={data.additional_charges}
-                                              // onChange={(e) => handleChange('additional_charges', e.target.value)}
-                                              name="additional_charges"
-                                              variant="outlined"
-                                              type="number"
-                                              InputProps={{
-                                                  startAdornment: (
-                                                      <InputAdornment position="start">
-                                                          <AttachMoney color="action" />
-                                                      </InputAdornment>
-                                                  ),
-                                              }}
-                                              sx={{ maxWidth: '200px' }}
-                                          />
-                                          <TextField
-                                              label="Discount"
-                                              fullWidth
-                                              size='small'
-                                              // value={data.discount}
-                                              // onChange={(e) => handleChange('discount', e.target.value)}
-                                              name="discount"
-                                              variant="outlined"
-                                              type="number"
-                                              InputProps={{
-                                                  startAdornment: (
-                                                      <InputAdornment position="start">
-                                                          <AttachMoney color="action" />
-                                                      </InputAdornment>
-                                                  ),
-                                              }}
-                                              sx={{ maxWidth: '200px' }}
-                                          />
-      
-                                          <TextField
-                                              label="Round Off"
-                                              fullWidth
-                                              size='small'
-                                              // value={data.round_off}
-                                              // onChange={(e) => handleChange('round_off', e.target.value)}
-                                              name="round_off"
-                                              variant="outlined"
-                                              type="number"
-                                              InputProps={{
-                                                  startAdornment: (
-                                                      <InputAdornment position="start">
-                                                          <AttachMoney color="action" />
-                                                      </InputAdornment>
-                                                  ),
-                                              }}
-                                              sx={{ maxWidth: '200px' }}
-                                          />
-      
-                                          <TextField
-                                              label="Amount Paid"
-                                              fullWidth
-                                              size='small'
-                                              // value={data.amount_paid}
-                                              // onChange={(e) => handleChange('amount_paid', e.target.value)}
-                                              name="amount_paid"
-                                              variant="outlined"
-                                              type="number"
-                                              InputProps={{
-                                                  startAdornment: (
-                                                      <InputAdornment position="start">
-                                                          <AttachMoney color="action" />
-                                                      </InputAdornment>
-                                                  ),
-                                              }}
-                                              sx={{ maxWidth: '200px' }}
-                                          />
-      
-                                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                              <Typography variant="h6" sx={{ mr: 1 }}>
-                                                  Total GST
-                                              </Typography>
-                                              <Box sx={{
-                                                  py: 1,
-                                                  px: 2,
-                                                  bgcolor: alpha(theme.palette.warning.main, 0.1),
-                                                  borderRadius: 1,
-                                                  border: `1px solid ${alpha(theme.palette.warning.main, 0.5)}`,
-                                                  textAlign: 'center',
-                                                  fontWeight: 'bold',
-                                                  color: 'warning.main',
-                                              }}>
-                                                  &#8377; {data.items.reduce((total, item) => total + (item.gst_amount || 0), 0).toFixed(2)}
-                                              </Box>
-                                          </Box>
-      
-                                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                              <Typography variant="h6" sx={{ mr: 1 }}>
-                                                  Total Invoice Amount
-                                              </Typography>
-                                              <Box sx={{
-                                                  py: 1,
-                                                  px: 2,
-                                                  bgcolor: alpha(theme.palette.primary.main, 0.1),
-                                                  borderRadius: 1,
-                                                  border: `1px solid ${alpha(theme.palette.primary.main, 0.5)}`,
-                                                  textAlign: 'center',
-                                                  fontWeight: 'bold',
-                                                  color: 'primary.main',
-                                              }}>
-                                                  &#8377; {(data.items.reduce((total, item) => total + (item.amount || 0), 0) + data.items.reduce((total, item) => total + (item.gst_amount || 0), 0)).toFixed(2)}
-                                              </Box>
-                                          </Box>
-      
-                                      </Box> */}
+                            {/* Error Message for Items */}
+                            {errors.items && (
+                                <Fade in={true}>
+                                    <Box sx={{
+                                        mt: 2,
+                                        p: 2,
+                                        bgcolor: alpha(theme.palette.error.main, 0.1),
+                                        borderRadius: 2,
+                                        border: `1px solid ${alpha(theme.palette.error.main, 0.3)}`,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 1
+                                    }}>
+                                        <Info color="error" />
+                                        <Typography variant="body2" color="error.main" fontWeight="600">
+                                            {errors.items}
+                                        </Typography>
+                                    </Box>
+                                </Fade>
+                            )}
+                        </CardContent>
+                    </GradientCard>
+
+                    {/* Enhanced Totals Section */}
+                    <GradientCard gradient="success" sx={{ mb: 4, overflow: 'visible' }}>
+                        <CardContent sx={{ p: 0 }}>
+                            {/* Header */}
+                            <Box
+                                sx={{
+                                    p: 0,
+                                    background: `linear-gradient(135deg, ${theme.palette.success.main}15 0%, ${theme.palette.success.main}25 100%)`,
+                                    borderRadius: '12px 12px 0 0',
+                                }}
+                            >
+                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', zIndex: 1 }}>
+                                        <Avatar
+                                            sx={{
+                                                bgcolor: 'success.main',
+                                                mr: 2,
+                                                width: 52,
+                                                height: 52,
+                                                boxShadow: `0 8px 24px ${alpha(theme.palette.success.main, 0.3)}`,
+                                                background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
+                                            }}
+                                        >
+                                            <Calculate sx={{ fontSize: 24 }} />
+                                        </Avatar>
+                                        <Box>
+                                            <Typography variant="h5" fontWeight="800" color="success.main" sx={{ mb: 0.5 }}>
+                                                Financial Summary
+                                            </Typography>
+                                            <Typography variant="body2" color="text.secondary">
+                                                Invoice calculations and adjustments
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+
+                                    <Stack direction="row" spacing={1} alignItems="center">
+                                        <ActionButtonSuccess
+                                            onClick={handleSubmit}
+                                            disabled={isLoading || data.items.length === 0}
+                                            startIcon={isLoading ? <Timeline className="animate-spin" /> : <Save />}
+                                            text={isLoading ? `Updating...` : `Update Invoice`}
+                                        />
+                                        <IconButton
+                                            onClick={() => setExpandedTotals(!expandedTotals)}
+                                            sx={{
+                                                bgcolor: alpha(theme.palette.success.main, 0.1),
+                                                '&:hover': {
+                                                    bgcolor: alpha(theme.palette.success.main, 0.2),
+                                                    transform: 'scale(1.1)',
+                                                },
+                                                transition: 'all 0.2s ease',
+                                            }}
+                                        >
+                                            {expandedTotals ? <ExpandLess /> : <ExpandMore />}
+                                        </IconButton>
+                                    </Stack>
+                                </Box>
+
+                                {/* Quick Stats */}
+                                <Grid container spacing={2}>
+                                    {!tax_enable && <Grid item xs={6} sm={3}>
+                                        <Paper
+                                            elevation={0}
+                                            sx={{
+                                                p: 2,
+                                                textAlign: 'center',
+                                                bgcolor: alpha('#fff', 0.7),
+                                                borderRadius: 2,
+                                                border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+                                            }}
+                                        >
+                                            <Typography variant="caption" color="text.secondary">Sub-Totals</Typography>
+                                            <Typography variant="h6" fontWeight="700" color="info.main" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                                                <CurrencyRupee sx={{ fontSize: '1em' }} />
+                                                {total}
+                                            </Typography>
+                                        </Paper>
+                                    </Grid>}
+                                    <Grid item xs={6} sm={3}>
+                                        <Paper
+                                            elevation={0}
+                                            sx={{
+                                                p: 2,
+                                                textAlign: 'center',
+                                                bgcolor: alpha('#fff', 0.7),
+                                                borderRadius: 2,
+                                                border: `1px solid ${alpha(theme.palette.success.main, 0.2)}`,
+                                            }}
+                                        >
+                                            <Typography variant="caption" color="text.secondary">Total Discount amount</Typography>
+                                            <Typography variant="h6" fontWeight="700" color="warning.main" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                                                <CurrencyRupee sx={{ fontSize: '1em' }} />
+                                                {discount}
+                                            </Typography>
+                                        </Paper>
+                                    </Grid>
+                                    {tax_enable && <Grid item xs={6} sm={3}>
+                                        <Paper
+                                            elevation={0}
+                                            sx={{
+                                                p: 2,
+                                                textAlign: 'center',
+                                                bgcolor: alpha('#fff', 0.7),
+                                                borderRadius: 2,
+                                                border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+                                            }}
+                                        >
+                                            <Typography variant="caption" color="text.secondary">Total Tax Amount</Typography>
+                                            <Typography variant="h6" fontWeight="700" color="info.main" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                                                <CurrencyRupee sx={{ fontSize: '1em' }} />
+                                                {total_tax}
+                                            </Typography>
+                                        </Paper>
+                                    </Grid>}
+                                    <Grid item xs={12} sm={6}>
+                                        <Paper
+                                            elevation={0}
+                                            sx={{
+                                                p: 1.5,
+                                                textAlign: 'center',
+                                                bgcolor: `linear-gradient(135deg, ${alpha(theme.palette.success.main, 0.1)} 0%, ${alpha(theme.palette.success.main, 0.2)} 100%)`,
+                                                borderRadius: 2,
+                                                border: `2px solid ${alpha(theme.palette.success.main, 0.3)}`,
+                                            }}
+                                        >
+                                            <Typography variant="caption" color="text.secondary">GRAND TOTAL</Typography>
+                                            <Typography variant="h4" fontWeight="900" color="success.main" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                                                <CurrencyRupee sx={{ fontSize: '0.8em' }} />
+                                                {Number(grandTotal).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                            </Typography>
+                                        </Paper>
+                                    </Grid>
+                                </Grid>
+                            </Box>
+
+                            {/* Expandable Content */}
+                            <Collapse in={expandedTotals}>
+                                <Box sx={{ p: 1, pt: 2 }}>
+                                    <Grid container spacing={3} justifyContent={'flex-end'}>
+                                        {/* Row 1 */}
+                                        <Grid item xs={12} sm={6} md={tax_enable ? 2 : 2.4}>
+                                            <Box sx={{ position: 'relative' }}>
+                                                <Paper
+                                                    elevation={0}
+                                                    sx={{
+                                                        p: 2,
+                                                        borderRadius: 1,
+                                                        background: `linear-gradient(135deg, ${theme.palette.success.light} 0%, ${theme.palette.success.light} 100%)`,
+                                                        textAlign: 'center',
+                                                        height: 40,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        gap: .5,
+                                                    }}
+                                                >
+                                                    <Typography variant="caption" display="block">
+                                                        Sub Total :-
+                                                    </Typography>
+                                                    <CurrencyRupee sx={{ fontSize: 12 }} />
+                                                    <Typography variant="caption" fontWeight="600" color="success.main">
+                                                        {total}
+                                                    </Typography>
+                                                </Paper>
+                                                <Tooltip title="Base amount before any adjustments" arrow>
+                                                    <IconButton
+                                                        size="small"
+                                                        sx={{
+                                                            position: 'absolute',
+                                                            top: -8,
+                                                            right: -8,
+                                                            bgcolor: 'success.main',
+                                                            color: 'white',
+                                                            width: 20,
+                                                            height: 20,
+                                                            '&:hover': { bgcolor: 'success.dark' }
+                                                        }}
+                                                    >
+                                                        <Info sx={{ fontSize: 12 }} />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </Box>
+                                        </Grid>
+
+                                        <Grid item xs={12} sm={6} md={tax_enable ? 2 : 2.4}>
+                                            <Box >
+                                                <Paper
+                                                    elevation={0}
+                                                    sx={{
+                                                        p: 2,
+                                                        borderRadius: 1,
+                                                        background: `linear-gradient(135deg, ${theme.palette.warning.light} 0%, ${theme.palette.warning.light} 100%)`,
+                                                        textAlign: 'center',
+                                                        height: 40,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'flex-start',
+                                                        gap: .5,
+                                                    }}
+                                                >
+                                                    <LocalOffer color="warning" />
+                                                    <Box sx={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'flex-start',
+                                                        gap: 1,
+                                                    }}>
+                                                        <Typography variant="caption" display="block">
+                                                            Discount :-{' '}
+                                                        </Typography>
+                                                        <CurrencyRupee sx={{ fontSize: 12 }} />
+                                                        <Typography variant="caption" fontWeight="600" color="success.main">
+                                                            {discount}
+                                                        </Typography>
+                                                    </Box>
+                                                </Paper>
+                                            </Box>
+                                        </Grid>
+
+                                        <Grid item xs={12} sm={6} md={tax_enable ? 2 : 2.4}>
+                                            <Box sx={{ position: 'relative' }}>
+                                                <Paper
+                                                    elevation={0}
+                                                    sx={{
+                                                        p: 2,
+                                                        borderRadius: 1,
+                                                        background: `linear-gradient(135deg, ${theme.palette.info.light} 0%, ${theme.palette.info.light} 100%)`,
+                                                        textAlign: 'center',
+                                                        height: 40,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'flex-start',
+                                                        gap: 1,
+                                                    }}
+                                                >
+                                                    <AccountBalance color="info" />
+                                                    <Box sx={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        gap: 1,
+                                                    }}>
+                                                        <Typography variant="caption" display="block">
+                                                            Total Amount :-{' '}
+                                                        </Typography>
+                                                        <CurrencyRupee sx={{ fontSize: 12 }} />
+                                                        <Typography variant="caption" fontWeight="600" color="success.main">
+                                                            {total_amount}
+                                                        </Typography>
+                                                    </Box>
+                                                </Paper>
+                                                <Tooltip title="Total amount after deducting discount from the sub-totals" arrow>
+                                                    <IconButton
+                                                        size="small"
+                                                        sx={{
+                                                            position: 'absolute',
+                                                            top: -8,
+                                                            right: -8,
+                                                            bgcolor: 'success.main',
+                                                            color: 'white',
+                                                            width: 20,
+                                                            height: 20,
+                                                            '&:hover': { bgcolor: 'success.dark' }
+                                                        }}
+                                                    >
+                                                        <Info sx={{ fontSize: 12 }} />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </Box>
+                                        </Grid>
+
+                                        {tax_enable && <Grid item xs={12} sm={6} md={2}>
+                                            <Paper
+                                                elevation={0}
+                                                sx={{
+                                                    p: 2,
+                                                    borderRadius: 1,
+                                                    background: `linear-gradient(135deg, ${theme.palette.info.light} 0%, ${theme.palette.info.light} 100%)`,
+                                                    textAlign: 'center',
+                                                    height: 40,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'flex-start',
+                                                    gap: .5,
+                                                }}
+                                            >
+                                                <Receipt color="warning" />
+                                                <Box sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: 1,
+                                                }}>
+                                                    <Typography variant="caption" display="block">
+                                                        Total Tax :-{' '}
+                                                    </Typography>
+                                                    <CurrencyRupee sx={{ fontSize: 12 }} />
+                                                    <Typography variant="caption" fontWeight="600" color="success.main">
+                                                        {total_tax}
+                                                    </Typography>
+                                                </Box>
+                                            </Paper>
+                                        </Grid>}
+
+                                        {/* Row 2 */}
+                                        <Grid item xs={12} sm={6} md={tax_enable ? 2 : 2.4}>
+                                            <AnimatedTextField
+                                                label="Additional Charges"
+                                                fullWidth
+                                                size="small"
+                                                value={data.additional_charge}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange('additional_charge', Number(e.target.value))}
+                                                name="additional_charge"
+                                                variant="outlined"
+                                                type="number"
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <Add color="secondary" />
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                            />
+                                        </Grid>
+
+                                        <Grid item xs={12} sm={6} md={tax_enable ? 2 : 2.4}>
+                                            <Paper
+                                                elevation={0}
+                                                sx={{
+                                                    p: 2,
+                                                    borderRadius: 1,
+                                                    background: `linear-gradient(135deg, ${theme.palette.info.light} 0%, ${theme.palette.info.light} 100%)`,
+                                                    textAlign: 'center',
+                                                    height: 40,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'flex-start',
+                                                    gap: 1,
+                                                }}
+                                            >
+                                                <TrendingUp color="info" />
+                                                <Box sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: 1,
+                                                }}>
+                                                    <Typography variant="caption" display="block">
+                                                        Round Off :-{' '}
+                                                    </Typography>
+                                                    <CurrencyRupee sx={{ fontSize: 12 }} />
+                                                    <Typography variant="caption" fontWeight="600" color="success.main">
+                                                        {roundoff}
+                                                    </Typography>
+                                                </Box>
+                                            </Paper>
+                                        </Grid>
+
+                                        <Grid item xs={12} sm={12} md={4}>
+                                            <Paper
+                                                elevation={3}
+                                                sx={{
+                                                    p: 2,
+                                                    borderRadius: 1,
+                                                    background: `linear-gradient(135deg, ${theme.palette.success.main}10 0%, ${theme.palette.success.main}25 100%)`,
+                                                    border: `2px solid ${alpha(theme.palette.success.main, 0.4)}`,
+                                                    textAlign: 'center',
+                                                    height: 56,
+                                                    display: 'flex',
+                                                    alignItems: 'baseline',
+                                                    justifyContent: 'center',
+                                                    gap: 1,
+                                                }}
+                                            >
+                                                <Typography variant="subtitle2" color="text.secondary" fontWeight="600" >
+                                                    GRAND TOTAL
+                                                </Typography>
+                                                <CurrencyRupee sx={{ color: 'success.main', fontSize: 16, fontWeight: 'bold' }} />
+                                                <Typography variant="h5" fontWeight="900" color="success.main" >
+                                                    {Number(grandTotal).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                </Typography>
+                                            </Paper>
+                                        </Grid>
+                                    </Grid>
+                                </Box>
+                            </Collapse>
+                        </CardContent>
+                    </GradientCard>
+
+                    {/* Enhanced Remarks Section */}
+                    <GradientCard gradient="warning" sx={{ mb: 4 }}>
+                        <CardContent sx={{ p: 0 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column', width: '100%' }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, width: '100%' }}>
+                                    <Avatar sx={{ bgcolor: 'warning.main', mr: 2, width: 40, height: 40 }}>
+                                        <Description />
+                                    </Avatar>
+                                    <Box>
+                                        <Typography variant="h5" fontWeight="700" color="warning.main">
+                                            Additional Information
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            Add any extra details or notes for this invoice
+                                        </Typography>
+                                    </Box>
+                                </Box>
                                 <TextField
-                                    label="Remarks"
                                     fullWidth
-                                    size='small'
-                                    value={data.narration}
-                                    onChange={(e) => handleChange('narration', e.target.value)}
-                                    name="narration"
+                                    multiline
+                                    rows={4}
                                     variant="outlined"
-                                    InputProps={{
-                                        startAdornment: (
-                                            <InputAdornment position="start">
-                                                <Info color="action" />
-                                            </InputAdornment>
-                                        ),
-                                    }}
-                                    sx={{ my: 2, }}
+                                    placeholder="Enter additional information..."
+                                    sx={{ mt: 2 }}
                                 />
                             </Box>
+                        </CardContent>
+                    </GradientCard>
+                </Box>
 
-                            <Box sx={{ my: 1, width: '100%', display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-                                <ActionButtonCancel
-                                    onClick={() => {
-                                        navigate(-1);
-                                    }}
-                                    disabled={isLoading}
-                                    startIcon={<Cancel />}
-                                />
-                                <ActionButtonSuccess
-                                    onClick={handleSubmit}
-                                    disabled={isLoading}
-                                    startIcon={isLoading ? <Timeline className="animate-spin" /> : <AddCircleOutline />}
-                                    text={isLoading ? `Updating...` : `Update Invoice ${(type ? type.charAt(0).toUpperCase() + type.slice(1) : '')}`}
-                                />
-                            </Box>
-                        </Box>
-                    </CardContent>
-                </StyledCard>
-
-                <AddItemModal
-                    open={isAddItemModalOpen}
-                    onClose={() => setAddItemModalOpen(false)}
-                    onCreated={(item) => {
-                        setData(prev => ({
-                            ...prev,
-                            items: [...prev.items, item]
-                        }));
-                        setAddItemModalOpen(false);
-                    }}
-                    onUpdated={(updatedItem) => {
-                        setData(prev => ({
-                            ...prev,
-                            items: prev.items.map(item => item.item_id === updatedItem.item_id ? updatedItem : item)
-                        }));
-                        setAddItemModalOpen(false);
-                    }}
-                    item={item}
-                />
             </Container>
+
+            <AddItemModal
+                open={isAddItemModalOpen}
+                onClose={() => setAddItemModalOpen(false)}
+                onCreated={(item) => {
+                    setData(prev => ({
+                        ...prev,
+                        items: [...prev.items, item]
+                    }));
+                    setAddItemModalOpen(false);
+                }}
+                onUpdated={(updatedItem) => {
+                    setData(prev => ({
+                        ...prev,
+                        items: prev.items.map(item => item.item_id === updatedItem.item_id ? updatedItem : item)
+                    }));
+                    setAddItemModalOpen(false);
+                }}
+                item={item}
+            />
+           
         </LocalizationProvider>
     );
 }

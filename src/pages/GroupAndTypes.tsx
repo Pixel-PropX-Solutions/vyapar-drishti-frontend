@@ -702,7 +702,7 @@ const GroupAndTypes: React.FC = () => {
                                             }}
                                         >
                                             <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                                                GST Info
+                                                TAX Info
                                             </Typography>
                                         </TableSortLabel>
                                     </Tooltip>

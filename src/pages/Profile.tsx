@@ -269,7 +269,7 @@ const ProfilePage: React.FC = () => {
                       </TableCell>
                       <TableCell align="center" sx={{ px: 1 }}>
                         <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                          GSTIN
+                          TIN
                         </Typography>
                       </TableCell>
                       <TableCell align="center" sx={{ px: 1 }}>
@@ -721,7 +721,7 @@ const ProfilePage: React.FC = () => {
                             <FormControlLabel
                               control={
                                 <Switch
-                                  checked={currentCompanyDetails?.company_settings?.features?.enable_gst || false}
+                                  checked={currentCompanyDetails?.company_settings?.features?.enable_tax || false}
                                   disabled
                                   color="primary"
                                 />
@@ -729,10 +729,10 @@ const ProfilePage: React.FC = () => {
                               label={
                                 <Box>
                                   <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                                    GST Management
+                                    TAX Management
                                   </Typography>
                                   <Typography variant="caption" color="text.secondary">
-                                    Tax calculation and GST return filing
+                                    Tax calculation and TAX return filing
                                   </Typography>
                                 </Box>
                               }
@@ -776,13 +776,13 @@ const ProfilePage: React.FC = () => {
                       </Typography>
                       {currentCompanyDetails ? (
                         <Stack spacing={1.5}>
-                          {currentCompanyDetails?.company_settings?.gst_details?.gstin && (
+                          {currentCompanyDetails?.company_settings?.tax_details?.tin && (
                             <InfoRow
                               icon={<SecurityOutlined />}
-                              label="GSTIN"
+                              label="TIN"
                               value={
                                 <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-                                  {currentCompanyDetails?.company_settings?.gst_details?.gstin}
+                                  {currentCompanyDetails?.company_settings?.tax_details?.tin}
                                 </Typography>
                               }
                             />

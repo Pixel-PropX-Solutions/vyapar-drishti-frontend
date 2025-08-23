@@ -24,6 +24,7 @@ import {
     AccountBalance,
     AddCircleOutlined,
     Image,
+    Cancel,
 } from "@mui/icons-material";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
@@ -60,7 +61,7 @@ interface CustomerFormData {
     bank_ifsc?: string;
     bank_branch?: string;
     account_holder?: string;
-    gstin?: string;
+    tin?: string;
 }
 
 interface ValidationErrors {
@@ -80,13 +81,13 @@ const EditCustomer: React.FC = () => {
     const [isDragActive, setIsDragActive] = useState(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-    const [fetchingGST, setFetchingGST] = useState(false);
+    const [fetchingTAX, setFetchingTAX] = useState(false);
     const { user, current_company_id } = useSelector((state: RootState) => state.auth);
     const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
     const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
     const { customerType_id, editingCustomer } = useSelector((state: RootState) => state.customersLedger);
-    const isGSTINRequired: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst && customerType === 'Creditors';
-    const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
+    const isTINRequired: boolean = currentCompanyDetails?.company_settings?.features?.enable_tax && customerType === 'Creditors';
+    const tax_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_tax;
     const [expandedSections, setExpandedSections] = useState({
         profile: true,
         contact: true,
@@ -113,7 +114,7 @@ const EditCustomer: React.FC = () => {
         bank_ifsc: '',
         bank_branch: '',
         account_holder: '',
-        gstin: '',
+        tin: '',
     });
 
     const validateForm = useCallback((): boolean => {
@@ -229,10 +230,10 @@ const EditCustomer: React.FC = () => {
 
     const validateField = (field: string, value: string): string => {
         if (field === 'name' && !value.trim()) return 'Billing Name is required. This name is used for invoicing and legal purposes.';
-        if (gst_enable && !data.mailing_country && field === 'mailing_state' && !value.trim()) return 'Please select country first.';
-        if (gst_enable && field === 'mailing_country' && !value.trim()) return 'Billing country is required.';
-        if (gst_enable && field === 'mailing_state' && !value.trim()) return 'Billing state is required.';
-        if (isGSTINRequired && field === 'gstin' && !value.trim()) return 'GSTIN is required.';
+        if (tax_enable && !data.mailing_country && field === 'mailing_state' && !value.trim()) return 'Please select country first.';
+        if (tax_enable && field === 'mailing_country' && !value.trim()) return 'Billing country is required.';
+        if (tax_enable && field === 'mailing_state' && !value.trim()) return 'Billing state is required.';
+        if (isTINRequired && field === 'tin' && !value.trim()) return 'TIN is required.';
 
         // if (field === 'mailing_address' && !value.trim()) return '';
         if (field === 'mailing_pincode' && value && !/^\d{1,6}$/.test(value)) return 'Invalid pincode format';
@@ -240,7 +241,7 @@ const EditCustomer: React.FC = () => {
         if (field === 'number' && value && !/^\d{10}$/.test(value)) return 'Invalid phone number format';
         if (field === 'email' && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Invalid email format';
         if (field === 'name' && value.trim().length < 2) return 'Name must be at least 2 characters';
-        if (field === 'gstin' && value && !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][A-Z0-9][Z][0-9A-Z]$/.test(value)) return 'Invalid GSTIN format';
+        if (field === 'tin' && value && !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][A-Z0-9][Z][0-9A-Z]$/.test(value)) return 'Invalid TIN format';
         if (field === 'account_number' && value && !/^\d{9,18}$/.test(value)) return 'Invalid bank account number format';
         if (field === 'bank_ifsc' && value && !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(value)) return 'Invalid IFSC code format';
         return '';
@@ -267,7 +268,7 @@ const EditCustomer: React.FC = () => {
                 bank_ifsc: editingCustomer?.bank_ifsc || '',
                 bank_branch: editingCustomer?.bank_branch || '',
                 account_holder: editingCustomer?.account_holder || '',
-                gstin: editingCustomer.gstin || '',
+                tin: editingCustomer.tin || '',
             });
 
             setImagePreview(
@@ -319,7 +320,7 @@ const EditCustomer: React.FC = () => {
         if (data.bank_ifsc?.trim()) sanitizedData.bank_ifsc = data.bank_ifsc.trim();
         if (data.bank_branch?.trim()) sanitizedData.bank_branch = data.bank_branch.trim();
         if (data.account_holder?.trim()) sanitizedData.account_holder = data.account_holder.trim();
-        if (data.gstin?.trim()) sanitizedData.gstin = data.gstin.trim();
+        if (data.tin?.trim()) sanitizedData.tin = data.tin.trim();
 
         const formData = new FormData();
         Object.entries(sanitizedData).forEach(([key, value]) => {
@@ -362,11 +363,11 @@ const EditCustomer: React.FC = () => {
         }
     };
 
-    const handlefetchGSTINDetails = async () => {
-        setFetchingGST(true);
+    const handlefetchTINDetails = async () => {
+        setFetchingTAX(true);
 
         setTimeout(() => {
-            setFetchingGST(false);
+            setFetchingTAX(false);
         }, 2000);
     };
 
@@ -414,6 +415,7 @@ const EditCustomer: React.FC = () => {
                                     dispatch(setEditingCustomer(null));
                                     navigate(-1);
                                 }}
+                                startIcon={<Cancel />}
                                 disabled={isLoading}
                             />
                             <ActionButtonSuccess
@@ -454,17 +456,17 @@ const EditCustomer: React.FC = () => {
                     expandedSections={expandedSections}
                     required
                 >
-                    {gst_enable && <FormControl fullWidth sx={{ mt: 2 }}>
+                    {tax_enable && <FormControl fullWidth sx={{ mt: 2 }}>
                         <TextField
                             fullWidth
                             size="small"
-                            label={`GSTIN Number (${isGSTINRequired ? 'Required' : 'Optional'})`}
+                            label={`TIN Number (${isTINRequired ? 'Required' : 'Optional'})`}
                             placeholder="27XXXXXXXXXXXX"
-                            value={data.gstin || ''}
-                            required={isGSTINRequired}
-                            onChange={(e) => handleInputChange('gstin', capitalizeInput(e.target.value, 'characters'))}
-                            error={!!validationErrors.gstin}
-                            helperText={validationErrors.gstin || "15-digit GSTIN number"}
+                            value={data.tin || ''}
+                            required={isTINRequired}
+                            onChange={(e) => handleInputChange('tin', capitalizeInput(e.target.value, 'characters'))}
+                            error={!!validationErrors.tin}
+                            helperText={validationErrors.tin || "15-digit TIN number"}
                             InputProps={{
                                 sx: {
                                     borderRadius: 1,
@@ -476,8 +478,8 @@ const EditCustomer: React.FC = () => {
                                         <Button
                                             variant="contained"
                                             color="success"
-                                            onClick={handlefetchGSTINDetails}
-                                            disabled={fetchingGST}
+                                            onClick={handlefetchTINDetails}
+                                            disabled={fetchingTAX}
                                             sx={{
                                                 borderRadius: '8px',
                                                 fontWeight: 600,
@@ -492,7 +494,7 @@ const EditCustomer: React.FC = () => {
                                                 },
                                             }}
                                         >
-                                            {fetchingGST ? <Timeline className="animate-spin" /> : `Fetch Details`}
+                                            {fetchingTAX ? <Timeline className="animate-spin" /> : `Fetch Details`}
                                         </Button>
                                     </InputAdornment>
                                 ),
@@ -561,7 +563,7 @@ const EditCustomer: React.FC = () => {
                                             placeholder="Select country"
                                             size="small"
                                             id="mailing_country"
-                                            label={`Country ${gst_enable ? '(Required)' : ''}`}
+                                            label={`Country ${tax_enable ? '(Required)' : ''}`}
                                             autoComplete="off"
                                             error={!!validationErrors.mailing_country}
                                             helperText={validationErrors.mailing_country || "Country for mailing address"}
@@ -620,7 +622,7 @@ const EditCustomer: React.FC = () => {
                                             placeholder="Select state"
                                             disabled={!data.mailing_country}
                                             size="small"
-                                            label={`State ${gst_enable ? '(Required)' : ''}`}
+                                            label={`State ${tax_enable ? '(Required)' : ''}`}
                                             autoComplete="off"
                                             error={!!validationErrors.mailing_state}
                                             helperText={validationErrors.mailing_state || "State for address"}
@@ -902,6 +904,7 @@ const EditCustomer: React.FC = () => {
                         dispatch(setEditingCustomer(null));
                         navigate(-1);
                     }}
+                    startIcon={<Cancel />}
                     disabled={isLoading}
                 />
                 <ActionButtonSuccess

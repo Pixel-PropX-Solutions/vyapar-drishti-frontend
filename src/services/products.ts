@@ -165,6 +165,7 @@ export const viewProductsWithId = createAsyncThunk(
   async (company_id: string, { rejectWithValue }) => {
     try {
       const response = await userApi.get(`product/view/products/with_id?company_id=${company_id}`);
+      console.log("View Products with ID API Response", response);
 
       if (response.data.success === true) {
         const itemsList = response.data.data;

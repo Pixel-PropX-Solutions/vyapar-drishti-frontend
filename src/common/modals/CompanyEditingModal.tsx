@@ -108,7 +108,7 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
         code: '',
         email: '',
         image: '',
-        gstin: '',
+        tin: '',
         website: '',
         account_number: '',
         account_holder: '',
@@ -289,7 +289,7 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
             code: '',
             email: '',
             image: '',
-            gstin: '',
+            tin: '',
             website: '',
             account_number: '',
             account_holder: '',
@@ -321,7 +321,7 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
                 user_id: company?.user_id || '',
                 name: company.name || '',
                 mailing_name: company.mailing_name || '',
-                gstin: company?.gstin || '',
+                tin: company?.tin || '',
                 website: company?.website || '',
                 email: company?.email || '',
                 code: company?.phone?.code || '',
@@ -368,7 +368,7 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
         };
 
         if (data.email && data.email !== '') sanitizedData.email = data.email.trim();
-        if (data.gstin && data.gstin !== '') sanitizedData.gstin = data.gstin.trim();
+        if (data.tin && data.tin !== '') sanitizedData.tin = data.tin.trim();
         if (data.number && data.number !== '') sanitizedData.number = data.number.trim();
         if (data.code && data.code !== '') sanitizedData.code = data.code.trim();
         if (data.address_1 && data.address_1 !== '') sanitizedData.address_1 = data.address_1.trim();
@@ -1170,17 +1170,17 @@ const CompanyEditingModal: React.FC<EditUserModalProps> = ({
 
                                 <TextField
                                     fullWidth
-                                    label="GSTIN Number"
-                                    placeholder="15-digit GSTIN"
-                                    value={data.gstin}
+                                    label="TIN Number"
+                                    placeholder="15-digit TIN"
+                                    value={data.tin}
                                     size="small"
-                                    onChange={(e) => handleInputChange('gstin', e.target.value.toUpperCase())}
-                                    error={!!formErrors.gstin}
-                                    helperText={formErrors.gstin || "15 characters including state code. If you enter the GSTIN then the company will be registered as a GST-registered company."}
+                                    onChange={(e) => handleInputChange('tin', e.target.value.toUpperCase())}
+                                    error={!!formErrors.tin}
+                                    helperText={formErrors.tin || "15 characters including state code. If you enter the TIN then the company will be registered as a TAX-registered company."}
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">
-                                                <CreditCard color={formErrors.gstin ? 'error' : 'primary'} />
+                                                <CreditCard color={formErrors.tin ? 'error' : 'primary'} />
                                             </InputAdornment>
                                         ),
                                     }}

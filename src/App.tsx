@@ -16,7 +16,6 @@ import {
 } from "./theme/customizations";
 import Products from "./pages/Products";
 // import CreateUserProfile from "./features/profile/createUser";
-import CreateProduct from "./features/products/createProduct";
 import { getCurrentUser } from "./services/auth";
 import LandingPage from "./components/LandingPage/LandingPage";
 import AboutPage from "./components/About/AboutPage";
@@ -145,7 +144,6 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
               <Route element={<Dashboard />}>
                 <Route path="/account" element={<ProfilePage />} />
                 <Route path="/" element={<ProfilePage />} />
-                <Route path="/add/product" element={<CreateProduct />} />
                 <Route path="/products/:id" element={<ViewItem />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/warehouses" element={<Inventory />} />

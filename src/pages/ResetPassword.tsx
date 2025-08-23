@@ -379,6 +379,7 @@ const ResetPassword: React.FC = () => {
                 // aspectRatio: "1/1",
                 objectFit: "contain",
                 backgroundColor: "white",
+
               }}
             />
           </div>

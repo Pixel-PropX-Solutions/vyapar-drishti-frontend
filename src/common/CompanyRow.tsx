@@ -174,7 +174,7 @@ export const CompanyRow: React.FC<ProductRowProps> = ({ com, onDelete, onEdit, o
                         </Typography>
                     </TableCell>
                     <TableCell align="center" sx={{ px: 1 }}>
-                        {com.gstin && <Typography
+                        {com.tin && <Typography
                             variant="h6"
                             sx={{
                                 fontWeight: 600,
@@ -182,7 +182,7 @@ export const CompanyRow: React.FC<ProductRowProps> = ({ com, onDelete, onEdit, o
                                 color: theme.palette.text.primary,
                             }}
                         >
-                            {com.gstin}
+                            {com.tin}
                         </Typography>}
                     </TableCell>
 

@@ -1488,10 +1488,10 @@ export default AboutPage;
 //                     />
 //                     <InfoRow
 //                       icon={<AccountBalance />}
-//                       label="GST Number"
+//                       label="TAX Number"
 //                       value={
 //                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-//                           {company?.gstin || 'Not provided'}
+//                           {company?.tin || 'Not provided'}
 //                         </Box>
 //                       }
 //                     />

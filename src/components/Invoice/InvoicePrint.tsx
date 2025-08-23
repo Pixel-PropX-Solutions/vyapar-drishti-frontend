@@ -122,24 +122,7 @@ const InvoicePrint: React.FC<Props> = ({
             return;
         }
 
-        const printContent = `
-            <!DOCTYPE html>
-            <html>
-                <head>
-                    <title>Invoice ${invoiceNumber}</title>
-                    <style>
-                        body { margin: 0; padding: 0px; font-family: Arial, sans-serif; }
-                        @media print {
-                            body { margin: 0; padding: 0; }
-                            .no-print { display: none !important; }
-                        }
-                    </style>
-                </head>
-                <body>
-                    ${fullHtml}
-                </body>
-            </html>
-        `;
+        const printContent = fullHtml;
 
         printWindow.document.write(printContent);
         printWindow.document.close();

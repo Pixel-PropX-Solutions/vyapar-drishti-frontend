@@ -21,29 +21,34 @@ import {
 } from "@mui/material";
 import {
     Close as CloseIcon,
-    Business,
     Close,
     Save,
-    LocationCity,
-    MonetizationOn,
+    Inventory,
+    CurrencyRupee,
+    Category,
+    AddCircleOutline,
 } from "@mui/icons-material";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { viewProductsWithId } from "@/services/products";
 import { units } from "@/internals/data/units";
+import ProductsSideModal from "@/features/products/ProductsSideModal";
 
 // Interfaces
 interface InvoiceItems {
     vouchar_id: string;
     item: string;
     item_id: string;
+    unit: string;
+    hsn_code?: string;
     quantity: number;
     rate: number;
     amount: number;
-    gst?: number;
-    gst_amount?: number;
-
+    discount_amount: number;
+    tax_rate?: number;
+    tax_amount?: number;
+    total_amount: number;
 }
 
 
@@ -68,22 +73,27 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
     const [isLoading, setIsLoading] = useState(false);
     const [_showValidation, setShowValidation] = useState(false);
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+    const [drawer, setDrawer] = useState<boolean>(false);
+    const [refreshKey, setRefreshKey] = useState<number>(0);
     const [focusedField, setFocusedField] = useState<string>('');
-    const [itemsList, setItemsList] = useState<{ id: string; name: string; unit: string, gst: string, hsn_code: string }[]>([]);
+    const [itemsList, setItemsList] = useState<{ id: string; name: string; unit: string, tax_rate: string, hsn_code: string }[]>([]);
     const { user, current_company_id } = useSelector((state: RootState) => state.auth);
     const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
     const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
-    const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
+    const tax_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_tax;
     const [data, setData] = useState<Partial<InvoiceItems>>({
         item: '',
         item_id: '',
+        unit: '',
+        hsn_code: '',
         quantity: 0,
         rate: 0,
         amount: 0,
-        gst: 0,
-        gst_amount: 0,
+        discount_amount: 0,
+        tax_rate: 0,
+        tax_amount: 0,
+        total_amount: 0,
     });
-    const [totalAmount, setTotalAmount] = useState(0);
     const autoCompleteInputRef = useRef<HTMLInputElement>(null);
 
     // Validation function
@@ -104,12 +114,6 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
         }
         if ((formData?.amount ?? 0) <= 0) {
             errors.amount = 'Amount must be greater than 0';
-        }
-        if ((formData?.gst ?? 0) < 0) {
-            errors.gst = 'GST must be 0 or greater';
-        }
-        if ((formData?.gst_amount ?? 0) < 0) {
-            errors.gst_amount = 'GST Amount must be 0 or greater';
         }
 
         setFormErrors(errors);
@@ -141,19 +145,21 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
                 }
                 newData.quantity = Number(quantity);
             }
-            // If rate, quantity, or gst changes, recalculate amount and gst_amount
-            if (field === 'rate' || field === 'quantity' || field === 'gst') {
+            // If rate, quantity, or tax_rate changes, recalculate amount and tax_rate
+            if (field === 'rate' || field === 'quantity' || field === 'tax_rate' || field === 'discount_amount') {
                 const quantity = parseFloat(String(field === 'quantity' ? newData.quantity : newData.quantity)) || 0;
                 const rate = parseFloat(String(field === 'rate' ? value : newData.rate)) || 0;
-                const gst = parseFloat(String(field === 'gst' ? value : newData.gst)) || 0;
-                const gstAmount = parseFloat(((quantity * rate * gst) / 100).toFixed(2));
                 const amount = parseFloat((quantity * rate).toFixed(2));
+                const discount = parseFloat(String(field === 'discount_amount' ? value : newData.discount_amount)) || 0;
+
+                const tax = parseFloat(String(field === 'tax_rate' ? value : newData.tax_rate)) || 0;
+                const taxAmount = parseFloat((((quantity * rate - discount) * tax) / 100).toFixed(2));
                 newData = {
                     ...newData,
                     amount,
-                    gst_amount: gstAmount,
+                    tax_amount: taxAmount,
+                    total_amount: amount + taxAmount - discount,
                 };
-                setTotalAmount(amount + gstAmount);
             }
             validateForm(newData);
             return newData;
@@ -165,11 +171,15 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
         setData({
             item: '',
             item_id: '',
+            unit: '',
+            hsn_code: '',
             quantity: 0,
             rate: 0,
             amount: 0,
-            gst: 0,
-            gst_amount: 0,
+            discount_amount: 0,
+            tax_rate: 0,
+            tax_amount: 0,
+            total_amount: 0,
         });
         setFormErrors({});
         setShowValidation(false);
@@ -197,7 +207,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
                         name: product.stock_item_name,
                         id: product._id,
                         unit: product.unit,
-                        gst: product.rate,
+                        tax_rate: product.tax_rate || 0,
                         hsn_code: product.hsn_code || ''
                     }))
                 );
@@ -207,7 +217,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
             toast.error(error || "An unexpected error occurred. Please try again later.");
         });
 
-    }, [dispatch, open, currentCompanyId]);
+    }, [dispatch, open, currentCompanyId, refreshKey]);
 
     useEffect(() => {
         if (open && item) {
@@ -215,23 +225,29 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
                 item: item.item || '',
                 item_id: item.item_id || '',
                 quantity: item.quantity || 0,
+                unit: item.unit || '',
+                hsn_code: item.hsn_code || '',
                 rate: item.rate || 0,
                 amount: item.amount || 0,
-                gst: item.gst || 0,
-                gst_amount: item.gst_amount || 0,
+                discount_amount: item.discount_amount || 0,
+                tax_rate: item.tax_rate || 0,
+                tax_amount: item.tax_amount || 0,
+                total_amount: item.total_amount || 0,
             });
-            setTotalAmount(item.amount + (item.gst_amount || 0));
         } else if (open && !item) {
             setData({
                 item: '',
                 item_id: '',
+                unit: '',
+                hsn_code: '',
                 quantity: 0,
                 rate: 0,
                 amount: 0,
-                gst: 0,
-                gst_amount: 0,
+                discount_amount: 0,
+                tax_rate: 0,
+                tax_amount: 0,
+                total_amount: 0,
             });
-            setTotalAmount(0);
         }
     }, [open, item]);
 
@@ -257,12 +273,12 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
     };
 
 
-    const formFields = gst_enable ? [
+    const formFields = tax_enable ? [
         {
             key: 'quantity',
             label: 'Quantity',
             placeholder: 'Enter the quantity of the item',
-            icon: Business,
+            icon: Inventory,
             required: true,
             description: `Quantity of the item (Should be ${units.find(unit => unit.value === itemsList.find(item => item.id === data.item_id)?.unit)?.si_representation === 'integer' ? 'whole number' : 'decimal number'})`,
             disabled: false, // This field is editable
@@ -272,53 +288,62 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
             key: 'rate',
             label: 'Rate',
             placeholder: 'Enter the rate of the item',
-            icon: MonetizationOn,
+            icon: CurrencyRupee,
             required: true,
-            description: 'Rate of the item',
+            description: 'Rate of the item per unit',
             disabled: false, // This field is editable
         },
         {
             key: 'amount',
             label: 'Amount',
             placeholder: 'Enter the amount',
-            icon: MonetizationOn,
+            icon: CurrencyRupee,
             required: true,
             description: 'Enter rate and quantity to calculate amount',
-            disabled: true, // This field is auto-calculated based on rate, quantity, and GST
+            disabled: true, // This field is auto-calculated based on rate, quantity, and TAX
         },
         {
-            key: 'gst',
-            label: 'GST',
-            placeholder: 'Enter the GST percentage',
-            icon: MonetizationOn,
-            required: true,
-            description: 'GST percentage for the item (optional)',
+            key: 'discount_amount',
+            label: 'Discount Amount',
+            placeholder: 'Enter the discount amount',
+            icon: CurrencyRupee,
+            required: false,
+            description: 'Enter the discount amount',
+            disabled: false,
+        },
+        {
+            key: 'tax_rate',
+            label: 'TAX',
+            placeholder: 'Enter the TAX percentage',
+            icon: CurrencyRupee,
+            required: false,
+            description: 'TAX percentage for the item (optional)',
             disabled: true, // This field is editable
         },
         {
-            key: 'gst_amount',
-            label: 'GST Amount',
-            placeholder: 'Enter the GST amount',
-            icon: MonetizationOn,
+            key: 'tax_amount',
+            label: 'TAX Amount',
+            placeholder: 'Enter the TAX amount',
+            icon: CurrencyRupee,
             required: false,
-            description: 'Enter rate and quantity to calculate GST amount',
+            description: 'Enter rate and quantity to calculate TAX amount',
             disabled: true, // This field is auto-calculated based on rate and quantity
         },
         {
-            key: 'total-amount',
+            key: 'total_amount',
             label: 'Total Amount',
             placeholder: 'Enter the total amount',
-            icon: MonetizationOn,
-            required: true,
+            icon: CurrencyRupee,
+            required: false,
             description: 'Enter rate and quantity to calculate total amount',
-            disabled: true, // This field is auto-calculated based on rate, quantity, and GST
+            disabled: true, // This field is auto-calculated based on rate, quantity, and TAX
         },
     ] : [
         {
             key: 'quantity',
             label: 'Quantity',
             placeholder: 'Enter the quantity of the item',
-            icon: Business,
+            icon: Inventory,
             required: true,
             description: `Quantity of the item (should be valid ${units.find(unit => unit.value === itemsList.find(item => item.id === data.item_id)?.unit)?.si_representation === 'integer' ? 'whole number' : 'decimal number'})`,
             disabled: false, // This field is editable
@@ -328,18 +353,36 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
             key: 'rate',
             label: 'Rate',
             placeholder: 'Enter the rate of the item',
-            icon: MonetizationOn,
+            icon: CurrencyRupee,
             required: true,
-            description: 'Rate of the item',
+            description: 'Rate of the item per unit',
             disabled: false, // This field is editable
         },
         {
             key: 'amount',
             label: 'Amount',
             placeholder: 'Enter the amount',
-            icon: MonetizationOn,
+            icon: CurrencyRupee,
             required: true,
             description: 'Enter rate and quantity to calculate amount',
+            disabled: true, // This field is auto-calculated based on rate and quantity
+        },
+        {
+            key: 'discount_amount',
+            label: 'Discount Amount',
+            placeholder: 'Enter the discount amount',
+            icon: CurrencyRupee,
+            required: false,
+            description: 'Enter the the discount amount',
+            disabled: false, // This field is auto-calculated based on rate and quantity
+        },
+        {
+            key: 'total_amount',
+            label: 'Total Amount',
+            placeholder: 'Total amount',
+            icon: CurrencyRupee,
+            required: true,
+            description: 'Enter rate and quantity to calculate total amount',
             disabled: true, // This field is auto-calculated based on rate and quantity
         },
     ];
@@ -412,6 +455,37 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
                             </Typography>
                         </Box>
                     </Box>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => {
+                            setDrawer(true);
+                        }}
+                        disabled={isLoading}
+                        startIcon={<AddCircleOutline />}
+                        sx={{
+                            textTransform: 'none',
+                            fontWeight: 600,
+                            borderRadius: 1,
+                            px: 4,
+                            py: 1.5,
+                            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                            boxShadow: `0 4px 20px ${alpha(theme.palette.primary.main, 0.3)}`,
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            '&:hover': {
+                                background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
+                                borderColor: theme.palette.common.white,
+                            },
+                            '&:disabled': {
+                                background: alpha(theme.palette.action.disabled, 0.12),
+                                color: theme.palette.action.disabled,
+                                boxShadow: 'none',
+                                transform: 'none',
+                            }
+                        }}
+                    >
+                        Create New Item
+                    </Button>
                 </Box>
             </Slide>
 
@@ -447,14 +521,17 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
                                     }
                                     value={
                                         itemsList.find((p) => p.id === data.item_id) ||
-                                        (data.item ? { id: '', name: data.item, unit: '', gst: '', hsn_code: '' } : null)
+                                        (data.item ? { id: '', name: data.item, unit: data.unit || '', tax_rate: data.tax_rate || '', hsn_code: data.hsn_code || '' } : null)
                                     }
                                     onChange={(_, newValue) => {
                                         if (newValue && typeof newValue === 'object') {
                                             handleInputChange('item', newValue.name);
                                             handleInputChange('item_id', newValue.id);
-                                            if (gst_enable)
-                                                handleInputChange('gst', newValue.gst);
+                                            handleInputChange('unit', newValue.unit);
+                                            if (tax_enable) {
+                                                handleInputChange('hsn_code', newValue.hsn_code);
+                                                handleInputChange('tax_rate', String(newValue.tax_rate || 0));
+                                            }
                                         } else {
                                             handleInputChange('item', '');
                                             handleInputChange('item_id', '');
@@ -497,7 +574,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
                                                             display: 'flex',
                                                             alignItems: 'center'
                                                         }}>
-                                                            <LocationCity
+                                                            <Category
                                                                 color={formErrors.item ? 'error' :
                                                                     focusedField === 'item' ? 'primary' : 'action'}
                                                                 sx={{ fontSize: 20 }}
@@ -526,12 +603,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
                                             inputType = 'number';
                                             inputStep = unitType === 'integer' ? '1' : '0.01';
                                         }
-                                        let value = undefined;
-                                        if (field.key === 'total-amount') {
-                                            value = totalAmount;
-                                        } else {
-                                            value = data[field.key as keyof InvoiceItems] || '';
-                                        }
+                                        const value = data[field.key as keyof InvoiceItems] || '';
 
                                         return (
                                             <TextField
@@ -572,18 +644,31 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
                                                     ),
                                                     endAdornment: field.required && (
                                                         <InputAdornment position="end">
-                                                            <Chip
-                                                                label="Required"
-                                                                size="small"
-                                                                color="primary"
-                                                                variant="outlined"
-                                                                sx={{
-                                                                    fontSize: '0.7rem',
-                                                                    height: 20,
-                                                                    opacity: focusedField === field.key ? 1 : 0.6,
-                                                                    transition: 'opacity 0.3s ease'
-                                                                }}
-                                                            />
+                                                            {['rate'].includes(field.key)
+                                                                ? (<Chip
+                                                                    label={`per ${data.unit || 'Unit'}`}
+                                                                    size="small"
+                                                                    color="primary"
+                                                                    variant="outlined"
+                                                                    sx={{
+                                                                        fontSize: '0.7rem',
+                                                                        height: 20,
+                                                                        opacity: focusedField === field.key ? 1 : 0.6,
+                                                                        transition: 'opacity 0.3s ease'
+                                                                    }}
+                                                                />)
+                                                                : (<Chip
+                                                                    label="Required"
+                                                                    size="small"
+                                                                    color="primary"
+                                                                    variant="outlined"
+                                                                    sx={{
+                                                                        fontSize: '0.7rem',
+                                                                        height: 20,
+                                                                        opacity: focusedField === field.key ? 1 : 0.6,
+                                                                        transition: 'opacity 0.3s ease'
+                                                                    }}
+                                                                />)}
                                                         </InputAdornment>
                                                     )
                                                 }}
@@ -682,6 +767,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
                         item === null ? "Add Item" : 'Update Item'}
                 </Button>
             </Box>
+            <ProductsSideModal drawer={drawer} setDrawer={setDrawer} setRefreshKey={setRefreshKey} />
         </Drawer>
     );
 }

@@ -57,11 +57,11 @@
 //         ?.reduce((sum, item) => sum + parseFloat(item.amount || "0"), 0)
 //         .toFixed(2);
 
-//     const totalGST = items
+//     const totalTAX = items
 //         ?.reduce((sum, item) => {
 //             const itemAmount = parseFloat(item.amount || "0");
-//             const gstRate = parseFloat(item.GST_percent || "0") / 100;
-//             return sum + itemAmount * gstRate;
+//             const taxRate = parseFloat(item.TAX_percent || "0") / 100;
+//             return sum + itemAmount * taxRate;
 //         }, 0)
 //         .toFixed(2);
 
@@ -75,7 +75,7 @@
 //             expiry: new Date().toISOString().substring(0, 7),
 //             quantity: "0",
 //             MRP: "0.00",
-//             GST_percent: "0",
+//             TAX_percent: "0",
 //             amount: "0.00",
 //         };
 //         const newItems = [...items, newItem];
@@ -102,14 +102,14 @@
 //         index: number,
 //         quantity: string,
 //         mrp: string,
-//         gst: string
+//         tax: string
 //     ) => {
 //         const quantityNum = parseFloat(quantity || "0");
 //         const mrpNum = parseFloat(mrp || "0");
-//         const gstNum = parseFloat(gst || "0");
-//         const gstAmount = (mrpNum * gstNum) / 100;
+//         const taxNum = parseFloat(tax || "0");
+//         const taxAmount = (mrpNum * taxNum) / 100;
 
-//         const amount = (quantityNum * mrpNum + gstAmount).toFixed(2);
+//         const amount = (quantityNum * mrpNum + taxAmount).toFixed(2);
 //         handleFieldChange(`items.${index}.amount`, amount);
 //     };
 
@@ -177,7 +177,7 @@
 //                                 size="small"
 //                             />
 //                             <Chip
-//                                 label={`GST Amount: &#8377;${totalGST}`}
+//                                 label={`TAX Amount: &#8377;${totalTAX}`}
 //                                 color="info"
 //                                 size="small"
 //                             />
@@ -339,7 +339,7 @@
 //                                             px: 0.75
 //                                         }}
 //                                     >
-//                                         GST %
+//                                         TAX %
 //                                     </TableCell>
 //                                     <TableCell
 //                                         sx={{
@@ -667,13 +667,13 @@
 //                                                             index,
 //                                                             item?.quantity || "0",
 //                                                             rate,
-//                                                             item?.GST_percent || "0"
+//                                                             item?.TAX_percent || "0"
 //                                                         );
 //                                                         calculateRowAmount(
 //                                                             index,
 //                                                             item?.quantity || "0",
 //                                                             rate,
-//                                                             item?.GST_percent || "0"
+//                                                             item?.TAX_percent || "0"
 //                                                         );
 //                                                     }}
 //                                                     disabled={!editMode}
@@ -708,14 +708,14 @@
 //                                             </TableCell>
 //                                             <TableCell sx={{ py: 1, px: 0.75 }}>
 //                                                 <TextField
-//                                                     value={item?.GST_percent || ""} // Ensure value is never null
+//                                                     value={item?.TAX_percent || ""} // Ensure value is never null
 //                                                     onChange={(e) => {
 //                                                         handleFieldChange(
-//                                                             `items.${index}.GST_percent`,
+//                                                             `items.${index}.TAX_percent`,
 //                                                             e.target.value
 //                                                         );
 //                                                     }}
-//                                                     name="GST_percent"
+//                                                     name="TAX_percent"
 //                                                     disabled={!editMode}
 //                                                     size="small"
 //                                                     fullWidth

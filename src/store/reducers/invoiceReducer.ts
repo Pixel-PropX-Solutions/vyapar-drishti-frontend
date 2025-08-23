@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AuthStates } from "@/utils/enums";
 import { GetAllInvoiceGroups, GetAllVouchars, GetInvoiceData, InvoicesSortField, PageMeta, SortOrder } from "@/utils/types";
-import { deleteGSTInvoice, deleteInvoice, updateInvoice, viewAllInvoiceGroups, viewAllInvoices, viewInvoice } from "@/services/invoice";
+import { deleteTAXInvoice, deleteInvoice, updateInvoice, viewAllInvoiceGroups, viewAllInvoices, viewInvoice } from "@/services/invoice";
 import { getAllInvoiceGroups } from "@/services/invoice";
 
 interface InvoiceState {
@@ -172,14 +172,14 @@ const invoiceSlice = createSlice({
                 state.loading = false;
             })
 
-            .addCase(deleteGSTInvoice.pending, (state) => {
+            .addCase(deleteTAXInvoice.pending, (state) => {
                 state.error = null;
                 state.loading = true;
             })
-            .addCase(deleteGSTInvoice.fulfilled, (state) => {
+            .addCase(deleteTAXInvoice.fulfilled, (state) => {
                 state.loading = false;
             })
-            .addCase(deleteGSTInvoice.rejected, (state, action) => {
+            .addCase(deleteTAXInvoice.rejected, (state, action) => {
                 state.error = action.payload as string;
                 state.loading = false;
             })

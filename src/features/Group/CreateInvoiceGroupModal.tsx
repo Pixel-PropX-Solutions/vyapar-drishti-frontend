@@ -52,9 +52,9 @@
 //     parent: string;
 //     description: string;
 //     image?: File | string;
-//     // gst_nature_of_goods: string;
-//     // gst_hsn_code: string;
-//     // gst_taxability: string;
+//     // nature_of_goods: string;
+//     // hsn_code: string;
+//     // taxability: string;
 // }
 
 // const CreateInvoiceGroupModal: React.FC<CreateInventoryGroupModalProps> = ({

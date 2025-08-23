@@ -73,7 +73,7 @@
 //     bank_ifsc?: string;
 //     bank_branch?: string;
 //     account_holder?: string;
-//     gstin?: string;
+//     tin?: string;
 // }
 
 // interface ValidationErrors {
@@ -127,7 +127,7 @@
 //         bank_ifsc: '',
 //         bank_branch: '',
 //         account_holder: '',
-//         gstin: '',
+//         tin: '',
 //     });
 
 
@@ -270,15 +270,15 @@
 //                 showMailingDetails: true,
 //                 showBankDetails: true,
 //                 isBankOptional: true,
-//                 isGSTINOptional: currentCompanyDetails?.company_settings?.features?.enable_gst ? true : false,
+//                 isTINOptional: currentCompanyDetails?.company_settings?.features?.enable_tax ? true : false,
 //                 isMailingAddressOptional: false,
-//                 showGSTIN: true,
+//                 showTIN: true,
 //                 requiredFields: [
 //                     'name',
 //                     'mailing_state',
 //                     'parent',
 //                     'mailing_country',
-//                     ...(currentCompanyDetails?.company_settings?.features?.enable_gst ? ['gstin'] : []),
+//                     ...(currentCompanyDetails?.company_settings?.features?.enable_tax ? ['tin'] : []),
 //                 ],
 //             };
 //         }
@@ -290,9 +290,9 @@
 //                 showMailingDetails: true,
 //                 showBankDetails: true,
 //                 isBankOptional: false,
-//                 isGSTINOptional: false,
+//                 isTINOptional: false,
 //                 isMailingAddressOptional: true,
-//                 showGSTIN: false,
+//                 showTIN: false,
 //                 requiredFields: ['name', 'parent'],
 //             };
 //         }
@@ -304,10 +304,10 @@
 //                 showMailingDetails: true,
 //                 showBankDetails: true,
 //                 isBankOptional: true,
-//                 isGSTINOptional: currentCompanyDetails?.company_settings?.features?.enable_gst ? false : true,
+//                 isTINOptional: currentCompanyDetails?.company_settings?.features?.enable_tax ? false : true,
 //                 isMailingAddressOptional: true,
-//                 showGSTIN: true,
-//                 requiredFields: ['name', 'parent', ...(currentCompanyDetails?.company_settings?.features?.enable_gst ? ['gstin'] : []),],
+//                 showTIN: true,
+//                 requiredFields: ['name', 'parent', ...(currentCompanyDetails?.company_settings?.features?.enable_tax ? ['tin'] : []),],
 //             };
 //         }
 //         if (
@@ -323,9 +323,9 @@
 //                 showMailingDetails: false,
 //                 showBankDetails: true,
 //                 isBankOptional: false,
-//                 isGSTINOptional: false,
+//                 isTINOptional: false,
 //                 isMailingAddressOptional: false,
-//                 showGSTIN: false,
+//                 showTIN: false,
 //                 requiredFields: ['name', 'parent'],
 //             };
 //         }
@@ -344,9 +344,9 @@
 //                 showMailingDetails: false,
 //                 showBankDetails: false,
 //                 isBankOptional: true,
-//                 isGSTINOptional: false,
+//                 isTINOptional: false,
 //                 isMailingAddressOptional: true,
-//                 showGSTIN: false,
+//                 showTIN: false,
 //                 requiredFields: ['name', 'parent'],
 //             };
 //         }
@@ -367,11 +367,11 @@
 //                 showProfileImage: false,
 //                 showMailingDetails: true,
 //                 showBankDetails: true,
-//                 showGSTIN: true,
+//                 showTIN: true,
 //                 isBankOptional: true,
-//                 isGSTINOptional: currentCompanyDetails?.company_settings?.features?.enable_gst ? false : true,
+//                 isTINOptional: currentCompanyDetails?.company_settings?.features?.enable_tax ? false : true,
 //                 isMailingAddressOptional: true,
-//                 requiredFields: ['name', 'parent', 'mailing_state', 'mailing_country', ...(currentCompanyDetails?.company_settings?.features?.enable_gst ? ['gstin'] : []),],
+//                 requiredFields: ['name', 'parent', 'mailing_state', 'mailing_country', ...(currentCompanyDetails?.company_settings?.features?.enable_tax ? ['tin'] : []),],
 //             };
 //         } if (
 //             type === 'cash-in-hand'
@@ -383,9 +383,9 @@
 //                 showMailingDetails: false,
 //                 showBankDetails: true,
 //                 isBankOptional: true,
-//                 isGSTINOptional: false,
+//                 isTINOptional: false,
 //                 isMailingAddressOptional: false,
-//                 showGSTIN: false,
+//                 showTIN: false,
 //                 requiredFields: ['name', 'parent'],
 //             };
 //         }
@@ -396,14 +396,14 @@
 //             showMailingDetails: true,
 //             showBankDetails: true,
 //             isBankOptional: true,
-//             isGSTINOptional: currentCompanyDetails?.company_settings?.features?.enable_gst ? false : true,
+//             isTINOptional: currentCompanyDetails?.company_settings?.features?.enable_tax ? false : true,
 //             isMailingAddressOptional: true,
-//             showGSTIN: true,
-//             requiredFields: ['name', 'mailing_state', 'parent', ...(currentCompanyDetails?.company_settings?.features?.enable_gst ? ['gstin'] : []),],
+//             showTIN: true,
+//             requiredFields: ['name', 'mailing_state', 'parent', ...(currentCompanyDetails?.company_settings?.features?.enable_tax ? ['tin'] : []),],
 //         };
-//     }, [currentCompanyDetails?.company_settings?.features?.enable_gst, selectedTypeOption?.parent, selectedTypeOption?.user_id, selectedTypeOption?.value]);
+//     }, [currentCompanyDetails?.company_settings?.features?.enable_tax, selectedTypeOption?.parent, selectedTypeOption?.user_id, selectedTypeOption?.value]);
 
-//     const { showAll, showBankDetails, showBasicDetails, showGSTIN, showMailingDetails, showProfileImage, isBankOptional, isGSTINOptional, isMailingAddressOptional, requiredFields } = getVisibleFields();
+//     const { showAll, showBankDetails, showBasicDetails, showTIN, showMailingDetails, showProfileImage, isBankOptional, isTINOptional, isMailingAddressOptional, requiredFields } = getVisibleFields();
 
 //     const validateField = (field: keyof CustomerFormData, value: string): string => {
 //         if (!showAll && !['name', 'parent'].includes(field)) return '';
@@ -414,7 +414,7 @@
 //         if (field === 'number' && value && !/^\d{10}$/.test(value)) return 'Invalid phone number format';
 //         if (field === 'email' && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Invalid email format';
 //         if (field === 'name' && value.trim().length < 2) return 'Name must be at least 2 characters';
-//         if (field === 'gstin' && value && !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][A-Z0-9][Z][0-9A-Z]$/.test(value)) return 'Invalid GSTIN format';
+//         if (field === 'tin' && value && !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][A-Z0-9][Z][0-9A-Z]$/.test(value)) return 'Invalid TIN format';
 //         if (field === 'account_number' && value && !/^\d{9,18}$/.test(value)) return 'Invalid bank account number format';
 //         if (field === 'bank_ifsc' && value && !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(value)) return 'Invalid IFSC code format';
 //         return '';
@@ -442,7 +442,7 @@
 //                 bank_ifsc: cred?.bank_ifsc || '',
 //                 bank_branch: cred?.bank_branch || '',
 //                 account_holder: cred?.account_holder || '',
-//                 gstin: cred.gstin || '',
+//                 tin: cred.tin || '',
 //             });
 //             setSelectedTypeOption({
 //                 label: cred.parent || 'Select Group',
@@ -494,7 +494,7 @@
 //         if (data.bank_ifsc?.trim()) sanitizedData.bank_ifsc = data.bank_ifsc.trim();
 //         if (data.bank_branch?.trim()) sanitizedData.bank_branch = data.bank_branch.trim();
 //         if (data.account_holder?.trim()) sanitizedData.account_holder = data.account_holder.trim();
-//         if (data.gstin?.trim()) sanitizedData.gstin = data.gstin.trim();
+//         if (data.tin?.trim()) sanitizedData.tin = data.tin.trim();
 
 //         const formData = new FormData();
 //         Object.entries(sanitizedData).forEach(([key, value]) => {
@@ -1471,7 +1471,7 @@
 //                     </Paper>}
 
 //                     {/* Tax Info Section */}
-//                     {showGSTIN && <Paper
+//                     {showTIN && <Paper
 //                         elevation={0}
 //                         sx={{
 //                             p: 2,
@@ -1499,22 +1499,22 @@
 //                         <Box sx={{ mt: 2 }}>
 //                             <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
 
-//                                 {showGSTIN && <Box sx={{ width: '100%' }}>
+//                                 {showTIN && <Box sx={{ width: '100%' }}>
 //                                     <FormControl fullWidth>
 //                                         <Typography variant="subtitle2" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
 //                                             <Label fontSize="small" color="primary" />
-//                                             GSTIN Number
-//                                             <Chip label={!isGSTINOptional ? "Required" : 'Optional'} size="small" color={!isGSTINOptional ? "primary" : "default"} variant="outlined" />
+//                                             TIN Number
+//                                             <Chip label={!isTINOptional ? "Required" : 'Optional'} size="small" color={!isTINOptional ? "primary" : "default"} variant="outlined" />
 //                                         </Typography>
 //                                         <TextField
 //                                             fullWidth
 //                                             size="small"
 //                                             placeholder="27XXXXXXXXXXXX"
-//                                             value={data.gstin || ''}
-//                                             required={!isGSTINOptional}
-//                                             onChange={(e) => handleInputChange('gstin', e.target.value)}
-//                                             error={!!validationErrors.gstin}
-//                                             helperText={validationErrors.gstin || "15-digit GSTIN number"}
+//                                             value={data.tin || ''}
+//                                             required={!isTINOptional}
+//                                             onChange={(e) => handleInputChange('tin', e.target.value)}
+//                                             error={!!validationErrors.tin}
+//                                             helperText={validationErrors.tin || "15-digit TIN number"}
 //                                             InputProps={{
 //                                                 sx: {
 //                                                     borderRadius: 1,

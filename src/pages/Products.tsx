@@ -89,7 +89,7 @@ const ProductsListing: React.FC = () => {
   const { user, current_company_id } = useSelector((state: RootState) => state.auth);
   const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
   const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
-  const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
+  const tax_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_tax;
 
   const [selectedProduct, setSelectedProduct] = useState<ProductUpdate | null>(null);
   const [openCategoryModal, setOpenCategoryModal] = useState<boolean>(false);
@@ -525,20 +525,20 @@ const ProductsListing: React.FC = () => {
                     </TableSortLabel>
                   </Tooltip>
                 </TableCell>
-                {/* {!gst_enable && <TableCell align="center" sx={{ px: 1 }}>
+                {/* {!tax_enable && <TableCell align="center" sx={{ px: 1 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
                     Low Stock Alert
                   </Typography>
                 </TableCell>} */}
-                {gst_enable && <TableCell align="center" sx={{ px: 1 }}>
+                {tax_enable && <TableCell align="center" sx={{ px: 1 }}>
                   <Tooltip title="Sort by Bar-Code" arrow>
                     <TableSortLabel
-                      active={sortBy === "gst_hsn_code"}
-                      direction={sortBy === "gst_hsn_code" ? sortOrder : "asc"}
+                      active={sortBy === "hsn_code"}
+                      direction={sortBy === "hsn_code" ? sortOrder : "asc"}
                       onClick={() => {
                         setData((prevState) => ({
                           ...prevState,
-                          sortBy: "gst_hsn_code",
+                          sortBy: "hsn_code",
                           sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
                         }));
                       }}

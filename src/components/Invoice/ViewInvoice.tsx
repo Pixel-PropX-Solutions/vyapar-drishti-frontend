@@ -60,7 +60,7 @@ export const ViewInvoiceInfo = () => {
     const { current_company_id, user } = useSelector((state: RootState) => state.auth);
     const { invoiceData } = useSelector((state: RootState) => state.invoice);
     const currentCompanyDetails = user?.company?.find((company: any) => company._id === current_company_id);
-    const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
+    const tax_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_tax;
 
     const [isLoading, _setLoading] = useState<boolean>(false);
 
@@ -327,10 +327,11 @@ export const ViewInvoiceInfo = () => {
                                 ) : (
                                     <Stack spacing={1}>
                                         {[
-                                            { label: 'Sub-total', value: `₹${invoiceData?.inventory?.reduce((acc, item) => acc + item.amount, 0)}` },
-                                            // { label: 'Discount', value: `₹${invoiceData.summary.discount}` },
-                                            // { label: 'Total Tax', value: `₹${invoiceData.summary.totalTax}` },
-                                            // { label: 'Additional Charges', value: `₹${invoiceData.summary.additionalCharges}` }
+                                            // { label: 'Sub-total', value: `₹ ${invoiceData?.total_amount}` },
+                                            // { label: 'Discount', value: `₹ ${invoiceData?.discount}` },
+                                            { label: 'Total Amount', value: `₹ ${invoiceData?.total}` },
+                                            { label: 'Total Tax', value: `₹ ${invoiceData?.total_tax}` },
+                                            // { label: 'Additional Charges', value: `₹ ${invoiceData?.additional_charge}` }
                                         ].map((item, index) => (
                                             <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                 <Typography variant="inherit" color="text.secondary">
@@ -356,7 +357,7 @@ export const ViewInvoiceInfo = () => {
                                                 Grand Total
                                             </Typography>
                                             <Typography variant="h6" fontWeight="bold" color="success.main">
-                                                ₹{Math.abs(invoiceData?.accounting_entries.find(entry => entry.ledger === invoiceData?.party_name)?.amount || 0)}
+                                                ₹{Math.abs(invoiceData?.grand_total ?? 0)}
                                             </Typography>
                                         </Box>
                                     </Stack>
@@ -402,12 +403,12 @@ export const ViewInvoiceInfo = () => {
                                             <TableHead>
                                                 <TableRow>
                                                     <TableCell sx={{ fontWeight: 'bold' }}>Product</TableCell>
-                                                    {gst_enable && <TableCell align="center" sx={{ fontWeight: 'bold' }}>HSN/SAC</TableCell>}
+                                                    {tax_enable && <TableCell align="center" sx={{ fontWeight: 'bold' }}>HSN/SAC</TableCell>}
                                                     <TableCell align="center" sx={{ fontWeight: 'bold' }}>Qty</TableCell>
                                                     <TableCell align="right" sx={{ fontWeight: 'bold' }}>Rate (₹)</TableCell>
                                                     <TableCell align="right" sx={{ fontWeight: 'bold' }}>Price (₹)</TableCell>
-                                                    {gst_enable && <TableCell align="center" sx={{ fontWeight: 'bold' }}>GST %</TableCell>}
-                                                    {gst_enable && <TableCell align="right" sx={{ fontWeight: 'bold' }}>GST (₹)</TableCell>}
+                                                    {tax_enable && <TableCell align="center" sx={{ fontWeight: 'bold' }}>TAX %</TableCell>}
+                                                    {tax_enable && <TableCell align="right" sx={{ fontWeight: 'bold' }}>TAX (₹)</TableCell>}
                                                     <TableCell align="right" sx={{ fontWeight: 'bold' }}>Total (₹)</TableCell>
                                                 </TableRow>
                                             </TableHead>
@@ -427,7 +428,7 @@ export const ViewInvoiceInfo = () => {
                                                                 {item.item}
                                                             </Typography>
                                                         </TableCell>
-                                                        {gst_enable && <TableCell align="center">
+                                                        {tax_enable && <TableCell align="center">
                                                             <Chip
                                                                 label={item.hsn_code}
                                                                 size="small"
@@ -441,15 +442,15 @@ export const ViewInvoiceInfo = () => {
                                                         </TableCell>
                                                         <TableCell align="right">₹{item.rate}</TableCell>
                                                         <TableCell align="right">₹{item.rate * item.quantity}</TableCell>
-                                                        {gst_enable && <TableCell align="center">
+                                                        {tax_enable && <TableCell align="center">
                                                             <Chip
-                                                                label={`${item.gst}%`}
+                                                                label={`${item.tax_rate}%`}
                                                                 size="small"
                                                                 color="info"
                                                                 variant="filled"
                                                             />
                                                         </TableCell>}
-                                                        {gst_enable && <TableCell align="right">₹{(parseFloat(item.gst_amount ?? '') ?? 0).toFixed(2)}</TableCell>}
+                                                        {tax_enable && <TableCell align="right">₹{(item.tax_amount ?? 0).toFixed(2)}</TableCell>}
                                                         <TableCell align="right">
                                                             <Typography variant="body1" fontWeight="bold" color="success.main">
                                                                 ₹{(item.amount ?? 0).toFixed(2)}
@@ -458,13 +459,87 @@ export const ViewInvoiceInfo = () => {
                                                     </TableRow>
                                                 ))}
 
-                                                {/* Total Row */}
+                                                <TableRow sx={{
+                                                    "& .MuiTableCell-root": {
+                                                        padding: '8px 16px',
+                                                    },
+                                                }}>
+                                                    <TableCell colSpan={tax_enable ? 7 : 4} align="right">
+                                                    </TableCell>
+                                                    <TableCell align="right" >
+                                                    </TableCell>
+                                                </TableRow>
+                                                <TableRow sx={{
+                                                    bgcolor: alpha(theme.palette.success.light, 0.05),
+                                                    "& .MuiTableCell-root": {
+                                                        padding: '8px 16px',
+                                                    },
+                                                }}>
+                                                    <TableCell colSpan={tax_enable ? 7 : 4} align="right">
+                                                        Sub-Total:
+                                                    </TableCell>
+                                                    <TableCell align="right" sx={{ color: 'success.main' }}>
+                                                        ₹{Math.abs(invoiceData?.total_amount || 0)}
+                                                    </TableCell>
+                                                </TableRow>
+                                                <TableRow sx={{
+                                                    bgcolor: alpha(theme.palette.success.light, 0.05),
+                                                    "& .MuiTableCell-root": {
+                                                        padding: '8px 16px',
+                                                    },
+                                                }}>
+                                                    <TableCell colSpan={tax_enable ? 7 : 4} align="right">
+                                                        Discount Total:
+                                                    </TableCell>
+                                                    <TableCell align="right" sx={{ color: 'success.main' }}>
+                                                        ₹{Math.abs(invoiceData?.discount || 0)}
+                                                    </TableCell>
+                                                </TableRow>
+                                                <TableRow sx={{
+                                                    bgcolor: alpha(theme.palette.success.light, 0.05),
+                                                    "& .MuiTableCell-root": {
+                                                        padding: '8px 16px',
+                                                    },
+                                                }}>
+                                                    <TableCell colSpan={tax_enable ? 7 : 4} align="right">
+                                                        Total :
+                                                    </TableCell>
+                                                    <TableCell align="right" sx={{ color: 'success.main' }}>
+                                                        ₹{Math.abs(invoiceData?.total || 0)}
+                                                    </TableCell>
+                                                </TableRow>
+                                                <TableRow sx={{
+                                                    bgcolor: alpha(theme.palette.success.light, 0.05),
+                                                    "& .MuiTableCell-root": {
+                                                        padding: '8px 16px',
+                                                    },
+                                                }}>
+                                                    <TableCell colSpan={tax_enable ? 7 : 4} align="right" >
+                                                        Total Tax:
+                                                    </TableCell>
+                                                    <TableCell align="right" sx={{ color: 'success.main' }}>
+                                                        ₹{Math.abs(invoiceData?.total_tax || 0)}
+                                                    </TableCell>
+                                                </TableRow>
+                                                <TableRow sx={{
+                                                    bgcolor: alpha(theme.palette.success.light, 0.05),
+                                                    "& .MuiTableCell-root": {
+                                                        padding: '8px 16px',
+                                                    },
+                                                }}>
+                                                    <TableCell colSpan={tax_enable ? 7 : 4} align="right">
+                                                        Additional Charges:
+                                                    </TableCell>
+                                                    <TableCell align="right" sx={{ color: 'success.main' }}>
+                                                        ₹{Math.abs(invoiceData?.additional_charge || 0)}
+                                                    </TableCell>
+                                                </TableRow>
                                                 <TableRow sx={{ bgcolor: alpha(theme.palette.success.main, 0.05) }}>
-                                                    <TableCell colSpan={gst_enable ? 7 : 4} align="right" sx={{ fontWeight: 'bold', fontSize: '1.1em' }}>
+                                                    <TableCell colSpan={tax_enable ? 7 : 4} align="right" sx={{ fontWeight: 'bold', fontSize: '1.1em' }}>
                                                         Grand Total:
                                                     </TableCell>
                                                     <TableCell align="right" sx={{ fontWeight: 'bold', fontSize: '1.2em', color: 'success.main' }}>
-                                                        ₹{Math.abs(invoiceData?.accounting_entries.find(entry => entry.ledger === invoiceData?.party_name)?.amount || 0)}
+                                                        ₹{Math.abs(invoiceData?.grand_total || 0)}
                                                     </TableCell>
                                                 </TableRow>
                                             </TableBody>

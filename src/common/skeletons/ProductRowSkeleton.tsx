@@ -12,7 +12,7 @@ export const ProductRowSkeleton: React.FC = () => {
     const { user, current_company_id } = useSelector((state: RootState) => state.auth);
     const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
     const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
-    const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
+    const tax_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_tax;
 
     return (
         <TableRow sx={{
@@ -32,10 +32,10 @@ export const ProductRowSkeleton: React.FC = () => {
             {/* <TableCell align="center">
                 <Skeleton variant="text" width={80} height={20} sx={{ mx: 'auto' }} />
             </TableCell> */}
-            {/* {!gst_enable && <TableCell align="center">
+            {/* {!tax_enable && <TableCell align="center">
                 <Skeleton variant="text" width={80} height={20} sx={{ mx: 'auto' }} />
             </TableCell>} */}
-            {gst_enable && <TableCell align="center">
+            {tax_enable && <TableCell align="center">
                 <Skeleton variant="text" width={60} height={20} sx={{ mx: 'auto' }} />
             </TableCell>}
             <TableCell align="center">

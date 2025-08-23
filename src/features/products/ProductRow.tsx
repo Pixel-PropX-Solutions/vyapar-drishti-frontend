@@ -43,7 +43,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
     const { user, current_company_id } = useSelector((state: RootState) => state.auth);
     const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
     const currentCompanyDetails = user?.company?.find((c: any) => c._id == currentCompanyId);
-    const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
+    const tax_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_tax;
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const closingValue = (((product?.purchase_value + product?.opening_value) / (product?.purchase_qty + product?.opening_balance)) * product?.current_stock) || 0;
@@ -123,7 +123,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                     </TableCell>
 
                     {/* Product Low Stock Alert */}
-                    {/* {!gst_enable && <TableCell align="center" sx={{ px: 1 }}>
+                    {/* {!tax_enable && <TableCell align="center" sx={{ px: 1 }}>
                         <Typography
                             variant="body1"
                             sx={{
@@ -136,7 +136,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                     </TableCell>} */}
 
                     {/* Product HSN/SAC Code */}
-                    {gst_enable && <TableCell align="center" sx={{ px: 1 }}>
+                    {tax_enable && <TableCell align="center" sx={{ px: 1 }}>
                         <Typography
                             variant="body1"
                             sx={{
@@ -144,7 +144,7 @@ export const ProductRow: React.FC<ProductRowProps> = ({ product, onDelete, onEdi
                                 color: theme.palette.text.secondary,
                             }}
                         >
-                            {product.gst_hsn_code ? (`#${product.gst_hsn_code}`) : ('-')}
+                            {product.hsn_code ? (`#${product.hsn_code}`) : ('-')}
                         </Typography>
                     </TableCell>}
 

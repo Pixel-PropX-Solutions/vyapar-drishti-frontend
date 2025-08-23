@@ -142,6 +142,14 @@ const UpdatePaymentReceipt: React.FC = () => {
                 vehicle_number: "",
                 status: "",
                 due_date: "",
+                paid_amount: 0,
+                total_amount: total,
+                total: total,
+                discount: 0,
+                additional_charge: 0,
+                total_tax: 0,
+                roundoff: 0,
+                grand_total: total,
                 accounting,
                 items: []
             };

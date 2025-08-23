@@ -1,4 +1,3 @@
-import { Cancel } from "@mui/icons-material";
 import { useTheme } from "@mui/material";
 import { ActionButton } from "./ActionButton1";
 
@@ -9,6 +8,7 @@ interface ActionButtonProps {
   disabled?: boolean;
   text?: React.ReactNode | string;
 }
+
 const ActionButtonCancel: React.FC<ActionButtonProps> = ({
   variant,
   startIcon,
@@ -20,7 +20,7 @@ const ActionButtonCancel: React.FC<ActionButtonProps> = ({
   return (
     <ActionButton
       variant={variant || 'contained'}
-      startIcon={startIcon || <Cancel />}
+      startIcon={startIcon}
       color="error"
       onClick={onClick}
       disabled={disabled}

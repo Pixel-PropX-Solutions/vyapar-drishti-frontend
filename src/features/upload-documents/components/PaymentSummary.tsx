@@ -23,8 +23,8 @@ const PaymentSummary: React.FC<PaymentSummaryProps> = ({ totals }) => {
                         <Typography variant="body2">&#8377;{totals?.discount?.toFixed(2)}</Typography>
                     </Box>
                     <Box display="flex" justifyContent="space-between" mb={1}>
-                        <Typography variant="body2">GST Total:</Typography>
-                        <Typography variant="body2">&#8377;{totals?.GST_total?.toFixed(2)}</Typography>
+                        <Typography variant="body2">TAX Total:</Typography>
+                        <Typography variant="body2">&#8377;{totals?.TAX_total?.toFixed(2)}</Typography>
                     </Box>
                     <Divider sx={{ my: 1 }} />
                     <Box display="flex" justifyContent="space-between">

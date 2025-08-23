@@ -28,6 +28,7 @@ userApi.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 userApi.interceptors.response.use(
     (response: AxiosResponse): AxiosResponse => {
         if (response.data.accessToken && response.data.refreshToken) {
+            console.log("Response in user api", response)
             localStorage.setItem("accessToken", response.data.accessToken);
             localStorage.setItem("refreshToken", response.data.refreshToken);
             const decoded: any = jwtDecode(response.data.accessToken);
@@ -52,6 +53,7 @@ userApi.interceptors.response.use(
                     {},
                     { withCredentials: true }
                 );
+                console.log("Token refresh response:", data);
                 localStorage.setItem("accessToken", data.accessToken);
                 localStorage.setItem("refreshToken", data.refreshToken);
                 const decoded: any = jwtDecode(data.accessToken);
@@ -73,6 +75,7 @@ userApi.interceptors.response.use(
                 window.location.href = "/";
             }
         }
+        console.error("API response error:", error);
 
         return Promise.reject(error);
     }

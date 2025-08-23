@@ -3,7 +3,6 @@ import {
     Box,
     Button,
     Container,
-    CssBaseline,
     TextField,
     Typography,
     Grid,
@@ -239,7 +238,6 @@ const ResetPasswordForm: React.FC = () => {
             }}
         >
             <Container component="main" maxWidth="sm">
-                <CssBaseline />
                 <Paper
                     elevation={0}
                     sx={{
@@ -262,6 +260,7 @@ const ResetPasswordForm: React.FC = () => {
                             sx={{
                                 display: "flex",
                                 alignItems: "center",
+                                flexDirection: isMobile ? "column" : "row",
                                 gap: 1,
                                 mb: 1,
                             }}

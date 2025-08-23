@@ -162,12 +162,12 @@ export const InventoryGroupsRow: React.FC<ProductRowProps> = ({ inventoryGroup, 
                                         color: theme.palette.text.secondary,
                                     }}
                                 >
-                                    {inventoryGroup.gst_hsn_code || 'No HSN/SAC Code'}
+                                    {inventoryGroup.hsn_code || 'No HSN/SAC Code'}
                                 </Typography>
                             </Box>
                         </Box>
                     </TableCell> */}
-                    {/* GST Taxability */}
+                    {/* TAX Taxability */}
                     {/* <TableCell align="right" sx={{ px: 1 }}>
                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -179,7 +179,7 @@ export const InventoryGroupsRow: React.FC<ProductRowProps> = ({ inventoryGroup, 
                                         color: theme.palette.success.main,
                                     }}
                                 >
-                                    {inventoryGroup.gst_taxability || 'Taxable'}
+                                    {inventoryGroup.taxability || 'Taxable'}
                                 </Typography>
                             </Box>
                         </Box>

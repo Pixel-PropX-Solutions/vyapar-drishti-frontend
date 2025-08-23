@@ -506,11 +506,11 @@
 //                       <Grid container spacing={2}>
 //                         <Grid item xs={12} md={6}>
 //                           <TextField
-//                             label="GSTIN"
+//                             label="TIN"
 //                             fullWidth
-//                             value={invoice?.stockist?.GSTIN}
+//                             value={invoice?.stockist?.TIN}
 //                             onChange={(e) => handleChange(e.target.name, e.target.value)}
-//                             name="stockist.GSTIN"
+//                             name="stockist.TIN"
 //                             disabled={!editMode} // Ensure this is correctly bound to editMode
 //                             margin="normal"
 //                             size="small"
@@ -638,11 +638,11 @@
 //                       <Grid container spacing={2}>
 //                         <Grid item xs={12} md={6}>
 //                           <TextField
-//                             label="GSTIN"
+//                             label="TIN"
 //                             fullWidth
-//                             value={invoice?.chemist?.GSTIN}
+//                             value={invoice?.chemist?.TIN}
 //                             onChange={(e) => handleChange(e.target.name, e.target.value)}
-//                             name="chemist.GSTIN"
+//                             name="chemist.TIN"
 //                             disabled={!editMode}
 //                             margin="normal"
 //                             size="small"
@@ -733,9 +733,9 @@
 //                               );
 //                               // Recalculate grand total
 //                               const subtotal = invoice?.totals?.subtotal ?? 0;
-//                               const gstTotal = invoice?.totals?.GST_total ?? 0;
+//                               const taxTotal = invoice?.totals?.TAX_total ?? 0;
 //                               const newGrandTotal =
-//                                 subtotal - discount + gstTotal;
+//                                 subtotal - discount + taxTotal;
 //                               handleChange(
 //                                 'totals.grand_total',
 //                                 newGrandTotal
@@ -757,14 +757,14 @@
 //                         </Grid>
 //                         <Grid item xs={6}>
 //                           <TextField
-//                             label="GST Total"
+//                             label="TAX Total"
 //                             // type="number"
 //                             fullWidth
-//                             value={invoice?.totals?.GST_total}
+//                             value={invoice?.totals?.TAX_total}
 //                             disabled={!editMode}
 //                             onChange={(e) =>
 //                               handleChange(
-//                                 `totals.GST_total`,
+//                                 `totals.TAX_total`,
 //                                 e.target.value
 //                               )
 //                             }
@@ -896,14 +896,14 @@
 //                           mb={1}
 //                         >
 //                           <Typography variant="body1" color="text.secondary">
-//                             GST Total:
+//                             TAX Total:
 //                           </Typography>
 //                           <Typography
 //                             variant="body1"
 //                             fontWeight="500"
 //                             color="#2e7d32"
 //                           >
-//                             {`+ ${(Number(invoice?.totals?.GST_total || 0)).toFixed(2)} &#8377;`}
+//                             {`+ ${(Number(invoice?.totals?.TAX_total || 0)).toFixed(2)} &#8377;`}
 //                           </Typography>
 //                         </Box>
 

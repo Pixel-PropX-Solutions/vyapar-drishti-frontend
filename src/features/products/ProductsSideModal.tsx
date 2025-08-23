@@ -31,7 +31,6 @@ import { viewAllCategories } from '@/services/category';
 import { AppDispatch, RootState } from '@/store/store';
 import { useDispatch, useSelector } from 'react-redux';
 import { FormCreateProduct, ProductUpdate } from '@/utils/types';
-import { useNavigate } from 'react-router-dom';
 
 // Components
 import BasicDetailsSection from './BasicDetailsSection';
@@ -47,7 +46,7 @@ interface SideModalProps {
     drawer: boolean;
     setRefreshKey: React.Dispatch<React.SetStateAction<number>>;
     setDrawer: React.Dispatch<React.SetStateAction<boolean>>;
-    setSelectedProduct: React.Dispatch<React.SetStateAction<ProductUpdate | null>>;
+    setSelectedProduct?: React.Dispatch<React.SetStateAction<ProductUpdate | null>>;
     product?: ProductUpdate | null;
 }
 
@@ -77,12 +76,11 @@ const ColorlibConnector = styled(StepConnector)(({ theme }) => ({
 const ProductsSideModal = (props: SideModalProps) => {
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
-    const navigate = useNavigate();
     const { setDrawer, drawer, setRefreshKey, product, setSelectedProduct } = props;
     const { user, current_company_id } = useSelector((state: RootState) => state.auth);
     const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
     const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
-    const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
+    const tax_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_tax;
 
 
     // State management
@@ -134,17 +132,17 @@ const ProductsSideModal = (props: SideModalProps) => {
         opening_balance: 0,
         opening_rate: 0,
         opening_value: 0,
-        gst_nature_of_goods: '',
-        gst_hsn_code: '',
-        gst_taxability: '',
-        gst_percentage: '',
+        nature_of_goods: '',
+        hsn_code: '',
+        taxability: '',
+        tax_rate: '',
         low_stock_alert: 0,
     });
 
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     // Step configuration
-    const steps = gst_enable ? [
+    const steps = tax_enable ? [
         { label: 'Basic Details', icon: EditIcon },
         { label: 'Additional Info', icon: AddIcon },
         { label: 'Advanced Settings', icon: CheckCircleIcon }
@@ -159,14 +157,14 @@ const ProductsSideModal = (props: SideModalProps) => {
         const errors: Record<string, string> = {};
         if (!data.stock_item_name.trim()) errors.product_name = 'Product name is required';
         if (!data.unit.trim()) errors.selling_price = 'Product must have a measuring unit';
-        if (currentCompanyDetails?.company_settings?.features?.enable_gst) {
-            if (!data.gst_hsn_code.trim()) errors.gst_hsn_code = 'GST HSN code is required';
-            if (!data.gst_taxability.trim()) errors.gst_taxability = 'GST taxability is required';
-            if (data.gst_taxability === 'Taxable' && !data.gst_percentage.trim()) errors.gst_percentage = 'GST percentage is required';
+        if (currentCompanyDetails?.company_settings?.features?.enable_tax) {
+            if (!data.hsn_code.trim()) errors.hsn_code = 'HSN code is required';
+            if (!data.taxability.trim()) errors.taxability = 'Taxability is required';
+            if (data.taxability === 'Taxable' && !data.tax_rate.trim()) errors.tax_rate = 'Tax percentage is required';
         }
         setValidationErrors(errors);
         return errors;
-    }, [currentCompanyDetails?.company_settings?.features?.enable_gst, data]);
+    }, [currentCompanyDetails?.company_settings?.features?.enable_tax, data]);
 
     // Check step completion
     const checkStepCompletion = useCallback(() => {
@@ -185,7 +183,7 @@ const ProductsSideModal = (props: SideModalProps) => {
 
         if (
             steps.length > 2 &&
-            (currentStep > 1 || data.gst_hsn_code || data.gst_taxability || data.gst_percentage)
+            (currentStep > 1 || data.hsn_code || data.taxability || data.tax_rate)
         ) {
             newCompletedSteps.add(2);
         }
@@ -262,9 +260,9 @@ const ProductsSideModal = (props: SideModalProps) => {
                 unit_id: data.unit_id.trim(),
                 company_id: (currentCompanyId || '').trim(),
                 is_deleted: data.is_deleted === false,
-                gst_hsn_code: data.gst_hsn_code.trim(),
-                gst_taxability: data.gst_taxability.trim(),
-                gst_percentage: data.gst_percentage.trim(),
+                hsn_code: data.hsn_code.trim(),
+                taxability: data.taxability.trim(),
+                tax_rate: data.tax_rate.trim(),
                 low_stock_alert: data.low_stock_alert,
                 opening_balance: data.opening_balance,
                 opening_rate: data.opening_rate,
@@ -287,9 +285,8 @@ const ProductsSideModal = (props: SideModalProps) => {
                 await dispatch(updateProduct({ data: formData, id: product._id }))
                     .unwrap()
                     .then(() => {
-                        navigate(`/products`);
                         setRefreshKey(prev => prev + 1);
-                        setSelectedProduct(null);
+                        setSelectedProduct?.(null);
                         toast.success("Product successfully updated! 🎉")
                     }).catch((error) => {
                         toast.error(error || "An unexpected error occurred. Please try again later.")
@@ -298,9 +295,8 @@ const ProductsSideModal = (props: SideModalProps) => {
                 await dispatch(createProduct({ productData: formData }))
                     .unwrap()
                     .then(() => {
-                        navigate(`/products`);
                         setRefreshKey(prev => prev + 1);
-                        setSelectedProduct(null);
+                        setSelectedProduct?.(null);
                         toast.success("Product successfully created! 🎉")
                     }).catch((error) => {
                         toast.error(error || "An unexpected error occurred. Please try again later.")
@@ -334,11 +330,11 @@ const ProductsSideModal = (props: SideModalProps) => {
             opening_balance: 0,
             opening_rate: 0,
             opening_value: 0,
-            gst_nature_of_goods: '',
-            gst_hsn_code: '',
-            gst_taxability: '',
+            nature_of_goods: '',
+            hsn_code: '',
+            taxability: '',
             low_stock_alert: 0,
-            gst_percentage: '',
+            tax_rate: '',
         });
         setImagePreview(null);
         setCurrentStep(0);
@@ -352,7 +348,7 @@ const ProductsSideModal = (props: SideModalProps) => {
     const handleClose = useCallback(() => {
         setDrawer(false);
         setIsLoading(false);
-        setSelectedProduct(null);
+        setSelectedProduct?.(null);
         setSelectedUnitOption(null);
         setSelectedCategoryOption(null);
         setSelectedGroupOption(null);
@@ -402,11 +398,11 @@ const ProductsSideModal = (props: SideModalProps) => {
                 opening_balance: product.opening_balance || 0,
                 opening_rate: product.opening_rate || 0,
                 opening_value: product.opening_value || 0,
-                gst_nature_of_goods: product.gst_nature_of_goods || '',
-                gst_hsn_code: product.gst_hsn_code || '',
-                gst_taxability: product.gst_taxability || '',
+                nature_of_goods: product.nature_of_goods || '',
+                hsn_code: product.hsn_code || '',
+                taxability: product.taxability || '',
                 low_stock_alert: product.low_stock_alert || 0,
-                gst_percentage: product.gst_percentage || '',
+                tax_rate: product.tax_rate || '',
             });
             setImagePreview(typeof product?.image === 'string' ? product.image : '');
         }
@@ -467,8 +463,8 @@ const ProductsSideModal = (props: SideModalProps) => {
     }, [inventoryGroupLists, data.group, selectedGroupOption, data.group_id]);
 
     useEffect(() => {
-        setShowGstFields(!!data.gst_hsn_code);
-    }, [data.gst_hsn_code]);
+        setShowGstFields(!!data.hsn_code);
+    }, [data.hsn_code]);
 
     // Step renderer
     const renderStepContent = () => {
@@ -486,7 +482,7 @@ const ProductsSideModal = (props: SideModalProps) => {
             setOpenCategoryModal,
             setOpenGroupModal,
             showGstFields,
-            isHSNRequired: gst_enable,
+            isHSNRequired: tax_enable,
             selectedUnitOption,
             setSelectedUnitOption,
             imagePreview,
@@ -520,12 +516,12 @@ const ProductsSideModal = (props: SideModalProps) => {
             case 1:
                 return true;
             case 2:
-                if (gst_enable) {
-                    if (!data.gst_hsn_code.trim() || !data.gst_taxability.trim()) {
+                if (tax_enable) {
+                    if (!data.hsn_code.trim() || !data.taxability.trim()) {
                         return false;
                     }
-                    if (data.gst_taxability === 'Taxable') {
-                        return !!data.gst_percentage.trim();
+                    if (data.taxability === 'Taxable') {
+                        return !!data.tax_rate.trim();
                     }
                     return true;
                 } else {
@@ -536,7 +532,7 @@ const ProductsSideModal = (props: SideModalProps) => {
         }
     };
 
-    const isHSNCodeEntered = gst_enable ? data.gst_hsn_code.trim() !== '' : true;
+    const isHSNCodeEntered = tax_enable ? data.hsn_code.trim() !== '' : true;
 
     return (
         <>

@@ -42,7 +42,7 @@ const InvoiceSummaryCard: React.FC<InvoiceSummaryCardProps> = ({
                     <Typography variant="body2" mt={1}>
                         Phone: {details?.phone}
                     </Typography>
-                    <Typography variant="body2">GSTIN: {details?.GSTIN}</Typography>
+                    <Typography variant="body2">TIN: {details?.TIN}</Typography>
                     <Typography variant="body2">DL No: {details?.DL_No}</Typography>
                 </CardContent>
             </StyledCard>

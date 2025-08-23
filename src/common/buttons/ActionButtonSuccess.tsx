@@ -1,4 +1,3 @@
-import { AddCircleOutline } from "@mui/icons-material";
 import { useTheme } from "@mui/material";
 import { ActionButton } from "./ActionButton1";
 
@@ -20,7 +19,7 @@ const ActionButtonSuccess: React.FC<ActionButtonProps> = ({
     return (
         <ActionButton
             variant={variant || 'contained'}
-            startIcon={startIcon || <AddCircleOutline />}
+            startIcon={startIcon}
             color="success"
             onClick={onClick}
             disabled={disabled}

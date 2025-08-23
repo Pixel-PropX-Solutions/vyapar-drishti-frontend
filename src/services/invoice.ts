@@ -1,5 +1,5 @@
 import userApi from "@/api/api";
-import { CreateInvoiceData, CreateInvoiceWithGSTData, UpdateGSTInvoice, UpdateInvoice } from "@/utils/types";
+import { CreateInvoiceData, CreateInvoiceWithTAXData, UpdateTAXInvoice, UpdateInvoice } from "@/utils/types";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 
@@ -19,20 +19,23 @@ export const createInvoice = createAsyncThunk(
                 return rejectWithValue("Invoice creation failed");
             }
         } catch (error: any) {
+            console.error("Error in createInvoice:", error);
             return rejectWithValue(error?.response?.data?.message);
         }
     }
 );
 
 
-export const createInvoiceWithGST = createAsyncThunk(
-    "create/invoice/gst",
+export const createInvoiceWithTAX = createAsyncThunk(
+    "create/invoice/tax",
     async (
-        data: CreateInvoiceWithGSTData,
+        data: CreateInvoiceWithTAXData,
         { rejectWithValue }
     ) => {
         try {
-            const createRes = await userApi.post(`/invoices/create/vouchar/gst`, data);
+            console.log("Data in createInvoiceWithTAX:", data);
+            const createRes = await userApi.post(`/invoices/create/vouchar/tax`, data);
+            console.log("Create TAX Invoice api response ", createRes);
 
             if (createRes.data.success === true) {
                 return;
@@ -106,6 +109,8 @@ export const viewInvoice = createAsyncThunk(
             const response = await userApi.get(
                 `/invoices/get/vouchar/${vouchar_id}?company_id=${company_id}`
             );
+
+            console.log("View Invoice API Response", response);
 
             if (response.data.success === true) {
                 const invoiceData = response.data.data;
@@ -231,17 +236,17 @@ export const updateInvoice = createAsyncThunk(
 );
 
 
-export const updateGSTInvoice = createAsyncThunk(
-    "update/invoice/gst/vouchar",
+export const updateTaxInvoice = createAsyncThunk(
+    "update/invoice/tax/vouchar",
     async (
-        data: UpdateGSTInvoice,
+        data: UpdateTAXInvoice,
         { rejectWithValue }
     ) => {
         try {
 
-            console.log("updateGSTInvoice:", data);
-            const updateRes = await userApi.put(`/invoices/update/vouchar/gst/${data.vouchar_id}`, data);
-            console.log("Response from updateGSTInvoice:", updateRes);
+            console.log("updateTaxInvoice:", data);
+            const updateRes = await userApi.put(`/invoices/update/vouchar/tax/${data.vouchar_id}`, data);
+            console.log("Response from updateTaxInvoice:", updateRes);
 
             if (updateRes.data.success === true) {
                 return;
@@ -283,8 +288,8 @@ export const printInvoices = createAsyncThunk(
     }
 );
 
-export const printGSTInvoices = createAsyncThunk(
-    "print/gst/invoices",
+export const printTAXInvoices = createAsyncThunk(
+    "print/tax/invoices",
     async (
         {
             vouchar_id,
@@ -299,10 +304,10 @@ export const printGSTInvoices = createAsyncThunk(
     ) => {
         try {
             const response = await userApi.get(
-                `/invoices/print/vouchar/gst?vouchar_id=${vouchar_id}&company_id=${company_id}`
+                `/invoices/print/vouchar/tax?vouchar_id=${vouchar_id}&company_id=${company_id}`
             );
 
-            console.log("Response from printGSTInvoices:", response);
+            console.log("Response from printTAXInvoices:", response);
 
             if (response.data.success === true) {
                 const data = response.data.data;
@@ -423,8 +428,8 @@ export const deleteInvoice = createAsyncThunk(
 );
 
 
-export const deleteGSTInvoice = createAsyncThunk(
-    "delete/gst/invoice",
+export const deleteTAXInvoice = createAsyncThunk(
+    "delete/tax/invoice",
     async (
         {
             vouchar_id,
@@ -437,7 +442,7 @@ export const deleteGSTInvoice = createAsyncThunk(
     ) => {
         try {
             const response = await userApi.delete(
-                `/invoices/gst/delete/${vouchar_id}?company_id=${company_id}`
+                `/invoices/tax/delete/${vouchar_id}?company_id=${company_id}`
             );
 
             if (response.data.success === true) {

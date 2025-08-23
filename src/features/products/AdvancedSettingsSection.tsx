@@ -40,16 +40,16 @@ const AdvancedSettingsSection: React.FC<AdvancedSettingsSectionProps> = ({
 }) => {
     const theme = useTheme();
 
-    // GST Nature of Goods options
-    const gstNatureOptions = [
+    // Nature of Goods options
+    const natureOptions = [
         { value: 'Goods', label: 'Goods' },
         { value: 'Services', label: 'Services' },
         { value: 'Composite Supply', label: 'Composite Supply' },
         { value: 'Mixed Supply', label: 'Mixed Supply' }
     ];
 
-    // GST Taxability options
-    const gstTaxabilityOptions = [
+    // Taxability options
+    const taxabilityOptions = [
         { value: 'Taxable', label: 'Taxable' },
         { value: 'Exempt', label: 'Exempt' },
         { value: 'Zero Rated', label: 'Zero Rated' },
@@ -74,13 +74,13 @@ const AdvancedSettingsSection: React.FC<AdvancedSettingsSectionProps> = ({
                                 Advanced Settings
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                Configure GST details and other advanced product settings
+                                Configure TAX details and other advanced product settings
                             </Typography>
                         </Box>
                     </Stack>
                 </Box>
 
-                {/* GST Settings Card */}
+                {/* TAX Settings Card */}
                 <Card sx={{
                     borderRadius: 1,
                     boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.08)}`,
@@ -89,7 +89,7 @@ const AdvancedSettingsSection: React.FC<AdvancedSettingsSectionProps> = ({
                     backdropFilter: 'blur(10px)'
                 }}>
                     <CardContent sx={{ p: 0 }}>
-                        {/* GST Header */}
+                        {/* TAX Header */}
                         <Box
                             sx={{
                                 p: 1,
@@ -108,17 +108,17 @@ const AdvancedSettingsSection: React.FC<AdvancedSettingsSectionProps> = ({
                                     </Box>
                                     <Box>
                                         <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                                            GST Configuration
+                                            TAX Configuration
                                         </Typography>
                                         <Typography variant="body2" color="text.secondary">
-                                            Configure GST details for tax compliance
+                                            Configure TAX details for tax compliance
                                         </Typography>
                                     </Box>
                                 </Stack>
                             </Stack>
                         </Box>
 
-                        {/* GST Content */}
+                        {/* TAX Content */}
                         <Box sx={{ p: 1 }}>
                             <Stack spacing={2}>
                                 {/* HSN Code */}
@@ -126,8 +126,8 @@ const AdvancedSettingsSection: React.FC<AdvancedSettingsSectionProps> = ({
                                     fullWidth
                                     label="HSN/SAC Code"
                                     placeholder="Enter HSN or SAC code"
-                                    value={data.gst_hsn_code || ''}
-                                    onChange={(e) => handleChange('gst_hsn_code', e.target.value)}
+                                    value={data.hsn_code || ''}
+                                    onChange={(e) => handleChange('hsn_code', e.target.value)}
                                     InputProps={{
                                         startAdornment: (
                                             <InputAdornment position="start">
@@ -136,8 +136,8 @@ const AdvancedSettingsSection: React.FC<AdvancedSettingsSectionProps> = ({
                                         )
                                     }}
                                     required={isHSNRequired}
-                                    error={!!validationErrors.gst_hsn_code}
-                                    helperText={validationErrors.gst_hsn_code || 'Harmonized System of Nomenclature code for goods/services'}
+                                    error={!!validationErrors.hsn_code}
+                                    helperText={validationErrors.hsn_code || 'Harmonized System of Nomenclature code for goods/services'}
                                     sx={{
                                         '& .MuiOutlinedInput-root': {
                                             borderRadius: 1,
@@ -152,8 +152,8 @@ const AdvancedSettingsSection: React.FC<AdvancedSettingsSectionProps> = ({
                                             fullWidth
                                             select
                                             label="Nature of Goods/Services"
-                                            value={data.gst_nature_of_goods}
-                                            onChange={handleSelectChange('gst_nature_of_goods')}
+                                            value={data.nature_of_goods}
+                                            onChange={handleSelectChange('nature_of_goods')}
                                             sx={{
                                                 '& .MuiOutlinedInput-root': {
                                                     borderRadius: 1,
@@ -167,20 +167,20 @@ const AdvancedSettingsSection: React.FC<AdvancedSettingsSectionProps> = ({
                                                 )
                                             }}
                                         >
-                                            {gstNatureOptions.map((option) => (
+                                            {natureOptions.map((option) => (
                                                 <MenuItem key={option.value} value={option.value}>
                                                     {option.label}
                                                 </MenuItem>
                                             ))}
                                         </TextField>
 
-                                        {/* GST Taxability */}
+                                        {/* Taxability */}
                                         <TextField
                                             fullWidth
                                             select
-                                            label="GST Taxability"
-                                            value={data.gst_taxability}
-                                            onChange={handleSelectChange('gst_taxability')}
+                                            label="Taxability"
+                                            value={data.taxability}
+                                            onChange={handleSelectChange('taxability')}
                                             sx={{
                                                 '& .MuiOutlinedInput-root': {
                                                     borderRadius: 1,
@@ -194,20 +194,20 @@ const AdvancedSettingsSection: React.FC<AdvancedSettingsSectionProps> = ({
                                                 )
                                             }}
                                         >
-                                            {gstTaxabilityOptions.map((option) => (
+                                            {taxabilityOptions.map((option) => (
                                                 <MenuItem key={option.value} value={option.value}>
                                                     {option.label}
                                                 </MenuItem>
                                             ))}
                                         </TextField>
 
-                                        {data.gst_taxability === "Taxable" && (
+                                        {data.taxability === "Taxable" && (
                                             <TextField
                                                 fullWidth
-                                                label="GST Tax Rate"
-                                                placeholder="Enter GST tax rate"
-                                                value={data.gst_percentage || ''}
-                                                onChange={(e) => handleChange('gst_percentage', e.target.value)}
+                                                label="Tax Rate"
+                                                placeholder="Enter tax rate"
+                                                value={data.tax_rate || ''}
+                                                onChange={(e) => handleChange('tax_rate', e.target.value)}
                                                 InputProps={{
                                                     startAdornment: (
                                                         <InputAdornment position="start">
@@ -222,8 +222,8 @@ const AdvancedSettingsSection: React.FC<AdvancedSettingsSectionProps> = ({
                                                         </InputAdornment>
                                                     )
                                                 }}
-                                                error={!!validationErrors.gst_percentage}
-                                                helperText={validationErrors.gst_percentage || 'GST tax rate in percentage'}
+                                                error={!!validationErrors.tax_rate}
+                                                helperText={validationErrors.tax_rate || 'Tax rate in percentage'}
                                                 type="number"
                                                 sx={{
                                                     '& .MuiOutlinedInput-root': {
@@ -234,7 +234,7 @@ const AdvancedSettingsSection: React.FC<AdvancedSettingsSectionProps> = ({
                                     </>
                                 )}
 
-                                {/* GST Info */}
+                                {/* TAX Info */}
                                 <Alert
                                     severity="info"
                                     icon={<InfoIcon fontSize="small" />}
@@ -246,7 +246,7 @@ const AdvancedSettingsSection: React.FC<AdvancedSettingsSectionProps> = ({
                                 >
                                     <Typography variant="body2">
                                         <strong>HSN/SAC Code:</strong> Enter the 4-8 digit code for your product.
-                                        Additional GST fields will appear after entering the HSN code.
+                                        Additional Tax fields will appear after entering the HSN code.
                                     </Typography>
                                 </Alert>
                             </Stack>

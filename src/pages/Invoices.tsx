@@ -35,7 +35,7 @@ import { SortOrder, GetAllVouchars, InvoicesSortField } from "@/utils/types";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { useNavigate } from "react-router-dom";
-import { deleteGSTInvoice, deleteInvoice, printGSTInvoices, printInvoices, viewAllInvoices } from "@/services/invoice";
+import { deleteTAXInvoice, deleteInvoice, printTAXInvoices, printInvoices, viewAllInvoices } from "@/services/invoice";
 import { InvoicerRow } from "@/components/Invoice/InvoiceRow";
 import InvoicePrint from "@/components/Invoice/InvoicePrint";
 import { getAllInvoiceGroups } from "@/services/invoice";
@@ -64,7 +64,7 @@ const Invoices: React.FC = () => {
   const { user, current_company_id } = useSelector((state: RootState) => state.auth);
   const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
   const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
-  const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
+  const tax_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_tax;
   const { searchQuery, filterState, page, rowsPerPage, startDate, endDate, type, sortField, sortOrder } = useSelector((state: RootState) => state.invoice.invoicesFilters);
   const [debouncedQuery, setDebouncedQuery] = useState(searchQuery);
 
@@ -155,8 +155,8 @@ const Invoices: React.FC = () => {
 
   // Handle Delete Invoice details
   const handleDeleteInvoice = (inv: GetAllVouchars) => {
-    if (gst_enable) {
-      dispatch(deleteGSTInvoice({ vouchar_id: inv._id, company_id: currentCompanyId })).unwrap().then(() => {
+    if (tax_enable) {
+      dispatch(deleteTAXInvoice({ vouchar_id: inv._id, company_id: currentCompanyId })).unwrap().then(() => {
         fetchInvoices();
         toast.success("Invoice deleted successfully!");
       }).catch((error) => {
@@ -174,8 +174,8 @@ const Invoices: React.FC = () => {
 
   const handlePrintInvoice = (invoice: GetAllVouchars) => {
     if (invoice.voucher_type === 'Sales' || invoice.voucher_type === 'Purchase') {
-      if (gst_enable) {
-        dispatch(printGSTInvoices({
+      if (tax_enable) {
+        dispatch(printTAXInvoices({
           vouchar_id: invoice._id,
           company_id: currentCompanyId || "",
         })).then((response) => {
@@ -193,7 +193,7 @@ const Invoices: React.FC = () => {
             setFullHtml(fullHtml);
             setHtml(true);
           } else {
-            console.error("Failed to print GST invoice:", response.payload);
+            console.error("Failed to print TAX invoice:", response.payload);
           }
         }
         ).catch((error) => {

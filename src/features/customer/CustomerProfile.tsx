@@ -46,7 +46,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { BottomPagination } from "@/common/modals/BottomPagination";
 import { CustomerInvoicesRowSkeleton } from "@/common/skeletons/CustomerInvoicesRowSkeleton";
-import { deleteGSTInvoice, deleteInvoice } from "@/services/invoice";
+import { deleteTAXInvoice, deleteInvoice } from "@/services/invoice";
 import toast from "react-hot-toast";
 
 const CustomerProfile: React.FC = () => {
@@ -54,7 +54,7 @@ const CustomerProfile: React.FC = () => {
     const { user, current_company_id } = useSelector((state: RootState) => state.auth);
     const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
     const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
-    const gst_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_gst;
+    const tax_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_tax;
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const { customer_id } = useParams();
@@ -129,8 +129,8 @@ const CustomerProfile: React.FC = () => {
 
     // Handle Delete Invoice details
     const handleDeleteInvoice = (invId: string) => {
-        if (gst_enable) {
-            dispatch(deleteGSTInvoice({ vouchar_id: invId, company_id: currentCompanyId })).unwrap().then(() => {
+        if (tax_enable) {
+            dispatch(deleteTAXInvoice({ vouchar_id: invId, company_id: currentCompanyId })).unwrap().then(() => {
                 // fetchIvoices();
                 toast.success("Invoice deleted successfully!");
             }).catch((error) => {

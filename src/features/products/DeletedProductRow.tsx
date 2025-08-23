@@ -147,7 +147,7 @@ export const DeletedProductRow: React.FC<DeletedProductRowProps> = ({ product, o
                                         color: theme.palette.text.secondary,
                                     }}
                                 >
-                                    {product.gst_hsn_code ? (`#${product.gst_hsn_code}`) : "No Barcode"}
+                                    {product.hsn_code ? (`#${product.hsn_code}`) : "No Barcode"}
                                 </Typography>
                             </Box>
                         </Box>

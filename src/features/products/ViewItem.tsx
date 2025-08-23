@@ -900,7 +900,7 @@ export default function ViewItem() {
                                 HSN Code
                               </Typography>
                               <Typography variant="body1" fontWeight={500}>
-                                {item.gst_hsn_code || "Not specified"}
+                                {item.hsn_code || "Not specified"}
                               </Typography>
                             </Grid>
                             <Grid item xs={12} sm={6}>
@@ -912,7 +912,7 @@ export default function ViewItem() {
                                 Taxability
                               </Typography>
                               <Typography variant="body1" fontWeight={500}>
-                                {item.gst_taxability || "Not specified"}
+                                {item.taxability || "Not specified"}
                               </Typography>
                             </Grid>
                           </Grid>

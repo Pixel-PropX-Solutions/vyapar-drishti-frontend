@@ -2,7 +2,6 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AuthStates } from "@/utils/enums";
 import {
   deleteProduct,
-  // sellProduct,
   updateProduct,
   createProduct,
   viewAllProducts,
@@ -10,7 +9,6 @@ import {
   getProduct,
   viewAllStockItems,
   getProductTimeline,
-  // viewProductsWithId,
 } from "@/services/products";
 import { PageMeta, GetProduct, ProductCreate, UploadData, ProductUpdate, GetStockItem } from "@/utils/types";
 
@@ -21,7 +19,6 @@ interface ProductState {
   item: any | null;
   timeline: any | null;
   uploadData: UploadData | null;
-  // productsListing: Array<ProductListing> | null;
   productsData: Array<GetProduct> | null;
   stockItems: Array<GetStockItem> | null;
   loading: boolean;
