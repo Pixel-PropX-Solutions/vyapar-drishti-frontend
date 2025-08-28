@@ -126,7 +126,6 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 {/* <Route path="/" element={<AdminDashboard />} /> */}
                 <Route path="/account" element={<ProfilePage />} />
                 <Route path="/" element={<ProfilePage />} />
-                <Route path="/add/product" element={<CreateProduct />} />
                 <Route path="/products/:id" element={<ViewItem />} />
                 <Route path="/products" element={<Products />} />
                 {/* <Route path="/inventory" element={<AdminInventory />} /> */}

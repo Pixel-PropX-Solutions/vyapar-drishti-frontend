@@ -70,7 +70,7 @@ import { updateInvoice, updateTaxInvoice, viewInvoice } from '@/services/invoice
 import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import AddItemModal from '@/common/modals/AddItemModal';
-import { capitalizeInput, formatLocalDate } from '@/utils/functions';
+import { capitalizeInput, formatLocalDate, getInitials } from '@/utils/functions';
 import ActionButtonSuccess from '@/common/buttons/ActionButtonSuccess';
 import ActionButtonCancel from '@/common/buttons/ActionButtonCancel';
 
@@ -129,7 +129,6 @@ const GradientCard = ({ children, gradient = 'primary', ...props }: GradientCard
                 borderRadius: 1,
                 background: gradients[gradient],
                 backdropFilter: 'blur(20px)',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 ...props.sx
             }}
             {...props}
@@ -231,6 +230,7 @@ export default function SalePurchaseInvoiceCreation() {
     const [showSummary, setShowSummary] = useState(false);
 
     const [expandedTotals, setExpandedTotals] = useState(true);
+    const [expandedNotes, setExpandedNotes] = useState(false);
 
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
@@ -836,6 +836,10 @@ export default function SalePurchaseInvoiceCreation() {
                                                             views={["year", "month", "day"]}
                                                             onChange={(value) => {
                                                                 setDate(value || new Date());
+                                                                setData(prev => ({
+                                                                    ...prev,
+                                                                    date: value ? formatLocalDate(value).split('T')[0] : ''
+                                                                }));
                                                                 if (errors.date) {
                                                                     setErrors(prev => {
                                                                         const newErrors = { ...prev };
@@ -1205,8 +1209,8 @@ export default function SalePurchaseInvoiceCreation() {
                                                     <TableRow
                                                         sx={{
                                                             '&:hover': {
-                                                                bgcolor: alpha(theme.palette.primary.main, 0.02),
-                                                                transform: 'scale(1.001)',
+                                                                bgcolor: alpha(theme.palette.primary.main, 0.05),
+                                                                transform: 'scale(1.01)',
                                                             },
                                                             transition: 'all 0.2s ease',
                                                             '& .MuiTableCell-root': {
@@ -1225,28 +1229,33 @@ export default function SalePurchaseInvoiceCreation() {
                                                                         fontWeight: 600
                                                                     }}
                                                                 >
-                                                                    {(itemsList.find((p) => p.id === item.item_id)?.name || item.item).charAt(0).toUpperCase()}
+                                                                    {getInitials(item.item).toUpperCase()}
                                                                 </Avatar>
                                                                 <Box>
                                                                     <Typography variant="body1" fontWeight="600" color="text.primary">
-                                                                        {itemsList.find((p) => p.id === item.item_id)?.name || item.item}
+                                                                        {item.item}
                                                                     </Typography>
-                                                                    <Typography variant="caption" color="text.secondary">
-                                                                        Unit: {itemsList.find((p) => p.id === item.item_id)?.unit || 'pcs'}
-                                                                    </Typography>
+                                                                    {tax_enable && <Typography variant="caption" color="text.secondary">
+                                                                        HSN: {item.hsn_code}
+                                                                    </Typography>}
+                                                                    {!tax_enable && <Typography variant="caption" color="text.secondary">
+                                                                        Unit: {item.unit || 'PCS'}
+                                                                    </Typography>}
                                                                 </Box>
                                                             </Box>
                                                         </TableCell>
 
                                                         <TableCell align="center">
                                                             <Chip
-                                                                label={item.quantity}
+                                                                label={`${item.quantity} ` + `${tax_enable ? (item.unit ?? 'PCS') : ''}`}
                                                                 size="small"
                                                                 sx={{
                                                                     bgcolor: alpha(theme.palette.info.main, 0.1),
                                                                     color: 'info.main',
                                                                     fontWeight: 600,
-                                                                    minWidth: 60
+                                                                    minWidth: 60,
+                                                                    py: 1.5,
+                                                                    px: 1,
                                                                 }}
                                                             />
                                                         </TableCell>
@@ -1273,10 +1282,10 @@ export default function SalePurchaseInvoiceCreation() {
                                                             <>
                                                                 <TableCell align="center">
                                                                     <Chip
-                                                                        label={`${itemsList.find((p) => p.id === item.item_id)?.tax_rate || 0}%`}
+                                                                        label={`${item?.tax_rate || 0}%`}
                                                                         size="small"
                                                                         color="warning"
-                                                                        sx={{ fontWeight: 600, minWidth: 60 }}
+                                                                        sx={{ fontWeight: 600, minWidth: 60, py: 1.5, px: 1 }}
                                                                     />
                                                                 </TableCell>
 
@@ -1527,6 +1536,68 @@ export default function SalePurchaseInvoiceCreation() {
                                     </Box>
                                 </Fade>
                             )}
+                        </CardContent>
+                    </GradientCard>
+
+                    {/* Enhanced Remarks Section */}
+                    <GradientCard gradient="warning" sx={{
+                        mb: 4, cursor: 'pointer',
+                        transition: 'hover 0.1s cubic-bezier(0.4, 0, 0.2, 1)',
+                        ':hover': { bgcolor: alpha(theme.palette.warning.main, 0.1) }
+                    }}>
+                        <CardContent sx={{ p: 0 }}>
+                            <Box sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                            }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setExpandedNotes(!expandedNotes);
+                                }}
+                            >
+                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, width: '100%' }}>
+                                    <Avatar sx={{ bgcolor: 'warning.main', mr: 2, width: 40, height: 40 }}>
+                                        <Description />
+                                    </Avatar>
+                                    <Box>
+                                        <Typography variant="h5" fontWeight="700" color="warning.main">
+                                            Additional Information
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            Add any extra details or notes for this invoice
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                                <IconButton
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setExpandedNotes(!expandedNotes);
+                                    }}
+                                    sx={{
+                                        bgcolor: alpha(theme.palette.success.main, 0.1),
+                                        '&:hover': {
+                                            bgcolor: alpha(theme.palette.success.main, 0.2),
+                                            transform: 'scale(1.1)',
+                                        },
+                                        transition: 'all 0.2s ease',
+                                    }}
+                                >
+                                    {expandedNotes ? <ExpandLess /> : <ExpandMore />}
+                                </IconButton>
+                            </Box>
+                            <Collapse in={expandedNotes}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column', width: '100%' }}>
+                                    <TextField
+                                        fullWidth
+                                        multiline
+                                        rows={3}
+                                        variant="outlined"
+                                        placeholder="Enter additional information..."
+                                        sx={{ mt: 2 }}
+                                    />
+                                </Box>
+                            </Collapse>
                         </CardContent>
                     </GradientCard>
 
@@ -1840,7 +1911,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                 label="Additional Charges"
                                                 fullWidth
                                                 size="small"
-                                                value={data.additional_charge}
+                                                value={data.additional_charge || ''}
                                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange('additional_charge', Number(e.target.value))}
                                                 name="additional_charge"
                                                 variant="outlined"
@@ -1918,35 +1989,6 @@ export default function SalePurchaseInvoiceCreation() {
                             </Collapse>
                         </CardContent>
                     </GradientCard>
-
-                    {/* Enhanced Remarks Section */}
-                    <GradientCard gradient="warning" sx={{ mb: 4 }}>
-                        <CardContent sx={{ p: 0 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column', width: '100%' }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, width: '100%' }}>
-                                    <Avatar sx={{ bgcolor: 'warning.main', mr: 2, width: 40, height: 40 }}>
-                                        <Description />
-                                    </Avatar>
-                                    <Box>
-                                        <Typography variant="h5" fontWeight="700" color="warning.main">
-                                            Additional Information
-                                        </Typography>
-                                        <Typography variant="body2" color="text.secondary">
-                                            Add any extra details or notes for this invoice
-                                        </Typography>
-                                    </Box>
-                                </Box>
-                                <TextField
-                                    fullWidth
-                                    multiline
-                                    rows={4}
-                                    variant="outlined"
-                                    placeholder="Enter additional information..."
-                                    sx={{ mt: 2 }}
-                                />
-                            </Box>
-                        </CardContent>
-                    </GradientCard>
                 </Box>
 
             </Container>
@@ -1970,7 +2012,7 @@ export default function SalePurchaseInvoiceCreation() {
                 }}
                 item={item}
             />
-           
+
         </LocalizationProvider>
     );
 }

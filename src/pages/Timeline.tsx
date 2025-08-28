@@ -18,44 +18,44 @@ import {
     TextField,
     MenuItem,
     TableSortLabel,
-    Tooltip,
     useTheme,
+    Skeleton,
+    alpha,
 } from '@mui/material';
-import { RefreshOutlined } from '@mui/icons-material';
-import SearchIcon from '@mui/icons-material/Search';
+import {
+    RefreshOutlined,
+    Search as SearchIcon,
+    Inventory as InventoryIcon,
+} from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { getStockMovement } from '@/services/inventory';
-import { formatDate } from '@/utils/functions';
 import { SortField, SortOrder } from '@/utils/types';
 import { BottomPagination } from '@/common/modals/BottomPagination';
-import { TimelineRowSkeleton } from '@/common/skeletons/TimelineRowSkeleton';
 
 const Timeline: React.FC = () => {
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
     const { stockMovement, timelinePageMeta } = useSelector((state: RootState) => state.inventory);
     const [debounceQuery, setDebounceQuery] = useState<string>('');
+    const { user, current_company_id } = useSelector((state: RootState) => state.auth);
+    const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
     const [loading, setLoading] = useState<boolean>(false);
     const [data, setData] = useState({
         search: '',
-        category: 'All-Categories',
-        state: '',
-        movement_type: 'all',
-        party_name: 'all',
+        category: 'all',
         page_no: 1,
-        limit: 10,
+        limit: 30,
         startDate: new Date('2025-04-01'),
         endDate: new Date('2026-03-31'),
-        sortField: "created_at" as SortField,
+        sortField: "item" as SortField,
         sortOrder: "desc" as SortOrder,
     });
 
-    const { search, movement_type, page_no, limit, startDate, party_name, endDate, sortField, sortOrder } =
-        data;
+    const { search, page_no, limit, startDate, endDate, category, sortField, sortOrder } = data;
 
     const handleSortRequest = (field: SortField) => {
         const isAsc = sortField === field && sortOrder === "asc";
@@ -71,9 +71,9 @@ const Timeline: React.FC = () => {
         dispatch(
             getStockMovement({
                 search: debounceQuery,
-                movement_type: movement_type == 'all' ? '' : movement_type,
-                party_name: party_name,
                 page_no: page_no,
+                company_id: currentCompanyId,
+                category: category === 'all' ? '' : category,
                 limit: limit,
                 startDate: startDate.toISOString(),
                 endDate: endDate.toISOString(),
@@ -86,17 +86,13 @@ const Timeline: React.FC = () => {
             setLoading(false);
             console.error("Error fetching stock movement:", error);
         });
-    }, [dispatch, debounceQuery, movement_type, page_no, limit, startDate, party_name, endDate, sortField, sortOrder]);
+    }, [dispatch, debounceQuery, page_no, limit, startDate, currentCompanyId, category, endDate, sortField, sortOrder]);
 
-    // Debounce search input
     useEffect(() => {
         const handler = setTimeout(() => {
             setDebounceQuery(search);
         }, 300);
-
-        return () => {
-            clearTimeout(handler);
-        };
+        return () => clearTimeout(handler);
     }, [search]);
 
     const handleChangePage = (
@@ -116,17 +112,44 @@ const Timeline: React.FC = () => {
         }));
     };
 
+    const clearFilters = () => {
+        setData({
+            search: '',
+            category: 'all',
+            startDate: new Date('2025-04-01'),
+            endDate: new Date('2026-03-31'),
+            page_no: 1,
+            sortField: "item",
+            sortOrder: "desc",
+            limit: 30,
+        });
+    };
+
     useEffect(() => {
         fetchMovement();
     }, []);
 
     useEffect(() => {
         fetchMovement();
-    }, [dispatch, endDate, limit, movement_type, page_no, debounceQuery, sortField, sortOrder, startDate, fetchMovement]);
+    }, [dispatch, endDate, limit, page_no, category, debounceQuery, sortField,currentCompanyId, sortOrder, startDate, fetchMovement]);
+
+    const formatNumber = (num: number, decimals: number = 2) => {
+        if (num === null || num === undefined) return '0.00';
+        return Number(num).toLocaleString('en-IN', {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals
+        });
+    };
+
+    const formatCurrency = (num: number) => {
+        if (num === null || num === undefined) return '₹ 0.00';
+        return `₹ ${formatNumber(num)}`;
+    };
 
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <Box sx={{ width: "100%", p: 3, }}>
+            <Box sx={{ width: "100%", p: { xs: 2, md: 3 } }}>
+                {/* Header Card */}
                 <Card sx={{ mb: 3, p: 2, boxShadow: '0 2px 4px rgba(0,0,0,0.05)', borderRadius: '8px' }}>
                     <CardContent>
                         <Grid item xs={12} md={12}>
@@ -134,12 +157,13 @@ const Timeline: React.FC = () => {
                                 Inventory Timeline
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                View all stock movements including purchases, sales, and adjustments.
+                                Track all stock movements, analyze trends, and monitor inventory performance
                             </Typography>
                         </Grid>
                     </CardContent>
                 </Card>
 
+                {/* Filters Section */}
                 <Grid container spacing={2} sx={{ mb: 2 }}>
                     <Grid item xs={12} md={12}>
                         <Stack
@@ -147,7 +171,7 @@ const Timeline: React.FC = () => {
                             spacing={2}
                             alignItems="center"
                         >
-                            <Grid item xs={12} sm={4} md={4}>
+                            <Grid item xs={12} sm={5} md={5}>
                                 <TextField
                                     fullWidth
                                     placeholder="Search by Order ID or Stockist Name"
@@ -162,7 +186,7 @@ const Timeline: React.FC = () => {
                             </Grid>
 
 
-                            <Grid item xs={12} sm={3} flexDirection={'row'} display="flex" gap={2} alignItems="center">
+                            <Grid item xs={12} sm={4} flexDirection={'row'} display="flex" gap={2} alignItems="center">
                                 <DatePicker
                                     label="Start Date"
                                     value={startDate}
@@ -208,38 +232,8 @@ const Timeline: React.FC = () => {
                                     }}
                                 />
                             </Grid>
-                            <Grid item xs={12} md={1}>
-                                <TextField
-                                    select
-                                    value={movement_type}
-                                    fullWidth
-                                    label="Movement Type"
-                                    size="small"
-                                    onChange={(e) => handleStateChange('movement_type', e.target.value)}
-                                >
-                                    <MenuItem value="all" sx={{ fontWeight: 600 }}>All </MenuItem>
-                                    <MenuItem value="Sales">Sales</MenuItem>
-                                    <MenuItem value="Purchase">Purchase</MenuItem>
-                                </TextField>
-                            </Grid>
-                            <Grid item xs={12} md={2}>
-                                <TextField
-                                    select
-                                    value={party_name}
-                                    fullWidth
-                                    label="Party Name"
-                                    size="small"
-                                    onChange={(e) => handleStateChange('party_name', e.target.value)}
-                                >
-                                    <MenuItem value="all" sx={{ fontWeight: 600 }}>All Parties </MenuItem>
-                                    {
-                                        timelinePageMeta.unique.map((party: string) => (
-                                            <MenuItem key={party} value={party}>{party}</MenuItem>
-                                        ))
-                                    }
-                                </TextField>
-                            </Grid>
-                            <Grid item xs={12} md={1}>
+
+                            <Grid item xs={12} md={1.5}>
                                 <TextField
                                     select
                                     fullWidth
@@ -248,18 +242,19 @@ const Timeline: React.FC = () => {
                                     onChange={(e) => handleStateChange('limit', e.target.value)}
                                     size="small"
                                 >
-                                    <MenuItem value={10}>10</MenuItem>
                                     <MenuItem value={30}>30</MenuItem>
                                     <MenuItem value={50}>50</MenuItem>
                                     <MenuItem value={100}>100</MenuItem>
+                                    <MenuItem value={500}>500</MenuItem>
                                 </TextField>
                             </Grid>
-                            <Grid item xs={12} md={.5}>
+                            <Grid item xs={12} md={1.5}>
                                 <Button
                                     variant="outlined"
                                     color="primary"
                                     size="medium"
-                                    onClick={() => fetchMovement()}
+                                    startIcon={<RefreshOutlined />}
+                                    onClick={() => clearFilters()}
                                     sx={{
                                         fontWeight: '600',
                                         py: 1,
@@ -269,143 +264,495 @@ const Timeline: React.FC = () => {
                                         borderColor: '#1976d2'
                                     }}
                                 >
-                                    <RefreshOutlined />
+                                    Reset Filters
                                 </Button>
                             </Grid>
                         </Stack>
                     </Grid>
                 </Grid>
 
-
-                <TableContainer component={Paper} elevation={0} sx={{
-                    border: '1px solid',
-                    borderColor: theme.palette.mode === 'light' ? '#e0e0e0' : 'rgba(255, 255, 255, 0.12)',
-                    borderRadius: '8px',
-                    overflow: 'hidden',
-                    mb: 1
-                }}>
-                    <Table sx={{ minWidth: 650 }}>
-                        <TableHead>
-                            <TableRow sx={{ backgroundColor: theme.palette.mode === 'light' ? '#f5f5f5' : 'rgba(25, 118, 210, 0.08)' }}>
-                                <TableCell sx={{ fontWeight: '600' }}>
-                                    <Tooltip title="Sort by Product Name" arrow>
-                                        <TableSortLabel
-                                            active={sortField === "product_name"}
-                                            direction={sortField === "product_name" ? sortOrder : "asc"}
-                                            onClick={() => handleSortRequest("product_name")}
-                                        >
-                                            Product Name
-                                        </TableSortLabel>
-                                    </Tooltip>
-                                </TableCell>
-                                <TableCell align="center" sx={{ fontWeight: '600', whiteSpace: 'nowrap' }}>
-                                    Purchase
-                                </TableCell>
-                                <TableCell align="center" sx={{ fontWeight: '600', whiteSpace: 'nowrap' }}>
-                                    Sales
-                                </TableCell>
-                                <TableCell sx={{ fontWeight: '600', whiteSpace: 'nowrap' }}>
-                                    Unit Price
-                                </TableCell>
-                                <TableCell sx={{ fontWeight: '600' }}>
-                                    Invoice No.
-                                </TableCell>
-                                <TableCell sx={{ fontWeight: '600', whiteSpace: 'nowrap' }}>
-                                    Party Name
-                                </TableCell>
-                                <TableCell sx={{ fontWeight: '600' }}>
-                                    <Tooltip title="Sort by Date" arrow>
-                                        <TableSortLabel
-                                            active={sortField === "created_at"}
-                                            direction={sortField === "created_at" ? sortOrder : "asc"}
-                                            onClick={() => handleSortRequest("created_at")}
-                                        >
-                                            Date
-                                        </TableSortLabel>
-                                    </Tooltip>
-                                </TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {loading ? (
-                                Array.from({ length: 5 }, (_, index) => (
-                                    <TimelineRowSkeleton key={index} />
-                                ))
-                            ) : (stockMovement?.length ?? 0) > 0 ? (
-                                stockMovement?.map((item) => (
-                                    <TableRow
-                                        key={item?._id || `item-${Math.random()}`}
+                {/* Data Table */}
+                <Paper elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, overflow: 'hidden' }}>
+                    <TableContainer sx={{}}>
+                        <Table stickyHeader sx={{ minWidth: 1400 }}>
+                            <TableHead>
+                                {/* Main Header */}
+                                <TableRow sx={{
+                                    "& .MuiTableCell-root": {
+                                        padding: '8px 16px',
+                                    },
+                                }}>
+                                    <TableCell
+                                        rowSpan={2}
                                         sx={{
-                                            '&:hover': { bgcolor: theme.palette.mode === 'dark' ? 'rgba(182, 185, 188, 0.15)' : '#f1f8ff', },
-                                            backgroundColor: item?.voucher_type === "Purchase" ? 'rgba(244, 67, 54, 0.1)' : 'rgba(76, 175, 80, 0.1)',
+                                            fontWeight: 700,
+                                            backgroundColor: 'primary.main',
+                                            color: 'primary.contrastText',
+                                            borderRight: '1px solid rgba(255,255,255,0.2)',
+                                            zIndex: 3
                                         }}
                                     >
-                                        <TableCell component="th" scope="row">
-                                            <Typography variant="body2" fontWeight="500">
-                                                {(item?.item || 'Unnamed Product')}
-                                            </Typography>
+                                        Sr. No.
+                                    </TableCell>
+                                    <TableCell
+                                        rowSpan={2}
+                                        sx={{
+                                            fontWeight: 700,
+                                            backgroundColor: 'primary.main',
+                                            color: 'primary.contrastText',
+                                            borderRight: '1px solid rgba(255,255,255,0.2)',
+                                            minWidth: 200,
+                                            position: 'sticky',
+                                            left: 0,
+                                            zIndex: 3
+                                        }}
+                                    >
+                                        <TableSortLabel
+                                            sx={{
+                                                '&.MuiTableSortLabel-root': { color: 'inherit' },
+                                                '&.MuiTableSortLabel-root:hover': { color: 'inherit' },
+                                                '& .MuiTableSortLabel-icon': { color: 'inherit !important' }
+                                            }}
+                                            onClick={() => handleSortRequest('item')}
+                                        >
+                                            Item Details (Unit)
+                                        </TableSortLabel>
+                                    </TableCell>
+
+                                    {[
+                                        { title: 'Opening Balance', color: 'info.main' },
+                                        { title: 'Purchases', color: 'success.main' },
+                                        { title: 'Sales', color: 'error.main' },
+                                        { title: 'Gross Profit', color: 'warning.main' },
+                                        { title: 'Current Stock', color: 'primary.main' }
+                                    ].map((section, index) => (
+                                        <TableCell
+                                            key={section.title}
+                                            align="center"
+                                            colSpan={section.title === 'Gross Profit' ? 2 : 3}
+                                            sx={{
+                                                fontWeight: 700,
+                                                backgroundColor: section.color,
+                                                color: 'white',
+                                                borderRight: index < 4 ? '1px solid rgba(255,255,255,0.2)' : 'none',
+                                                borderBottom: '1px solid rgba(255,255,255,0.2)'
+                                            }}
+                                        >
+                                            {section.title}
                                         </TableCell>
-                                        <TableCell align="center" sx={{
-                                            backgroundColor: item?.voucher_type === "Purchase" ? 'rgba(244, 67, 54, 0.1)' : 'transparent',
-                                            fontWeight: item?.voucher_type === "Purchase" ? '600' : 'normal'
+                                    ))}
+                                </TableRow>
+
+                                {/* Sub Headers */}
+                                <TableRow sx={{
+                                    "& .MuiTableCell-root": {
+                                        padding: '8px 16px',
+                                    },
+                                }}>
+                                    {/* Opening Balance sub-headers */}
+                                    {['QTY', 'Rate', 'Value'].map((header) => (
+                                        <TableCell
+                                            key={`opening-${header}`}
+                                            align="center"
+                                            sx={{
+                                                fontWeight: 600,
+                                                backgroundColor: 'info.light',
+                                                color: 'info.contrastText',
+                                                borderRight: '1px solid rgba(255,255,255,0.3)',
+                                                fontSize: '0.75rem'
+                                            }}
+                                        >
+                                            {header}
+                                        </TableCell>
+                                    ))}
+
+                                    {/* Inwards sub-headers */}
+                                    {['QTY', 'Rate', 'Value'].map((header) => (
+                                        <TableCell
+                                            key={`inwards-${header}`}
+                                            align="center"
+                                            sx={{
+                                                fontWeight: 600,
+                                                backgroundColor: 'success.light',
+                                                color: 'success.contrastText',
+                                                borderRight: '1px solid rgba(255,255,255,0.3)',
+                                                fontSize: '0.75rem'
+                                            }}
+                                        >
+                                            {header}
+                                        </TableCell>
+                                    ))}
+
+                                    {/* Outwards sub-headers */}
+                                    {['QTY', 'Rate', 'Value'].map((header) => (
+                                        <TableCell
+                                            key={`outwards-${header}`}
+                                            align="center"
+                                            sx={{
+                                                fontWeight: 600,
+                                                backgroundColor: 'error.light',
+                                                color: 'error.contrastText',
+                                                borderRight: '1px solid rgba(255,255,255,0.3)',
+                                                fontSize: '0.75rem'
+                                            }}
+                                        >
+                                            {header}
+                                        </TableCell>
+                                    ))}
+
+                                    {/* Gross Profit sub-headers */}
+                                    {['Value', 'Margin %'].map((header) => (
+                                        <TableCell
+                                            key={`profit-${header}`}
+                                            align="center"
+                                            sx={{
+                                                fontWeight: 600,
+                                                backgroundColor: 'warning.light',
+                                                color: 'warning.contrastText',
+                                                borderRight: '1px solid rgba(255,255,255,0.3)',
+                                                fontSize: '0.75rem'
+                                            }}
+                                        >
+                                            {header}
+                                        </TableCell>
+                                    ))}
+
+                                    {/* Closing Balance sub-headers */}
+                                    {['QTY', 'Rate', 'Value'].map((header, index) => (
+                                        <TableCell
+                                            key={`closing-${header}`}
+                                            align="center"
+                                            sx={{
+                                                fontWeight: 600,
+                                                backgroundColor: 'primary.light',
+                                                color: 'primary.contrastText',
+                                                borderRight: index < 2 ? '1px solid rgba(255,255,255,0.3)' : 'none',
+                                                fontSize: '0.75rem'
+                                            }}
+                                        >
+                                            {header}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            </TableHead>
+
+                            <TableBody>
+                                {loading ? (
+                                    Array.from({ length: 5 }).map((_, index) => (
+                                        <TableRow key={index} sx={{
+                                            "& .MuiTableCell-root": {
+                                                padding: '8px 16px',
+                                            },
                                         }}>
-                                            {item?.voucher_type === "Purchase" && (item?.quantity || 0)}
-                                        </TableCell>
-                                        <TableCell align="center" sx={{
-                                            backgroundColor: item?.voucher_type === "Sales" ? 'rgba(76, 175, 80, 0.1)' : 'transparent',
-                                            fontWeight: item?.voucher_type === "Sales" ? '600' : 'normal'
-                                        }}>
-                                            {item?.voucher_type === "Sales" && (item?.quantity || 0)}
-                                        </TableCell>
-                                        <TableCell sx={{ fontWeight: '500' }}>&#8377; {item?.rate || 0}</TableCell>
-                                        <TableCell>{item?.voucher_number || 'N/A'}</TableCell>
-                                        <TableCell>
-                                            <Typography variant="body2" fontWeight="500">
-                                                {item?.party_name || 'N/A'}
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Typography variant="body2" fontWeight="500">
-                                                {item?.date ? formatDate(item.date) : 'N/A'}
-                                            </Typography>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
-                                        <Grid item xs={12}>
-                                            <Box sx={{
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                alignItems: 'center',
-                                                gap: 2,
-                                                py: 4,
-                                            }}>
-                                                <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 600 }}>
+                                            <TableCell >
+                                                <Skeleton variant="text" width="60px" />
+                                            </TableCell>
+                                            <TableCell sx={{ position: 'sticky', left: 0, backgroundColor: 'background.paper', zIndex: 1, minWidth: 200, }}>
+                                                <Skeleton variant="text" width="100%" />
+                                            </TableCell>
+                                            {Array.from({ length: 14 }).map((_, cellIndex) => (
+                                                <TableCell key={cellIndex}>
+                                                    <Skeleton variant="text" width="60px" />
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                    ))
+                                ) : (stockMovement?.length ?? 0) > 0 ? (
+                                    stockMovement?.map((item, index) => {
+                                        return (
+                                            <TableRow
+                                                key={item._id}
+                                                sx={{
+                                                    '&:hover': {
+                                                        backgroundColor: 'action.hover',
+                                                    },
+                                                    backgroundColor: index % 2 === 0 ? 'white' : alpha("hsl(220, 20%, 88%)", .5),
+                                                    "& .MuiTableCell-root": {
+                                                        padding: '8px 16px',
+                                                    },
+                                                    whiteSpace: 'nowrap',
+                                                }}
+                                            >
+                                                {/* Serial Number - Sticky */}
+                                                <TableCell
+                                                    sx={{
+                                                        backgroundColor: index % 2 === 0 ? 'white' : "hsl(220, 20%, 88%)",
+                                                        zIndex: 3,
+                                                        textAlign: 'center',
+                                                        borderRight: '1px solid',
+                                                        borderRightColor: 'divider'
+                                                    }}
+                                                >
+                                                    {index + 1 + ((timelinePageMeta.page - 1) * limit)}
+                                                </TableCell>
+                                                <TableCell
+                                                    className="sticky-cell"
+                                                    sx={{
+                                                        position: 'sticky',
+                                                        left: 0,
+                                                        backgroundColor: index % 2 === 0 ? 'white' : "hsl(220, 20%, 88%)",
+                                                        zIndex: 3,
+                                                        minWidth: 200,
+                                                        borderRight: '1px solid',
+                                                        borderRightColor: 'divider'
+                                                    }}
+                                                >
+                                                    <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', gap: 0.5 }}>
+                                                        <Typography fontWeight={600} sx={{ fontSize: '0.8rem' }} noWrap>
+                                                            {item.item.length > 35 ? item.item.slice(0, 35) + '...' : item.item || 'Unnamed Product'}
+                                                        </Typography>
+                                                        <Typography variant="caption" color="text.secondary" fontWeight={500} noWrap>
+                                                            {item.unit || 'PCS'}
+                                                        </Typography>
+                                                    </Box>
+                                                </TableCell>
+
+                                                {/* Opening Balance */}
+                                                <TableCell align="right" sx={{ fontSize: '0.75rem' }}>
+                                                    {formatNumber(item.opening_qty)}
+                                                </TableCell>
+                                                <TableCell align="right" sx={{ fontSize: '0.75rem' }}>
+                                                    {formatNumber(item.opening_rate)}
+                                                </TableCell>
+                                                <TableCell align="right" sx={{
+                                                    fontSize: '0.8rem', fontWeight: 600, borderRight: '1px solid',
+                                                    borderRightColor: 'divider'
+                                                }}>
+                                                    {formatCurrency(item.opening_val)}
+                                                </TableCell>
+
+                                                {/* Inwards */}
+                                                <TableCell align="right" sx={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>
+                                                    {item.inwards_qty > 0 ? formatNumber(item.inwards_qty) : '—'}
+                                                </TableCell>
+                                                <TableCell align="right" sx={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>
+                                                    {item.inwards_qty > 0 ? formatNumber(item.inwards_rate) : '—'}
+                                                </TableCell>
+                                                <TableCell align="right" sx={{
+                                                    fontSize: '0.8rem', fontWeight: 600, color: 'text.primary', borderRight: '1px solid',
+                                                    borderRightColor: 'divider'
+                                                }}>
+                                                    {item.inwards_val > 0 ? formatCurrency(item.inwards_val) : '—'}
+                                                </TableCell>
+
+                                                {/* Outwards */}
+                                                <TableCell align="right" sx={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>
+                                                    {item.outwards_qty > 0 ? formatNumber(item.outwards_qty) : '—'}
+                                                </TableCell>
+                                                <TableCell align="right" sx={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>
+                                                    {item.outwards_qty > 0 ? formatNumber(item.outwards_rate) : '—'}
+                                                </TableCell>
+                                                <TableCell align="right" sx={{
+                                                    fontSize: '0.8rem', fontWeight: 600, color: 'text.primary', borderRight: '1px solid',
+                                                    borderRightColor: 'divider'
+                                                }}>
+                                                    {item.outwards_val > 0 ? formatCurrency(item.outwards_val) : '—'}
+                                                </TableCell>
+
+                                                {/* Gross Profit */}
+                                                <TableCell align="right" sx={{ fontSize: '0.8rem', fontWeight: 700, color: item.gross_profit >= 0 ? 'success.main' : 'error.main' }}>
+                                                    {formatCurrency(item.gross_profit)}
+                                                </TableCell>
+                                                <TableCell align="right" sx={{
+                                                    fontSize: '0.8rem', fontWeight: 600, color: item.profit_percent >= 0 ? 'success.main' : 'error.main', borderRight: '1px solid',
+                                                    borderRightColor: 'divider'
+                                                }}>
+                                                    {formatNumber(item.profit_percent)}%
+                                                </TableCell>
+
+                                                {/* Closing Balance */}
+                                                <TableCell align="right" sx={{ fontSize: '0.75rem', color: item.closing_qty < 0 ? 'error.main' : 'text.primary' }}>
+                                                    {formatNumber(item.closing_qty)}
+                                                </TableCell>
+                                                <TableCell align="right" sx={{ fontSize: '0.75rem', color: item.closing_rate < 0 ? 'error.main' : 'text.primary' }}>
+                                                    {formatNumber(item.closing_rate)}
+                                                </TableCell>
+                                                <TableCell align="right" sx={{ fontSize: '0.8rem', fontWeight: 600, color: item.closing_val < 0 ? 'error.main' : 'success.main' }}>
+                                                    {formatCurrency(item.closing_val)}
+                                                </TableCell>
+                                            </TableRow>
+                                        )
+                                    })
+
+                                ) : (
+                                    <TableRow sx={{
+                                        "& .MuiTableCell-root": {
+                                            padding: '8px 16px',
+                                        },
+                                    }}>
+                                        <TableCell colSpan={16} align="center">
+                                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, my: 8 }}>
+                                                <InventoryIcon sx={{ fontSize: 48, color: 'text.disabled' }} />
+                                                <Typography variant="h6" color="text.secondary" fontWeight={600}>
                                                     No Records Found
                                                 </Typography>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    Try adjusting your filters or search criteria, or add your sales/purchase records.
+                                                <Typography variant="body2" color="text.disabled" sx={{ maxWidth: 400, textAlign: 'center' }}>
+                                                    Try adjusting your filters or date range, or add some inventory transactions to see data here.
                                                 </Typography>
                                             </Box>
-                                        </Grid>
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+
+                                {loading ? (
+                                    Array.from({ length: 5 }).map((_, index) => (
+                                        <TableRow key={index} sx={{
+                                            "& .MuiTableCell-root": {
+                                                padding: '8px 16px',
+                                            },
+                                        }}>
+                                            <TableCell >
+                                                <Skeleton variant="text" width="60px" />
+                                            </TableCell>
+                                            <TableCell sx={{ position: 'sticky', left: 0, backgroundColor: 'background.paper', zIndex: 1, minWidth: 200, }}>
+                                                <Skeleton variant="text" width="100%" />
+                                            </TableCell>
+                                            {Array.from({ length: 14 }).map((_, cellIndex) => (
+                                                <TableCell key={cellIndex}>
+                                                    <Skeleton variant="text" width="60px" />
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                    ))
+                                ) : (stockMovement?.length ?? 0) > 0 && (
+                                    <>
+                                        <TableRow
+                                            sx={{
+                                                "& .MuiTableCell-root": {
+                                                    padding: '8px 16px',
+                                                    bgcolor: alpha(theme.palette.primary.light, 0.3),
+                                                },
+                                            }}
+                                        >
+                                            <TableCell colSpan={16}>
+                                            </TableCell>
+                                        </TableRow>
+                                        <TableRow
+                                            sx={{
+                                                '&:hover': {
+                                                    backgroundColor: 'action.hover',
+                                                },
+                                                backgroundColor: alpha("hsl(220, 20%, 88%)", .5),
+                                                "& .MuiTableCell-root": {
+                                                    padding: '8px 16px',
+                                                },
+                                                whiteSpace: 'nowrap',
+                                            }}
+                                        >
+                                            <TableCell
+                                                className="sticky-cell"
+                                                sx={{
+                                                    backgroundColor: "hsl(220, 20%, 88%)",
+                                                    zIndex: 3,
+                                                    textAlign: 'center',
+                                                    // borderRight: '1px solid',
+                                                    // borderRightColor: 'divider'
+                                                }}
+                                            >
+
+                                            </TableCell>
+                                            <TableCell
+                                                className="sticky-cell"
+                                                sx={{
+                                                    position: 'sticky',
+                                                    left: 0,
+                                                    backgroundColor: "hsl(220, 20%, 88%)",
+                                                    zIndex: 1,
+                                                    minWidth: 200,
+                                                    borderRight: '1px solid',
+                                                    borderRightColor: 'divider'
+                                                }}
+                                            >
+                                                <Box>
+                                                    <Typography fontWeight={700} sx={{ fontSize: '1rem' }} noWrap>
+                                                        Totals
+                                                    </Typography>
+                                                </Box>
+                                            </TableCell>
+
+                                            {/* Opening Balance */}
+                                            <TableCell align="right" sx={{ fontSize: '0.75rem' }}>
+
+                                            </TableCell>
+                                            <TableCell align="right" sx={{ fontSize: '0.75rem' }}>
+
+                                            </TableCell>
+                                            <TableCell align="right" sx={{
+                                                fontSize: '1.2rem', fontWeight: 600, borderRight: '1px solid',
+                                                borderRightColor: 'divider'
+                                            }}>
+                                                {formatCurrency(timelinePageMeta.opening_val)}
+                                            </TableCell>
+
+                                            {/* Inwards */}
+                                            <TableCell align="right" sx={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>
+
+                                            </TableCell>
+                                            <TableCell align="right" sx={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>
+
+                                            </TableCell>
+                                            <TableCell align="right" sx={{
+                                                fontSize: '1.2rem', fontWeight: 600, color: 'text.primary', borderRight: '1px solid',
+                                                borderRightColor: 'divider'
+                                            }}>
+                                                {formatCurrency(timelinePageMeta.inwards_val)}
+                                            </TableCell>
+
+                                            {/* Outwards */}
+                                            <TableCell align="right" sx={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>
+
+                                            </TableCell>
+                                            <TableCell align="right" sx={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>
+
+                                            </TableCell>
+                                            <TableCell align="right" sx={{
+                                                fontSize: '1.2rem', fontWeight: 600, color: 'text.primary', borderRight: '1px solid',
+                                                borderRightColor: 'divider'
+                                            }}>
+                                                {formatCurrency(timelinePageMeta.outwards_val)}
+                                            </TableCell>
+
+                                            {/* Gross Profit */}
+                                            <TableCell align="right" sx={{ fontSize: '1rem', fontWeight: 700, color: timelinePageMeta.gross_profit >= 0 ? 'success.main' : 'error.main' }}>
+                                                {formatCurrency(timelinePageMeta.gross_profit)}
+                                            </TableCell>
+                                            <TableCell align="right" sx={{
+                                                fontSize: '1.2rem', fontWeight: 600, color: timelinePageMeta.profit_percent >= 0 ? 'success.main' : 'error.main', borderRight: '1px solid',
+                                                borderRightColor: 'divider'
+                                            }}>
+                                                {formatCurrency(timelinePageMeta.profit_percent)}%
+                                            </TableCell>
+
+                                            {/* Closing Balance */}
+                                            <TableCell align="right" sx={{ fontSize: '0.75rem', color: 'text.primary' }}>
+
+                                            </TableCell>
+                                            <TableCell align="right" sx={{ fontSize: '0.75rem', color: 'text.primary' }}>
+
+                                            </TableCell>
+                                            <TableCell align="right" sx={{ fontSize: '1.2rem', fontWeight: 600, color: timelinePageMeta.closing_val < 0 ? 'error.main' : 'success.main' }}>
+                                                {formatCurrency(timelinePageMeta.closing_val)}
+                                            </TableCell>
+                                        </TableRow>
+                                    </>
+
+                                )}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Paper>
 
                 {/* Pagination */}
-                <BottomPagination
-                    total={timelinePageMeta.total}
-                    item="items"
-                    page={timelinePageMeta?.page}
-                    metaPage={timelinePageMeta.page}
-                    rowsPerPage={limit}
-                    onChange={handleChangePage}
-                />
+                <Box sx={{ mt: 2 }}>
+                    <BottomPagination
+                        total={timelinePageMeta.total}
+                        item="items"
+                        page={timelinePageMeta?.page}
+                        metaPage={timelinePageMeta.page}
+                        rowsPerPage={limit}
+                        onChange={handleChangePage}
+                    />
+                </Box>
             </Box>
         </LocalizationProvider>
     );

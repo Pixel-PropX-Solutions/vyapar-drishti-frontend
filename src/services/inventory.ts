@@ -8,8 +8,8 @@ export const getStockMovement = createAsyncThunk(
   async (
     {
       search,
-      movement_type,
-      party_name,
+      category,
+      company_id,
       page_no,
       limit,
       startDate,
@@ -18,10 +18,10 @@ export const getStockMovement = createAsyncThunk(
       sortOrder
     }: {
       search: string;
+      company_id: string;
       startDate: string;
       endDate: string;
-      movement_type: string;
-      party_name: string;
+      category: string;
       page_no: number;
       limit: number;
       sortField: string;
@@ -31,7 +31,7 @@ export const getStockMovement = createAsyncThunk(
   ) => {
     try {
       const response = await userApi.get(
-        `/invoices/get/timeline?${search ? `search=${search}&` : ''}${movement_type ? `type=${movement_type}&` : ''}${party_name !== 'all' ? `party_name=${party_name}&` : ''}${startDate ? `start_date=${startDate}&` : ''}${endDate ? `end_date=${endDate}&` : ''}page_no=${page_no}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"}`
+        `/invoices/get/timeline?${company_id ? `company_id=${company_id}&` : ''}${search ? `search=${search}&` : ''}${category !== 'all' ? `category=${category}&` : ''}${startDate ? `start_date=${startDate}&` : ''}${endDate ? `end_date=${endDate}&` : ''}page_no=${page_no}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"}`
       );
 
       console.log("View StockMovement response", response)

@@ -130,7 +130,7 @@ const PaymentReceiptInvoice: React.FC = () => {
             const payload = {
                 voucher_type: transactionType,
                 voucher_type_id: invoiceType_id || '',
-                date: date instanceof Date ? date.toISOString().split('T')[0] : date,
+                date: date.toISOString().split('T')[0],
                 voucher_number: transactionNumber,
                 party_name: partyName,
                 party_name_id: customersList.find(c => c.ledger_name === partyName)?._id ?? '',

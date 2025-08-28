@@ -136,8 +136,8 @@ const Invoices: React.FC = () => {
       startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString(),
       endDate: new Date().toISOString(),
       rowsPerPage: 10,
-      sortField: "created_at" as InvoicesSortField,
-      sortOrder: "asc" as SortOrder,
+      sortField: "date" as InvoicesSortField,
+      sortOrder: "desc" as SortOrder,
     }));
   }, []);
 

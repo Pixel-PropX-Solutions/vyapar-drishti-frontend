@@ -7,6 +7,7 @@ export type SortField =
   | "created_at"
   | 'product_name'
   | "category"
+  | "item"
   | "company_name";
 
 
@@ -376,7 +377,7 @@ export interface CreateInvoiceWithTAXData {
   mode_of_transport: string,
   status: string,
   due_date: string,
-  
+
   paid_amount: number,
   total: number,
   discount: number,
@@ -918,28 +919,23 @@ export interface UpdateCategory {
 
 export interface StockMovement {
   _id: string,
-  user_id: string,
-  company_id: string,
-  vouchar_id: string,
-  voucher_number: string,
-  voucher_type: string,
-  item: string,
   item_id: string,
-  quantity: number,
-  rate: number,
-  amount: number,
-  additional_amount: number,
-  discount_amount: number,
-  godown: string,
-  godown_id: string,
-  order_number: string,
-  order_due_date: string,
-  date: string,
-  narration: string,
-  party_name: string,
-  place_of_supply: string,
-  created_at: string,
-  updated_at: string,
+  item: string,
+  unit: string,
+  inwards_qty: number,
+  inwards_val: number,
+  outwards_qty: number,
+  outwards_val: number,
+  opening_qty: number,
+  opening_val: number,
+  closing_qty: number,
+  closing_val: number,
+  opening_rate: number,
+  inwards_rate: number,
+  outwards_rate: number,
+  closing_rate: number,
+  gross_profit: number,
+  profit_percent: number
 }
 
 export interface InventoryItem {
