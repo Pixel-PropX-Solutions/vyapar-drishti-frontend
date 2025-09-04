@@ -1,5 +1,5 @@
 import userApi from "@/api/api";
-import { UserSignUp } from "@/utils/types";
+import { ContactFormData, UserSignUp } from "@/utils/types";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { jwtDecode } from 'jwt-decode';
 
@@ -293,6 +293,26 @@ export const emailVerify = createAsyncThunk(
       }
     } catch (error: any) {
       console.log("Email verification error:", error);
+      return rejectWithValue(error?.response?.data?.message);
+    }
+  }
+);
+
+
+
+export const sendQueryEmail = createAsyncThunk(
+  "user/send/query/email",
+  async (data: ContactFormData, { rejectWithValue }) => {
+    try {
+      const response = await userApi.post(`/auth/send/email/query`, data);
+      console.log("Send query email API response:", response);
+      if (response.status === 200) {
+        return response.data;
+      } else {
+        return rejectWithValue("Send query email failed.");
+      }
+    } catch (error: any) {
+      console.log("Send query email error:", error);
       return rejectWithValue(error?.response?.data?.message);
     }
   }

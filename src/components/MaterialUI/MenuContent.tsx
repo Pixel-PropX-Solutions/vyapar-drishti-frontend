@@ -25,6 +25,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { ROLE_ENUM } from '@/utils/enums';
 import {
+  Assessment,
   // AddCardOutlined, 
   PaymentsOutlined, People, ReceiptOutlined, Security
 } from '@mui/icons-material';
@@ -58,7 +59,7 @@ const createMainListItems = (role: string): MenuItem[] => {
     { text: "Customers", path: "/customers", icon: <People />, requiredRole: 'user' },
     { text: "Invoices", path: "/invoices", icon: <ReceiptOutlined />, requiredRole: 'user' },
     { text: "Transactions", path: "/transactions", icon: <PaymentsOutlined />, requiredRole: 'user' },
-    // { text: "Expenses", path: "/expenses", icon: <AddCardOutlined />, requiredRole: 'user' }
+    { text: "Reports", path: "/reports", icon: <Assessment />, requiredRole: 'user' }
   ];
 
   // const userItems: MenuItem[] = [

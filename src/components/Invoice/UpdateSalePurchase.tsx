@@ -58,6 +58,8 @@ import {
     AccountBalance,
     PeopleAltOutlined,
     DateRange,
+    Payments,
+    ArrowBack,
 } from "@mui/icons-material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -65,7 +67,6 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { viewAllCustomerWithType } from '@/services/customers';
-import { viewProductsWithId } from '@/services/products';
 import { updateInvoice, updateTaxInvoice, viewInvoice } from '@/services/invoice';
 import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -73,6 +74,7 @@ import AddItemModal from '@/common/modals/AddItemModal';
 import { capitalizeInput, formatLocalDate, getInitials } from '@/utils/functions';
 import ActionButtonSuccess from '@/common/buttons/ActionButtonSuccess';
 import ActionButtonCancel from '@/common/buttons/ActionButtonCancel';
+import { ActionButton } from '@/common/buttons/ActionButton';
 
 // Interfaces
 interface InvoiceItems {
@@ -170,9 +172,9 @@ const AnimatedTextField = ({ ...props }: any) => {
     );
 };
 
-const StatusChip = ({ status, ...props }: any) => {
-    const getStatusConfig = (status: string) => {
-        switch (status?.toLowerCase()) {
+const StatusChip = ({ payment_mode, ...props }: any) => {
+    const getStatusConfig = (payment_mode: string) => {
+        switch (payment_mode?.toLowerCase()) {
             case 'paid':
                 return { color: 'success', icon: '✓' };
             case 'unpaid':
@@ -184,11 +186,11 @@ const StatusChip = ({ status, ...props }: any) => {
         }
     };
 
-    const config = getStatusConfig(status);
+    const config = getStatusConfig(payment_mode);
 
     return (
         <Chip
-            label={`${config.icon} ${status}`}
+            label={`${config.icon} ${payment_mode}`}
             color={config.color as any}
             variant="outlined"
             size="small"
@@ -211,10 +213,12 @@ const modeOfTransportOptions = [
     { label: '🚢 By Sea', value: 'By Sea', icon: '🚢' },
 ];
 
-const paymentStatusOptions = [
-    { label: '✅ Paid', value: 'Paid', color: 'success' },
-    { label: '⏳ Unpaid', value: 'Unpaid', color: 'error' },
-    { label: '⏱ Partially Paid', value: 'Partially Paid', color: 'warning' },
+const paymentModeOptions = [
+    { label: '💵 Cash', value: 'Cash', color: 'success' },
+    { label: '💳 Card', value: 'Card', color: 'error' },
+    { label: '🏦 Net Banking', value: 'Net Banking', color: 'warning' },
+    { label: '🏧 NEFT', value: 'NEFT', color: 'warning' },
+    { label: '📄 Cheque', value: 'Cheque', color: 'warning' },
 ];
 
 // Main Component
@@ -225,7 +229,6 @@ export default function SalePurchaseInvoiceCreation() {
     const [date, setDate] = useState(new Date());
     const [dueDate, setDueDate] = useState(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
     const invoiceType = type === "sales" ? "Sales" : type === "purchase" ? "Purchase" : "";
-    const [itemsList, setItemsList] = useState<{ id: string; name: string; unit: string, tax_rate: string, hsn_code: string }[]>([]);
     const theme = useTheme();
     const [showSummary, setShowSummary] = useState(false);
 
@@ -260,7 +263,7 @@ export default function SalePurchaseInvoiceCreation() {
         mode_of_transport: "",
         vehicle_number: "",
         due_date: "",
-        status: "",
+        payment_mode: "",
         paid_amount: 0,
         total: 0,
         discount: 0,
@@ -375,7 +378,7 @@ export default function SalePurchaseInvoiceCreation() {
                     mode_of_transport: data.mode_of_transport,
                     vehicle_number: data.vehicle_number,
                     place_of_supply: data.place_of_supply,
-                    status: data.status,
+                    payment_mode: data.payment_mode,
                     paid_amount: data.paid_amount,
                     due_date: data.due_date,
                     additional_charge: Number(additional_charge),
@@ -389,8 +392,8 @@ export default function SalePurchaseInvoiceCreation() {
                         ...item,
                         entry_id: item.entry_id || '',
                         vouchar_id: data._id,
-                        hsn_code: itemsList.find((p) => p.id === item.item_id)?.hsn_code || '',
-                        unit: itemsList.find((p) => p.id === item.item_id)?.unit || '',
+                        hsn_code: item?.hsn_code || '',
+                        unit: item?.unit || '',
                         quantity: item.quantity || 1,
                         rate: item.rate || 0,
                         amount: item.amount || 0,
@@ -434,7 +437,7 @@ export default function SalePurchaseInvoiceCreation() {
                     mode_of_transport: data.mode_of_transport,
                     vehicle_number: data.vehicle_number,
                     place_of_supply: data.place_of_supply,
-                    status: data.status,
+                    payment_mode: data.payment_mode,
                     paid_amount: data.paid_amount,
                     due_date: data.due_date,
                     additional_charge: Number(additional_charge),
@@ -511,20 +514,6 @@ export default function SalePurchaseInvoiceCreation() {
                     setParties(ledgersWithType.map((part: any) => ({ name: part.ledger_name, id: part._id })));
                 }
 
-                // Load products
-                const productsResponse = await dispatch(viewProductsWithId(currentCompanyId || ''));
-                if (productsResponse.meta.requestStatus === 'fulfilled') {
-                    const products = productsResponse.payload;
-                    setItemsList(
-                        products.map((product: any) => ({
-                            name: product.stock_item_name,
-                            id: product._id,
-                            unit: product.unit,
-                            tax_rate: product.tax_rate || 0,
-                            hsn_code: product.hsn_code || ''
-                        }))
-                    );
-                }
             } catch (error) {
                 console.error("Failed to load initial data:", error);
                 toast.error("Failed to load data. Please refresh the page.");
@@ -558,7 +547,7 @@ export default function SalePurchaseInvoiceCreation() {
                 place_of_supply: invoiceData.place_of_supply || '',
                 mode_of_transport: invoiceData.mode_of_transport || '',
                 vehicle_number: invoiceData.vehicle_number || '',
-                status: invoiceData.status || '',
+                payment_mode: invoiceData.payment_mode || '',
                 due_date: invoiceData.due_date || '',
                 paid_amount: invoiceData.paid_amount || 0,
                 total: invoiceData.total || 0,
@@ -632,12 +621,18 @@ export default function SalePurchaseInvoiceCreation() {
                             <CardContent sx={{ p: 0 }}>
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', }}>
                                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                        <ActionButton
+                                            icon={<ArrowBack fontSize="small" />}
+                                            title="Back"
+                                            color="primary"
+                                            onClick={() => navigate(-1)}
+                                        />
                                         <Avatar
                                             sx={{
                                                 bgcolor: 'primary.main',
-                                                width: 56,
-                                                height: 56,
-                                                mr: 3,
+                                                width: 48,
+                                                height: 48,
+                                                mx: 2,
                                                 background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
                                                 boxShadow: theme.shadows[8],
                                             }}
@@ -645,8 +640,8 @@ export default function SalePurchaseInvoiceCreation() {
                                             <Receipt sx={{ fontSize: 28 }} />
                                         </Avatar>
                                         <Box>
-                                            <Typography variant="h4" fontWeight="800" color="primary.main" sx={{ mb: 1 }}>
-                                                Update {invoiceType} Invoice
+                                            <Typography variant="h5" component="h1" fontWeight="800" color="primary.main" sx={{ mb: 1 }}>
+                                                Create {invoiceType}
                                             </Typography>
                                             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                                                 <Chip icon={<Business />} label={currentCompany?.name || 'Company'} size="small" />
@@ -745,9 +740,9 @@ export default function SalePurchaseInvoiceCreation() {
                                         </Box>
                                     )}
 
-                                    {data.status && (
+                                    {data.payment_mode && (
                                         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                                            <StatusChip status={data.status} />
+                                            <StatusChip payment_mode={data.payment_mode} />
                                         </Box>
                                     )}
                                 </Stack>
@@ -975,25 +970,6 @@ export default function SalePurchaseInvoiceCreation() {
                                                         )}
                                                         sx={{ flex: 1 }}
                                                     />
-                                                    <Box sx={{ width: '50%' }}>
-                                                        <AnimatedTextField
-                                                            label="Paid Amount"
-                                                            type="number"
-                                                            fullWidth
-                                                            value={data.paid_amount}
-                                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange('paid_amount', e.target.value)}
-                                                            name="paid_amount"
-                                                            variant="outlined"
-                                                            InputProps={{
-                                                                startAdornment: (
-                                                                    <InputAdornment position="start">
-                                                                        <CurrencyRupee color='primary' />
-                                                                    </InputAdornment>
-                                                                ),
-                                                            }}
-                                                            sx={{ flex: 1 }}
-                                                        />
-                                                    </Box>
                                                 </Stack>
                                                 {tax_enable && <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 2 }}>
                                                     <Box sx={{ width: '50%' }}>
@@ -1030,26 +1006,26 @@ export default function SalePurchaseInvoiceCreation() {
                                                         />
                                                     </Box>
                                                     <Autocomplete
-                                                        options={paymentStatusOptions}
+                                                        options={paymentModeOptions}
                                                         getOptionLabel={(option) => option.label}
-                                                        value={paymentStatusOptions.find(option => option.value === data.status) || null}
+                                                        value={paymentModeOptions.find(option => option.value === data.payment_mode) || null}
                                                         onChange={(_, newValue) =>
                                                             setData(prev => ({
                                                                 ...prev,
-                                                                status: newValue ? newValue.value : ''
+                                                                payment_mode: newValue ? newValue.value : ''
                                                             }))
                                                         }
                                                         renderInput={(params) => (
                                                             <TextField
                                                                 {...params}
-                                                                label="Status"
+                                                                label="Payment Mode"
                                                                 variant="outlined"
                                                                 fullWidth
                                                                 InputProps={{
                                                                     ...params.InputProps,
                                                                     startAdornment: (
                                                                         <InputAdornment position="start">
-                                                                            <Commute color="primary" />
+                                                                            <Payments color="primary" />
                                                                         </InputAdornment>
                                                                     ),
                                                                 }}
@@ -1637,12 +1613,12 @@ export default function SalePurchaseInvoiceCreation() {
                                     </Box>
 
                                     <Stack direction="row" spacing={1} alignItems="center">
-                                        <ActionButtonSuccess
+                                        {!expandedTotals && <ActionButtonSuccess
                                             onClick={handleSubmit}
                                             disabled={isLoading || data.items.length === 0}
                                             startIcon={isLoading ? <Timeline className="animate-spin" /> : <Save />}
                                             text={isLoading ? `Updating...` : `Update Invoice`}
-                                        />
+                                        />}
                                         <IconButton
                                             onClick={() => setExpandedTotals(!expandedTotals)}
                                             sx={{
@@ -1959,7 +1935,7 @@ export default function SalePurchaseInvoiceCreation() {
                                             </Paper>
                                         </Grid>
 
-                                        <Grid item xs={12} sm={12} md={4}>
+                                        <Grid item xs={12} sm={12} md={3}>
                                             <Paper
                                                 elevation={3}
                                                 sx={{
@@ -1983,6 +1959,55 @@ export default function SalePurchaseInvoiceCreation() {
                                                     {Number(grandTotal).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                                 </Typography>
                                             </Paper>
+                                        </Grid>
+                                        <Grid item xs={12} sm={12} md={2}>
+                                            <AnimatedTextField
+                                                label="Paid Amount"
+                                                type="number"
+                                                fullWidth
+                                                value={data.paid_amount}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange('paid_amount', e.target.value)}
+                                                name="paid_amount"
+                                                variant="outlined"
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <CurrencyRupee color='primary' />
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                                sx={{ flex: 1 }}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} sm={12} md={2}>
+                                            <Paper
+                                                elevation={3}
+                                                sx={{
+                                                    p: 2,
+                                                    borderRadius: 1,
+                                                    background: `linear-gradient(135deg, ${theme.palette.success.main}10 0%, ${theme.palette.success.main}25 100%)`,
+                                                    border: `2px solid ${alpha(theme.palette.success.main, 0.4)}`,
+                                                    textAlign: 'center',
+                                                    height: 56,
+                                                    display: 'flex',
+                                                    alignItems: 'baseline',
+                                                    justifyContent: 'center',
+                                                    cursor: (isLoading || data.items.length === 0) ? 'not-allowed' : 'pointer',
+                                                    ":hover": {
+                                                        boxShadow: (isLoading || data.items.length === 0) ? 'none' : `0 4px 20px ${alpha(theme.palette.success.main, 0.3)}`,
+                                                        transform: (isLoading || data.items.length === 0) ? 'none' : 'translateY(-2px)',
+                                                        color: (isLoading || data.items.length === 0) ? 'text.disabled' : `#ffffff`,
+                                                        background: (isLoading || data.items.length === 0) ? alpha(theme.palette.success.main, 0.1) : `${theme.palette.success.main}`,
+                                                    },
+                                                    gap: 1,
+                                                }}
+                                                onClick={handleSubmit}
+                                            >
+                                                <Typography variant="subtitle2" fontWeight="600" >
+                                                    {isLoading ? `Updating...` : `Update Invoice`}
+                                                </Typography>
+                                            </Paper>
+
                                         </Grid>
                                     </Grid>
                                 </Box>

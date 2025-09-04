@@ -42,8 +42,9 @@ import {
     Assessment,
     CheckCircle,
     Warning,
+    ArrowBack,
 } from '@mui/icons-material';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { formatDate } from '@/utils/functions';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
@@ -54,6 +55,7 @@ import { viewInvoice } from '@/services/invoice';
 
 export const ViewInvoiceInfo = () => {
     const theme = useTheme();
+    const navigate = useNavigate();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const { invoice_id } = useParams();
     const dispatch = useDispatch<AppDispatch>();
@@ -111,9 +113,17 @@ export const ViewInvoiceInfo = () => {
                         gap: 2
                     }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Avatar sx={{ bgcolor: theme.palette.primary.main, width: 40, height: 40 }}>
-                                <Receipt />
-                            </Avatar>
+                            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                <ActionButton
+                                    icon={<ArrowBack fontSize="small" />}
+                                    title="Back"
+                                    color="primary"
+                                    onClick={() => navigate(-1)}
+                                />
+                                <Avatar sx={{ bgcolor: theme.palette.primary.main, width: 40, height: 40 }}>
+                                    <Receipt />
+                                </Avatar>
+                            </Box>
                             <Box>
                                 {isLoading ? (
                                     <Skeleton width={200} height={40} />
@@ -193,22 +203,22 @@ export const ViewInvoiceInfo = () => {
                                     </Box>
                                 ) : (
                                     <Stack spacing={2}>
-                                        {invoiceData?.status && <Box>
+                                        {invoiceData?.payment_mode && <Box>
                                             <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                                                 Invoice Status
                                             </Typography>
-                                            {getStatusIcon(invoiceData?.status || '') ? (
+                                            {getStatusIcon(invoiceData?.payment_mode || '') ? (
                                                 <Chip
-                                                    icon={getStatusIcon(invoiceData?.status || '')}
-                                                    label={invoiceData?.status.toUpperCase()}
-                                                    color={getStatusColor(invoiceData?.status || '') as any}
+                                                    icon={getStatusIcon(invoiceData?.payment_mode || '')}
+                                                    label={invoiceData?.payment_mode.toUpperCase()}
+                                                    color={getStatusColor(invoiceData?.payment_mode || '') as any}
                                                     variant="filled"
                                                     sx={{ fontWeight: 'bold' }}
                                                 />
                                             ) : (
                                                 <Chip
-                                                    label={invoiceData?.status.toUpperCase()}
-                                                    color={getStatusColor(invoiceData?.status || '') as any}
+                                                    label={invoiceData?.payment_mode.toUpperCase()}
+                                                    color={getStatusColor(invoiceData?.payment_mode || '') as any}
                                                     variant="filled"
                                                     sx={{ fontWeight: 'bold' }}
                                                 />

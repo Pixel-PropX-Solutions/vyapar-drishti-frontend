@@ -56,7 +56,7 @@ const initialState: CustomerState = {
         endDate: new Date().toISOString(),
         rowsPerPage: 10,
         sortField: "date",
-        sortOrder: "asc" as SortOrder,
+        sortOrder: "desc" as SortOrder,
     }
 }
 

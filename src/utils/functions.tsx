@@ -205,3 +205,18 @@ export const formatLocalDate = (date: Date): string => {
 export const getFYyear = (fy: string): string => {
   return `FY: ${fy.slice(0, 4)} - ${parseInt(fy.slice(0, 4), 10) + 1}`;
 }
+
+/**
+ * Converts a month number (1–12) to the full month name.
+ * @param month - number (1 = January, 12 = December)
+ * @returns Month name string (e.g., "January") or "" if invalid
+ */
+export function getMonthName(month: number): string {
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  if (month < 1 || month > 12) return "";
+  return months[month - 1];
+}

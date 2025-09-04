@@ -25,6 +25,7 @@ import {
     AddCircleOutlined,
     Image,
     Cancel,
+    ArrowBack,
 } from "@mui/icons-material";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
@@ -39,6 +40,7 @@ import { setEditingCustomer } from "@/store/reducers/customersReducer";
 import PhoneNumber from "@/common/PhoneNumber";
 import ActionButtonCancel from "@/common/buttons/ActionButtonCancel";
 import ActionButtonSuccess from "@/common/buttons/ActionButtonSuccess";
+import { ActionButton } from "@/common/buttons/ActionButton";
 
 
 interface CustomerFormData {
@@ -390,16 +392,24 @@ const EditCustomer: React.FC = () => {
                         }}
                     >
                         <Grid item sx={{ width: "50%" }}>
-                            <Typography
-                                variant="h4"
-                                component="h1"
-                                gutterBottom
-                            >
-                                {editingCustomer ? 'Update ' : 'Create new '}{customerType}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" >
-                                Fill in the details below to {editingCustomer ? 'update the ' : 'create a new '}{customerType}.
-                            </Typography>
+                            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                <ActionButton
+                                    icon={<ArrowBack fontSize="small" />}
+                                    title="Back"
+                                    color="primary"
+                                    onClick={() => navigate(-1)}
+                                />
+                                <Box>
+                                    <Typography
+                                        variant="h5" component="h1" fontWeight="700" color="text.primary"
+                                    >
+                                        {editingCustomer ? 'Update ' : 'Create new '}{customerType}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary" >
+                                        Fill in the details below to {editingCustomer ? 'update the ' : 'create a new '}{customerType}.
+                                    </Typography>
+                                </Box>
+                            </Box>
                         </Grid>
 
                         <Grid

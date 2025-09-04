@@ -57,6 +57,20 @@ export type InvoicesSortField =
 
 export type SortOrder = "asc" | "desc";
 
+export interface ContactFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  company: string;
+  industry: string;
+  queryType: string;
+  employees: string;
+  message: string;
+  marketingConsent: boolean;
+  time: string;
+}
+
 export interface Units {
   id: string;
   unit_name: string;
@@ -222,7 +236,7 @@ export interface CreateInvoiceData {
 
   vehicle_number: string,
   mode_of_transport: string,
-  status: string,
+  payment_mode: string,
   due_date: string,
 
   paid_amount: number,
@@ -273,7 +287,7 @@ export interface UpdateInvoice {
 
   vehicle_number: string,
   mode_of_transport: string,
-  status: string,
+  payment_mode: string,
   due_date: string,
   paid_amount: number,
   total: number,
@@ -324,7 +338,7 @@ export interface UpdateTAXInvoice {
 
   vehicle_number: string,
   mode_of_transport: string,
-  status: string,
+  payment_mode: string,
   due_date: string,
   paid_amount: number,
   total: number,
@@ -375,7 +389,7 @@ export interface CreateInvoiceWithTAXData {
 
   vehicle_number: string,
   mode_of_transport: string,
-  status: string,
+  payment_mode: string,
   due_date: string,
 
   paid_amount: number,
@@ -590,7 +604,7 @@ export interface GetInvoiceData {
   reference_number: string,
   place_of_supply: string,
   mode_of_transport: string,
-  status: string,
+  payment_mode: string,
   due_date: string,
   paid_amount: number,
   total: number,
@@ -960,4 +974,38 @@ export interface InventoryItem {
   low_stock_alert: number;
   last_restock_date: string;
   stock_status: string;
+}
+
+export interface MonthlyData {
+  sales: number,
+  purchase: number,
+  profit: number,
+  year: number,
+  data: Array<{
+    id: string | 'sales' | 'purchase' | 'profit',
+    label: string,
+    data: Array<number>
+  }>
+}
+
+export interface DailyData {
+  sales: number,
+  purchase: number,
+  profit: number,
+  year: number,
+  month: number,
+  data: Array<{
+    id: string | 'sales' | 'purchase' | 'profit',
+    label: string,
+    data: Array<number>
+  }>
+}
+
+export interface StatsData {
+  opening: number,
+  purchase: number,
+  sales: number,
+  current: number,
+  profit: number,
+  profit_percent: number,
 }

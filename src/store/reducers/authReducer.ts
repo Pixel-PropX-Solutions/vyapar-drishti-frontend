@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AuthStates } from "@/utils/enums";
-import { deleteAccount, deleteCompany, emailVerify, forgetPassword, getCurrentCompany, getCurrentUser, login, logout, register, resetPassword, switchCompany } from "@/services/auth";
+import { deleteAccount, deleteCompany, emailVerify, forgetPassword, getCurrentCompany, getCurrentUser, login, logout, register, resetPassword, sendQueryEmail, switchCompany } from "@/services/auth";
 import { GetCompany, UserSignUp } from "@/utils/types";
 
 
@@ -233,6 +233,18 @@ const authSlice = createSlice({
         state.loading = false;
       })
       .addCase(emailVerify.rejected, (state, action) => {
+        state.error = action.payload as string;
+        state.loading = false;
+      })
+      
+      .addCase(sendQueryEmail.pending, (state) => {
+        state.error = null;
+        state.loading = true;
+      })
+      .addCase(sendQueryEmail.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(sendQueryEmail.rejected, (state, action) => {
         state.error = action.payload as string;
         state.loading = false;
       })

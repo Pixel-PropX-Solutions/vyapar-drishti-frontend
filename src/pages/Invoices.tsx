@@ -28,6 +28,7 @@ import {
   RefreshOutlined,
   PeopleAlt,
   Today,
+  ArrowBack,
 } from "@mui/icons-material";
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
@@ -43,11 +44,13 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { InvoicesRowSkeleton } from "@/common/skeletons/InvoicesRowSkeleton";
-import { ActionButton } from "@/common/buttons/ActionButton1";
+import { ActionButton } from "@/common/buttons/ActionButton";
 import { setInvoicesFilters, setInvoiceTypeId } from "@/store/reducers/invoiceReducer";
 import toast from "react-hot-toast";
 import { BottomPagination } from "@/common/modals/BottomPagination";
 import { formatLocalDate } from "@/utils/functions";
+import ActionButtonSuccess from "@/common/buttons/ActionButtonSuccess";
+import ActionButtonCancel from "@/common/buttons/ActionButtonCancel";
 
 
 const Invoices: React.FC = () => {
@@ -249,17 +252,25 @@ const Invoices: React.FC = () => {
               }}
             >
               <Grid item sx={{ width: "50%" }}>
-                <Typography
-                  variant="h4"
-                  component="h1"
-                  gutterBottom
-                >
-                  Invoices Directory
-                </Typography>
-                <Typography variant="body2" color="text.secondary" >
-                  {pageMeta.total} Invoices available in your database after applying
-                  filters
-                </Typography>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                  <ActionButton
+                    icon={<ArrowBack fontSize="small" />}
+                    title="Back"
+                    color="primary"
+                    onClick={() => navigate(-1)}
+                  />
+                  <Box>
+                    <Typography
+                      variant="h5" component="h1" fontWeight="700" color="text.primary"
+                    >
+                      Invoices Directory
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" >
+                      {pageMeta.total} Invoices available in your database after applying
+                      filters
+                    </Typography>
+                  </Box>
+                </Box>
               </Grid>
 
               <Grid
@@ -270,10 +281,7 @@ const Invoices: React.FC = () => {
                 }}
               >
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                  <ActionButton
-                    variant="contained"
-                    startIcon={<AddCircleOutlineIcon />}
-                    color="success"
+                  <ActionButtonSuccess
                     onClick={() => {
                       if (!currentCompanyDetails?._id) {
                         toast.error('Please create a company first.');
@@ -282,23 +290,12 @@ const Invoices: React.FC = () => {
                       dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Sales'))?._id || ''));
                       navigate('/invoices/create/sales')
                     }}
-                    sx={{
-                      background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
-                      color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
-                      border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
-                      '&:hover': {
-                        color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                        background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
-                      },
-                    }}
-                  >
-                    Add Sales
-                  </ActionButton>
+                    text='Add Sales'
+                    startIcon={<AddCircleOutlineIcon />}
+                  />
 
-                  <ActionButton
-                    variant="contained"
+                  <ActionButtonCancel
                     startIcon={<RemoveCircleOutlineIcon />}
-                    color="error"
                     onClick={() => {
                       if (!currentCompanyDetails?._id) {
                         toast.error('Please create a company first.');
@@ -307,18 +304,32 @@ const Invoices: React.FC = () => {
                       dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Purchase'))?._id || ''));
                       navigate('/invoices/create/purchase');
                     }}
+                    text='Add Purchase'
+                  />
+
+                  {/* <ActionButton
+                    variant="contained"
+                    startIcon={<RemoveCircleOutlineIcon />}
+                    onClick={() => {
+                      if (!currentCompanyDetails?._id) {
+                        toast.error('Please create a company first.');
+                        return;
+                      }
+                      dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Quotations'))?._id || ''));
+                      navigate('/invoices/create/quotations');
+                    }}
                     sx={{
-                      background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
-                      color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
-                      border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#c62828'}`,
+                      background: alpha(theme.palette.info.main, 0.1),
+                      color: theme.palette.info.dark,
+                      border: `1px solid ${theme.palette.info.dark}`,
                       '&:hover': {
                         color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                        background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
+                        background: theme.palette.info.dark,
                       },
                     }}
                   >
-                    Add Purchase
-                  </ActionButton>
+                    Add Quotations
+                  </ActionButton> */}
                 </Box>
               </Grid>
             </Paper>
@@ -510,9 +521,9 @@ const Invoices: React.FC = () => {
                 <TableCell align="left" sx={{ px: 1 }}>
                   <Tooltip title="Sort by Invoice Type" arrow>
                     <TableSortLabel
-                    active={sortField === "voucher_type"}
-                    direction={sortField === "voucher_type" ? sortOrder : "asc"}
-                    onClick={() => handleSortRequest("voucher_type")}
+                      active={sortField === "voucher_type"}
+                      direction={sortField === "voucher_type" ? sortOrder : "asc"}
+                      onClick={() => handleSortRequest("voucher_type")}
                     >
                       <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
                         Invoice Type
@@ -592,10 +603,7 @@ const Invoices: React.FC = () => {
                         }}
                       >
                         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                          <ActionButton
-                            variant="contained"
-                            startIcon={<AddCircleOutlineIcon />}
-                            color="success"
+                          <ActionButtonSuccess
                             onClick={() => {
                               if (!currentCompanyDetails?._id) {
                                 toast.error('Please create a company first.');
@@ -604,23 +612,12 @@ const Invoices: React.FC = () => {
                               dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Sales'))?._id || ''));
                               navigate('/invoices/create/sales')
                             }}
-                            sx={{
-                              background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
-                              color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
-                              border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
-                              '&:hover': {
-                                color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                                background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
-                              },
-                            }}
-                          >
-                            Add Sales
-                          </ActionButton>
+                            text='Add Sales'
+                            startIcon={<AddCircleOutlineIcon />}
+                          />
 
-                          <ActionButton
-                            variant="contained"
+                          <ActionButtonCancel
                             startIcon={<RemoveCircleOutlineIcon />}
-                            color="error"
                             onClick={() => {
                               if (!currentCompanyDetails?._id) {
                                 toast.error('Please create a company first.');
@@ -629,18 +626,8 @@ const Invoices: React.FC = () => {
                               dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Purchase'))?._id || ''));
                               navigate('/invoices/create/purchase');
                             }}
-                            sx={{
-                              background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
-                              color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
-                              border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#c62828'}`,
-                              '&:hover': {
-                                color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                                background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
-                              },
-                            }}
-                          >
-                            Add Purchase
-                          </ActionButton>
+                            text='Add Purchase'
+                          />
                         </Box>
                       </Grid>
                     </Box>

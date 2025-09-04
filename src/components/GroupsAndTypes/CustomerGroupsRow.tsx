@@ -25,9 +25,8 @@ import EditIcon from "@mui/icons-material/Edit";
 // import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 // import CategoryIcon from "@mui/icons-material/Category";
 import { GetAllAccountingGroups } from "@/utils/types";
-import { viewProduct } from "@/services/products";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/store/store";
+// import { useDispatch, useSelector } from "react-redux";
+// import { AppDispatch, RootState } from "@/store/store";
 import { formatDate } from "@/utils/functions";
 
 interface ProductRowProps {
@@ -41,8 +40,8 @@ interface ProductRowProps {
 
 export const CustomerGroupsRow: React.FC<ProductRowProps> = ({ cusGroup, onDelete, onEdit, onView, index }) => {
     const theme = useTheme();
-    const dispatch = useDispatch<AppDispatch>();
-    const { currentCompany } = useSelector((state: RootState) => state.auth)
+    // const dispatch = useDispatch<AppDispatch>();
+    // const { currentCompany } = useSelector((state: RootState) => state.auth)
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
 
@@ -274,13 +273,12 @@ export const CustomerGroupsRow: React.FC<ProductRowProps> = ({ cusGroup, onDelet
                                     </IconButton>
                                 </Tooltip> */}
 
-                                <Tooltip title="Edit Product" arrow>
+                                <Tooltip title="Edit Customer Group" arrow>
                                     <IconButton
                                         size="small"
                                         onClick={async (e) => {
                                             e.stopPropagation();
                                             onEdit(cusGroup);
-                                            dispatch(viewProduct({ product_id: cusGroup._id, company_id: currentCompany?._id ?? '' }));
                                         }}
                                         sx={{
                                             bgcolor: alpha(theme.palette.warning.main, 0.1),

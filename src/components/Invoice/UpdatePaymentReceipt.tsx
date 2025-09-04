@@ -140,7 +140,7 @@ const UpdatePaymentReceipt: React.FC = () => {
                 place_of_supply: "",
                 mode_of_transport: "",
                 vehicle_number: "",
-                status: "",
+                payment_mode: "",
                 due_date: "",
                 paid_amount: 0,
                 total_amount: total,

@@ -57,6 +57,8 @@ import { ProductUpdate } from "@/utils/types";
 import toast from "react-hot-toast";
 import { formatDate, getAvatarColor, getInitials } from "@/utils/functions";
 import ProductsSideModal from "./ProductsSideModal";
+import { ActionButton } from "@/common/buttons/ActionButton";
+import { ArrowBack } from "@mui/icons-material";
 
 interface HistoryEntry {
   date: string;
@@ -71,7 +73,6 @@ export default function ViewItem() {
   const theme = useTheme();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
-  // const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const { item, timeline } = useSelector((state: RootState) => state.product);
   const { currentCompany } = useSelector((state: RootState) => state.auth);
@@ -85,17 +86,6 @@ export default function ViewItem() {
     null
   );
 
-  // const historyData: HistoryEntry[] = [
-  //   {
-  //     date: "2025-02-20",
-  //     action: "Stock Update",
-  //     details: "Added 50 units to inventory",
-  //     user: "John Doe",
-  //     type: "stock",
-  //   },
-  // ];
-
-  // Calculate stock status
   const getStockStatus = () => {
     if (!item)
       return { status: "Loading...", color: "info", severity: "info" as const };
@@ -135,14 +125,6 @@ export default function ViewItem() {
           setIsLoading(false);
         });
       dispatch(getProductTimeline({ product_id: id ?? '', company_id: currentCompany?._id ?? '' }))
-      // .unwrap()
-      // .then(() => {
-      //   setIsLoading(false);
-      // })
-      // .catch((error) => {
-      //   toast.error(error || "An unexpected error occurred. Please try again later.")
-      //   setIsLoading(false);
-      // });
     };
     fetchProduct();
   }, [id, dispatch, refreshKey, currentCompany?._id]);
@@ -165,18 +147,11 @@ export default function ViewItem() {
 
   const handleEdit = () => {
     setDrawer(true);
-    // setSelectedProduct(item);
-    // setOpenEditProductModal(true);
   };
 
   const handleDelete = () => {
     setOpenDeleteDialog(true);
   };
-
-  // const handleShare = () => {
-  //   navigator.clipboard.writeText(window.location.href);
-  //   toast.success("Product link copied to clipboard");
-  // };
 
   const handleCopyId = () => {
     navigator.clipboard.writeText(item._id);
@@ -284,149 +259,107 @@ export default function ViewItem() {
 
       {/* Enhanced Product Header */}
       <Fade in={true} timeout={500}>
-        <Card
-          elevation={0}
-          sx={{
-            mb: 3,
-            borderRadius: 1,
-            border: `1px solid ${theme.palette.divider}`,
-            background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.default} 100%)`,
-          }}
-        >
-          <CardContent sx={{ p: 3 }}>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-                mb: 2,
-              }}
-            >
-              <Box sx={{ display: "flex", alignItems: "center", flex: 1 }}>
-                <Avatar
-                  src={typeof item?.image === "string" && item.image ? item.image : undefined}
-                  sx={{
-                    width: 60,
-                    height: 60,
-                    bgcolor: getAvatarColor(item.stock_item_name),
-                    fontSize: '1rem',
-                    fontWeight: 700,
-                    boxShadow: `0 4px 12px ${alpha(getAvatarColor(item.stock_item_name), 0.3)}`,
-                    mr: 2,
-                  }}
-                >
-                  {(getInitials(item.stock_item_name))}
-                </Avatar>
+        {/* Header Section */}
+        <Card sx={{ mb: 3, p: 2, boxShadow: '0 2px 4px rgba(0,0,0,0.05)', borderRadius: '8px' }}>
+          <CardContent>
+            <Grid container spacing={2} alignItems="center" justifyContent='space-between'>
+              <Grid item xs={12} md={8}>
                 <Box>
-                  <Typography
-                    variant="h4"
-                    component="h1"
-                    sx={{
-                      fontWeight: 700,
-                      background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                      backgroundClip: "text",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      mb: 1,
-                    }}
-                  >
-                    {item.stock_item_name}
-                  </Typography>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <Chip
-                      icon={<CategoryIcon />}
-                      label={item.category || "Uncategorized"}
+                  <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                    <ActionButton
+                      icon={<ArrowBack fontSize="small" />}
+                      title="Back"
                       color="primary"
-                      variant="outlined"
-                      size="small"
-                      sx={{ px: 1 }}
+                      onClick={() => navigate(-1)}
                     />
-                    <Chip
-                      icon={<InventoryIcon />}
-                      label={item.unit}
-                      variant="outlined"
-                      size="small"
-                      sx={{ px: 1 }}
-                    />
-                    <Chip
-                      label={stockStatus.status}
-                      color={stockStatus.color as any}
-                      size="small"
-                      sx={{ fontWeight: 600, px: 1 }}
-                    />
+                    <Box>
+                      <Typography variant="h5" component="h1" fontWeight="700" color="text.primary">
+                        {item.stock_item_name}
+                      </Typography>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <Chip
+                          icon={<CategoryIcon />}
+                          label={item.category || "Uncategorized"}
+                          color="primary"
+                          variant="outlined"
+                          size="small"
+                          sx={{ px: 1 }}
+                        />
+                        <Chip
+                          icon={<InventoryIcon />}
+                          label={item.unit}
+                          variant="outlined"
+                          size="small"
+                          sx={{ px: 1 }}
+                        />
+                        <Chip
+                          label={stockStatus.status}
+                          color={stockStatus.color as any}
+                          size="small"
+                          sx={{ fontWeight: 600, px: 1 }}
+                        />
+                      </Box>
+                    </Box>
                   </Box>
                 </Box>
-              </Box>
-
-              <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-                <Box sx={{ textAlign: "center", border: `1px solid ${theme.palette.divider}`, px: 2, py: 1, borderRadius: 1, backgroundColor: theme.palette.primary.light }}>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
-                    Selling Price
+                <Tabs
+                  value={activeTab}
+                  onChange={handleTabChange}
+                  aria-label="dashboard tabs"
+                  sx={{ mt: 1 }}
+                >
+                  <Tab
+                    label="Activity History"
+                    icon={<HistoryIcon />}
+                    iconPosition="start" />
+                  <Tab
+                    label="Product Details"
+                    icon={<InfoIcon />}
+                    iconPosition="start" />
+                </Tabs>
+              </Grid>
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <Box
+                  sx={{ textAlign: "center", border: `1px solid ${theme.palette.divider}`, px: 2, py: .5, borderRadius: 1, backgroundColor: theme.palette.primary.light }}
+                >
+                  <Typography variant="body2" color="text.secondary">
+                    Avg. Selling Rate
                   </Typography>
                   <Typography
-                    variant="h5"
+                    variant="body1"
                     sx={{
                       fontWeight: 700,
                       color: "success.main",
                     }}
                   >{item.sales_qty > 0 ? <>
-                    &#8377; {item.sales_value}
+                    &#8377; {item.avg_sale_rate}
                   </> : 'No Sale Yet'}
                   </Typography>
                 </Box>
-                <Box sx={{ textAlign: "center", border: `1px solid ${theme.palette.divider}`, px: 2, py: 1, borderRadius: 1, backgroundColor: theme.palette.secondary.light }}>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
-                    Purchase Price
+                <Box sx={{ textAlign: "center", border: `1px solid ${theme.palette.divider}`, px: 2, py: .5, borderRadius: 1, backgroundColor: theme.palette.secondary.light }}>
+                  <Typography variant="body2" color="text.secondary" >
+                    Avg. Purchase Rate
                   </Typography>
-                  <Typography variant="h6" color="text.primary">
+                  <Typography variant="body1"
+                    sx={{
+                      fontWeight: 700,
+                    }}>
                     {item.purchase_qty > 0 ? <>
-                      &#8377; {item.purchase_value}
+                      &#8377; {item.avg_purchase_rate}
                     </> : "Not Purchased"}
                   </Typography>
                 </Box>
-                {/* <Tooltip title="Share Product">
-                  <IconButton onClick={handleShare} color="primary">
-                    <ShareIcon />
-                  </IconButton>
-                </Tooltip> */}
               </Box>
-            </Box>
+            </Grid>
 
-            {/* Enhanced Tabs */}
-            <Tabs
-              value={activeTab}
-              onChange={handleTabChange}
-              sx={{
-                "& .MuiTabs-indicator": {
-                  height: 3,
-                  borderRadius: "3px 3px 0 0",
-                },
-                "& .MuiTab-root": {
-                  minHeight: 48,
-                  textTransform: "none",
-                  fontSize: "1rem",
-                  fontWeight: 500,
-                },
-              }}
-            >
-              <Tab
-                label="Activity History"
-                icon={<HistoryIcon />}
-                iconPosition="start"
-              />
-              <Tab
-                label="Product Details"
-                icon={<InfoIcon />}
-                iconPosition="start"
-              />
-            </Tabs>
+
           </CardContent>
         </Card>
       </Fade>

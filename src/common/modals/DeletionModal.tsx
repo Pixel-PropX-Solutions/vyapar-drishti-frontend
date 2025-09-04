@@ -12,11 +12,10 @@ import {
   useTheme,
   Button,
 } from "@mui/material";
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
-import { deleteProduct, viewProduct } from "@/services/products";
+import { deleteProduct } from "@/services/products";
 import toast from "react-hot-toast";
 import { setProductId } from "@/store/reducers/productReducer";
 import {
@@ -82,7 +81,7 @@ const InfoRow: React.FC<{
 
 export default function DeletionModal({ id }: { id: string }) {
   const theme = useTheme();
-  const { productData, productId } = useSelector(
+  const { productData } = useSelector(
     (state: RootState) => state.product
   );
   const { currentCompany } = useSelector((state: RootState) => state.auth);
@@ -90,16 +89,6 @@ export default function DeletionModal({ id }: { id: string }) {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
 
-  useEffect(() => {
-    if (id) {
-      dispatch(viewProduct({ product_id: id, company_id: currentCompany?._id ?? '' }));
-    }
-    window.scrollTo(0, 0);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "auto";
-    };
-  }, [id, productId, dispatch, currentCompany?._id]);
 
   const handleDelete = () => {
     dispatch(deleteProduct({ id: id ?? "", company_id: currentCompany?._id ?? '' }))

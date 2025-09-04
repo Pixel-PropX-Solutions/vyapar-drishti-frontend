@@ -35,7 +35,8 @@ import { AppDispatch, RootState } from "@/store/store";
 import { useNavigate } from "react-router-dom";
 import {
     deleteInvoice,
-    printPaymentInvoices, printRecieptInvoices,
+    printInvoices,
+    printTAXInvoices,
     viewAllInvoices
 } from "@/services/invoice";
 import { InvoicerRow } from "@/components/Invoice/InvoiceRow";
@@ -47,34 +48,62 @@ import { InvoicesRowSkeleton } from "@/common/skeletons/InvoicesRowSkeleton";
 import { BottomPagination } from "@/common/modals/BottomPagination";
 import { setInvoiceTypeId } from "@/store/reducers/invoiceReducer";
 import toast from "react-hot-toast";
-import PDFModal from "@/common/modals/PDFModal";
+import usePDFHandler from "@/common/hooks/usePDFHandler";
 
 
 const Transactions: React.FC = () => {
     const navigate = useNavigate();
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
-    const [htmlFromAPI, setHtmlFromAPI] = useState<string>('');
     const [html, setHtml] = useState<boolean>(false);
-    const [invoiceId, setInvoiceId] = useState<string>('');
-    const [customer, setCustomer] = useState<string>('');
     const { invoices, loading, pageMeta, invoiceGroups } = useSelector((state: RootState) => state.invoice);
     const { user, current_company_id } = useSelector((state: RootState) => state.auth);
     const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
+    const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
+    const tax_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_tax;
 
-    // const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
+    const { init, setIsGenerating, PDFViewModal } = usePDFHandler();
+
+
+    async function handleInvoice(invoice: any, callback: () => void) {
+
+        if (!['Sales', 'Purchase'].includes(invoice.voucher_type)) { return; }
+
+        try {
+            setIsGenerating(true);
+
+            const res = await dispatch((tax_enable ? printTAXInvoices : printInvoices)({
+                vouchar_id: invoice._id,
+                company_id: current_company_id || '',
+            }));
+
+            if (res.meta.requestStatus !== 'fulfilled') {
+                console.error('Failed to print invoice:', res.payload);
+                return;
+            }
+
+            const { paginated_data, download_data } = res.payload as { paginated_data: Array<{ html: string, page_number: number }>, download_data: string };
+
+            init({ html: paginated_data.map(item => item.html), downloadHtml: download_data, pdfName: invoice.voucher_number, title: invoice.voucher_number }, callback);
+        } catch (e) {
+            console.error('Error printing invoice:', e);
+        } finally {
+            setIsGenerating(false);
+        }
+    }
+
 
     const [state, setState] = useState({
         searchQuery: "",
         filterState: "All-States",
         is_deleted: false,
-        type: "Transactions",
+        type: "All",
         page: 1,
         startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
         endDate: new Date(),
         rowsPerPage: 10,
-        sortField: "created_at" as CustomerSortField,
-        sortOrder: "asc" as SortOrder,
+        sortField: "date" as CustomerSortField,
+        sortOrder: "desc" as SortOrder,
     });
 
     const { searchQuery, filterState, page, is_deleted, rowsPerPage, startDate, endDate, type, sortField, sortOrder } = state;
@@ -130,13 +159,13 @@ const Transactions: React.FC = () => {
             searchQuery: "",
             filterState: "All-States",
             is_deleted: false,
-            type: "Transactions",
+            type: "All",
             page: 1,
             startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
             endDate: new Date(),
             rowsPerPage: 10,
-            sortField: "created_at" as CustomerSortField,
-            sortOrder: "asc" as SortOrder,
+            sortField: "date" as CustomerSortField,
+            sortOrder: "desc" as SortOrder,
         });
     }, []);
 
@@ -152,50 +181,6 @@ const Transactions: React.FC = () => {
     const handleViewInvoice = (_invoice: GetAllVouchars) => {
         // navigate(`/customers/${customer._id}`)
     };
-
-    const handlePrintInvoice = (invoiceId: string, invoiceNumber: string, invoiceType: string, customer: string) => {
-        if (invoiceType === 'Receipt') {
-            dispatch(printRecieptInvoices({
-                vouchar_id: invoiceId,
-                company_id: currentCompanyId || "",
-            })).then((response) => {
-                if (response.meta.requestStatus === 'fulfilled') {
-                    const payload = response.payload as { invoceHtml: string };
-                    setHtmlFromAPI(payload.invoceHtml);
-                    setInvoiceId(invoiceNumber);
-                    setCustomer(customer);
-                    setHtml(true);
-                } else {
-                    console.error("Failed to print invoice:", response.payload);
-                }
-            }
-            ).catch((error) => {
-                console.error("Error printing invoice:", error);
-            }
-            );
-        } else if (invoiceType === 'Payment') {
-            dispatch(printPaymentInvoices({
-                vouchar_id: invoiceId,
-                company_id: currentCompanyId || "",
-            })).then((response) => {
-                if (response.meta.requestStatus === 'fulfilled') {
-                    const payload = response.payload as { invoceHtml: string };
-                    setHtmlFromAPI(payload.invoceHtml);
-                    setInvoiceId(invoiceNumber);
-                    setCustomer(customer);
-                    setHtml(true);
-                } else {
-                    console.error("Failed to print invoice:", response.payload);
-                }
-            }
-            ).catch((error) => {
-                console.error("Error printing invoice:", error);
-            }
-            );
-        }
-    };
-
-    const filteredInvoices = invoices?.filter((inv) => inv.voucher_type === 'Payment' || inv.voucher_type === 'Receipt');
 
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -214,9 +199,7 @@ const Transactions: React.FC = () => {
                         >
                             <Grid item sx={{ width: "50%" }}>
                                 <Typography
-                                    variant="h4"
-                                    component="h1"
-                                    gutterBottom
+                                   variant="h5" component="h1" fontWeight="700" color="text.primary"
                                 >
                                     Transactions Directory
                                 </Typography>
@@ -369,7 +352,7 @@ const Transactions: React.FC = () => {
                                 ),
                             }}
                         >
-                            <MenuItem selected value="Transactions">
+                            <MenuItem selected value="All">
                                 <em>All</em>
                             </MenuItem>
                             <MenuItem value={'Payment'}>
@@ -377,6 +360,12 @@ const Transactions: React.FC = () => {
                             </MenuItem>
                             <MenuItem value={'Receipt'}>
                                 Receipt
+                            </MenuItem>
+                            <MenuItem value={'Sales'}>
+                                Sales
+                            </MenuItem>
+                            <MenuItem value={'Purchase'}>
+                                Purchase
                             </MenuItem>
                         </TextField>
                     </FormControl>
@@ -527,8 +516,8 @@ const Transactions: React.FC = () => {
                             {loading ? (
                                 Array([1, 2, 3, 4, 5])
                                     .map((_, index) => <InvoicesRowSkeleton key={`skeleton-${index}`} />)
-                            ) : filteredInvoices?.length > 0 ? (
-                                filteredInvoices.map((inv, index) => (
+                            ) : invoices?.length > 0 ? (
+                                invoices.map((inv, index) => (
                                     <InvoicerRow
                                         key={inv._id}
                                         inv={inv}
@@ -546,7 +535,7 @@ const Transactions: React.FC = () => {
                                                 toast.error(error || 'An unexpected error occurred. Please try again later.');
                                             })
                                         }}
-                                        onPrint={() => { handlePrintInvoice(inv._id, inv.voucher_number, inv.voucher_type, inv.party_name) }}
+                                        onPrint={() => { handleInvoice(inv, () => { setHtml(true); }) }}
                                     />))
                             ) : (
                                 <TableRow>
@@ -638,7 +627,8 @@ const Transactions: React.FC = () => {
                     onChange={handleChangePage}
                 />
 
-                {html && <PDFModal invoiceHtml={htmlFromAPI} fullHtml={htmlFromAPI} downloadHtml={htmlFromAPI} open={html} onClose={() => setHtml(false)} invoiceNumber={invoiceId} customerName={customer} />}
+                {/* {html && <PDFModal invoiceHtml={htmlFromAPI} fullHtml={htmlFromAPI} downloadHtml={htmlFromAPI} open={html} onClose={() => setHtml(false)} invoiceNumber={invoiceId} customerName={customer} />} */}
+                <PDFViewModal visible={html} setVisible={setHtml} />
             </Box >
         </LocalizationProvider>
 

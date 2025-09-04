@@ -37,10 +37,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { InventorySortField, SortOrder } from '@/utils/types';
 import { getInventoryItems, getInventoryStats } from '@/services/inventory';
-import { WarningOutlined } from '@mui/icons-material';
-import { ActionButton } from "@/common/buttons/ActionButton1";
+import { ArrowBack, WarningOutlined } from '@mui/icons-material';
+import { ActionButton } from "@/common/buttons/ActionButton";
 import InventoryStockCardSkeleton from '@/common/skeletons/InventoryStockCardSkeleton';
 import toast from 'react-hot-toast';
+import ActionButtonSuccess from '@/common/buttons/ActionButtonSuccess';
+import ActionButtonCancel from '@/common/buttons/ActionButtonCancel';
 
 // Styled Components with enhanced visuals
 const StockCard = styled(Paper)(({ theme }) => ({
@@ -238,20 +240,28 @@ const Inventory: React.FC = () => {
                 <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
                         <Box>
-                            <Typography variant="h5" component="h1" fontWeight="700" color="text.primary">
-                                Inventory Management
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                Includes the items which have been added to at least a single invoice.
-                            </Typography>
+                            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                <ActionButton
+                                    icon={<ArrowBack fontSize="small" />}
+                                    title="Back"
+                                    color="primary"
+                                    onClick={() => navigate(-1)}
+                                />
+                                <Box>
+                                    <Typography variant="h5" component="h1" fontWeight="700" color="text.primary">
+                                        Inventory Management
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                        Includes the items which have been added to at least a single invoice.
+                                    </Typography>
+                                </Box>
+                            </Box>
                         </Box>
 
                         {/* Top Action Buttons with improved styling */}
                         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                            <ActionButton
-                                variant="contained"
+                            <ActionButtonSuccess
                                 startIcon={<AddCircleOutlineIcon />}
-                                color="success"
                                 onClick={() => {
                                     if (!currentCompanyDetails?._id) {
                                         toast.error('Please create a company first.');
@@ -259,22 +269,11 @@ const Inventory: React.FC = () => {
                                     }
                                     navigate('/invoices/create/purchase');
                                 }}
-                                sx={{
-                                    background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
-                                    color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
-                                    '&:hover': {
-                                        color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                                        background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
-                                    },
-                                }}
-                            >
-                                Add Purchase
-                            </ActionButton>
+                                text='Add Purchase'
+                            />
 
-                            <ActionButton
-                                variant="contained"
+                            <ActionButtonCancel
                                 startIcon={<RemoveCircleOutlineIcon />}
-                                color="error"
                                 onClick={() => {
                                     if (!currentCompanyDetails?._id) {
                                         toast.error('Please create a company first.');
@@ -282,19 +281,8 @@ const Inventory: React.FC = () => {
                                     }
                                     navigate('/invoices/create/sales');
                                 }}
-                                sx={{
-                                    background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
-                                    color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
-                                    '&:hover': {
-                                        color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                                        background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
-                                    },
-                                }}
-                            >
-                                Add Sales
-                            </ActionButton>
-
-
+                                text='Add Sales'
+                            />
                         </Box>
                     </Box>
                 </CardContent>
