@@ -645,7 +645,7 @@ export default function SalePurchaseInvoiceCreation() {
                                             </Typography>
                                             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                                                 <Chip icon={<Business />} label={currentCompany?.name || 'Company'} size="small" />
-                                                <Chip icon={<Today />} label={formatLocalDate(date).split('T')[0].split('-').reverse().join('-')} size="small" />
+                                                <Chip icon={<Today />} label={formatLocalDate(date.toISOString()).split('T')[0].split('-').reverse().join('-')} size="small" />
                                                 {tax_enable && <Chip icon={<Assignment />} label="TAX Enabled" color="success" size="small" />}
                                             </Box>
                                         </Box>
@@ -833,7 +833,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                                 setDate(value || new Date());
                                                                 setData(prev => ({
                                                                     ...prev,
-                                                                    date: value ? formatLocalDate(value).split('T')[0] : ''
+                                                                    date: value ? formatLocalDate(value.toISOString()).split('T')[0] : ''
                                                                 }));
                                                                 if (errors.date) {
                                                                     setErrors(prev => {

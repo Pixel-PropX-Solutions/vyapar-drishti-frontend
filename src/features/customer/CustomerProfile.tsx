@@ -75,16 +75,16 @@ const CustomerProfile: React.FC = () => {
             limit: rowsPerPage,
             sortField,
             sortOrder,
-            start_date: formatLocalDate(new Date(startDate)),
-            end_date: formatLocalDate(new Date(endDate)),
+            start_date: formatLocalDate(startDate),
+            end_date: formatLocalDate(endDate),
         }));
     }, [currentCompanyId, customer_id, dispatch, endDate, page, rowsPerPage, debouncedQuery, sortField, sortOrder, startDate, type]);
 
     useEffect(() => {
         if (customer_id) {
             dispatch(getCustomer({
-                id: customer_id, start_date: formatLocalDate(new Date(startDate)),
-                end_date: formatLocalDate(new Date(endDate)),
+                id: customer_id, start_date: formatLocalDate(startDate),
+                end_date: formatLocalDate(endDate),
             }));
         }
     }, [dispatch, customer_id, startDate, endDate]);
@@ -150,7 +150,7 @@ const CustomerProfile: React.FC = () => {
 
 
     // managing searchQuery, filterState, page, rowsPerPage
-    const handleStateChange = (field: string, value: any) => {
+    const handleStateChange = (field: string, value: string | number) => {
         dispatch(setCustomersFilters({
             [field]: value
         }))
@@ -162,8 +162,8 @@ const CustomerProfile: React.FC = () => {
             searchQuery: "",
             type: "all",
             page: 1,
-            startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString(),
-            endDate: new Date().toISOString(),
+            startDate: (new Date(new Date().getFullYear(), new Date().getMonth(), 1)).toISOString(),
+            endDate: (new Date()).toISOString(),
             rowsPerPage: 10,
             sortField: "created_at",
             sortOrder: "desc" as SortOrder,
@@ -516,7 +516,7 @@ const CustomerProfile: React.FC = () => {
                             ) : customerInvoices?.length > 0 ? (
                                 customerInvoices?.map((inv, index) => (
                                     <CustomerInvoicesRow
-                                        key={inv.vouchar_id}
+                                        key={`${inv.vouchar_id}-${index}`}
                                         inv={inv}
                                         index={index + 1 + (page - 1) * rowsPerPage}
                                         onView={() => {
@@ -546,7 +546,7 @@ const CustomerProfile: React.FC = () => {
                             )}
                             {loading ? (
                                 Array([1, 2, 3, 4, 5])
-                                    .map((_, index) => <CustomerInvoicesRowSkeleton key={`skeleton-${index}`} />)
+                                    .map((_, index) => <CustomerInvoicesRowSkeleton key={`skeleton1-${index}`} />)
                             ) : customerInvoices?.length > 0 && (
                                 <>
                                     <TableRow sx={{

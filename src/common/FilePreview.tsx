@@ -94,7 +94,6 @@ export const FilePreview: React.FC<FilePreviewProps> = ({ file, onClose }) => {
                             renderTextLayer={true}
                             renderAnnotationLayer={true}
                             renderMode="canvas"
-                            width={Math.min(window.innerWidth * 0.7, 800)}
                             scale={1.0}
                         />
                     </Document>

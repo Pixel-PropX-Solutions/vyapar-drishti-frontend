@@ -556,7 +556,7 @@ export interface FormCreateProduct {
   nature_of_goods?: string;
   hsn_code: string;
   taxability: string;
-  tax_rate: string;
+  tax_rate: number;
 
   low_stock_alert: number;
 }
@@ -583,7 +583,7 @@ export interface ProductUpdate {
   nature_of_goods?: string;
   hsn_code?: string;
   taxability?: string;
-  tax_rate: string;
+  tax_rate: number;
   low_stock_alert?: number;
 }
 

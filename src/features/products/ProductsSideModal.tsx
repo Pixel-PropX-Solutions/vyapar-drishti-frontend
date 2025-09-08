@@ -35,12 +35,12 @@ import { FormCreateProduct, ProductUpdate } from '@/utils/types';
 // Components
 import BasicDetailsSection from './BasicDetailsSection';
 import AdditionalInfoSection from './AdditionalInfoSection';
-// import OpeningStockSection from './OpeningStockSection';
 import AdvancedSettingsSection from './AdvancedSettingsSection';
 import CategoryCreateModal from '../category/CategoryCreateModal';
 import CreateInventoryGroupModal from '../Group/CreateInventoryGroupModal';
 import { viewAllInventoryGroups } from '@/services/inventoryGroup';
 import { units } from '@/internals/data/units';
+import { roundToDigits } from '@/utils/functions';
 
 interface SideModalProps {
     drawer: boolean;
@@ -135,7 +135,7 @@ const ProductsSideModal = (props: SideModalProps) => {
         nature_of_goods: '',
         hsn_code: '',
         taxability: '',
-        tax_rate: '',
+        tax_rate: 0,
         low_stock_alert: 0,
     });
 
@@ -160,7 +160,7 @@ const ProductsSideModal = (props: SideModalProps) => {
         if (currentCompanyDetails?.company_settings?.features?.enable_tax) {
             if (!data.hsn_code.trim()) errors.hsn_code = 'HSN code is required';
             if (!data.taxability.trim()) errors.taxability = 'Taxability is required';
-            if (data.taxability === 'Taxable' && !data.tax_rate.trim()) errors.tax_rate = 'Tax percentage is required';
+            if (data.taxability === 'Taxable' && data.tax_rate < 0) errors.tax_rate = 'Tax percentage is required';
         }
         setValidationErrors(errors);
         return errors;
@@ -253,28 +253,28 @@ const ProductsSideModal = (props: SideModalProps) => {
         setIsLoading(true);
         try {
             // Calculate opening_value
-            const opening_value = (Number(data.opening_balance) || 0) * (Number(data.opening_rate) || 0);
-            const sanitizedData: Record<string, any> = {
+            const openingValue = roundToDigits({ num: (Number(data.opening_balance) || 0) * (Number(data.opening_rate) || 0), digits: 2 });
+            const sanitizedData: Record<string, string | File | boolean | number | undefined> = {
                 stock_item_name: data.stock_item_name.trim(),
                 unit: data.unit.trim(),
                 unit_id: data.unit_id.trim(),
                 company_id: (currentCompanyId || '').trim(),
                 is_deleted: data.is_deleted === false,
-                hsn_code: data.hsn_code.trim(),
-                taxability: data.taxability.trim(),
-                tax_rate: data.tax_rate.trim(),
-                low_stock_alert: data.low_stock_alert,
-                opening_balance: data.opening_balance,
-                opening_rate: data.opening_rate,
-                opening_value, // Ensure opening_value is included
             };
-
-            // Add optional fields
-            Object.entries(data).forEach(([key, value]) => {
-                if (!(key in sanitizedData)) {
-                    sanitizedData[key] = value;
-                }
-            });
+            if (data.hsn_code?.trim()) sanitizedData.hsn_code = data.hsn_code.trim();
+            if (data.taxability?.trim()) sanitizedData.taxability = data.taxability.trim();
+            if (data.nature_of_goods?.trim()) sanitizedData.nature_of_goods = data.nature_of_goods.trim();
+            if (data.alias_name?.trim()) sanitizedData.alias_name = data.alias_name.trim();
+            if (data.category?.trim()) sanitizedData.category = data.category.trim();
+            if (data.category_id?.trim()) sanitizedData.category_id = data.category_id.trim();
+            if (data.group?.trim()) sanitizedData.group = data.group.trim();
+            if (data.description?.trim()) sanitizedData.description = data.description.trim();
+            if (data.image && typeof data.image !== 'string') sanitizedData.image = data.image;
+            if (data.opening_balance) sanitizedData.opening_balance = data.opening_balance;
+            if (data.opening_rate) sanitizedData.opening_rate = data.opening_rate;
+            if (openingValue) sanitizedData.opening_value = openingValue;
+            if (data.low_stock_alert) sanitizedData.low_stock_alert = data.low_stock_alert;
+            if (data.tax_rate) sanitizedData.tax_rate = data.tax_rate;
 
             const formData = new FormData();
             Object.entries(sanitizedData).forEach(([key, value]) => {
@@ -334,7 +334,7 @@ const ProductsSideModal = (props: SideModalProps) => {
             hsn_code: '',
             taxability: '',
             low_stock_alert: 0,
-            tax_rate: '',
+            tax_rate: 0,
         });
         setImagePreview(null);
         setCurrentStep(0);
@@ -402,7 +402,7 @@ const ProductsSideModal = (props: SideModalProps) => {
                 hsn_code: product.hsn_code || '',
                 taxability: product.taxability || '',
                 low_stock_alert: product.low_stock_alert || 0,
-                tax_rate: product.tax_rate || '',
+                tax_rate: product.tax_rate || 0,
             });
             setImagePreview(typeof product?.image === 'string' ? product.image : '');
         }
@@ -521,7 +521,7 @@ const ProductsSideModal = (props: SideModalProps) => {
                         return false;
                     }
                     if (data.taxability === 'Taxable') {
-                        return !!data.tax_rate.trim();
+                        return data.tax_rate > 0;
                     }
                     return true;
                 } else {

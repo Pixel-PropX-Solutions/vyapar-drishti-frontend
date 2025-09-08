@@ -28,6 +28,7 @@ import {
     RefreshOutlined,
     PeopleAlt,
     Today,
+    ArrowBack,
 } from "@mui/icons-material";
 import { CustomerSortField, SortOrder, GetAllVouchars } from "@/utils/types";
 import { useDispatch, useSelector } from "react-redux";
@@ -35,8 +36,10 @@ import { AppDispatch, RootState } from "@/store/store";
 import { useNavigate } from "react-router-dom";
 import {
     deleteInvoice,
-    printInvoices,
-    printTAXInvoices,
+    getInvoicesPDF,
+    getPaymentPdf,
+    getRecieptPdf,
+    getTaxInvoicesPDF,
     viewAllInvoices
 } from "@/services/invoice";
 import { InvoicerRow } from "@/components/Invoice/InvoiceRow";
@@ -49,46 +52,54 @@ import { BottomPagination } from "@/common/modals/BottomPagination";
 import { setInvoiceTypeId } from "@/store/reducers/invoiceReducer";
 import toast from "react-hot-toast";
 import usePDFHandler from "@/common/hooks/usePDFHandler";
+import { ActionButton } from "@/common/buttons/ActionButton";
 
 
 const Transactions: React.FC = () => {
     const navigate = useNavigate();
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
-    const [html, setHtml] = useState<boolean>(false);
+    const [visible, setVisible] = useState<boolean>(false);
     const { invoices, loading, pageMeta, invoiceGroups } = useSelector((state: RootState) => state.invoice);
     const { user, current_company_id } = useSelector((state: RootState) => state.auth);
     const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
     const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
     const tax_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_tax;
 
-    const { init, setIsGenerating, PDFViewModal } = usePDFHandler();
+    const { init, setLoading, PDFViewModal } = usePDFHandler();
 
 
     async function handleInvoice(invoice: any, callback: () => void) {
 
-        if (!['Sales', 'Purchase'].includes(invoice.voucher_type)) { return; }
-
         try {
-            setIsGenerating(true);
+            setLoading(true);
+            const res = await dispatch(
+                (invoice.voucher_type === 'Payment' ? getPaymentPdf :
+                    invoice.voucher_type === 'Receipt' ? getRecieptPdf :
+                        tax_enable ? getTaxInvoicesPDF : getInvoicesPDF)({
+                            vouchar_id: invoice._id,
+                            company_id: current_company_id || '',
+                        }));
 
-            const res = await dispatch((tax_enable ? printTAXInvoices : printInvoices)({
-                vouchar_id: invoice._id,
-                company_id: current_company_id || '',
-            }));
+            if (res.meta.requestStatus === 'fulfilled') {
+                const { pdfUrl } = res.payload as { pdfUrl: string };
 
-            if (res.meta.requestStatus !== 'fulfilled') {
+                // ✅ Rebuild File from URL when needed
+                const blob = await fetch(pdfUrl).then((r) => r.blob());
+                const file1 = new File([blob], `${invoice._id}.pdf`, {
+                    type: "application/pdf",
+                });
+
+                init({ file: file1, entityNumber: invoice.voucher_number, title: invoice.party_name, fileName: `${invoice.voucher_number}-vyapar-drishti` }, callback);
+            } else {
                 console.error('Failed to print invoice:', res.payload);
                 return;
             }
 
-            const { paginated_data, download_data } = res.payload as { paginated_data: Array<{ html: string, page_number: number }>, download_data: string };
-
-            init({ html: paginated_data.map(item => item.html), downloadHtml: download_data, pdfName: invoice.voucher_number, title: invoice.voucher_number }, callback);
         } catch (e) {
             console.error('Error printing invoice:', e);
         } finally {
-            setIsGenerating(false);
+            setLoading(false);
         }
     }
 
@@ -178,8 +189,10 @@ const Transactions: React.FC = () => {
     }
 
     // Handle view stockist details
-    const handleViewInvoice = (_invoice: GetAllVouchars) => {
-        // navigate(`/customers/${customer._id}`)
+    const handleViewInvoice = (invoice: GetAllVouchars) => {
+        if (invoice.voucher_type !== 'Payment' && invoice.voucher_type !== "receipt") {
+            navigate(`/invoices/${invoice._id}`)
+        }
     };
 
     return (
@@ -198,14 +211,24 @@ const Transactions: React.FC = () => {
                             }}
                         >
                             <Grid item sx={{ width: "50%" }}>
-                                <Typography
-                                   variant="h5" component="h1" fontWeight="700" color="text.primary"
-                                >
-                                    Transactions Directory
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary" >
-                                    {pageMeta.total} Transactions found
-                                </Typography>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <ActionButton
+                                        icon={<ArrowBack fontSize="small" />}
+                                        title="Back"
+                                        color="primary"
+                                        onClick={() => navigate(-1)}
+                                    />
+                                    <Box>
+                                        <Typography
+                                            variant="h5" component="h1" fontWeight="700" color="text.primary"
+                                        >
+                                            Transactions Directory
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary" >
+                                            {pageMeta.total} Transactions found
+                                        </Typography>
+                                    </Box>
+                                </Box>
                             </Grid>
 
                             <Grid
@@ -535,7 +558,7 @@ const Transactions: React.FC = () => {
                                                 toast.error(error || 'An unexpected error occurred. Please try again later.');
                                             })
                                         }}
-                                        onPrint={() => { handleInvoice(inv, () => { setHtml(true); }) }}
+                                        onPrint={() => { handleInvoice(inv, () => { setVisible(true); }) }}
                                     />))
                             ) : (
                                 <TableRow>
@@ -627,8 +650,7 @@ const Transactions: React.FC = () => {
                     onChange={handleChangePage}
                 />
 
-                {/* {html && <PDFModal invoiceHtml={htmlFromAPI} fullHtml={htmlFromAPI} downloadHtml={htmlFromAPI} open={html} onClose={() => setHtml(false)} invoiceNumber={invoiceId} customerName={customer} />} */}
-                <PDFViewModal visible={html} setVisible={setHtml} />
+                {visible && <PDFViewModal visible={visible} setVisible={setVisible} />}
             </Box >
         </LocalizationProvider>
 

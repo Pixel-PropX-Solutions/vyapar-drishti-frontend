@@ -267,7 +267,7 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                                     </IconButton>
                                 </Tooltip>
 
-                                {['Sales', 'Purchase'].includes(inv.voucher_type) && <Tooltip title="Print Invoice" arrow>
+                                <Tooltip title="Print Invoice" arrow>
                                     <IconButton
                                         size="small"
                                         onClick={(e) => {
@@ -287,7 +287,7 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                                     >
                                         <Print fontSize="small" />
                                     </IconButton>
-                                </Tooltip>}
+                                </Tooltip>
                             </Box>
                         </Zoom>
                     </TableCell>

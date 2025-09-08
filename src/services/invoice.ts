@@ -259,8 +259,8 @@ export const updateTaxInvoice = createAsyncThunk(
     }
 );
 
-export const printInvoices = createAsyncThunk(
-    "print/invoices",
+export const getInvoicesPDF = createAsyncThunk(
+    "get/invoices/pdf",
     async (
         {
             vouchar_id,
@@ -275,12 +275,17 @@ export const printInvoices = createAsyncThunk(
     ) => {
         try {
             const response = await userApi.get(
-                `/invoices/print/vouchar?vouchar_id=${vouchar_id}&company_id=${company_id}`
+                `/invoices/print/vouchar?vouchar_id=${vouchar_id}&company_id=${company_id}`,
+                { responseType: 'blob' }
             );
+            console.log('Response Get Invoice PDF API', response);
+            if (response.status === 200) {
+                const pdfBlob = response.data as Blob;
 
-            if (response.data.success === true) {
-                const data = response.data.data;
-                return data;
+                // ✅ Convert Blob → Object URL (serializable string)
+                const pdfUrl = URL.createObjectURL(pdfBlob);
+
+                return { pdfUrl }; // keep state serializable
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
             return rejectWithValue(error?.response?.data?.message);
@@ -288,8 +293,8 @@ export const printInvoices = createAsyncThunk(
     }
 );
 
-export const printTAXInvoices = createAsyncThunk(
-    "print/tax/invoices",
+export const getTaxInvoicesPDF = createAsyncThunk(
+    "get/tax/invoices/pdf",
     async (
         {
             vouchar_id,
@@ -304,14 +309,17 @@ export const printTAXInvoices = createAsyncThunk(
     ) => {
         try {
             const response = await userApi.get(
-                `/invoices/print/vouchar/tax?vouchar_id=${vouchar_id}&company_id=${company_id}`
+                `/invoices/print/vouchar/tax?vouchar_id=${vouchar_id}&company_id=${company_id}`,
+                { responseType: 'blob' }
             );
+            console.log('Response Get Tax Invoice PDF API', response);
+            if (response.status === 200) {
+                const pdfBlob = response.data as Blob;
 
-            console.log("Response from printTAXInvoices:", response);
+                // ✅ Convert Blob → Object URL (serializable string)
+                const pdfUrl = URL.createObjectURL(pdfBlob);
 
-            if (response.data.success === true) {
-                const data = response.data.data;
-                return data;
+                return { pdfUrl }; // keep state serializable
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
             return rejectWithValue(error?.response?.data?.message);
@@ -319,8 +327,8 @@ export const printTAXInvoices = createAsyncThunk(
     }
 );
 
-export const printRecieptInvoices = createAsyncThunk(
-    "print/receipt/invoices",
+export const getRecieptPdf = createAsyncThunk(
+    "get/receipt/pdf",
     async (
         {
             vouchar_id,
@@ -335,12 +343,17 @@ export const printRecieptInvoices = createAsyncThunk(
     ) => {
         try {
             const response = await userApi.get(
-                `/invoices/print/vouchar/receipt?vouchar_id=${vouchar_id}&company_id=${company_id}`
+                `/invoices/print/vouchar/receipt?vouchar_id=${vouchar_id}&company_id=${company_id}`,
+                { responseType: 'blob' }
             );
+            console.log('Response Get Receipt PDF API', response);
+            if (response.status === 200) {
+                const pdfBlob = response.data as Blob;
 
-            if (response.data.success === true) {
-                const invoceHtml = response.data.data;
-                return { invoceHtml };
+                // ✅ Convert Blob → Object URL (serializable string)
+                const pdfUrl = URL.createObjectURL(pdfBlob);
+
+                return { pdfUrl }; // keep state serializable
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
             return rejectWithValue(error?.response?.data?.message);
@@ -349,8 +362,8 @@ export const printRecieptInvoices = createAsyncThunk(
 );
 
 
-export const printPaymentInvoices = createAsyncThunk(
-    "print/payment/invoices",
+export const getPaymentPdf = createAsyncThunk(
+    "get/payment/pdf",
     async (
         {
             vouchar_id,
@@ -365,12 +378,19 @@ export const printPaymentInvoices = createAsyncThunk(
     ) => {
         try {
             const response = await userApi.get(
-                `/invoices/print/vouchar/payment?vouchar_id=${vouchar_id}&company_id=${company_id}`
+                `/invoices/print/vouchar/payment?vouchar_id=${vouchar_id}&company_id=${company_id}`,
+                { responseType: 'blob' }
             );
 
-            if (response.data.success === true) {
-                const invoceHtml = response.data.data;
-                return { invoceHtml };
+            console.log('Response Get Payment PDF API', response);
+
+            if (response.status === 200) {
+                const pdfBlob = response.data as Blob;
+
+                // ✅ Convert Blob → Object URL (serializable string)
+                const pdfUrl = URL.createObjectURL(pdfBlob);
+
+                return { pdfUrl }; // keep state serializable
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
             return rejectWithValue(error?.response?.data?.message);

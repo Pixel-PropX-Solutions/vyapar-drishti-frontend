@@ -36,9 +36,8 @@ import { SortOrder, GetAllVouchars, InvoicesSortField } from "@/utils/types";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { useNavigate } from "react-router-dom";
-import { deleteTAXInvoice, deleteInvoice, printTAXInvoices, printInvoices, viewAllInvoices } from "@/services/invoice";
+import { deleteTAXInvoice, deleteInvoice, getTaxInvoicesPDF, viewAllInvoices, getInvoicesPDF, getPaymentPdf, getRecieptPdf } from "@/services/invoice";
 import { InvoicerRow } from "@/components/Invoice/InvoiceRow";
-import InvoicePrint from "@/components/Invoice/InvoicePrint";
 import { getAllInvoiceGroups } from "@/services/invoice";
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -51,18 +50,14 @@ import { BottomPagination } from "@/common/modals/BottomPagination";
 import { formatLocalDate } from "@/utils/functions";
 import ActionButtonSuccess from "@/common/buttons/ActionButtonSuccess";
 import ActionButtonCancel from "@/common/buttons/ActionButtonCancel";
+import usePDFHandler from "@/common/hooks/usePDFHandler";
 
 
 const Invoices: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
-  const [htmlFromAPI, setHtmlFromAPI] = useState<Array<{ html: string, page_number: number }>>([]);
-  const [html, setHtml] = useState<boolean>(false);
-  const [invoiceId, setInvoiceId] = useState<string>('');
-  const [fullHtml, setFullHtml] = useState<string>('');
-  const [downloadHtml, setDownloadHtml] = useState<string>('');
-  const [customerName, setCustomerName] = useState<string>('');
+  const [visible, setVisible] = useState<boolean>(false);
   const { invoices, loading, pageMeta, invoiceGroups } = useSelector((state: RootState) => state.invoice);
   const { user, current_company_id } = useSelector((state: RootState) => state.auth);
   const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
@@ -77,8 +72,8 @@ const Invoices: React.FC = () => {
         searchQuery: debouncedQuery,
         company_id: currentCompanyId || "",
         type: type,
-        start_date: formatLocalDate(new Date(startDate)),
-        end_date: formatLocalDate(new Date(endDate)),
+        start_date: formatLocalDate(startDate),
+        end_date: formatLocalDate(endDate),
         pageNumber: page,
         limit: rowsPerPage,
         sortField: sortField,
@@ -86,6 +81,44 @@ const Invoices: React.FC = () => {
       })
     )
   }, [dispatch, debouncedQuery, currentCompanyId, type, startDate, endDate, page, rowsPerPage, sortField, sortOrder]);
+
+
+  const { init, setLoading, PDFViewModal } = usePDFHandler();
+
+
+  async function handleInvoice(invoice: GetAllVouchars, callback: () => void) {
+
+    try {
+      setLoading(true);
+      const res = await dispatch(
+        (invoice.voucher_type === 'Payment' ? getPaymentPdf :
+          invoice.voucher_type === 'Receipt' ? getRecieptPdf :
+            tax_enable ? getTaxInvoicesPDF : getInvoicesPDF)({
+              vouchar_id: invoice._id,
+              company_id: current_company_id || '',
+            }));
+
+      if (res.meta.requestStatus === 'fulfilled') {
+        const { pdfUrl } = res.payload as { pdfUrl: string };
+
+        // ✅ Rebuild File from URL when needed
+        const blob = await fetch(pdfUrl).then((r) => r.blob());
+        const file1 = new File([blob], `${invoice._id}.pdf`, {
+          type: "application/pdf",
+        });
+
+        init({ file: file1, entityNumber: invoice.voucher_number, title: invoice.party_name, fileName: `${invoice.voucher_number}-vyapar-drishti` }, callback);
+      } else {
+        console.error('Failed to print invoice:', res.payload);
+        return;
+      }
+
+    } catch (e) {
+      console.error('Error printing invoice:', e);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   // Fetch Invoices
   useEffect(() => {
@@ -136,8 +169,8 @@ const Invoices: React.FC = () => {
       filterState: "All-States",
       type: "Invoices",
       page: 1,
-      startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString(),
-      endDate: new Date().toISOString(),
+      startDate: (new Date(new Date().getFullYear(), new Date().getMonth(), 1)).toISOString(),
+      endDate: (new Date()).toISOString(),
       rowsPerPage: 10,
       sortField: "date" as InvoicesSortField,
       sortOrder: "desc" as SortOrder,
@@ -145,7 +178,7 @@ const Invoices: React.FC = () => {
   }, []);
 
   // managing searchQuery, filterState, page, rowsPerPage
-  const handleStateChange = (field: string, value: any) => {
+  const handleStateChange = (field: string, value: string | number) => {
     dispatch(setInvoicesFilters({
       [field]: value
     }))
@@ -174,67 +207,6 @@ const Invoices: React.FC = () => {
       })
     }
   };
-
-  const handlePrintInvoice = (invoice: GetAllVouchars) => {
-    if (invoice.voucher_type === 'Sales' || invoice.voucher_type === 'Purchase') {
-      if (tax_enable) {
-        dispatch(printTAXInvoices({
-          vouchar_id: invoice._id,
-          company_id: currentCompanyId || "",
-        })).then((response) => {
-          if (response.meta.requestStatus === 'fulfilled') {
-            const payload = response.payload as { paginated_data: Array<{ html: string, page_number: number }>, complete_data: string, download_data: string };
-            toast.success("Invoice data fetched successfully! 🎉");
-            const paginated_html = payload.paginated_data;
-            const fullHtml = payload.complete_data;
-            const download_html = payload.download_data;
-
-            setHtmlFromAPI(paginated_html);
-            setDownloadHtml(download_html);
-            setInvoiceId(invoice.voucher_number);
-            setCustomerName(invoice?.party_name)
-            setFullHtml(fullHtml);
-            setHtml(true);
-          } else {
-            console.error("Failed to print TAX invoice:", response.payload);
-          }
-        }
-        ).catch((error) => {
-          toast.error(error || "An unexpected error occurred. Please try again later.");
-        }
-        );
-      } else {
-        dispatch(printInvoices({
-          vouchar_id: invoice._id,
-          company_id: currentCompanyId || "",
-        })).then((response) => {
-          if (response.meta.requestStatus === 'fulfilled') {
-            const payload = response.payload as { paginated_data: Array<{ html: string, page_number: number }>, complete_data: string, download_data: string };
-            toast.success("Invoice data fetched successfully! 🎉");
-            const paginated_html = payload.paginated_data;
-            const fullHtml = payload.complete_data;
-            const download_html = payload.download_data;
-
-            setHtmlFromAPI(paginated_html);
-            setDownloadHtml(download_html);
-            setInvoiceId(invoice.voucher_number);
-            setCustomerName(invoice?.party_name)
-            setFullHtml(fullHtml);
-            setHtml(true);
-          } else {
-            console.error("Failed to print invoice:", response.payload);
-          }
-        }
-        ).catch((error) => {
-          toast.error(error || "An unexpected error occurred. Please try again later.");
-        }
-        );
-      }
-
-    }
-  };
-
-  const filteredInvoices = invoices?.filter((inv) => inv.voucher_type === 'Sales' || inv.voucher_type === 'Purchase');
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -360,7 +332,7 @@ const Invoices: React.FC = () => {
             value={new Date(startDate)}
             format="dd/MM/yyyy"
             views={["year", "month", "day"]}
-            onChange={(newValue) => handleStateChange("startDate", newValue)}
+            onChange={(newValue) => handleStateChange("startDate", newValue?.toISOString() ?? '')}
             slotProps={{
               textField: {
 
@@ -383,7 +355,7 @@ const Invoices: React.FC = () => {
             value={new Date(endDate)}
             format="dd/MM/yyyy"
             views={["year", "month", "day"]}
-            onChange={(newValue) => handleStateChange("endDate", newValue)}
+            onChange={(newValue) => handleStateChange("endDate", newValue?.toISOString() ?? '')}
             slotProps={{
               textField: {
                 size: "small",
@@ -570,8 +542,8 @@ const Invoices: React.FC = () => {
               {loading ? (
                 Array([1, 2, 3, 4, 5])
                   .map((_, index) => <InvoicesRowSkeleton key={`skeleton-${index}`} />)
-              ) : filteredInvoices?.length > 0 ? (
-                filteredInvoices.map((inv, index) => (
+              ) : invoices?.length > 0 ? (
+                invoices.map((inv, index) => (
                   <InvoicerRow
                     key={inv._id}
                     inv={inv}
@@ -581,7 +553,7 @@ const Invoices: React.FC = () => {
                       navigate(`/invoices/update/${inv.voucher_type.toLowerCase()}/${inv._id}`);
                     }}
                     onDelete={() => handleDeleteInvoice(inv)}
-                    onPrint={() => handlePrintInvoice(inv)}
+                    onPrint={() => { handleInvoice(inv, () => { setVisible(true); }) }}
 
                   />))
               ) : (
@@ -650,7 +622,7 @@ const Invoices: React.FC = () => {
           onChange={handleChangePage}
         />
 
-        {html && <InvoicePrint invoiceHtml={htmlFromAPI} downloadHtml={downloadHtml} customerName={customerName} fullHtml={fullHtml} open={html} onClose={() => setHtml(false)} invoiceNumber={invoiceId} />}
+        {visible && <PDFViewModal visible={visible} setVisible={setVisible} />}
       </Box >
     </LocalizationProvider>
 

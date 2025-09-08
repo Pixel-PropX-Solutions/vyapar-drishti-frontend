@@ -207,7 +207,7 @@ const AdvancedSettingsSection: React.FC<AdvancedSettingsSectionProps> = ({
                                                 label="Tax Rate"
                                                 placeholder="Enter tax rate"
                                                 value={data.tax_rate || ''}
-                                                onChange={(e) => handleChange('tax_rate', e.target.value)}
+                                                onChange={(e) => handleChange('tax_rate', Number(e.target.value))}
                                                 InputProps={{
                                                     startAdornment: (
                                                         <InputAdornment position="start">
