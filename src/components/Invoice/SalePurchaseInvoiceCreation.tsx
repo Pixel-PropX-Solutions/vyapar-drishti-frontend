@@ -373,7 +373,7 @@ export default function SalePurchaseInvoiceCreation() {
             if (tax_enable) {
                 const dataToSend = {
                     ...data,
-                    date: date.toISOString().split('T')[0],
+                    date: date.toISOString().slice(0, 10),
                     company_id: currentCompany?._id || '',
                     voucher_type_id: invoiceType_id || '',
                     party_name_id: data.party_id,

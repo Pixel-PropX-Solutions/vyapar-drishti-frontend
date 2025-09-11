@@ -94,60 +94,24 @@ export default function usePDFHandler(): RetrunType {
         } catch (error) {
             console.error('Download failed:', error);
             toast.error('Failed to download invoice');
+            setLoading(false);
         } finally {
             setLoading(false);
         }
     };
 
-    const handlePrint = async () => {
-        if (data?.file === null) return;
-        try {
-            setLoading(true);
-            const url = URL.createObjectURL(data.file);
+    const handlePrint = () => {
+        if (!previewUrl) return;
+        setLoading(true);
 
-            // Open the PDF in a new tab/window so the browser's native PDF viewer can be used.
-            const printWindow = window.open(url, '_blank', 'noopener');
+        const newWindow = window.open(previewUrl, "_blank", "noopener")
 
-            if (!printWindow) {
-                toast.error('Unable to open print window. Please allow popups to print.');
-                URL.revokeObjectURL(url);
-                return;
-            }
-
-            try { printWindow.focus(); } catch { /* ignore */ }
-
-            let attempts = 0;
-            const maxAttempts = 8;
-
-            const attemptPrint = () => {
-                attempts += 1;
-                try {
-                    printWindow.print();
-                    // Revoke the object URL shortly after initiating print
-                    setTimeout(() => {
-                        try { URL.revokeObjectURL(url); } catch { /* ignore */ }
-                    }, 1500);
-                } catch {
-                    if (attempts < maxAttempts) {
-                        setTimeout(attemptPrint, 500);
-                    } else {
-                        toast.error('Automatic print failed. Please print from the opened PDF window.');
-                        setTimeout(() => {
-                            try { URL.revokeObjectURL(url); } catch { /* ignore */ }
-                        }, 2000);
-                    }
-                }
-            };
-
-            // Prefer to trigger print once the new window loads, with a fallback retry.
-            printWindow.onload = attemptPrint;
-            setTimeout(attemptPrint, 1200);
-
-        } catch (error) {
-            console.error('Error generating PDF for printing:', error);
-        } finally {
+        if (!newWindow) {
+            toast.error("Unable to open print window. Please allow popups.");
             setLoading(false);
+            return;
         }
+        setLoading(false);
     };
 
     const handleShare = async () => {
@@ -175,6 +139,7 @@ export default function usePDFHandler(): RetrunType {
             if ((error as Error).name !== 'AbortError') {
                 console.error('Share failed:', error);
             }
+            setLoading(false);
         } finally {
             setLoading(false);
         }
@@ -187,15 +152,13 @@ export default function usePDFHandler(): RetrunType {
         const [pageNumber, setPageNumber] = useState(1);
         const [isFullscreen, setIsFullscreen] = useState(false);
         const [numPages, setNumPages] = useState<number>(0);
-        
+
         function onDocumentLoadSuccess({
             numPages: nextNumPages,
         }: PDFDocumentProxy): void {
             setNumPages(nextNumPages);
             setPageNumber(1);
         }
-
-
 
         const toggleFullscreen = () => {
             setIsFullscreen(prev => !prev);
@@ -358,7 +321,22 @@ export default function usePDFHandler(): RetrunType {
                                         file={previewUrl}
                                         onLoadSuccess={onDocumentLoadSuccess}
                                         options={options}
-                                        loading={<Typography>Loading PDF...</Typography>}
+                                        loading={<Box
+                                            sx={{
+                                                display: "flex",
+                                                flexDirection: "column",
+                                                alignItems: "center",
+                                                p: 2,
+                                            }}
+                                        >
+                                            <TextSnippet sx={{ fontSize: 100, color: "action.active" }} />
+                                            <Typography variant="h6" sx={{ mt: 2 }}>
+                                                Loading Pdf...
+                                            </Typography>
+                                            <Typography variant="body2" color="text.secondary">
+                                                Please wait while we load the document.
+                                            </Typography>
+                                        </Box>}
                                         error={<Typography color="error">Failed to load PDF</Typography>}
                                     >
                                         <Page

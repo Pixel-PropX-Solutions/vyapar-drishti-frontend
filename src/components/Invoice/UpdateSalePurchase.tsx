@@ -369,7 +369,7 @@ export default function SalePurchaseInvoiceCreation() {
             if (tax_enable) {
                 const dataToSend = {
                     ...data,
-                    date: data.date,
+                    date: data.date.slice(0, 10),
                     vouchar_id: data._id || '',
                     user_id: user?._id || '',
                     company_id: currentCompany?._id || '',
@@ -428,7 +428,7 @@ export default function SalePurchaseInvoiceCreation() {
             } else {
                 const dataToSend = {
                     ...data,
-                    date: data.date,
+                    date: data.date.slice(0, 10),
                     vouchar_id: data._id || '',
                     user_id: user?._id || '',
                     company_id: currentCompany?._id || '',

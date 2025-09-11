@@ -58,6 +58,9 @@ export const login = createAsyncThunk(
 
     } catch (error: any) {
       console.log("Login API Error", error)
+      if (error?.name === "AxiosError" && error?.code === 'ERR_NETWORK') {
+        return rejectWithValue("Please check your internet connection. If the problem persists, contact support.");
+      }
       return rejectWithValue(error?.response?.data?.message);
     }
   }

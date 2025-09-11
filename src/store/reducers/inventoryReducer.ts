@@ -18,8 +18,8 @@ interface TimeLinePageMeta {
 interface InventoryState {
   authState: AuthStates;
   stockMovement: Array<StockMovement> | null;
-  InventoryItems: Array<InventoryItem> | null;
   timelinePageMeta: TimeLinePageMeta;
+  InventoryItems: Array<InventoryItem> | null;
   inventoryPageMeta: {
     page: number;
     limit: number;

@@ -81,6 +81,8 @@ export const viewAllInvoices = createAsyncThunk(
                 }`
             );
 
+            console.log("View All Invoices API Response", response);
+
             if (response.data.success === true) {
                 const invoices = response.data.data.docs;
                 const pageMeta = response.data.data.meta;
