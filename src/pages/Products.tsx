@@ -45,6 +45,8 @@ import CreateInventoryGroupModal from "@/features/Group/CreateInventoryGroupModa
 import { deleteInventoryGroup, viewAllInventoryGroup } from "@/services/inventoryGroup";
 import { InventoryGroupCard } from "@/features/Group/InventoryGroupCard";
 import { BottomPagination } from "@/common/modals/BottomPagination";
+import { ActionButton } from "@/common/buttons/ActionButton";
+import { ArrowBack } from "@mui/icons-material";
 
 const ProductsListing: React.FC = () => {
   const theme = useTheme();
@@ -268,18 +270,28 @@ const ProductsListing: React.FC = () => {
           <Grid container spacing={2} alignItems="center">
             <Grid item xs={12} md={8}>
               <Box>
-                <Typography variant="h5" component="h1" fontWeight="700" color="text.primary">
-                  {selectedTab === 0 && 'Products'}
-                  {selectedTab === 1 && 'Categories'}
-                  {selectedTab === 2 && 'Groups'}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {selectedTab === 0
-                    ? 'Manage your product inventory, add new items, and track stock levels.'
-                    : selectedTab === 1
-                      ? 'Organize your products into categories for better management and navigation.'
-                      : 'Group your products for better organization and reporting.'}
-                </Typography>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                  <ActionButton
+                    icon={<ArrowBack fontSize="small" />}
+                    title="Back"
+                    color="primary"
+                    onClick={() => navigate(-1)}
+                  />
+                  <Box>
+                    <Typography variant="h5" component="h1" fontWeight="700" color="text.primary">
+                      {selectedTab === 0 && 'Products'}
+                      {selectedTab === 1 && 'Categories'}
+                      {selectedTab === 2 && 'Groups'}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {selectedTab === 0
+                        ? 'Manage your product inventory, add new items, and track stock levels.'
+                        : selectedTab === 1
+                          ? 'Organize your products into categories for better management and navigation.'
+                          : 'Group your products for better organization and reporting.'}
+                    </Typography>
+                  </Box>
+                </Box>
               </Box>
               <Tabs
                 value={selectedTab}

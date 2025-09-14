@@ -200,6 +200,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
             return;
         }
         dispatch(viewProductsWithId(currentCompanyId || '')).then((response) => {
+            console.log('Product with id in Add item Modal', response)
             if (response.meta.requestStatus === 'fulfilled') {
                 const products = response.payload;
                 setItemsList(
@@ -698,6 +699,8 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
                     </Grow>
                 </Box>
             </Box>
+
+            {/* Footer */}
             <Box sx={{
                 position: 'sticky',
                 bottom: 0,

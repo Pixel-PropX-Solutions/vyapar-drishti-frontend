@@ -35,6 +35,7 @@ export const ActionButton = ({
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     '&:hover': {
                         bgcolor: alpha(theme.palette[color].main, 0.15),
+                        border: `1px solid ${theme.palette[color].main}`,
                         transform: 'translateY(-2px)',
                         boxShadow: `0 4px 12px ${alpha(theme.palette[color].main, 0.3)}`,
                     },

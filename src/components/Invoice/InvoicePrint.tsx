@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import html2pdf from "html2pdf.js";
 import theme from "@/theme";
 import {
     Drawer,
@@ -22,20 +21,32 @@ import {
     Download as DownloadIcon,
     Print as PrintIcon,
     Share as ShareIcon,
-    ZoomIn as ZoomInIcon,
-    ZoomOut as ZoomOutIcon,
     Fullscreen as FullscreenIcon,
     FullscreenExit as FullscreenExitIcon,
     NavigateBeforeOutlined,
     NavigateNextOutlined,
+    TextSnippet,
 } from "@mui/icons-material";
 import toast from "react-hot-toast";
-import IframeRenderer from "@/common/IframeRenderer";
+import { pdfjs, Document, Page } from "react-pdf";
+import "react-pdf/dist/esm/Page/AnnotationLayer.css";
+import "react-pdf/dist/esm/Page/TextLayer.css";
+import type { PDFDocumentProxy } from "pdfjs-dist";
+
+
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+    "pdfjs-dist/build/pdf.worker.min.mjs",
+    import.meta.url
+).toString();
+
+const options = {
+    cMapUrl: "/cmaps/",
+    standardFontDataUrl: "/standard_fonts/",
+};
+
 
 type Props = {
-    invoiceHtml: Array<{ html: string, page_number: number }>;
-    fullHtml: string;
-    downloadHtml: string;
+    file: File;
     open: boolean;
     onClose: () => void;
     invoiceNumber?: string;
@@ -43,59 +54,31 @@ type Props = {
 };
 
 const InvoicePrint: React.FC<Props> = ({
-    invoiceHtml,
-    fullHtml,
-    downloadHtml,
-    onClose,
+    file,
     open,
+    onClose,
     invoiceNumber = "",
     customerName = ""
 }) => {
     const muiTheme = useTheme();
     const isMobile = useMediaQuery(muiTheme.breakpoints.down('md'));
     const [isGenerating, setIsGenerating] = useState(false);
-    const [zoom, setZoom] = useState(1);
     const [pageNumber, setPageNumber] = useState(1);
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [numPages, setNumPages] = useState<number>(0);
 
-    const generatePDF = async (): Promise<Blob> => {
-        if (!downloadHtml) throw new Error('Invoice content not found');
-
-        // const element = invoiceRef.current;
-        try {
-            const pdf = await html2pdf()
-                .set({
-                    margin: [5, 0, 0, 0],
-                    filename: `${invoiceNumber}-vyapar-drishti.pdf`,
-                    html2canvas: {
-                        scale: 3,
-                        useCORS: true,
-                        allowTaint: false,
-                        backgroundColor: '#ffffff'
-                    },
-                    jsPDF: {
-                        unit: 'mm',
-                        format: 'A4',
-                        orientation: 'portrait',
-                        compress: false
-                    },
-                })
-                .from(downloadHtml)
-                .outputPdf('blob');
-
-            return pdf;
-        } finally {
-            // document.body.removeChild(element);
-        }
-    };
-
-
+    function onDocumentLoadSuccess({
+        numPages: nextNumPages,
+    }: PDFDocumentProxy): void {
+        setNumPages(nextNumPages);
+        setPageNumber(1);
+    }
 
     const handleDownload = async () => {
         try {
             setIsGenerating(true);
-            const pdfBlob = await generatePDF();
-            const url = URL.createObjectURL(pdfBlob);
+            const url = URL.createObjectURL(file);
             const link = document.createElement('a');
             link.href = url;
             link.download = `${invoiceNumber}-vyapar-drishti.pdf`;
@@ -114,36 +97,57 @@ const InvoicePrint: React.FC<Props> = ({
     };
 
     const handlePrint = () => {
-        if (!fullHtml) return;
+        const url = URL.createObjectURL(file);
 
-        const printWindow = window.open('', '_blank');
+        // Open the PDF in a new tab/window so the browser's native PDF viewer can be used.
+        const printWindow = window.open(url, '_blank', 'noopener');
+
         if (!printWindow) {
-            toast.error('Please allow popups to print.');
+            toast.error('Unable to open print window. Please allow popups to print.');
+            URL.revokeObjectURL(url);
             return;
         }
 
-        const printContent = fullHtml;
+        try { printWindow.focus(); } catch { /* ignore */ }
 
-        printWindow.document.write(printContent);
-        printWindow.document.close();
+        let attempts = 0;
+        const maxAttempts = 8;
 
-        printWindow.onload = () => {
-            printWindow.print();
-            printWindow.close();
+        const attemptPrint = () => {
+            attempts += 1;
+            try {
+                printWindow.print();
+                // Revoke the object URL shortly after initiating print
+                setTimeout(() => {
+                    try { URL.revokeObjectURL(url); } catch { /* ignore */ }
+                }, 1500);
+            } catch {
+                if (attempts < maxAttempts) {
+                    setTimeout(attemptPrint, 500);
+                } else {
+                    toast.error('Automatic print failed. Please print from the opened PDF window.');
+                    setTimeout(() => {
+                        try { URL.revokeObjectURL(url); } catch { /* ignore */ }
+                    }, 2000);
+                }
+            }
         };
+
+        // Prefer to trigger print once the new window loads, with a fallback retry.
+        printWindow.onload = attemptPrint;
+        setTimeout(attemptPrint, 1200);
     };
 
     const handleShare = async () => {
         try {
             if (navigator.share) {
                 setIsGenerating(true);
-                const pdfBlob = await generatePDF();
-                const file = new File([pdfBlob], `${invoiceNumber}-vyapar-drishti.pdf`, { type: 'application/pdf' });
+                const file1 = new File([file], `${invoiceNumber}-vyapar-drishti.pdf`, { type: 'application/pdf' });
 
                 toast.promise(navigator.share({
                     title: `Invoice ${invoiceNumber}`,
                     text: `Invoice for ${customerName}`,
-                    files: [file]
+                    files: [file1]
                 }), {
                     loading: 'Opening Sharing window...',
                     success: 'Invoice sharing opened successfully!',
@@ -164,17 +168,27 @@ const InvoicePrint: React.FC<Props> = ({
         }
     };
 
-    const handleZoomIn = () => {
-        setZoom(prev => Math.min(prev + 0.25, 2));
-    };
-
-    const handleZoomOut = () => {
-        setZoom(prev => Math.max(prev - 0.25, 0.5));
-    };
-
     const toggleFullscreen = () => {
         setIsFullscreen(prev => !prev);
     };
+
+    React.useEffect(() => {
+        let objectUrl: string | null = null;
+        if (file.type === "application/pdf") {
+            objectUrl = URL.createObjectURL(file);
+            setPreviewUrl(objectUrl);
+        } else if (file.type.startsWith("text/")) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewUrl(reader.result as string);
+            };
+            reader.readAsText(file);
+        }
+
+        return () => {
+            if (objectUrl) URL.revokeObjectURL(objectUrl);
+        };
+    }, [file]);
 
     return (
         <>
@@ -233,7 +247,7 @@ const InvoicePrint: React.FC<Props> = ({
                         </Box>
 
                         {/* Page Controls */}
-                        <Stack direction="row" spacing={1} sx={{ mr: 2 }}>
+                        {numPages > 1 && <Stack direction="row" spacing={1} sx={{ mr: 2 }}>
                             <IconButton
                                 onClick={() => setPageNumber(prev => Math.max(prev - 1, 1))}
                                 disabled={pageNumber <= 1}
@@ -249,50 +263,15 @@ const InvoicePrint: React.FC<Props> = ({
                                 justifyContent: 'center',
                                 color: theme.palette.text.secondary
                             }}>
-                                Page {pageNumber} of {invoiceHtml?.length}
+                                Page {pageNumber} of {numPages}
                             </Typography>
                             <IconButton
-                                onClick={() => setPageNumber(prev => Math.min(prev + 1, invoiceHtml?.length))}
-                                disabled={pageNumber >= invoiceHtml?.length}
+                                onClick={() => setPageNumber(prev => Math.min(prev + 1, numPages))}
+                                disabled={pageNumber >= numPages}
                             >
                                 <NavigateNextOutlined />
                             </IconButton>
-                        </Stack>
-
-                        {/* Zoom Controls */}
-                        <Stack direction="row" spacing={1} sx={{ mr: 2 }}>
-                            <Tooltip title="Zoom Out">
-                                <IconButton
-                                    onClick={handleZoomOut}
-                                    disabled={zoom <= 0.5}
-                                    size="small"
-                                >
-                                    <ZoomOutIcon />
-                                </IconButton>
-                            </Tooltip>
-                            <Typography
-                                variant="body2"
-                                sx={{
-                                    minWidth: 40,
-                                    textAlign: 'center',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    color: theme.palette.text.secondary
-                                }}
-                            >
-                                {Math.round(zoom * 100)}%
-                            </Typography>
-                            <Tooltip title="Zoom In">
-                                <IconButton
-                                    onClick={handleZoomIn}
-                                    disabled={zoom >= 2}
-                                    size="small"
-                                >
-                                    <ZoomInIcon />
-                                </IconButton>
-                            </Tooltip>
-                        </Stack>
+                        </Stack>}
 
                         <Tooltip title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}>
                             <IconButton onClick={toggleFullscreen} sx={{ mr: 1 }}>
@@ -330,35 +309,52 @@ const InvoicePrint: React.FC<Props> = ({
                     }
                 }}>
                     <Box sx={{
-                        p: 2,
+                        py: 2,
                         display: 'flex',
                         justifyContent: 'center',
-                        minHeight: '100%'
                     }}>
                         <Paper
                             elevation={8}
                             sx={{
                                 backgroundColor: '#ffffff',
-                                borderRadius: 1,
-                                padding: 2,
-                                overflow: 'hidden',
-                                transform: `scale(${zoom})`,
-                                transformOrigin: 'top center',
-                                transition: 'transform 0.2s ease-in-out',
                                 boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
-                                maxWidth: '210mm',
-                                width: '100%',
-                                minHeight: '300mm',
                             }}
                         >
                             {/* Render Invoice HTML of page {page} */}
-                            {invoiceHtml?.length > 0 ? (
-                                <IframeRenderer htmlString={invoiceHtml.find(page => page.page_number === pageNumber)?.html ?? ''} />
-                            ) : (
-                                <Typography variant="body2" color="text.secondary">
-                                    No invoice data available.
-                                </Typography>
-                            )}
+                            {file.type === "application/pdf" && previewUrl ?
+                                (<Document
+                                    file={previewUrl}
+                                    onLoadSuccess={onDocumentLoadSuccess}
+                                    options={options}
+                                    loading={<Typography>Loading PDF...</Typography>}
+                                    error={<Typography color="error">Failed to load PDF</Typography>}
+                                >
+                                    <Page
+                                        pageNumber={pageNumber}
+                                        renderTextLayer={true}
+                                        renderAnnotationLayer={true}
+                                        renderMode="canvas"
+                                        scale={1.0}
+                                    />
+                                </Document>) :
+                                (
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            alignItems: "center",
+                                            p: 2,
+                                        }}
+                                    >
+                                        <TextSnippet sx={{ fontSize: 100, color: "action.active" }} />
+                                        <Typography variant="h6" sx={{ mt: 2 }}>
+                                            Preview Not Available
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            This file type is not supported for preview
+                                        </Typography>
+                                    </Box>
+                                )}
                         </Paper>
                     </Box>
                 </Box>

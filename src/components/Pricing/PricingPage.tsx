@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { 
-  Box, 
-  Container, 
-  Typography, 
-  Grid, 
-  Card, 
-  CardContent, 
+import {
+  Box,
+  Container,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
   CardHeader,
-  Button, 
+  Button,
   Switch,
   FormControlLabel,
   Divider,
@@ -21,7 +21,7 @@ import {
   useTheme,
   Zoom
 } from '@mui/material';
-import { 
+import {
   Check as CheckIcon,
   Close as CloseIcon,
   Info as InfoIcon,
@@ -30,6 +30,7 @@ import {
   Bolt as BoltIcon,
   Support as SupportIcon
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 // Interface for plan features
 interface PlanFeature {
@@ -52,90 +53,97 @@ interface PricingPlan {
   buttonText: string;
   highlighted?: boolean;
   color: string;
+  navigateTo: string;
   icon: React.ReactNode;
 }
 
 const PricingPage: React.FC = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
   // const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const [isYearly, setIsYearly] = useState<boolean>(true);
   const [currency, setCurrency] = useState<'INR' | 'USD'>('INR');
   const [hoveredPlan, setHoveredPlan] = useState<number | null>(null);
-  
+
   // Pricing plans data
   const pricingPlans: PricingPlan[] = [
     {
       title: 'Starter',
       subtitle: 'Perfect for small businesses and startups',
-      priceMonthlyINR: 999,
-      priceYearlyINR: 9990,
-      priceMonthlyUSD: 12,
-      priceYearlyUSD: 120,
+      priceMonthlyINR: 100,
+      priceYearlyINR: 1100,
+      priceMonthlyUSD: 2,
+      priceYearlyUSD: 23,
       features: [
-        'Up to 5 users',
-        '10GB data storage',
+        'Single Company',
+        'Only Non Tax Functionality',
         'Basic analytics',
-        'Email support'
+        'Email support',
+        'Email Notifications'
       ],
       buttonText: 'Start Free Trial',
+      navigateTo: '/signup',
       color: '#3f51b5',
       icon: <TimerIcon fontSize="large" />
     },
     {
       title: 'Professional',
       subtitle: 'Ideal for growing businesses',
-      priceMonthlyINR: 2499,
-      priceYearlyINR: 24990,
-      priceMonthlyUSD: 30,
-      priceYearlyUSD: 300,
+      priceMonthlyINR: 200,
+      priceYearlyINR: 2200,
+      priceMonthlyUSD: 4,
+      priceYearlyUSD: 45,
       features: [
-        'Up to 20 users',
-        '50GB data storage',
-        'Advanced analytics',
+        'Up to 2 company',
+        'Both Tax and Non Tax Functionality',
+        'Basic analytics',
         'Priority email support',
-        'API access',
-        'Custom dashboards'
+        'Email Notifications'
       ],
       buttonText: 'Start Free Trial',
       highlighted: true,
+      navigateTo: '/signup',
       color: '#7e57c2',
       icon: <BoltIcon fontSize="large" />
     },
     {
       title: 'Enterprise',
       subtitle: 'For large organizations with complex needs',
-      priceMonthlyINR: 7999,
-      priceYearlyINR: 79990,
-      priceMonthlyUSD: 97,
-      priceYearlyUSD: 970,
+      priceMonthlyINR: 300,
+      priceYearlyINR: 3300,
+      priceMonthlyUSD: 6,
+      priceYearlyUSD: 70,
       features: [
-        'Unlimited users',
-        '250GB data storage',
+        'Unlimited Companies',
+        'Both Tax and Non Tax Functionality',
+        'Advanced analytics',
         'Enterprise analytics',
         '24/7 phone & email support',
-        'Advanced API access',
+        'Phone & email notifications',
         'Custom integrations',
         'Dedicated account manager',
         'SSO & advanced security'
       ],
       buttonText: 'Contact Sales',
       color: '#5e35b1',
+      navigateTo: '/contact',
       icon: <SupportIcon fontSize="large" />
     }
   ];
-  
+
   // Plan feature comparison
   const planFeatures: PlanFeature[] = [
-    { name: 'Team members', starter: true, professional: true, enterprise: true, tooltip: 'Number of user accounts' },
+    { name: 'Company', starter: true, professional: true, enterprise: true, tooltip: 'Number of companies' },
     { name: 'Data storage', starter: true, professional: true, enterprise: true, tooltip: 'Cloud storage for your data' },
     { name: 'Basic analytics', starter: true, professional: true, enterprise: true },
-    { name: 'Advanced analytics', starter: false, professional: true, enterprise: true, tooltip: 'Includes trend analysis, forecasting, and custom reports' },
+    { name: 'Advanced analytics', starter: false, professional: false, enterprise: true, tooltip: 'Includes trend analysis, forecasting, and custom reports' },
     { name: 'Enterprise analytics', starter: false, professional: false, enterprise: true, tooltip: 'AI-powered insights and recommendations' },
     { name: 'Email support', starter: true, professional: true, enterprise: true },
+    { name: 'Email notifications', starter: true, professional: true, enterprise: true },
     { name: 'Priority support', starter: false, professional: true, enterprise: true },
     { name: '24/7 phone support', starter: false, professional: false, enterprise: true },
-    { name: 'API access', starter: false, professional: true, enterprise: true, tooltip: 'Access our platform programmatically' },
-    { name: 'Custom dashboards', starter: false, professional: true, enterprise: true },
+    { name: 'Phone notifications', starter: false, professional: false, enterprise: true },
+    { name: 'Custom dashboards', starter: false, professional: false, enterprise: true },
     { name: 'Custom integrations', starter: false, professional: false, enterprise: true, tooltip: 'Connect with your existing tools and software' },
     { name: 'Dedicated account manager', starter: false, professional: false, enterprise: true },
     { name: 'SSO & advanced security', starter: false, professional: false, enterprise: true, tooltip: 'Single Sign-On, SAML, and enhanced security features' },
@@ -144,9 +152,23 @@ const PricingPage: React.FC = () => {
   // Format price with appropriate currency symbol
   const formatPrice = (price: number, currency: 'INR' | 'USD') => {
     if (currency === 'INR') {
-      return `&#8377;${price.toLocaleString('en-IN')}`;
+      // Use Unicode Rupee symbol with fallback to HTML entity for older browsers
+      return (
+        <span>
+          <span style={{ fontFamily: 'Arial, sans-serif' }}>&#8377;</span>
+          &nbsp;
+          {price.toLocaleString('en-IN')}
+        </span>
+      );
     } else {
-      return `$${price.toLocaleString('en-US')}`;
+      // Use Unicode Dollar symbol with fallback to HTML entity for older browsers
+      return (
+        <span>
+          <span style={{ fontFamily: 'Arial, sans-serif' }}>&#36;</span>
+          &nbsp;
+          {price.toLocaleString('en-US')}
+        </span>
+      );
     }
   };
 
@@ -174,12 +196,12 @@ const PricingPage: React.FC = () => {
         <Typography variant="h6" component="p" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto', mb: 4 }}>
           Choose the perfect plan for your business needs. All plans include a 14-day free trial.
         </Typography>
-        
+
         {/* Billing Toggle */}
-        <Box 
-          sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
             justifyContent: 'center',
             gap: 2,
             mb: 2
@@ -199,19 +221,22 @@ const PricingPage: React.FC = () => {
                   {isYearly ? 'Yearly billing' : 'Monthly billing'}
                 </Typography>
                 {isYearly && (
-                  <Chip 
-                    size="small" 
-                    label="Save 20%" 
-                    color="success" 
+                  <Chip
+                    size="small"
+                    label={`Save ${calculateSavings(
+                      currency === 'INR' ? pricingPlans[0].priceMonthlyINR : pricingPlans[0].priceMonthlyUSD,
+                      currency === 'INR' ? pricingPlans[0].priceYearlyINR : pricingPlans[0].priceYearlyUSD
+                    )}%`}
+                    color="success"
                     sx={{ ml: 1 }}
                   />
                 )}
               </Box>
             }
           />
-          
+
           <Divider orientation="vertical" flexItem />
-          
+
           <FormControlLabel
             control={
               <Switch
@@ -222,17 +247,30 @@ const PricingPage: React.FC = () => {
             }
             label={
               <Typography variant="body1">
-                {currency === 'INR' ? 'INR (&#8377;)' : 'USD ($)'}
+                {currency === 'INR'
+                  ? <>INR (<span dangerouslySetInnerHTML={{ __html: '&#8377;' }} />)</>
+                  : <>USD (<span dangerouslySetInnerHTML={{ __html: '&#36;' }} />)</>
+                }
               </Typography>
             }
           />
         </Box>
-        
+
         <Typography variant="body2" color="text.secondary">
-          {currency === 'INR' ? '&#8377;1 = $0.012 USD' : '$1 = &#8377;82.5 INR'}
+          {currency === 'INR' ? (
+            <>
+              <span dangerouslySetInnerHTML={{ __html: '&#8377;' }} />1 =
+              <span dangerouslySetInnerHTML={{ __html: '&#36;' }} />0.012 USD
+            </>
+          ) : (
+            <>
+              <span dangerouslySetInnerHTML={{ __html: '&#36;' }} />1 =
+              <span dangerouslySetInnerHTML={{ __html: '&#8377;' }} />82.5 INR
+            </>
+          )}
         </Typography>
       </Box>
-      
+
       {/* Pricing Cards */}
       <Grid container spacing={4} justifyContent="center">
         {pricingPlans.map((plan, index) => {
@@ -240,17 +278,17 @@ const PricingPage: React.FC = () => {
           const price = isYearly
             ? (currency === 'INR' ? plan.priceYearlyINR : plan.priceYearlyUSD)
             : (currency === 'INR' ? plan.priceMonthlyINR : plan.priceMonthlyUSD);
-            
+
           // Calculate savings
           const savingsPercentage = calculateSavings(
             currency === 'INR' ? plan.priceMonthlyINR : plan.priceMonthlyUSD,
             currency === 'INR' ? plan.priceYearlyINR : plan.priceYearlyUSD
           );
-          
+
           return (
             <Grid item xs={12} md={4} key={index}>
               <Zoom appear in style={{ transitionDelay: `${index * 100}ms` }}>
-                <Card 
+                <Card
                   raised={plan.highlighted || hoveredPlan === index}
                   sx={{
                     height: '100%',
@@ -271,13 +309,13 @@ const PricingPage: React.FC = () => {
                   onMouseLeave={() => setHoveredPlan(null)}
                 >
                   {plan.highlighted && (
-                    <Box 
-                      sx={{ 
-                        position: 'absolute', 
-                        top: 15, 
-                        right: -35, 
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 15,
+                        right: -35,
                         transform: 'rotate(45deg)',
-                        backgroundColor: plan.color, 
+                        backgroundColor: plan.color,
                         color: 'white',
                         px: 4,
                         py: 0.5,
@@ -291,7 +329,7 @@ const PricingPage: React.FC = () => {
                       </Typography>
                     </Box>
                   )}
-                  
+
                   <CardHeader
                     title={
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -306,8 +344,8 @@ const PricingPage: React.FC = () => {
                     subheader={plan.subtitle}
                     titleTypographyProps={{ align: 'center' }}
                     subheaderTypographyProps={{ align: 'center' }}
-                    sx={{ 
-                      backgroundColor: `${plan.color}15`, 
+                    sx={{
+                      backgroundColor: `${plan.color}15`,
                       pb: 3,
                       borderBottom: `1px solid ${theme.palette.divider}`
                     }}
@@ -326,7 +364,7 @@ const PricingPage: React.FC = () => {
                         </Typography>
                       )}
                     </Box>
-                    
+
                     <List sx={{ mb: 3, flexGrow: 1 }}>
                       {plan.features.map((feature, idx) => (
                         <ListItem key={idx} dense>
@@ -337,21 +375,22 @@ const PricingPage: React.FC = () => {
                         </ListItem>
                       ))}
                     </List>
-                    
-                    <Button 
-                      variant={plan.highlighted ? "contained" : "outlined"} 
+
+                    <Button
+                      variant={plan.highlighted ? "contained" : "outlined"}
                       color="primary"
                       size="large"
                       fullWidth
-                      sx={{ 
-                        py: 1.5, 
+                      onClick={() => navigate(plan.navigateTo)}
+                      sx={{
+                        py: 1.5,
                         borderRadius: 1,
-                        background: plan.highlighted 
-                          ? `linear-gradient(45deg, ${plan.color} 30%, ${plan.color}99 90%)` 
+                        background: plan.highlighted
+                          ? `linear-gradient(45deg, ${plan.color} 30%, ${plan.color}99 90%)`
                           : 'transparent',
                         '&:hover': {
-                          background: plan.highlighted 
-                            ? `linear-gradient(45deg, ${plan.color} 30%, ${plan.color}99 90%)` 
+                          background: plan.highlighted
+                            ? `linear-gradient(45deg, ${plan.color} 30%, ${plan.color}99 90%)`
                             : `${plan.color}15`
                         }
                       }}
@@ -366,7 +405,7 @@ const PricingPage: React.FC = () => {
           );
         })}
       </Grid>
-      
+
       {/* Feature Comparison */}
       <Paper
         elevation={3}
@@ -381,7 +420,7 @@ const PricingPage: React.FC = () => {
         <Typography variant="h4" component="h2" gutterBottom align="center" fontWeight="bold" sx={{ mb: 4 }}>
           Feature Comparison
         </Typography>
-        
+
         <Grid container sx={{ mb: 2, pb: 1, borderBottom: `1px solid ${theme.palette.divider}` }}>
           <Grid item xs={4}>
             <Typography variant="subtitle1" fontWeight="bold">Feature</Typography>
@@ -406,13 +445,13 @@ const PricingPage: React.FC = () => {
             </Grid>
           </Grid>
         </Grid>
-        
+
         {planFeatures.map((feature, index) => (
-          <Grid 
-            container 
-            key={index} 
-            sx={{ 
-              py: 1.5, 
+          <Grid
+            container
+            key={index}
+            sx={{
+              py: 1.5,
               borderBottom: index < planFeatures.length - 1 ? `1px solid ${theme.palette.divider}` : 'none',
               '&:hover': {
                 backgroundColor: 'rgba(0, 0, 0, 0.03)'
@@ -457,7 +496,7 @@ const PricingPage: React.FC = () => {
           </Grid>
         ))}
       </Paper>
-      
+
       {/* FAQs or Additional Information */}
       <Box sx={{ mt: 8, textAlign: 'center' }}>
         <Typography variant="h5" gutterBottom>
@@ -466,10 +505,11 @@ const PricingPage: React.FC = () => {
         <Typography variant="body1" gutterBottom>
           Our team is here to help you choose the right plan for your business.
         </Typography>
-        <Button 
-          variant="outlined" 
-          color="primary" 
-          size="large" 
+        <Button
+          variant="outlined"
+          color="primary"
+          size="large"
+          onClick={() => navigate('/contact')}
           sx={{ mt: 2, borderRadius: 2 }}
         >
           Contact Sales

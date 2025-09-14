@@ -3,18 +3,23 @@ import { AuthStates } from "@/utils/enums";
 import { StockMovement, InventoryItem } from "@/utils/types";
 import { getInventoryItems, getInventoryStats, getStockMovement } from "@/services/inventory";
 
-interface PageMeta {
-  page: number;
-  limit: number;
-  total: number;
-  unique: string[];
+interface TimeLinePageMeta {
+  page: number,
+  limit: number,
+  total: number,
+  opening_val: number,
+  inwards_val: number,
+  outwards_val: number,
+  closing_val: number,
+  gross_profit: number,
+  profit_percent: number
 }
 
 interface InventoryState {
   authState: AuthStates;
   stockMovement: Array<StockMovement> | null;
+  timelinePageMeta: TimeLinePageMeta;
   InventoryItems: Array<InventoryItem> | null;
-  timelinePageMeta: PageMeta;
   inventoryPageMeta: {
     page: number;
     limit: number;
@@ -42,7 +47,12 @@ const initialState: InventoryState = {
     page: 0,
     limit: 0,
     total: 0,
-    unique: [],
+    opening_val: 0,
+    inwards_val: 0,
+    outwards_val: 0,
+    closing_val: 0,
+    gross_profit: 0,
+    profit_percent: 0
   },
   inventoryPageMeta: {
     page: 0,

@@ -31,6 +31,7 @@ import {
   LocationOn,
   Today,
   AddCircleOutline,
+  ArrowBack,
 } from "@mui/icons-material";
 import { CustomerSortField, SortOrder, GetUserLedgers } from "@/utils/types";
 import { useDispatch, useSelector } from "react-redux";
@@ -40,11 +41,13 @@ import { deleteCustomer, viewAllCustomer, viewAllCustomerWithTypes } from "@/ser
 import { CustomerRowSkeleton } from "@/common/skeletons/CustomerRowSkeleton";
 import { CustomerRow } from "@/features/customer/CustomerRow";
 import { viewAllAccountingGroups } from "@/services/accountingGroup";
-import { ActionButton } from "@/common/buttons/ActionButton1";
+import { ActionButton } from "@/common/buttons/ActionButton";
 import { setCustomerTypeId, setEditingCustomer } from "@/store/reducers/customersReducer";
 import toast from "react-hot-toast";
 import { BottomPagination } from "@/common/modals/BottomPagination";
 import { getAllInvoiceGroups } from "@/services/invoice";
+import ActionButtonSuccess from "@/common/buttons/ActionButtonSuccess";
+import ActionButtonCancel from "@/common/buttons/ActionButtonCancel";
 
 const CustomerLedger: React.FC = () => {
   const { customers, pageMeta, loading } = useSelector((state: RootState) => state.customersLedger);
@@ -172,19 +175,28 @@ const CustomerLedger: React.FC = () => {
         <CardContent>
           <Grid container spacing={2} alignItems="center">
             <Grid item xs={12} md={8}>
-              <Typography variant="h5" component="h1" fontWeight="700" color="text.primary">
-                Customers Directory
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Manage your customers, view their details, and perform actions like adding, editing, or deleting customers.
-              </Typography>
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                <ActionButton
+                  icon={<ArrowBack fontSize="small" />}
+                  title="Back"
+                  color="primary"
+                  onClick={() => navigate(-1)}
+                />
+                <Box>
+                  <Typography variant="h5" component="h1" fontWeight="700" color="text.primary">
+                    Customers Directory
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Manage your customers, view their details, and perform actions like adding, editing, or deleting customers.
+                  </Typography>
+                </Box>
+              </Box>
             </Grid>
             <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
               <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, flexWrap: 'wrap' }}>
-                <ActionButton
-                  variant="contained"
+                <ActionButtonSuccess
                   startIcon={<AddCircleOutline />}
-                  color="success"
+                  text="Add Debtors"
                   onClick={() => {
                     if (!currentCompanyDetails?._id) {
                       toast.error('Please create a company first.');
@@ -193,23 +205,11 @@ const CustomerLedger: React.FC = () => {
                     navigate('/customers/create/debtors');
                     dispatch(setCustomerTypeId(accountingGroups.find((group) => group.name.includes('Debtors'))?._id || ''))
                   }}
-                  sx={{
-                    background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
-                    color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
-                    border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
-                    '&:hover': {
-                      color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                      background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
-                    },
-                  }}
-                >
-                  Add Debtors
-                </ActionButton>
+                />
 
-                <ActionButton
-                  variant="contained"
+                <ActionButtonCancel
                   startIcon={<AddCircleOutline />}
-                  color="error"
+                  text="Add Creditors"
                   onClick={() => {
                     if (!currentCompanyDetails?._id) {
                       toast.error('Please create a company first.');
@@ -218,18 +218,8 @@ const CustomerLedger: React.FC = () => {
                     navigate('/customers/create/creditors');
                     dispatch(setCustomerTypeId(accountingGroups.find((group) => group.name.includes('Creditors'))?._id || ''))
                   }}
-                  sx={{
-                    background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
-                    color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
-                    border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#c62828'}`,
-                    '&:hover': {
-                      color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                      background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
-                    },
-                  }}
-                >
-                  Add Creditors
-                </ActionButton>
+                />
+
               </Box>
             </Grid>
           </Grid>
@@ -492,10 +482,8 @@ const CustomerLedger: React.FC = () => {
                       }}
                     >
                       <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                        <ActionButton
-                          variant="contained"
+                        <ActionButtonSuccess
                           startIcon={<AddCircleOutline />}
-                          color="success"
                           onClick={() => {
                             if (!currentCompanyDetails?._id) {
                               toast.error('Please create a company first.');
@@ -504,23 +492,11 @@ const CustomerLedger: React.FC = () => {
                             navigate('/customers/create/debtors');
                             dispatch(setCustomerTypeId(accountingGroups.find((group) => group.name.includes('Debtors'))?._id || ''))
                           }}
-                          sx={{
-                            background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
-                            color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
-                            border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
-                            '&:hover': {
-                              color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                              background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
-                            },
-                          }}
-                        >
-                          Add Debtors
-                        </ActionButton>
+                          text='Add Debtors'
+                        />
 
-                        <ActionButton
-                          variant="contained"
+                        <ActionButtonCancel
                           startIcon={<AddCircleOutline />}
-                          color="error"
                           onClick={() => {
                             if (!currentCompanyDetails?._id) {
                               toast.error('Please create a company first.');
@@ -529,18 +505,9 @@ const CustomerLedger: React.FC = () => {
                             navigate('/customers/create/creditors');
                             dispatch(setCustomerTypeId(accountingGroups.find((group) => group.name.includes('Creditors'))?._id || ''))
                           }}
-                          sx={{
-                            background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
-                            color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
-                            border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#c62828'}`,
-                            '&:hover': {
-                              color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                              background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
-                            },
-                          }}
-                        >
-                          Add Creditors
-                        </ActionButton>
+                          text='Add Creditors'
+                        />
+
                       </Box>
                     </Grid>
                   </Box>

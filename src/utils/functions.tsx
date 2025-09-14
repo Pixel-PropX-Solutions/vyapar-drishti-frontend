@@ -184,24 +184,54 @@ export function capitalizeInput(value: string, mode: 'off' | 'sentences' | 'word
   return value;
 };
 
-export const formatLocalDate = (date: Date): string => {
+export const formatLocalDate = (date: string): string => {
+  const parsedDate = new Date(date);
   const pad = (n: number): string => n.toString().padStart(2, '0');
   return (
-    date.getFullYear() +
+    parsedDate.getFullYear() +
     '-' +
-    pad(date.getMonth() + 1) +
+    pad(parsedDate.getMonth() + 1) +
     '-' +
-    pad(date.getDate()) +
+    pad(parsedDate.getDate()) +
     'T' +
-    pad(date.getHours()) +
+    pad(parsedDate.getHours()) +
     ':' +
-    pad(date.getMinutes()) +
+    pad(parsedDate.getMinutes()) +
     ':' +
-    pad(date.getSeconds()) +
+    pad(parsedDate.getSeconds()) +
     '.000Z'
   );
 };
 
 export const getFYyear = (fy: string): string => {
   return `FY: ${fy.slice(0, 4)} - ${parseInt(fy.slice(0, 4), 10) + 1}`;
+}
+
+/**
+ * Converts a month number (1–12) to the full month name.
+ * @param month - number (1 = January, 12 = December)
+ * @returns Month name string (e.g., "January") or "" if invalid
+ */
+export function getMonthName(month: number): string {
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  if (month < 1 || month > 12) return "";
+  return months[month - 1];
+}
+
+/**
+ * Round off the number to n number of digits.
+ * @param num = number (e.g., 433.4343343)
+ * @returns digits number (e.g., 2, 3) or 2 if not provided
+ */
+export function roundToDigits({ num, digits = 2 }: { num: number, digits?: number }): number {
+  if (digits === undefined || digits === null || isNaN(Number(digits))) {
+    digits = 2;
+  }
+  // Rounds a number to a specified number of decimal places.
+  const res = Number(num.toFixed(digits));
+  return res;
 }

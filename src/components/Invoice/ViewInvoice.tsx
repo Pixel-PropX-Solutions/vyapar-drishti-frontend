@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Box,
     Grid,
@@ -42,27 +42,69 @@ import {
     Assessment,
     CheckCircle,
     Warning,
+    ArrowBack,
 } from '@mui/icons-material';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { formatDate } from '@/utils/functions';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { ActionButton } from '@/common/buttons/ActionButton';
 import toast from 'react-hot-toast';
-import { viewInvoice } from '@/services/invoice';
+import { deleteInvoice, deleteTAXInvoice, getInvoicesPDF, getPaymentPdf, getRecieptPdf, getTaxInvoicesPDF, viewInvoice } from '@/services/invoice';
+import usePDFHandler from '@/common/hooks/usePDFHandler';
+import BackDropLoading from '@/common/loaders/BackDropLoading';
 
 
 export const ViewInvoiceInfo = () => {
     const theme = useTheme();
+    const navigate = useNavigate();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const { invoice_id } = useParams();
     const dispatch = useDispatch<AppDispatch>();
+    const [visible, setVisible] = useState<boolean>(false);
     const { current_company_id, user } = useSelector((state: RootState) => state.auth);
     const { invoiceData } = useSelector((state: RootState) => state.invoice);
     const currentCompanyDetails = user?.company?.find((company: any) => company._id === current_company_id);
     const tax_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_tax;
+    const [loading, _setIsLoading] = useState<boolean>(false);
 
-    const [isLoading, _setLoading] = useState<boolean>(false);
+    const { init, setLoading, PDFViewModal, handleShare, handleDownload, handlePrint, isLoading } = usePDFHandler();
+
+
+    async function handleInvoice(invoice: any, callback: () => void) {
+
+        try {
+            setLoading(true);
+            const res = await dispatch(
+                (invoice.voucher_type === 'Payment' ? getPaymentPdf :
+                    invoice.voucher_type === 'Receipt' ? getRecieptPdf :
+                        tax_enable ? getTaxInvoicesPDF : getInvoicesPDF)({
+                            vouchar_id: invoice._id,
+                            company_id: current_company_id || '',
+                        }));
+
+            if (res.meta.requestStatus === 'fulfilled') {
+                const { pdfUrl } = res.payload as { pdfUrl: string };
+
+                // ✅ Rebuild File from URL when needed
+                const blob = await fetch(pdfUrl).then((r) => r.blob());
+                const file1 = new File([blob], `${invoice._id}.pdf`, {
+                    type: "application/pdf",
+                });
+
+                init({ file: file1, entityNumber: invoice.voucher_number, title: invoice.party_name, fileName: `${invoice.voucher_number}-vyapar-drishti` }, callback);
+            } else {
+                console.error('Failed to print invoice:', res.payload);
+                return;
+            }
+
+        } catch (e) {
+            console.error('Error printing invoice:', e);
+        } finally {
+            setLoading(false);
+        }
+    }
+
 
     const getStatusColor = (status: string) => {
         switch (status.toLowerCase()) {
@@ -84,9 +126,31 @@ export const ViewInvoiceInfo = () => {
     useEffect(() => {
         dispatch(viewInvoice({ vouchar_id: invoice_id || '', company_id: current_company_id || '' }))
     }, [current_company_id, dispatch, invoice_id]);
-    const handleAction = useCallback((action: string) => {
-        toast.success(`${action} action initiated successfully`);
-    }, []);
+
+    const handleAction = (invoiceId: string, voucher_type: string) => {
+        if (voucher_type === 'Purchase' || voucher_type !== "Sales") {
+            navigate(`/invoices/update/${voucher_type.toLowerCase()}/${invoiceId}`);
+        }
+    };
+
+    const handleDeleteInvoice = (invoiceId: string) => {
+        if (tax_enable) {
+            dispatch(deleteTAXInvoice({ vouchar_id: invoiceId, company_id: currentCompanyDetails?._id ?? '' })).unwrap().then(() => {
+                navigate("/invoices")
+                toast.success("Invoice deleted successfully!");
+            }).catch((error) => {
+                toast.error(error || 'An unexpected error occurred. Please try again later.');
+            })
+        } else {
+            dispatch(deleteInvoice({ vouchar_id: invoiceId, company_id: currentCompanyDetails?._id ?? '' })).unwrap().then(() => {
+                toast.success("Invoice deleted successfully!");
+                navigate("/invoices")
+            }).catch((error) => {
+                toast.error(error || 'An unexpected error occurred. Please try again later.');
+            })
+        }
+    };
+
 
     return (
         <Container maxWidth="xl" sx={{ py: 3 }}>
@@ -111,11 +175,19 @@ export const ViewInvoiceInfo = () => {
                         gap: 2
                     }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Avatar sx={{ bgcolor: theme.palette.primary.main, width: 40, height: 40 }}>
-                                <Receipt />
-                            </Avatar>
+                            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                <ActionButton
+                                    icon={<ArrowBack fontSize="small" />}
+                                    title="Back"
+                                    color="primary"
+                                    onClick={() => navigate(-1)}
+                                />
+                                <Avatar sx={{ bgcolor: theme.palette.primary.main, width: 40, height: 40 }}>
+                                    <Receipt />
+                                </Avatar>
+                            </Box>
                             <Box>
-                                {isLoading ? (
+                                {loading ? (
                                     <Skeleton width={200} height={40} />
                                 ) : (
                                     <>
@@ -139,31 +211,31 @@ export const ViewInvoiceInfo = () => {
                                 icon={<Edit fontSize="small" />}
                                 title="Edit Invoice"
                                 color="primary"
-                                onClick={() => handleAction('Edit')}
+                                onClick={() => handleAction(invoiceData?._id ?? '', invoiceData?.voucher_type ?? '')}
                             />
                             <ActionButton
                                 icon={<Download fontSize="small" />}
                                 title="Download Invoice"
                                 color="info"
-                                onClick={() => handleAction('Download')}
+                                onClick={() => { handleInvoice(invoiceData, () => { handleDownload(); }) }}
                             />
                             <ActionButton
                                 icon={<Share fontSize="small" />}
                                 title="Share Invoice"
                                 color="warning"
-                                onClick={() => handleAction('Share')}
+                                onClick={() => { handleInvoice(invoiceData, () => { handleShare(); }) }}
                             />
                             <ActionButton
                                 icon={<Print fontSize="small" />}
                                 title="Print Invoice"
                                 color="success"
-                                onClick={() => handleAction('Print')}
+                                onClick={() => { handleInvoice(invoiceData, () => { handlePrint(); }) }}
                             />
                             <ActionButton
                                 icon={<Delete fontSize="small" />}
                                 title="Delete Invoice"
                                 color="error"
-                                onClick={() => handleAction('Delete')}
+                                onClick={() => handleDeleteInvoice(invoiceData?._id ?? '')}
                             />
                         </Stack>
                     </Box>
@@ -185,7 +257,7 @@ export const ViewInvoiceInfo = () => {
                                 </Box>
                                 <Divider sx={{ mb: 1 }} />
 
-                                {isLoading ? (
+                                {loading ? (
                                     <Box sx={{ '& > *': { mb: 2 } }}>
                                         {[...Array(4)].map((_, index) => (
                                             <Skeleton key={index} height={60} />
@@ -193,22 +265,22 @@ export const ViewInvoiceInfo = () => {
                                     </Box>
                                 ) : (
                                     <Stack spacing={2}>
-                                        {invoiceData?.status && <Box>
+                                        {invoiceData?.payment_mode && <Box>
                                             <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                                                 Invoice Status
                                             </Typography>
-                                            {getStatusIcon(invoiceData?.status || '') ? (
+                                            {getStatusIcon(invoiceData?.payment_mode || '') ? (
                                                 <Chip
-                                                    icon={getStatusIcon(invoiceData?.status || '')}
-                                                    label={invoiceData?.status.toUpperCase()}
-                                                    color={getStatusColor(invoiceData?.status || '') as any}
+                                                    icon={getStatusIcon(invoiceData?.payment_mode || '')}
+                                                    label={invoiceData?.payment_mode.toUpperCase()}
+                                                    color={getStatusColor(invoiceData?.payment_mode || '') as any}
                                                     variant="filled"
                                                     sx={{ fontWeight: 'bold' }}
                                                 />
                                             ) : (
                                                 <Chip
-                                                    label={invoiceData?.status.toUpperCase()}
-                                                    color={getStatusColor(invoiceData?.status || '') as any}
+                                                    label={invoiceData?.payment_mode.toUpperCase()}
+                                                    color={getStatusColor(invoiceData?.payment_mode || '') as any}
                                                     variant="filled"
                                                     sx={{ fontWeight: 'bold' }}
                                                 />
@@ -259,7 +331,7 @@ export const ViewInvoiceInfo = () => {
                                 </Box>
                                 <Divider sx={{ mb: 1 }} />
 
-                                {isLoading ? (
+                                {loading ? (
                                     <Box sx={{ '& > *': { mb: 2 } }}>
                                         {[...Array(5)].map((_, index) => (
                                             <Skeleton key={index} height={40} />
@@ -318,7 +390,7 @@ export const ViewInvoiceInfo = () => {
                                 </Box>
                                 <Divider sx={{ mb: 1 }} />
 
-                                {isLoading ? (
+                                {loading ? (
                                     <Box sx={{ '& > *': { mb: 2 } }}>
                                         {[...Array(6)].map((_, index) => (
                                             <Skeleton key={index} height={40} />
@@ -379,7 +451,7 @@ export const ViewInvoiceInfo = () => {
                                     </Typography>
                                 </Box>
 
-                                {isLoading ? (
+                                {loading ? (
                                     <>
                                         <LinearProgress sx={{ mb: 2 }} />
                                         <Box sx={{ '& > *': { mb: 2 } }}>
@@ -551,6 +623,9 @@ export const ViewInvoiceInfo = () => {
                     </Fade>
                 </Grid>
             </Grid>
+
+            {visible && <PDFViewModal visible={visible} setVisible={setVisible} />}
+            <BackDropLoading isLoading={isLoading} text='Generating and fetching pdf from server...' />
         </Container>
     );
 };

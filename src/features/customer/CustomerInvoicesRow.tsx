@@ -132,21 +132,21 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, o
                     {/* Invoice Payment Status */}
                     <TableCell align="left" sx={{ px: 1 }}>
                         <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', gap: 1 }}>
-                            {['Purchase', 'Sales'].includes(inv.voucher_type) && inv.status === 'Paid' &&
+                            {['Purchase', 'Sales'].includes(inv.voucher_type) && (inv.grand_total === inv.paid_amount) &&
                                 <CheckCircleOutline sx={{ mr: 0.5, color: theme.palette.success.main }} />}
-                            {['Purchase', 'Sales'].includes(inv.voucher_type) && inv.status === 'Unpaid' &&
+                            {['Purchase', 'Sales'].includes(inv.voucher_type) && (inv.paid_amount === 0) &&
                                 <CancelOutlined sx={{ mr: 0.5, color: theme.palette.error.main }} />}
-                            {['Purchase', 'Sales'].includes(inv.voucher_type) && inv.status === 'Partially Paid' &&
+                            {['Purchase', 'Sales'].includes(inv.voucher_type) && ((inv.grand_total > inv.paid_amount) && (inv.paid_amount > 0)) &&
                                 <ScheduleOutlined sx={{ mr: 0.5, color: theme.palette.warning.main }} />}
                             <Typography
                                 variant="body1"
                                 sx={{
                                     fontWeight: 700,
-                                    color: ['Purchase', 'Sales'].includes(inv.voucher_type) ?
-                                        inv.status === 'Paid' ? theme.palette.success.main : inv.status === 'Unpaid' ? theme.palette.error.main : inv.status === 'Partially Paid' ? theme.palette.warning.main : theme.palette.text.primary : theme.palette.text.primary,
+                                    color: ['Purchase', 'Sales'].includes(inv.voucher_type) &&
+                                        (inv.grand_total === inv.paid_amount) ? theme.palette.success.main : inv.paid_amount === 0 ? theme.palette.error.main : (inv.grand_total > inv.paid_amount && inv.paid_amount > 0) ? theme.palette.warning.main : theme.palette.text.primary,
                                 }}
                             >
-                                {['Purchase', 'Sales'].includes(inv.voucher_type) ? inv.status ? inv.status : '-' : '-'}
+                                {['Purchase', 'Sales'].includes(inv.voucher_type) && ((inv.grand_total === inv.paid_amount) ? "Paid" : (inv.paid_amount === 0 ? "Unpaid" : "Partially Paid"))}
                             </Typography>
                         </Box>
                     </TableCell>
@@ -218,7 +218,7 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, o
                     <TableCell align="center" sx={{ px: 1 }}>
                         <Zoom appear in timeout={200}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'center' }}>
-                                <Tooltip title="View Details" arrow>
+                                {['Sales', 'Purchase'].includes(inv.voucher_type) && <Tooltip title="View Details" arrow>
                                     <IconButton
                                         size="small"
                                         onClick={(e) => {
@@ -237,9 +237,9 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, o
                                     >
                                         <VisibilityIcon fontSize="small" />
                                     </IconButton>
-                                </Tooltip>
+                                </Tooltip>}
 
-                                <Tooltip title="Edit Invoice" arrow>
+                                {['Sales', 'Purchase'].includes(inv.voucher_type) && <Tooltip title="Edit Invoice" arrow>
                                     <IconButton
                                         size="small"
                                         onClick={(e) => {
@@ -258,7 +258,7 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, o
                                     >
                                         <EditIcon fontSize="small" />
                                     </IconButton>
-                                </Tooltip>
+                                </Tooltip>}
 
                                 <Tooltip title="Delete Invoice" arrow>
                                     <IconButton

@@ -7,6 +7,7 @@ export type SortField =
   | "created_at"
   | 'product_name'
   | "category"
+  | "item"
   | "company_name";
 
 
@@ -55,6 +56,20 @@ export type InvoicesSortField =
 
 
 export type SortOrder = "asc" | "desc";
+
+export interface ContactFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  company: string;
+  industry: string;
+  queryType: string;
+  employees: string;
+  message: string;
+  marketingConsent: boolean;
+  time: string;
+}
 
 export interface Units {
   id: string;
@@ -221,7 +236,7 @@ export interface CreateInvoiceData {
 
   vehicle_number: string,
   mode_of_transport: string,
-  status: string,
+  payment_mode: string,
   due_date: string,
 
   paid_amount: number,
@@ -272,7 +287,7 @@ export interface UpdateInvoice {
 
   vehicle_number: string,
   mode_of_transport: string,
-  status: string,
+  payment_mode: string,
   due_date: string,
   paid_amount: number,
   total: number,
@@ -323,7 +338,7 @@ export interface UpdateTAXInvoice {
 
   vehicle_number: string,
   mode_of_transport: string,
-  status: string,
+  payment_mode: string,
   due_date: string,
   paid_amount: number,
   total: number,
@@ -374,9 +389,9 @@ export interface CreateInvoiceWithTAXData {
 
   vehicle_number: string,
   mode_of_transport: string,
-  status: string,
+  payment_mode: string,
   due_date: string,
-  
+
   paid_amount: number,
   total: number,
   discount: number,
@@ -541,7 +556,7 @@ export interface FormCreateProduct {
   nature_of_goods?: string;
   hsn_code: string;
   taxability: string;
-  tax_rate: string;
+  tax_rate: number;
 
   low_stock_alert: number;
 }
@@ -568,7 +583,7 @@ export interface ProductUpdate {
   nature_of_goods?: string;
   hsn_code?: string;
   taxability?: string;
-  tax_rate: string;
+  tax_rate: number;
   low_stock_alert?: number;
 }
 
@@ -589,7 +604,7 @@ export interface GetInvoiceData {
   reference_number: string,
   place_of_supply: string,
   mode_of_transport: string,
-  status: string,
+  payment_mode: string,
   due_date: string,
   paid_amount: number,
   total: number,
@@ -918,28 +933,23 @@ export interface UpdateCategory {
 
 export interface StockMovement {
   _id: string,
-  user_id: string,
-  company_id: string,
-  vouchar_id: string,
-  voucher_number: string,
-  voucher_type: string,
-  item: string,
   item_id: string,
-  quantity: number,
-  rate: number,
-  amount: number,
-  additional_amount: number,
-  discount_amount: number,
-  godown: string,
-  godown_id: string,
-  order_number: string,
-  order_due_date: string,
-  date: string,
-  narration: string,
-  party_name: string,
-  place_of_supply: string,
-  created_at: string,
-  updated_at: string,
+  item: string,
+  unit: string,
+  inwards_qty: number,
+  inwards_val: number,
+  outwards_qty: number,
+  outwards_val: number,
+  opening_qty: number,
+  opening_val: number,
+  closing_qty: number,
+  closing_val: number,
+  opening_rate: number,
+  inwards_rate: number,
+  outwards_rate: number,
+  closing_rate: number,
+  gross_profit: number,
+  profit_percent: number
 }
 
 export interface InventoryItem {
@@ -964,4 +974,38 @@ export interface InventoryItem {
   low_stock_alert: number;
   last_restock_date: string;
   stock_status: string;
+}
+
+export interface MonthlyData {
+  sales: number,
+  purchase: number,
+  profit: number,
+  year: number,
+  data: Array<{
+    id: string | 'sales' | 'purchase' | 'profit',
+    label: string,
+    data: Array<number>
+  }>
+}
+
+export interface DailyData {
+  sales: number,
+  purchase: number,
+  profit: number,
+  year: number,
+  month: number,
+  data: Array<{
+    id: string | 'sales' | 'purchase' | 'profit',
+    label: string,
+    data: Array<number>
+  }>
+}
+
+export interface StatsData {
+  opening: number,
+  purchase: number,
+  sales: number,
+  current: number,
+  profit: number,
+  profit_percent: number,
 }

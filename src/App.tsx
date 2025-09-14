@@ -46,6 +46,7 @@ import { ViewInvoiceInfo } from "./components/Invoice/ViewInvoice";
 import VerifyEmail from "./pages/VerifyEmail";
 import ResetPassword from "./pages/ResetPassword";
 import ForgotPassword from "./pages/ForgotPassword";
+import Analytics from "./pages/Analytics";
 // import PromptModal from "./common/modals/PromptModal";
 
 const xThemeComponents = {
@@ -154,7 +155,6 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/customers/edit/:type" element={<EditCustomer />} />
 
                 <Route path="/transactions" element={<Transactions />} />
-                {/* <Route path="/expenses" element={<Transactions />} /> */}
                 <Route path="/transactions/create/:type" element={<PaymentReceiptInvoice />} />
                 <Route path="/transactions/update/:type/:voucher_id" element={<UpdatePaymentReceipt />} />
 
@@ -162,6 +162,9 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/invoices/:invoice_id" element={<ViewInvoiceInfo />} />
                 <Route path="/invoices/create/:type" element={<SalePurchaseInvoiceCreation />} />
                 <Route path="/invoices/update/:type/:voucher_id" element={<UpdateSalePurchase />} />
+
+                <Route path="/reports" element={<Analytics />} />
+                
                 <Route path="/xyz" element={<Xyz />} />
                 {/* <Route path="/*" element={<Navigate to="/" replace />} /> */}
               </Route>

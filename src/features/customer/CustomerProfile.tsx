@@ -25,6 +25,7 @@ import {
     CardContent,
 } from "@mui/material";
 import {
+    ArrowBack,
     Edit as EditIcon,
     FilterListOutlined,
     PeopleAlt,
@@ -37,7 +38,7 @@ import { AppDispatch, RootState } from "@/store/store";
 import { getCustomer, getCustomerInvoices } from "@/services/customers";
 import { useNavigate, useParams } from "react-router-dom";
 import { formatLocalDate, getInitials } from "@/utils/functions";
-import { ActionButton } from "@/common/buttons/ActionButton1";
+import { ActionButton } from "@/common/buttons/ActionButton";
 import { setCustomersFilters, setEditingCustomer } from "@/store/reducers/customersReducer";
 import { CustomerInvoicesRow } from "./CustomerInvoicesRow";
 import { SortOrder } from "@/utils/types";
@@ -48,6 +49,7 @@ import { BottomPagination } from "@/common/modals/BottomPagination";
 import { CustomerInvoicesRowSkeleton } from "@/common/skeletons/CustomerInvoicesRowSkeleton";
 import { deleteTAXInvoice, deleteInvoice } from "@/services/invoice";
 import toast from "react-hot-toast";
+import ActionButtonSuccess from "@/common/buttons/ActionButtonSuccess";
 
 const CustomerProfile: React.FC = () => {
     const { customer, loading, customerInvoices, customerInvoicesMeta } = useSelector((state: RootState) => state.customersLedger);
@@ -73,16 +75,16 @@ const CustomerProfile: React.FC = () => {
             limit: rowsPerPage,
             sortField,
             sortOrder,
-            start_date: formatLocalDate(new Date(startDate)),
-            end_date: formatLocalDate(new Date(endDate)),
+            start_date: formatLocalDate(startDate),
+            end_date: formatLocalDate(endDate),
         }));
     }, [currentCompanyId, customer_id, dispatch, endDate, page, rowsPerPage, debouncedQuery, sortField, sortOrder, startDate, type]);
 
     useEffect(() => {
         if (customer_id) {
             dispatch(getCustomer({
-                id: customer_id, start_date: formatLocalDate(new Date(startDate)),
-                end_date: formatLocalDate(new Date(endDate)),
+                id: customer_id, start_date: formatLocalDate(startDate),
+                end_date: formatLocalDate(endDate),
             }));
         }
     }, [dispatch, customer_id, startDate, endDate]);
@@ -148,7 +150,7 @@ const CustomerProfile: React.FC = () => {
 
 
     // managing searchQuery, filterState, page, rowsPerPage
-    const handleStateChange = (field: string, value: any) => {
+    const handleStateChange = (field: string, value: string | number) => {
         dispatch(setCustomersFilters({
             [field]: value
         }))
@@ -160,11 +162,11 @@ const CustomerProfile: React.FC = () => {
             searchQuery: "",
             type: "all",
             page: 1,
-            startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString(),
-            endDate: new Date().toISOString(),
+            startDate: (new Date(new Date().getFullYear(), new Date().getMonth(), 1)).toISOString(),
+            endDate: (new Date()).toISOString(),
             rowsPerPage: 10,
             sortField: "created_at",
-            sortOrder: "asc" as SortOrder,
+            sortOrder: "desc" as SortOrder,
         }));
     }, []);
 
@@ -198,11 +200,17 @@ const CustomerProfile: React.FC = () => {
                                 justifyContent: "center",
                                 alignItems: "center",
                             }}>
+                                <ActionButton
+                                    icon={<ArrowBack fontSize="small" />}
+                                    title="Back"
+                                    color="primary"
+                                    onClick={() => navigate(-1)}
+                                />
                                 <Avatar
                                     sx={{
-                                        mr: 2,
-                                        width: 64,
-                                        height: 64,
+                                        mx: 2,
+                                        width: 48,
+                                        height: 48,
                                         // bgcolor: theme.palette.primary.main,
                                     }}
                                 >
@@ -230,26 +238,14 @@ const CustomerProfile: React.FC = () => {
                                 }}
                             >
                                 {/* Edit Details Button */}
-                                <ActionButton
-                                    variant="contained"
+                                <ActionButtonSuccess
                                     startIcon={<EditIcon />}
-                                    color="success"
                                     onClick={() => {
                                         dispatch(setEditingCustomer(customer));
                                         navigate(`/customers/edit/${customer.parent.toLowerCase()}`);
                                     }}
-                                    sx={{
-                                        background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
-                                        border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
-                                        color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
-                                        '&:hover': {
-                                            color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                                            background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
-                                        },
-                                    }}
-                                >
-                                    Edit {customer.ledger_name}
-                                </ActionButton>
+                                    text={`Edit ${customer.ledger_name}`}
+                                />
                             </Grid>
                         </Paper>
                     </CardContent>
@@ -520,7 +516,7 @@ const CustomerProfile: React.FC = () => {
                             ) : customerInvoices?.length > 0 ? (
                                 customerInvoices?.map((inv, index) => (
                                     <CustomerInvoicesRow
-                                        key={inv.vouchar_id}
+                                        key={`${inv.vouchar_id}-${index}`}
                                         inv={inv}
                                         index={index + 1 + (page - 1) * rowsPerPage}
                                         onView={() => {
@@ -550,7 +546,7 @@ const CustomerProfile: React.FC = () => {
                             )}
                             {loading ? (
                                 Array([1, 2, 3, 4, 5])
-                                    .map((_, index) => <CustomerInvoicesRowSkeleton key={`skeleton-${index}`} />)
+                                    .map((_, index) => <CustomerInvoicesRowSkeleton key={`skeleton1-${index}`} />)
                             ) : customerInvoices?.length > 0 && (
                                 <>
                                     <TableRow sx={{

@@ -24,6 +24,7 @@ import {
   // GitHub as GitHubIcon,
   // Twitter as TwitterIcon
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 // Team member interface
 // interface TeamMember {
@@ -50,6 +51,7 @@ interface CompanyValue {
 }
 
 const AboutPage: React.FC = () => {
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState<string>('company');
   // const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   const [isScrolling, setIsScrolling] = useState<boolean>(false);
@@ -226,6 +228,7 @@ const AboutPage: React.FC = () => {
               <Button
                 variant="contained"
                 color="primary"
+                onClick={() => navigate('/contact')}
                 size="large"
                 sx={{
                   mt: 2,

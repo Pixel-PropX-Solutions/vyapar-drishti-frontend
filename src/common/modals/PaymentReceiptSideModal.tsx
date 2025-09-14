@@ -10,8 +10,6 @@ import {
     useTheme,
     Tooltip,
     Stack,
-    Fade,
-    LinearProgress,
     Chip,
     Avatar,
     useMediaQuery,
@@ -47,6 +45,7 @@ import { createInvoice, getInvoiceCounter } from "@/services/invoice";
 import { useNavigate } from "react-router-dom";
 import ActionButtonSuccess from "../buttons/ActionButtonSuccess";
 import ActionButtonCancel from "../buttons/ActionButtonCancel";
+import BackDropLoading from "../loaders/BackDropLoading";
 
 interface CreateInventoryGroupModalProps {
     open: boolean;
@@ -171,7 +170,7 @@ const PaymentReceiptSideModal: React.FC<CreateInventoryGroupModalProps> = ({
         const payload = {
             voucher_type: type === 'receipt' ? 'Receipt' : 'Payment',
             voucher_type_id: invoiceType_id || '',
-            date: data.date,
+            date: data.date.split('T')[0],
             voucher_number: data.transactionNumber || '',
             party_name: customerName,
             party_name_id: customerId ?? '',
@@ -182,7 +181,7 @@ const PaymentReceiptSideModal: React.FC<CreateInventoryGroupModalProps> = ({
             place_of_supply: "",
             mode_of_transport: "",
             vehicle_number: "",
-            status: "Paid",
+            payment_mode: "Cash",
             due_date: "",
             paid_amount: data.amount,
             total: data.amount,
@@ -266,19 +265,6 @@ const PaymentReceiptSideModal: React.FC<CreateInventoryGroupModalProps> = ({
                 onClose={onClose}
                 transitionDuration={300}
             >
-                <Fade in={isLoading}>
-                    <LinearProgress
-                        sx={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            zIndex: 1000,
-                            height: 3
-                        }}
-                    />
-                </Fade>
-
                 {/* Header */}
                 <Box sx={{
                     px: 3,
@@ -314,7 +300,7 @@ const PaymentReceiptSideModal: React.FC<CreateInventoryGroupModalProps> = ({
                         <Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <Typography variant="h6" fontWeight={700}>
-                                    {isReceipt ? 'Payment Received Cash' : 'Payment Given Cash'}
+                                    {isReceipt ? 'Receipt' : 'Payment'}
                                 </Typography>
                             </Box>
                         </Box>
@@ -630,6 +616,7 @@ const PaymentReceiptSideModal: React.FC<CreateInventoryGroupModalProps> = ({
                     </Stack>
                 </Box>
             </Drawer>
+            <BackDropLoading isLoading={isLoading} text={`Recording ${isReceipt ? 'Receipt' : 'Payment'} entry.`} />
         </LocalizationProvider>
     );
 };

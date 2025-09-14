@@ -58,6 +58,8 @@ import {
     AccountBalance,
     PeopleAltOutlined,
     DateRange,
+    Payments,
+    ArrowBack,
 } from "@mui/icons-material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -65,17 +67,17 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { viewAllCustomerWithType } from '@/services/customers';
-import { viewProductsWithId } from '@/services/products';
 import { createInvoice, createInvoiceWithTAX, getInvoiceCounter } from '@/services/invoice';
 import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import AddItemModal from '@/common/modals/AddItemModal';
-import { capitalizeInput, formatLocalDate } from '@/utils/functions';
+import { capitalizeInput, formatLocalDate, getInitials } from '@/utils/functions';
 import ActionButtonSuccess from '@/common/buttons/ActionButtonSuccess';
 import ActionButtonCancel from '@/common/buttons/ActionButtonCancel';
 import CreateCustomerModal from '@/common/modals/CreateCustomerModal';
 import { setCustomerTypeId } from '@/store/reducers/customersReducer';
 import { viewAllAccountingGroups } from '@/services/accountingGroup';
+import { ActionButton } from '@/common/buttons/ActionButton';
 
 // Interfaces
 interface InvoiceItems {
@@ -130,7 +132,6 @@ const GradientCard = ({ children, gradient = 'primary', ...props }: GradientCard
                 borderRadius: 1,
                 background: gradients[gradient],
                 backdropFilter: 'blur(20px)',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 ...props.sx
             }}
             {...props}
@@ -172,9 +173,9 @@ const AnimatedTextField = ({ ...props }: any) => {
     );
 };
 
-const StatusChip = ({ status, ...props }: any) => {
-    const getStatusConfig = (status: string) => {
-        switch (status?.toLowerCase()) {
+const StatusChip = ({ payment_mode, ...props }: any) => {
+    const getStatusConfig = (payment_mode: string) => {
+        switch (payment_mode?.toLowerCase()) {
             case 'paid':
                 return { color: 'success', icon: '✓' };
             case 'unpaid':
@@ -186,11 +187,11 @@ const StatusChip = ({ status, ...props }: any) => {
         }
     };
 
-    const config = getStatusConfig(status);
+    const config = getStatusConfig(payment_mode);
 
     return (
         <Chip
-            label={`${config.icon} ${status}`}
+            label={`${config.icon} ${payment_mode}`}
             color={config.color as any}
             variant="outlined"
             size="small"
@@ -213,10 +214,12 @@ const modeOfTransportOptions = [
     { label: '🚢 By Sea', value: 'By Sea', icon: '🚢' },
 ];
 
-const paymentStatusOptions = [
-    { label: '✅ Paid', value: 'Paid', color: 'success' },
-    { label: '⏳ Unpaid', value: 'Unpaid', color: 'error' },
-    { label: '⏱ Partially Paid', value: 'Partially Paid', color: 'warning' },
+const paymentModeOptions = [
+    { label: '💵 Cash', value: 'Cash', color: 'success' },
+    { label: '💳 Card', value: 'Card', color: 'error' },
+    { label: '🏦 Net Banking', value: 'Net Banking', color: 'warning' },
+    { label: '🏧 NEFT', value: 'NEFT', color: 'warning' },
+    { label: '📄 Cheque', value: 'Cheque', color: 'warning' },
 ];
 
 // Main Component
@@ -234,18 +237,19 @@ export default function SalePurchaseInvoiceCreation() {
     const { invoiceType_id } = useSelector((state: RootState) => state.invoice);
     const { accountingGroups } = useSelector((state: RootState) => state.accountingGroup);
 
-    const invoiceType = type === "sales" ? "Sales" : type === "purchase" ? "Purchase" : "";
+    const invoiceType = type !== undefined ? type.charAt(0).toUpperCase() + type.slice(1) : "";
     const [date, setDate] = useState(new Date());
     const [isLoading, setIsLoading] = useState(false);
     const [showSummary, setShowSummary] = useState(false);
     const [expandedTotals, setExpandedTotals] = useState(true);
+    const [expandedNotes, setExpandedNotes] = useState(false);
+
     const [item, setItem] = useState<InvoiceItems | null>(null);
     const [isAddItemModalOpen, setAddItemModalOpen] = useState(false);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [isCustomerModalOpen, setCustomerModalOpen] = useState(false);
     const [parties, setParties] = useState<{ id: string; name: string; }[]>([]);
     const [dueDate, setDueDate] = useState(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
-    const [itemsList, setItemsList] = useState<{ id: string; name: string; unit: string, tax_rate: string, hsn_code: string }[]>([]);
 
     const [data, setData] = useState({
         company_id: "",
@@ -263,7 +267,7 @@ export default function SalePurchaseInvoiceCreation() {
         mode_of_transport: "",
         vehicle_number: "",
         due_date: "",
-        status: "",
+        payment_mode: "",
         paid_amount: 0,
         total: 0,
         discount: 0,
@@ -369,14 +373,14 @@ export default function SalePurchaseInvoiceCreation() {
             if (tax_enable) {
                 const dataToSend = {
                     ...data,
-                    date: date.toISOString().split('T')[0],
+                    date: date.toISOString().slice(0, 10),
                     company_id: currentCompany?._id || '',
                     voucher_type_id: invoiceType_id || '',
                     party_name_id: data.party_id,
                     mode_of_transport: data.mode_of_transport,
                     vehicle_number: data.vehicle_number,
                     place_of_supply: data.place_of_supply,
-                    status: data.status,
+                    payment_mode: data.payment_mode,
                     paid_amount: data.paid_amount,
                     due_date: dueDate instanceof Date ? dueDate.toISOString().split('T')[0] : dueDate,
                     additional_charge: Number(additional_charge),
@@ -397,7 +401,7 @@ export default function SalePurchaseInvoiceCreation() {
                         godown_id: '',
                         order_number: '',
                         order_due_date: '',
-                        hsn_code: itemsList.find((p) => p.id === item.item_id)?.hsn_code || '',
+                        hsn_code: item?.hsn_code || '',
                     })),
                     accounting: [
                         {
@@ -428,7 +432,7 @@ export default function SalePurchaseInvoiceCreation() {
                     mode_of_transport: data.mode_of_transport,
                     vehicle_number: data.vehicle_number,
                     place_of_supply: data.place_of_supply,
-                    status: data.status,
+                    payment_mode: data.payment_mode,
                     paid_amount: data.paid_amount,
                     due_date: dueDate instanceof Date ? dueDate.toISOString().split('T')[0] : dueDate,
                     additional_charge: Number(additional_charge),
@@ -470,6 +474,31 @@ export default function SalePurchaseInvoiceCreation() {
         }
     };
 
+    const loadCustomers = async () => {
+        const customerResponse = await dispatch(viewAllCustomerWithType({
+            company_id: currentCompanyId || '',
+            customerType: invoiceType === 'Sales' ? 'Debtors' : 'Creditors',
+        }));
+
+        if (customerResponse.meta.requestStatus === 'fulfilled') {
+            const ledgersWithType = customerResponse.payload;
+            setParties(ledgersWithType.map((part: any) => ({ name: part.ledger_name, id: part._id })));
+        }
+    }
+    const loadCounter = async () => {
+        const counterResponse = await dispatch(getInvoiceCounter({
+            company_id: currentCompanyId || '',
+            voucher_type: invoiceType,
+        }));
+
+        if (counterResponse.meta.requestStatus === 'fulfilled') {
+            setData(prev => ({
+                ...prev,
+                voucher_number: counterResponse.payload.current_number,
+            }));
+        }
+    }
+
     // Load initial data with enhanced loading states
     useEffect(() => {
         if (currentCompanyId) {
@@ -482,44 +511,9 @@ export default function SalePurchaseInvoiceCreation() {
 
         const loadData = async () => {
             try {
-                // Load customers/suppliers
-                const customerResponse = await dispatch(viewAllCustomerWithType({
-                    company_id: currentCompanyId || '',
-                    customerType: invoiceType === 'Sales' ? 'Debtors' : 'Creditors',
-                }));
+                await loadCustomers();
+                await loadCounter();
 
-                if (customerResponse.meta.requestStatus === 'fulfilled') {
-                    const ledgersWithType = customerResponse.payload;
-                    setParties(ledgersWithType.map((part: any) => ({ name: part.ledger_name, id: part._id })));
-                }
-
-                // Load invoice counter
-                const counterResponse = await dispatch(getInvoiceCounter({
-                    company_id: currentCompanyId || '',
-                    voucher_type: invoiceType,
-                }));
-
-                if (counterResponse.meta.requestStatus === 'fulfilled') {
-                    setData(prev => ({
-                        ...prev,
-                        voucher_number: counterResponse.payload.current_number,
-                    }));
-                }
-
-                // Load products
-                const productsResponse = await dispatch(viewProductsWithId(currentCompanyId || ''));
-                if (productsResponse.meta.requestStatus === 'fulfilled') {
-                    const products = productsResponse.payload;
-                    setItemsList(
-                        products.map((product: any) => ({
-                            name: product.stock_item_name,
-                            id: product._id,
-                            unit: product.unit,
-                            tax_rate: product.tax_rate || 0,
-                            hsn_code: product.hsn_code || ''
-                        }))
-                    );
-                }
             } catch (error) {
                 console.error("Failed to load initial data:", error);
                 toast.error("Failed to load data. Please refresh the page.");
@@ -570,12 +564,18 @@ export default function SalePurchaseInvoiceCreation() {
                             <CardContent sx={{ p: 0 }}>
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', }}>
                                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                        <ActionButton
+                                            icon={<ArrowBack fontSize="small" />}
+                                            title="Back"
+                                            color="primary"
+                                            onClick={() => navigate(-1)}
+                                        />
                                         <Avatar
                                             sx={{
                                                 bgcolor: 'primary.main',
-                                                width: 56,
-                                                height: 56,
-                                                mr: 3,
+                                                width: 48,
+                                                height: 48,
+                                                mx: 2,
                                                 background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
                                                 boxShadow: theme.shadows[8],
                                             }}
@@ -583,12 +583,12 @@ export default function SalePurchaseInvoiceCreation() {
                                             <Receipt sx={{ fontSize: 28 }} />
                                         </Avatar>
                                         <Box>
-                                            <Typography variant="h4" fontWeight="800" color="primary.main" sx={{ mb: 1 }}>
-                                                Create {invoiceType} Invoice
+                                            <Typography variant="h5" component="h1" fontWeight="800" color="primary.main" sx={{ mb: 1 }}>
+                                                Create {invoiceType}
                                             </Typography>
                                             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                                                 <Chip icon={<Business />} label={currentCompany?.name || 'Company'} size="small" />
-                                                <Chip icon={<Today />} label={formatLocalDate(date).split('T')[0].split('-').reverse().join('-')} size="small" />
+                                                <Chip icon={<Today />} label={formatLocalDate(date.toISOString()).split('T')[0].split('-').reverse().join('-')} size="small" />
                                                 {tax_enable && <Chip icon={<Assignment />} label="TAX Enabled" color="success" size="small" />}
                                             </Box>
                                         </Box>
@@ -683,9 +683,9 @@ export default function SalePurchaseInvoiceCreation() {
                                         </Box>
                                     )}
 
-                                    {data.status && (
+                                    {data.payment_mode && (
                                         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                                            <StatusChip status={data.status} />
+                                            <StatusChip payment_mode={data.payment_mode} />
                                         </Box>
                                     )}
                                 </Stack>
@@ -911,25 +911,6 @@ export default function SalePurchaseInvoiceCreation() {
                                                         )}
                                                         sx={{ flex: 1 }}
                                                     />
-                                                    <Box sx={{ width: '50%' }}>
-                                                        <AnimatedTextField
-                                                            label="Paid Amount"
-                                                            type="number"
-                                                            fullWidth
-                                                            value={data.paid_amount}
-                                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange('paid_amount', e.target.value)}
-                                                            name="paid_amount"
-                                                            variant="outlined"
-                                                            InputProps={{
-                                                                startAdornment: (
-                                                                    <InputAdornment position="start">
-                                                                        <CurrencyRupee color='primary' />
-                                                                    </InputAdornment>
-                                                                ),
-                                                            }}
-                                                            sx={{ flex: 1 }}
-                                                        />
-                                                    </Box>
                                                 </Stack>
                                                 {tax_enable && <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 2 }}>
                                                     <Box sx={{ width: '50%' }}>
@@ -966,26 +947,26 @@ export default function SalePurchaseInvoiceCreation() {
                                                         />
                                                     </Box>
                                                     <Autocomplete
-                                                        options={paymentStatusOptions}
+                                                        options={paymentModeOptions}
                                                         getOptionLabel={(option) => option.label}
-                                                        value={paymentStatusOptions.find(option => option.value === data.status) || null}
+                                                        value={paymentModeOptions.find(option => option.value === data.payment_mode) || null}
                                                         onChange={(_, newValue) =>
                                                             setData(prev => ({
                                                                 ...prev,
-                                                                status: newValue ? newValue.value : ''
+                                                                payment_mode: newValue ? newValue.value : ''
                                                             }))
                                                         }
                                                         renderInput={(params) => (
                                                             <TextField
                                                                 {...params}
-                                                                label="Status"
+                                                                label="Payment Mode"
                                                                 variant="outlined"
                                                                 fullWidth
                                                                 InputProps={{
                                                                     ...params.InputProps,
                                                                     startAdornment: (
                                                                         <InputAdornment position="start">
-                                                                            <Commute color="primary" />
+                                                                            <Payments color="primary" />
                                                                         </InputAdornment>
                                                                     ),
                                                                 }}
@@ -1145,8 +1126,8 @@ export default function SalePurchaseInvoiceCreation() {
                                                     <TableRow
                                                         sx={{
                                                             '&:hover': {
-                                                                bgcolor: alpha(theme.palette.primary.main, 0.02),
-                                                                transform: 'scale(1.001)',
+                                                                bgcolor: alpha(theme.palette.primary.main, 0.05),
+                                                                transform: 'scale(1.01)',
                                                             },
                                                             transition: 'all 0.2s ease',
                                                             '& .MuiTableCell-root': {
@@ -1165,28 +1146,33 @@ export default function SalePurchaseInvoiceCreation() {
                                                                         fontWeight: 600
                                                                     }}
                                                                 >
-                                                                    {(itemsList.find((p) => p.id === item.item_id)?.name || item.item).charAt(0).toUpperCase()}
+                                                                    {getInitials(item.item).toUpperCase()}
                                                                 </Avatar>
                                                                 <Box>
                                                                     <Typography variant="body1" fontWeight="600" color="text.primary">
-                                                                        {itemsList.find((p) => p.id === item.item_id)?.name || item.item}
+                                                                        {item.item}
                                                                     </Typography>
-                                                                    <Typography variant="caption" color="text.secondary">
-                                                                        Unit: {itemsList.find((p) => p.id === item.item_id)?.unit || 'pcs'}
-                                                                    </Typography>
+                                                                    {tax_enable && <Typography variant="caption" color="text.secondary">
+                                                                        HSN: {item.hsn_code}
+                                                                    </Typography>}
+                                                                    {!tax_enable && <Typography variant="caption" color="text.secondary">
+                                                                        Unit: {item.unit || 'PCS'}
+                                                                    </Typography>}
                                                                 </Box>
                                                             </Box>
                                                         </TableCell>
 
                                                         <TableCell align="center">
                                                             <Chip
-                                                                label={item.quantity}
+                                                                label={`${item.quantity} ` + `${tax_enable ? (item.unit ?? 'PCS') : ''}`}
                                                                 size="small"
                                                                 sx={{
                                                                     bgcolor: alpha(theme.palette.info.main, 0.1),
                                                                     color: 'info.main',
                                                                     fontWeight: 600,
-                                                                    minWidth: 60
+                                                                    minWidth: 60,
+                                                                    py: 1.5,
+                                                                    px: 1,
                                                                 }}
                                                             />
                                                         </TableCell>
@@ -1213,10 +1199,10 @@ export default function SalePurchaseInvoiceCreation() {
                                                             <>
                                                                 <TableCell align="center">
                                                                     <Chip
-                                                                        label={`${itemsList.find((p) => p.id === item.item_id)?.tax_rate || 0}%`}
+                                                                        label={`${item?.tax_rate || 0}%`}
                                                                         size="small"
                                                                         color="warning"
-                                                                        sx={{ fontWeight: 600, minWidth: 60 }}
+                                                                        sx={{ fontWeight: 600, minWidth: 60, py: 1.5, px: 1 }}
                                                                     />
                                                                 </TableCell>
 
@@ -1470,6 +1456,68 @@ export default function SalePurchaseInvoiceCreation() {
                         </CardContent>
                     </GradientCard>
 
+                    {/* Enhanced Remarks Section */}
+                    <GradientCard gradient="warning" sx={{
+                        mb: 4, cursor: 'pointer',
+                        transition: 'hover 0.1s cubic-bezier(0.4, 0, 0.2, 1)',
+                        ':hover': { bgcolor: alpha(theme.palette.warning.main, 0.1) }
+                    }}>
+                        <CardContent sx={{ p: 0 }}>
+                            <Box sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                            }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setExpandedNotes(!expandedNotes);
+                                }}
+                            >
+                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, width: '100%' }}>
+                                    <Avatar sx={{ bgcolor: 'warning.main', mr: 2, width: 40, height: 40 }}>
+                                        <Description />
+                                    </Avatar>
+                                    <Box>
+                                        <Typography variant="h5" fontWeight="700" color="warning.main">
+                                            Additional Information
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            Add any extra details or notes for this invoice
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                                <IconButton
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setExpandedNotes(!expandedNotes);
+                                    }}
+                                    sx={{
+                                        bgcolor: alpha(theme.palette.success.main, 0.1),
+                                        '&:hover': {
+                                            bgcolor: alpha(theme.palette.success.main, 0.2),
+                                            transform: 'scale(1.1)',
+                                        },
+                                        transition: 'all 0.2s ease',
+                                    }}
+                                >
+                                    {expandedNotes ? <ExpandLess /> : <ExpandMore />}
+                                </IconButton>
+                            </Box>
+                            <Collapse in={expandedNotes}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column', width: '100%' }}>
+                                    <TextField
+                                        fullWidth
+                                        multiline
+                                        rows={3}
+                                        variant="outlined"
+                                        placeholder="Enter additional information..."
+                                        sx={{ mt: 2 }}
+                                    />
+                                </Box>
+                            </Collapse>
+                        </CardContent>
+                    </GradientCard>
+
                     {/* Enhanced Totals Section */}
                     <GradientCard gradient="success" sx={{ mb: 4, overflow: 'visible' }}>
                         <CardContent sx={{ p: 0 }}>
@@ -1506,12 +1554,12 @@ export default function SalePurchaseInvoiceCreation() {
                                     </Box>
 
                                     <Stack direction="row" spacing={1} alignItems="center">
-                                        <ActionButtonSuccess
+                                        {!expandedTotals && <ActionButtonSuccess
                                             onClick={handleSubmit}
                                             disabled={isLoading || data.items.length === 0}
                                             startIcon={isLoading ? <Timeline className="animate-spin" /> : <Save />}
                                             text={isLoading ? `Creating...` : `Create Invoice`}
-                                        />
+                                        />}
                                         <IconButton
                                             onClick={() => setExpandedTotals(!expandedTotals)}
                                             sx={{
@@ -1780,7 +1828,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                 label="Additional Charges"
                                                 fullWidth
                                                 size="small"
-                                                value={data.additional_charge}
+                                                value={data.additional_charge || ''}
                                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange('additional_charge', Number(e.target.value))}
                                                 name="additional_charge"
                                                 variant="outlined"
@@ -1828,7 +1876,7 @@ export default function SalePurchaseInvoiceCreation() {
                                             </Paper>
                                         </Grid>
 
-                                        <Grid item xs={12} sm={12} md={4}>
+                                        <Grid item xs={12} sm={12} md={3}>
                                             <Paper
                                                 elevation={3}
                                                 sx={{
@@ -1853,40 +1901,61 @@ export default function SalePurchaseInvoiceCreation() {
                                                 </Typography>
                                             </Paper>
                                         </Grid>
+                                        <Grid item xs={12} sm={12} md={2}>
+                                            <AnimatedTextField
+                                                label="Paid Amount"
+                                                type="number"
+                                                fullWidth
+                                                value={data.paid_amount}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange('paid_amount', e.target.value)}
+                                                name="paid_amount"
+                                                variant="outlined"
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <CurrencyRupee color='primary' />
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                                sx={{ flex: 1 }}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={12} sm={12} md={2}>
+                                            <Paper
+                                                elevation={3}
+                                                sx={{
+                                                    p: 2,
+                                                    borderRadius: 1,
+                                                    background: `linear-gradient(135deg, ${theme.palette.success.main}10 0%, ${theme.palette.success.main}25 100%)`,
+                                                    border: `2px solid ${alpha(theme.palette.success.main, 0.4)}`,
+                                                    textAlign: 'center',
+                                                    height: 56,
+                                                    display: 'flex',
+                                                    alignItems: 'baseline',
+                                                    justifyContent: 'center',
+                                                    cursor: (isLoading || data.items.length === 0) ? 'not-allowed' : 'pointer',
+                                                    ":hover": {
+                                                        boxShadow: (isLoading || data.items.length === 0) ? 'none' : `0 4px 20px ${alpha(theme.palette.success.main, 0.3)}`,
+                                                        transform: (isLoading || data.items.length === 0) ? 'none' : 'translateY(-2px)',
+                                                        color: (isLoading || data.items.length === 0) ? 'text.disabled' : `#ffffff`,
+                                                        background: (isLoading || data.items.length === 0) ? alpha(theme.palette.success.main, 0.1) : `${theme.palette.success.main}`,
+                                                    },
+                                                    gap: 1,
+                                                }}
+                                                onClick={handleSubmit}
+                                            >
+                                                <Typography variant="subtitle2" fontWeight="600" >
+                                                    {isLoading ? `Creating...` : `Create Invoice`}
+                                                </Typography>
+                                            </Paper>
+
+                                        </Grid>
                                     </Grid>
                                 </Box>
                             </Collapse>
                         </CardContent>
                     </GradientCard>
 
-                    {/* Enhanced Remarks Section */}
-                    <GradientCard gradient="warning" sx={{ mb: 4 }}>
-                        <CardContent sx={{ p: 0 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column', width: '100%' }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, width: '100%' }}>
-                                    <Avatar sx={{ bgcolor: 'warning.main', mr: 2, width: 40, height: 40 }}>
-                                        <Description />
-                                    </Avatar>
-                                    <Box>
-                                        <Typography variant="h5" fontWeight="700" color="warning.main">
-                                            Additional Information
-                                        </Typography>
-                                        <Typography variant="body2" color="text.secondary">
-                                            Add any extra details or notes for this invoice
-                                        </Typography>
-                                    </Box>
-                                </Box>
-                                <TextField
-                                    fullWidth
-                                    multiline
-                                    rows={4}
-                                    variant="outlined"
-                                    placeholder="Enter additional information..."
-                                    sx={{ mt: 2 }}
-                                />
-                            </Box>
-                        </CardContent>
-                    </GradientCard>
                 </Box>
 
             </Container>

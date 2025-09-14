@@ -8,13 +8,7 @@ import {
     Button,
     Paper,
     Divider,
-    Select,
     MenuItem,
-    FormControl,
-    InputLabel,
-    SelectChangeEvent,
-    Snackbar,
-    Alert,
     CircularProgress,
     Card,
     CardContent,
@@ -30,19 +24,13 @@ import {
     ArrowForward
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
+import { ContactFormData } from '@/utils/types';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '@/store/store';
+import { sendQueryEmail } from '@/services/auth';
+import toast from 'react-hot-toast';
+import { formatDatewithTime } from '@/utils/functions';
 
-// Types definitions
-interface ContactFormData {
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-    company: string;
-    industry: string;
-    employees: string;
-    message: string;
-    marketingConsent: boolean;
-}
 
 interface FormError {
     [key: string]: string;
@@ -179,6 +167,7 @@ const OfficeHoursCard: React.FC = () => {
 
 // Main Contact Page Component
 const ContactPage: React.FC = () => {
+    const dispatch = useDispatch<AppDispatch>();
     // const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     const [formData, setFormData] = useState<ContactFormData>({
@@ -189,21 +178,14 @@ const ContactPage: React.FC = () => {
         company: '',
         industry: '',
         employees: '',
+        queryType: '',
         message: '',
-        marketingConsent: true
+        marketingConsent: true,
+        time: formatDatewithTime(new Date().toISOString())
     });
 
     const [errors, setErrors] = useState<FormError>({});
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-    const [snackbar, setSnackbar] = useState<{
-        open: boolean;
-        message: string;
-        severity: 'success' | 'error';
-    }>({
-        open: false,
-        message: '',
-        severity: 'success'
-    });
 
     const industries = [
         'Healthcare',
@@ -227,6 +209,17 @@ const ContactPage: React.FC = () => {
         '100+ employees'
     ];
 
+    const queryTypes = [
+        'General Inquiry',
+        'Technical',
+        'Billing',
+        'Consultation',
+        'Feedback',
+        'Support',
+        'Sales',
+        'Other'
+    ];
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData({
@@ -235,22 +228,6 @@ const ContactPage: React.FC = () => {
         });
 
         // Clear error when user starts typing
-        if (errors[name]) {
-            setErrors({
-                ...errors,
-                [name]: ''
-            });
-        }
-    };
-
-    const handleSelectChange = (e: SelectChangeEvent<string>) => {
-        const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value
-        });
-
-        // Clear error when user makes a selection
         if (errors[name]) {
             setErrors({
                 ...errors,
@@ -277,14 +254,11 @@ const ContactPage: React.FC = () => {
             newErrors.phone = 'Please enter a valid phone number';
         }
 
-        // Company is required
-        if (!formData.company.trim()) newErrors.company = 'Company name is required';
-
         // Industry is required
         if (!formData.industry) newErrors.industry = 'Please select your industry';
 
-        // Employees selection is required
-        if (!formData.employees) newErrors.employees = 'Please select company size';
+        // Query type is required
+        if (!formData.queryType) newErrors.queryType = 'Please select a query type';
 
         // Message should be at least 10 characters
         if (!formData.message.trim()) {
@@ -306,42 +280,35 @@ const ContactPage: React.FC = () => {
 
         try {
             // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1500));
-
-            // Success handling
-            setSnackbar({
-                open: true,
-                message: 'Thank you for contacting us! We will get back to you shortly.',
-                severity: 'success'
+            await dispatch(sendQueryEmail(formData)).then((res) => {
+                if (res.meta.requestStatus === 'fulfilled') {
+                    toast.success('Thank you for contacting us! We will get back to you shortly.');
+                } else {
+                    toast.error('Something went wrong. Please try again later.');
+                }
+                // Reset form
+                setFormData({
+                    firstName: '',
+                    lastName: '',
+                    email: '',
+                    phone: '',
+                    queryType: '',
+                    company: '',
+                    industry: '',
+                    employees: '',
+                    message: '',
+                    marketingConsent: true,
+                    time: formatDatewithTime(new Date().toISOString())
+                });
             });
 
-            // Reset form
-            setFormData({
-                firstName: '',
-                lastName: '',
-                email: '',
-                phone: '',
-                company: '',
-                industry: '',
-                employees: '',
-                message: '',
-                marketingConsent: true
-            });
+
         } catch (error) {
             console.log("Error", error);
-            // Error handling
-            setSnackbar({
-                open: true,
-                message: 'Something went wrong. Please try again later.',
-                severity: 'error'
-            });
+            toast.error('Something went wrong. Please try again later.');
         } finally {
             setIsSubmitting(false);
         }
-    };
-
-    const handleCloseSnackbar = () => {
-        setSnackbar({ ...snackbar, open: false });
     };
 
     // Animation variants
@@ -437,9 +404,7 @@ const ContactPage: React.FC = () => {
                             fontSize: '0.75rem',
                             height: 28,
                             mb: 2,
-                            '& .MuiChip-label': {
-                                px: 2
-                            }
+                            p: 2,
                         }}
                     />
                     <Typography
@@ -525,7 +490,6 @@ const ContactPage: React.FC = () => {
                                             onChange={handleInputChange}
                                             error={!!errors.lastName}
                                             helperText={errors.lastName}
-                                            required
                                             variant="outlined"
                                         />
                                     </Grid>
@@ -556,7 +520,7 @@ const ContactPage: React.FC = () => {
                                             variant="outlined"
                                         />
                                     </Grid>
-                                    <Grid item xs={12}>
+                                    <Grid item xs={12} sm={6}>
                                         <TextField
                                             fullWidth
                                             label="Company Name"
@@ -565,56 +529,70 @@ const ContactPage: React.FC = () => {
                                             onChange={handleInputChange}
                                             error={!!errors.company}
                                             helperText={errors.company}
-                                            required
                                             variant="outlined"
                                         />
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
-                                        <FormControl fullWidth error={!!errors.industry} required>
-                                            <InputLabel id="industry-label">Industry</InputLabel>
-                                            <Select
-                                                labelId="industry-label"
-                                                name="industry"
-                                                value={formData.industry}
-                                                onChange={handleSelectChange}
-                                                label="Industry"
-                                            >
-                                                {industries.map((industry) => (
-                                                    <MenuItem key={industry} value={industry}>
-                                                        {industry}
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
-                                            {errors.industry && (
-                                                <Typography variant="caption" color="error">
-                                                    {errors.industry}
-                                                </Typography>
-                                            )}
-                                        </FormControl>
+                                        <TextField
+                                            fullWidth
+                                            label="Industry"
+                                            name="industry"
+                                            value={formData.industry}
+                                            onChange={handleInputChange}
+                                            error={!!errors.industry}
+                                            helperText={errors.industry}
+                                            required
+                                            select
+                                            variant="outlined"
+                                        >
+                                            {industries.map((industry) => (
+                                                <MenuItem key={industry} value={industry}>
+                                                    {industry}
+                                                </MenuItem>
+                                            ))}
+                                        </TextField>
                                     </Grid>
                                     <Grid item xs={12} sm={6}>
-                                        <FormControl fullWidth error={!!errors.employees} required>
-                                            <InputLabel id="employees-label">Company Size</InputLabel>
-                                            <Select
-                                                labelId="employees-label"
-                                                name="employees"
-                                                value={formData.employees}
-                                                onChange={handleSelectChange}
-                                                label="Company Size"
-                                            >
-                                                {employeeRanges.map((range) => (
-                                                    <MenuItem key={range} value={range}>
-                                                        {range}
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
-                                            {errors.employees && (
-                                                <Typography variant="caption" color="error">
-                                                    {errors.employees}
-                                                </Typography>
-                                            )}
-                                        </FormControl>
+                                        <TextField
+                                            fullWidth
+                                            label="Company Size"
+                                            name="employees"
+                                            value={formData.employees}
+                                            onChange={handleInputChange}
+                                            error={!!errors.employees}
+                                            helperText={errors.employees}
+                                            select
+                                            variant="outlined"
+                                        >
+                                            {employeeRanges.map((range) => (
+                                                <MenuItem key={range} value={range}>
+                                                    {range}
+                                                </MenuItem>
+                                            ))}
+                                        </TextField>
                                     </Grid>
+
+                                    <Grid item xs={12} sm={6}>
+                                        <TextField
+                                            fullWidth
+                                            label="Query Type"
+                                            name="queryType"
+                                            value={formData.queryType}
+                                            onChange={handleInputChange}
+                                            error={!!errors.queryType}
+                                            helperText={errors.queryType}
+                                            required
+                                            select
+                                            variant="outlined"
+                                        >
+                                            {queryTypes.map((type) => (
+                                                <MenuItem key={type} value={type}>
+                                                    {type}
+                                                </MenuItem>
+                                            ))}
+                                        </TextField>
+                                    </Grid>
+
                                     <Grid item xs={12}>
                                         <TextField
                                             fullWidth
@@ -643,20 +621,10 @@ const ContactPage: React.FC = () => {
                                                 py: 1.5,
                                                 mt: 2,
                                                 fontWeight: 600,
-                                                position: 'relative'
                                             }}
                                         >
                                             {isSubmitting ? (
-                                                <CircularProgress
-                                                    size={24}
-                                                    sx={{
-                                                        position: 'absolute',
-                                                        top: '50%',
-                                                        left: '50%',
-                                                        marginTop: '-12px',
-                                                        marginLeft: '-12px'
-                                                    }}
-                                                />
+                                                <CircularProgress />
                                             ) : (
                                                 <>
                                                     Submit Request <ArrowForward sx={{ ml: 1 }} />
@@ -708,34 +676,34 @@ const ContactPage: React.FC = () => {
                                 icon={<Email />}
                                 title="Email Us"
                                 content="support@vyapardrishti.in"
-                                link="mailto:tohidkhan1193407@gmail.com"
+                                link="mailto:vyapardrishti@gmail.com"
                             />
 
                             <ContactInfoCard
                                 icon={<Phone />}
                                 title="Call Us"
-                                content="+91 (636) 7097-548"
+                                content="+91 63670 97548"
                                 link="tel:+916367097548"
                             />
 
                             <ContactInfoCard
                                 icon={<LocationOn />}
                                 title="Our Office"
-                                content="123 Innovation Drive, Boston, MA 02210"
+                                content="Udaipur, Rajasthan, India"
                             />
 
                             <ContactInfoCard
                                 icon={<Support />}
                                 title="Technical Support"
                                 content="help@vyapardrishti.in"
-                                link="mailto:tohidkhan1193407@gmail.com"
+                                link="mailto:vyapardrishti@gmail.com"
                             />
 
                             <ContactInfoCard
                                 icon={<BusinessCenter />}
                                 title="Sales Inquiries"
                                 content="sales@vyapardrishti.in"
-                                link="mailto:tohidkhan1193407@gmail.com"
+                                link="mailto:vyapardrishti@gmail.com"
                             />
 
                             <OfficeHoursCard />
@@ -803,22 +771,6 @@ const ContactPage: React.FC = () => {
                         ))}
                     </Grid>
                 </Box>
-
-                {/* Snackbar for form submission feedback */}
-                <Snackbar
-                    open={snackbar.open}
-                    autoHideDuration={6000}
-                    onClose={handleCloseSnackbar}
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-                >
-                    <Alert
-                        onClose={handleCloseSnackbar}
-                        severity={snackbar.severity}
-                        sx={{ width: '100%' }}
-                    >
-                        {snackbar.message}
-                    </Alert>
-                </Snackbar>
             </Container>
         </Box>
     );
