@@ -1,15 +1,15 @@
 import React, { useEffect, useId, useRef, useState } from "react";
 import RegistrationForm from "@/features/auth/components/RegisterForm";
 import { Box, Grid, useTheme } from "@mui/material";
-import centerImage from "../assets/herosection.png";
-import Logo1 from "../assets/1.png";
-import Logo2 from "../assets/2.png";
-import Logo3 from "../assets/3.png";
-import Logo4 from "../assets/4.png";
-import Logo5 from "../assets/5.png";
-import Logo6 from "../assets/6.png";
-import Logo7 from "../assets/7.png";
-import Logo from "../assets/Logo.png";
+import centerImage from "../assets/herosection.webp";
+import Logo1 from "../assets/1.webp";
+import Logo2 from "../assets/2.webp";
+import Logo3 from "../assets/3.webp";
+import Logo4 from "../assets/4.webp";
+import Logo5 from "../assets/5.webp";
+import Logo6 from "../assets/6.webp";
+import Logo7 from "../assets/7.webp";
+import Logo from "../assets/Logo.webp";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 

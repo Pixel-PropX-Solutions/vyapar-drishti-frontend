@@ -135,6 +135,7 @@ export default function ViewItem() {
   };
 
   const timelineData: HistoryEntry[] = useMemo(() => {
+    if (!timeline || !timeline.timeline) return [];
     return timeline?.timeline?.map((entry: any) => ({
       date: entry.date,
       action: entry.voucher_type,
@@ -600,7 +601,7 @@ export default function ViewItem() {
                   </Typography>
 
                   <List sx={{ p: 0 }}>
-                    {timelineData.map((entry, index) => (
+                    {(timelineData.length > 0) && timelineData?.map((entry, index) => (
                       <Fade
                         in={true}
                         style={{ transitionDelay: `${index * 150}ms` }}

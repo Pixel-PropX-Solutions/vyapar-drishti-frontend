@@ -17,6 +17,12 @@ export type InventorySortField =
   | 'last_restock_date'
   | "current_stock";
 
+export type SummarySortField =
+  | "created_at"
+  | 'stock_item_name'
+  | 'hsn_code'
+  | "current_stock";
+
 
 export type ProductSortField =
   | "stock_item_name"
@@ -950,6 +956,70 @@ export interface StockMovement {
   closing_rate: number,
   gross_profit: number,
   profit_percent: number
+}
+
+export interface HSNInvoice {
+  date: string,
+  party_name: string,
+  party_tin: string | null,
+  voucher_id: string,
+  voucher_type: string,
+  voucher_number: string,
+  quantity: number,
+  total_amount: number,
+  taxable_value: number,
+  total_tax: number
+}
+
+export interface HSNSummary {
+  invoices: Array<HSNInvoice>,
+  hsn_code: string,
+  item: string,
+  item_id: string,
+  unit: string | null,
+  quantity: number,
+  total_value: number,
+  taxable_value: number,
+  tax_amount: number,
+  tax_rate: number,
+}
+
+export interface PartyInvoice {
+  date: string,
+  voucher_id: string,
+  voucher_type: string,
+  voucher_number: string,
+  items: number,
+  quantity: number,
+  total_amount: number,
+  taxable_value: number,
+  total_tax: number,
+}
+
+export interface PartySummary {
+  invoices: Array<PartyInvoice>,
+  quantity: number,
+  total_value: number,
+  taxable_value: number,
+  tax_amount: number,
+  party_name: string,
+  party_tin: string | null,
+}
+
+
+export interface BillSummary {
+  _id: string,
+  voucher_number: string,
+  voucher_type: string,
+  date: string,
+  party_name: string,
+  party_tin: string | null,
+  voucher_type_id: string,
+  party_name_id: string,
+  created_at: string,
+  total_value: number,
+  tax_amount: number,
+  taxable_value: number,
 }
 
 export interface InventoryItem {

@@ -21,6 +21,7 @@ import {
   Card,
   CardContent,
   Grid,
+  Checkbox,
 } from "@mui/material";
 import {
   Search as SearchIcon,
@@ -58,6 +59,8 @@ const Invoices: React.FC = () => {
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
   const [visible, setVisible] = useState<boolean>(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
   const { invoices, loading, pageMeta, invoiceGroups } = useSelector((state: RootState) => state.invoice);
   const { user, current_company_id } = useSelector((state: RootState) => state.auth);
   const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
@@ -455,6 +458,20 @@ const Invoices: React.FC = () => {
                     padding: '8px 16px',
                   },
                 }}>
+                {/* Select Check Box */}
+                <TableCell align="left" sx={{ px: 1, }}>
+                  <Checkbox
+                    indeterminate={selectedIds.length > 0 && selectedIds.length < invoices.length}
+                    checked={invoices.length > 0 && selectedIds.length === invoices.length}
+                    onChange={(_, checked) => {
+                      if (checked) {
+                        setSelectedIds(invoices.map((inv) => inv._id));
+                      } else {
+                        setSelectedIds([]);
+                      }
+                    }}
+                  />
+                </TableCell>
                 <TableCell sx={{ px: 1 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
                     Sr. No.
@@ -547,6 +564,12 @@ const Invoices: React.FC = () => {
                   <InvoicerRow
                     key={inv._id}
                     inv={inv}
+                    selected={selectedIds.includes(inv._id)}
+                    onSelect={(checked: boolean) => {
+                      setSelectedIds((prev) =>
+                        checked ? [...prev, inv._id] : prev.filter((id) => id !== inv._id)
+                      );
+                    }}
                     index={index + 1 + (page - 1) * rowsPerPage}
                     onView={() => handleViewInvoice(inv)}
                     onEdit={() => {

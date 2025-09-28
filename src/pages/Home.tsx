@@ -1,7 +1,7 @@
 import { Container, Grid, Typography, Button, Box, Paper, Card, CardContent, Stack } from '@mui/material';
 import { ArrowForward } from '@mui/icons-material'; // Adding an icon for more visual appeal
 import theme from '@/theme';
-import react from "../assets/Logo.png";
+import react from "../assets/Logo.webp";
 import { useNavigate } from 'react-router-dom';
 
 const Home = () => {

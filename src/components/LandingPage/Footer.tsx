@@ -1,8 +1,8 @@
 import React from 'react';
 import { Box, Typography, Container, Grid, Button, Stack } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import Logo from "../../assets/Logo.png";
-import logoText from "../../assets/Logo_Text.png";
+import Logo from "../../assets/Logo.webp";
+import logoText from "../../assets/Logo_Text.webp";
 
 const Footer: React.FC = () => {
     const navigate = useNavigate();  // useNavigate hook to navigate on link click

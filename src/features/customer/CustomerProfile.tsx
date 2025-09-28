@@ -23,6 +23,7 @@ import {
     TextField,
     Card,
     CardContent,
+    Checkbox,
 } from "@mui/material";
 import {
     ArrowBack,
@@ -47,16 +48,13 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { BottomPagination } from "@/common/modals/BottomPagination";
 import { CustomerInvoicesRowSkeleton } from "@/common/skeletons/CustomerInvoicesRowSkeleton";
-import { deleteTAXInvoice, deleteInvoice } from "@/services/invoice";
-import toast from "react-hot-toast";
 import ActionButtonSuccess from "@/common/buttons/ActionButtonSuccess";
 
 const CustomerProfile: React.FC = () => {
     const { customer, loading, customerInvoices, customerInvoicesMeta } = useSelector((state: RootState) => state.customersLedger);
     const { user, current_company_id } = useSelector((state: RootState) => state.auth);
     const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
-    const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
-    const tax_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_tax;
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const { customer_id } = useParams();
@@ -127,25 +125,6 @@ const CustomerProfile: React.FC = () => {
         dispatch(setCustomersFilters({
             page: newPage
         }))
-    };
-
-    // Handle Delete Invoice details
-    const handleDeleteInvoice = (invId: string) => {
-        if (tax_enable) {
-            dispatch(deleteTAXInvoice({ vouchar_id: invId, company_id: currentCompanyId })).unwrap().then(() => {
-                // fetchIvoices();
-                toast.success("Invoice deleted successfully!");
-            }).catch((error) => {
-                toast.error(error || 'An unexpected error occurred. Please try again later.');
-            })
-        } else {
-            dispatch(deleteInvoice({ vouchar_id: invId, company_id: currentCompanyId })).unwrap().then(() => {
-                toast.success("Invoice deleted successfully!");
-                // fetchIvoices();
-            }).catch((error) => {
-                toast.error(error || 'An unexpected error occurred. Please try again later.');
-            })
-        }
     };
 
 
@@ -404,6 +383,20 @@ const CustomerProfile: React.FC = () => {
                                         padding: '8px 16px',
                                     },
                                 }}>
+                                {/* Select Check Box */}
+                                <TableCell align="left" sx={{ px: 1, }}>
+                                    <Checkbox
+                                        indeterminate={selectedIds.length > 0 && selectedIds.length < customerInvoices.length}
+                                        checked={customerInvoices.length > 0 && selectedIds.length === customerInvoices.length}
+                                        onChange={(_, checked) => {
+                                            if (checked) {
+                                                setSelectedIds(customerInvoices.map((inv) => inv.vouchar_id));
+                                            } else {
+                                                setSelectedIds([]);
+                                            }
+                                        }}
+                                    />
+                                </TableCell>
                                 <TableCell sx={{ pl: 3, pr: 1 }}>
                                     <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
                                         Sr. No.
@@ -502,11 +495,11 @@ const CustomerProfile: React.FC = () => {
                                 </TableCell>
 
 
-                                <TableCell align="center" >
+                                {/* <TableCell align="center" >
                                     <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
                                         Actions
                                     </Typography>
-                                </TableCell>
+                                </TableCell> */}
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -518,16 +511,22 @@ const CustomerProfile: React.FC = () => {
                                     <CustomerInvoicesRow
                                         key={`${inv.vouchar_id}-${index}`}
                                         inv={inv}
+                                        selected={selectedIds.includes(inv.vouchar_id)}
+                                        onSelect={(checked: boolean) => {
+                                            setSelectedIds((prev) =>
+                                                checked ? [...prev, inv.vouchar_id] : prev.filter((id) => id !== inv.vouchar_id)
+                                            );
+                                        }}
                                         index={index + 1 + (page - 1) * rowsPerPage}
                                         onView={() => {
                                             navigate(`/invoices/${inv.vouchar_id}`);
                                         }}
-                                        onEdit={() => {
-                                            navigate(`/invoices/update/${inv.voucher_type.toLowerCase()}/${inv.vouchar_id}`);
-                                        }}
-                                        onDelete={() => {
-                                            handleDeleteInvoice(inv.vouchar_id);
-                                        }}
+                                    // onEdit={() => {
+                                    //     navigate(`/invoices/update/${inv.voucher_type.toLowerCase()}/${inv.vouchar_id}`);
+                                    // }}
+                                    // onDelete={() => {
+                                    //     handleDeleteInvoice(inv.vouchar_id);
+                                    // }}
                                     />))
                             ) : (
                                 <TableRow>
@@ -563,7 +562,7 @@ const CustomerProfile: React.FC = () => {
                                             padding: '8px 16px',
                                         },
                                     }}>
-                                        <TableCell colSpan={5} sx={{ textAlign: "center", }}>
+                                        <TableCell colSpan={6} sx={{ textAlign: "center", }}>
                                         </TableCell>
                                         <TableCell colSpan={1} sx={{ textAlign: "left", }}>
                                             <Typography variant="body1" color="text.primary" sx={{ fontWeight: 600, textDecoration: 'underline', whiteSpace: 'nowrap' }}>
@@ -604,15 +603,13 @@ const CustomerProfile: React.FC = () => {
                                                 </Typography>
                                             </Box>
                                         </TableCell>
-                                        <TableCell colSpan={1} sx={{ textAlign: "center", }}>
-                                        </TableCell>
                                     </TableRow>
                                     <TableRow sx={{
                                         "& .MuiTableCell-root": {
                                             padding: '8px 16px',
                                         },
                                     }}>
-                                        <TableCell colSpan={5} sx={{ textAlign: "center", }}>
+                                        <TableCell colSpan={6} sx={{ textAlign: "center", }}>
                                         </TableCell>
                                         <TableCell colSpan={1} sx={{ textAlign: "left", }}>
                                             <Typography variant="body1" color="text.primary" sx={{ fontWeight: 600, textDecoration: 'underline' }}>
@@ -621,7 +618,7 @@ const CustomerProfile: React.FC = () => {
                                         </TableCell>
                                         <TableCell align="right" colSpan={1} >
                                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                                {!customer.is_deemed_positive && <Typography
+                                                <Typography
                                                     variant="body1"
                                                     sx={{
                                                         fontWeight: 700,
@@ -630,7 +627,7 @@ const CustomerProfile: React.FC = () => {
                                                     }}
                                                 >
                                                     &#8377;
-                                                </Typography>}
+                                                </Typography>
                                                 <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.error.main, }}>
                                                     {Math.abs(customer.total_debit)}
                                                 </Typography>
@@ -638,7 +635,7 @@ const CustomerProfile: React.FC = () => {
                                         </TableCell>
                                         <TableCell align="right" colSpan={1} >
                                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                                {!customer.is_deemed_positive && <Typography
+                                                <Typography
                                                     variant="body1"
                                                     sx={{
                                                         fontWeight: 700,
@@ -647,13 +644,11 @@ const CustomerProfile: React.FC = () => {
                                                     }}
                                                 >
                                                     &#8377;
-                                                </Typography>}
+                                                </Typography>
                                                 <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.success.main, }}>
                                                     {Math.abs(customer.total_credit)}
                                                 </Typography>
                                             </Box>
-                                        </TableCell>
-                                        <TableCell colSpan={1} sx={{ textAlign: "center", }}>
                                         </TableCell>
                                     </TableRow>
                                     <TableRow sx={{
@@ -661,7 +656,7 @@ const CustomerProfile: React.FC = () => {
                                             padding: '8px 16px',
                                         },
                                     }}>
-                                        <TableCell colSpan={5} sx={{ textAlign: "center", }}>
+                                        <TableCell colSpan={6} sx={{ textAlign: "center", }}>
                                         </TableCell>
                                         <TableCell colSpan={1} sx={{ textAlign: "left", }}>
                                             <Typography variant="body1" color="text.primary" sx={{ fontWeight: 600, textDecoration: 'underline', whiteSpace: 'nowrap' }}>
@@ -670,7 +665,7 @@ const CustomerProfile: React.FC = () => {
                                         </TableCell>
                                         <TableCell align="right" colSpan={1} >
                                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                                {customer.total_amount < 0 && <Typography
+                                                {customer.closing_balance < 0 && <Typography
                                                     variant="body1"
                                                     sx={{
                                                         fontWeight: 700,
@@ -681,13 +676,13 @@ const CustomerProfile: React.FC = () => {
                                                     &#8377;
                                                 </Typography>}
                                                 <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.error.main, }}>
-                                                    {customer.total_amount < 0 ? Math.abs(customer.total_amount) : ''}
+                                                    {customer.closing_balance < 0 ? Math.abs(customer.closing_balance) : ''}
                                                 </Typography>
                                             </Box>
                                         </TableCell>
                                         <TableCell align="right" colSpan={1}>
                                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                                {!(customer.total_amount < 0) && <Typography
+                                                {!(customer.closing_balance < 0) && <Typography
                                                     variant="body1"
                                                     sx={{
                                                         fontWeight: 700,
@@ -698,11 +693,9 @@ const CustomerProfile: React.FC = () => {
                                                     &#8377;
                                                 </Typography>}
                                                 <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.success.main, }}>
-                                                    {customer.total_amount < 0 ? '' : Math.abs(customer.total_amount)}
+                                                    {customer.closing_balance < 0 ? '' : Math.abs(customer.closing_balance)}
                                                 </Typography>
                                             </Box>
-                                        </TableCell>
-                                        <TableCell colSpan={1} sx={{ textAlign: "center", }}>
                                         </TableCell>
                                     </TableRow>
                                 </>

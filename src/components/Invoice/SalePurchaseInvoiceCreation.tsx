@@ -349,8 +349,8 @@ export default function SalePurchaseInvoiceCreation() {
             total: Number(total).toFixed(2),
             discount: Number(discount).toFixed(2),
             total_amount: Number(total_amount).toFixed(2),
-            total_tax: Number(total_tax).toLocaleString('en-IN', { minimumFractionDigits: 2 }),
-            additional_charge: Number(additional_charge).toLocaleString('en-IN', { minimumFractionDigits: 2 }),
+            total_tax: Number(total_tax).toFixed(2),
+            additional_charge: Number(additional_charge).toFixed(2),
             roundoff: Number(roundoff).toFixed(2),
             grandTotal: Number(grandTotal).toFixed(2)
         };
@@ -1828,8 +1828,13 @@ export default function SalePurchaseInvoiceCreation() {
                                                 label="Additional Charges"
                                                 fullWidth
                                                 size="small"
-                                                value={data.additional_charge || ''}
-                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange('additional_charge', Number(e.target.value))}
+                                                value={data.additional_charge}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                    // Replace the entire value with the new input
+                                                    const newValue = e.target.value.replace(/[^0-9.]/g, '');
+                                                    handleChange('additional_charge', newValue === '' ? 0 : Number(newValue));
+                                                    // Select all text on focus for easy overwrite
+                                                }}
                                                 name="additional_charge"
                                                 variant="outlined"
                                                 type="number"
@@ -1839,6 +1844,9 @@ export default function SalePurchaseInvoiceCreation() {
                                                             <Add color="secondary" />
                                                         </InputAdornment>
                                                     ),
+                                                    inputProps: {
+                                                        onFocus: (e: React.FocusEvent<HTMLInputElement>) => e.target.select(),
+                                                    }
                                                 }}
                                             />
                                         </Grid>
@@ -1907,7 +1915,10 @@ export default function SalePurchaseInvoiceCreation() {
                                                 type="number"
                                                 fullWidth
                                                 value={data.paid_amount}
-                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange('paid_amount', e.target.value)}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                    const newValue = e.target.value.replace(/[^0-9.]/g, '');
+                                                    handleChange('paid_amount', newValue === '' ? 0 : Number(newValue));
+                                                }}
                                                 name="paid_amount"
                                                 variant="outlined"
                                                 InputProps={{
@@ -1916,6 +1927,9 @@ export default function SalePurchaseInvoiceCreation() {
                                                             <CurrencyRupee color='primary' />
                                                         </InputAdornment>
                                                     ),
+                                                    inputProps: {
+                                                        onFocus: (e: React.FocusEvent<HTMLInputElement>) => e.target.select(),
+                                                    }
                                                 }}
                                                 sx={{ flex: 1 }}
                                             />

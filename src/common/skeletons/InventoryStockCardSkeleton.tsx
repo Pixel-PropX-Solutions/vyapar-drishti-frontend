@@ -28,12 +28,14 @@ const InventoryStockCardSkeleton = (props: SkeletonProps) => {
                 borderLeft: border,
             }}>
                 <Box>
-                    <Skeleton variant="text" width={120} height={24} sx={{ mb: 1 }} />
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: theme.palette.common.black }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Skeleton variant="text" width={120} height={24} sx={{ mb: 1 }} />
                         <Skeleton variant="circular" width={32} height={32} />
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: theme.palette.common.black }}>
                         <Skeleton variant="text" width={60} height={40} />
                     </Box>
-                    <Skeleton variant="text" width={220} height={18} sx={{ mt: 2 }} />
+                    <Skeleton variant="text" width="100%" height={18} sx={{ mt: 2, mx: 'auto' }} />
                 </Box>
             </StockCard>
         </Grid>

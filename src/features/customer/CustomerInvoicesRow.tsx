@@ -3,23 +3,24 @@ import {
     Box,
     Typography,
     useTheme,
-    Tooltip,
+    // Tooltip,
     alpha,
-    DialogActions,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    Button,
-    IconButton,
+    // DialogActions,
+    // Dialog,
+    // DialogTitle,
+    // DialogContent,
+    // Button,
+    // IconButton,
     TableCell,
     TableRow,
     Fade,
-    Zoom,
-    Alert,
+    Checkbox,
+    // Zoom,
+    // Alert,
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import VisibilityIcon from "@mui/icons-material/Visibility";
+// import DeleteIcon from "@mui/icons-material/Delete";
+// import EditIcon from "@mui/icons-material/Edit";
+// import VisibilityIcon from "@mui/icons-material/Visibility";
 import { GetAllVouchars } from "@/utils/types";
 import {
     CancelOutlined,
@@ -31,22 +32,24 @@ import { formatDate } from "@/utils/functions";
 
 interface CustomerInvoicesRowProps {
     inv: any;
-    onDelete: (id: string) => void;
-    onEdit: (inv: GetAllVouchars) => void;
+    // onDelete: (id: string) => void;
+    // onEdit: (inv: GetAllVouchars) => void;
     onView: (inv: GetAllVouchars) => void;
     index: number;
+    selected?: boolean;
+    onSelect?: (checked: boolean) => void;
 }
 
 
-export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, onDelete, onEdit, onView, index }) => {
+export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, index, selected, onSelect }) => {
     const theme = useTheme();
-    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+    // const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
 
-    const confirmDelete = () => {
-        onDelete(inv?._id ?? '');
-        setOpenDeleteDialog(false);
-    };
+    // const confirmDelete = () => {
+    //     onDelete(inv?._id ?? '');
+    //     setOpenDeleteDialog(false);
+    // };
 
     return (
         <>
@@ -68,8 +71,15 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, o
                         },
                         borderLeft: `4px solid ${isHovered ? theme.palette.primary.main : 'transparent'}`,
                     }}
-                    onClick={() => onView(inv._id)}
+                    onClick={() => { if (onSelect) onSelect(!selected); }}
                 >
+                    {/* Select Check Box */}
+                    <TableCell align="left" sx={{ px: 1, }}>
+                        <Checkbox checked={!!selected} onChange={(e, checked) => {
+                            e.stopPropagation();
+                            if (onSelect) onSelect(checked);
+                        }} />
+                    </TableCell>
                     {/* Serial No */}
                     <TableCell align="left" sx={{ pl: 3, }}>
                         <Typography
@@ -215,7 +225,7 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, o
                     </TableCell>
 
                     {/* Actions */}
-                    <TableCell align="center" sx={{ px: 1 }}>
+                    {/* <TableCell align="center" sx={{ px: 1 }}>
                         <Zoom appear in timeout={200}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'center' }}>
                                 {['Sales', 'Purchase'].includes(inv.voucher_type) && <Tooltip title="View Details" arrow>
@@ -282,10 +292,10 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, o
                                 </Tooltip>
                             </Box>
                         </Zoom>
-                    </TableCell>
+                    </TableCell> */}
                 </TableRow>
             </Fade>
-
+            {/* 
             <Dialog
                 open={openDeleteDialog}
                 onClose={() => setOpenDeleteDialog(false)}
@@ -336,7 +346,7 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, o
                         Delete Customer
                     </Button>
                 </DialogActions>
-            </Dialog>
+            </Dialog> */}
         </>
     );
 };
