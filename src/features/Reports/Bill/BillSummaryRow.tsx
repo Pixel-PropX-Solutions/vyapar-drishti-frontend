@@ -8,15 +8,11 @@ import {
     useTheme,
     alpha,
     Chip,
-    Tooltip,
     LinearProgress,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 // Icons
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-
 import { BillSummary } from '@/utils/types';
 import { formatDate } from '@/utils/functions';
 import { OpenInNew } from '@mui/icons-material';
@@ -26,7 +22,6 @@ import { useNavigate } from 'react-router-dom';
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
     position: 'relative',
     transition: 'all 0.2s ease',
-    cursor: 'pointer',
     '& .MuiTableCell-root': {
         padding: '8px 16px',
         borderBottom: `1px solid ${alpha(theme.palette.divider, 0.06)}`,
@@ -48,19 +43,6 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 }));
 
-const ExpandButton = styled(IconButton)(({ theme }) => ({
-    transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-    borderRadius: theme.spacing(1.5),
-    padding: theme.spacing(0.8),
-    backgroundColor: alpha(theme.palette.grey[100], 0.6),
-    '&:hover': {
-        backgroundColor: alpha(theme.palette.primary.main, 0.1),
-        transform: 'scale(1.1)',
-    },
-    '&.expanded': {
-        backgroundColor: alpha(theme.palette.primary.main, 0.1),
-    },
-}));
 
 const SerialBadge = styled(Box)(({ theme }) => ({
     display: 'flex',
@@ -147,22 +129,6 @@ export const BillSummaryRow = (props: InventoryRowRowProps) => {
                         >
                             {serial}
                         </SerialBadge>
-
-                        <Tooltip
-                            title={open ? 'Collapse details' : 'Expand details'}
-                            arrow
-                        >
-                            <ExpandButton
-                                className={`expand-button ${open ? 'expanded' : ''}`}
-                                size="small"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setOpen(!open);
-                                }}
-                            >
-                                {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                            </ExpandButton>
-                        </Tooltip>
                     </Box>
                 </TableCell>
 
