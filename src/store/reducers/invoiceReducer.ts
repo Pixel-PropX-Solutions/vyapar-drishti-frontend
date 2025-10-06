@@ -18,6 +18,7 @@ interface InvoiceState {
     invoiceGroupPageMeta: PageMeta
     pageMeta: PageMeta;
     loading: boolean;
+    isInvoiceFecthing: boolean;
     error: string | null;
     invoicesFilters: {
         searchQuery: string,
@@ -53,6 +54,7 @@ const initialState: InvoiceState = {
         unique: [],
     },
     loading: false,
+    isInvoiceFecthing: false,
     error: null,
     invoicesFilters: {
         searchQuery: "",
@@ -106,18 +108,18 @@ const invoiceSlice = createSlice({
 
             .addCase(viewInvoice.pending, (state) => {
                 state.error = null;
-                state.loading = true;
+                state.isInvoiceFecthing = true;
             })
             .addCase(
                 viewInvoice.fulfilled,
                 (state, action: PayloadAction<any>) => {
                     state.invoiceData = action.payload.invoiceData;
-                    state.loading = false;
+                    state.isInvoiceFecthing = false;
                 }
             )
             .addCase(viewInvoice.rejected, (state, action) => {
                 state.error = action.payload as string;
-                state.loading = false;
+                state.isInvoiceFecthing = false;
             })
 
             .addCase(updateInvoice.pending, (state) => {

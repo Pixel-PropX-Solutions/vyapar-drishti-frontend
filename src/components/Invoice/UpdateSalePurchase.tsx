@@ -388,7 +388,7 @@ export default function SalePurchaseInvoiceCreation() {
                     total_tax: Number(total_tax),
                     roundoff: Number(roundoff),
                     grand_total: Number(grandTotal),
-                    items: data.items.map(item => ({
+                    items: data.items.map((item, index) => ({
                         ...item,
                         entry_id: item.entry_id || '',
                         vouchar_id: data._id,
@@ -403,14 +403,18 @@ export default function SalePurchaseInvoiceCreation() {
                         total_amount: Number(item.total_amount?.toFixed(2)) || 0,
                         godown: '',
                         godown_id: '',
+                        order_index: index
                     })),
                     accounting:
-                        data.accounting.map(acc => {
+                        data.accounting.map((acc) => {
                             let amount = 0;
+                            let order_index = 0;
                             if (type?.toLowerCase() === 'purchase') {
                                 amount = acc.ledger === data.party_name ? Number(grandTotal) : -Number(grandTotal);
+                                order_index = 0;
                             } else if (type?.toLowerCase() === 'sales') {
                                 amount = acc.ledger === data.party_name ? -Number(grandTotal) : Number(grandTotal);
+                                order_index = 1;
                             }
                             return {
                                 entry_id: acc.entry_id || '',
@@ -418,6 +422,7 @@ export default function SalePurchaseInvoiceCreation() {
                                 ledger: acc.ledger,
                                 ledger_id: acc.ledger_id,
                                 amount,
+                                order_index,
                             };
                         }),
                 };
@@ -447,7 +452,7 @@ export default function SalePurchaseInvoiceCreation() {
                     total_tax: Number(total_tax),
                     roundoff: Number(roundoff),
                     grand_total: Number(grandTotal),
-                    items: data.items.map(item => ({
+                    items: data.items.map((item, index) => ({
                         ...item,
                         entry_id: item.entry_id || '',
                         vouchar_id: data._id,
@@ -459,13 +464,17 @@ export default function SalePurchaseInvoiceCreation() {
                         total_amount: Number(item.total_amount?.toFixed(2)) || 0,
                         godown: '',
                         godown_id: '',
+                        order_index: index
                     })),
                     accounting: data.accounting.map(acc => {
                         let amount = 0;
+                        let order_index = 0;
                         if (type?.toLowerCase() === 'purchase') {
                             amount = acc.ledger === data.party_name ? Number(grandTotal) : -Number(grandTotal);
+                            order_index = 0;
                         } else if (type?.toLowerCase() === 'sales') {
                             amount = acc.ledger === data.party_name ? -Number(grandTotal) : Number(grandTotal);
+                            order_index = 1;
                         }
                         return {
                             entry_id: acc.entry_id || '',
@@ -473,6 +482,7 @@ export default function SalePurchaseInvoiceCreation() {
                             ledger: acc.ledger,
                             ledger_id: acc.ledger_id,
                             amount,
+                            order_index
                         };
                     }),
                 };

@@ -390,7 +390,7 @@ export default function SalePurchaseInvoiceCreation() {
                     total_tax: Number(total_tax),
                     roundoff: Number(roundoff),
                     grand_total: Number(grandTotal),
-                    items: data.items.map(item => ({
+                    items: data.items.map((item, index) => ({
                         ...item,
                         vouchar_id: '',
                         tax_rate: item.tax_rate || 0,
@@ -402,6 +402,7 @@ export default function SalePurchaseInvoiceCreation() {
                         order_number: '',
                         order_due_date: '',
                         hsn_code: item?.hsn_code || '',
+                        order_index: index
                     })),
                     accounting: [
                         {
@@ -409,12 +410,14 @@ export default function SalePurchaseInvoiceCreation() {
                             ledger: data.party_name,
                             ledger_id: data.party_id,
                             amount: type === 'sales' ? -Number(grandTotal) : Number(grandTotal),
+                            order_index: 0
                         },
                         {
                             vouchar_id: '',
                             ledger: data.counter_party,
                             ledger_id: data.counter_id,
                             amount: type === 'sales' ? Number(grandTotal) : -Number(grandTotal),
+                            order_index: 1
                         }
                     ],
                 };
@@ -442,9 +445,10 @@ export default function SalePurchaseInvoiceCreation() {
                     total_tax: Number(total_tax),
                     roundoff: Number(roundoff),
                     grand_total: Number(grandTotal),
-                    items: data.items.map(item => ({
+                    items: data.items.map((item, index) => ({
                         ...item,
                         vouchar_id: '',
+                        order_index: index
                     })),
                     accounting: [
                         {
@@ -452,12 +456,14 @@ export default function SalePurchaseInvoiceCreation() {
                             ledger: data.party_name,
                             ledger_id: data.party_id,
                             amount: type === 'sales' ? -Number(grandTotal) : Number(grandTotal),
+                            order_index: 0
                         },
                         {
                             vouchar_id: '',
                             ledger: data.counter_party,
                             ledger_id: data.counter_id,
                             amount: type === 'sales' ? Number(grandTotal) : -Number(grandTotal),
+                            order_index: 1
                         }
                     ],
                 };

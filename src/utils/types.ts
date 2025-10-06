@@ -258,21 +258,20 @@ export interface CreateInvoiceData {
     vouchar_id: string,
     ledger: string,
     ledger_id: string,
-    amount: number
+    amount: number,
+    order_index: number
   }>,
   items: Array<{
     vouchar_id: string;
     item: string;
     item_id: string;
-    // hsn_code: string;
     unit: string;
     quantity: number;
     rate: number;
     amount: number;
     discount_amount: number;
-    // tax_rate: number;
-    // tax_amount: number;
     total_amount: number;
+    order_index: number;
   }>
 }
 
@@ -309,7 +308,8 @@ export interface UpdateInvoice {
     vouchar_id: string,
     ledger: string,
     ledger_id: string,
-    amount: number
+    amount: number,
+    order_index: number;
   }>,
   items: Array<{
     entry_id: string,
@@ -323,6 +323,7 @@ export interface UpdateInvoice {
     total_amount: number,
     godown: string,
     godown_id: string,
+    order_index: number;
   }>
 }
 
@@ -360,7 +361,8 @@ export interface UpdateTAXInvoice {
     vouchar_id: string,
     ledger: string,
     ledger_id: string,
-    amount: number
+    amount: number,
+    order_index: number;
   }>,
   items: Array<{
     entry_id: string,
@@ -377,6 +379,7 @@ export interface UpdateTAXInvoice {
     total_amount: number;
     godown: string;
     godown_id: string;
+    order_index: number;
   }>
 }
 
@@ -412,7 +415,8 @@ export interface CreateInvoiceWithTAXData {
     vouchar_id: string,
     ledger: string,
     ledger_id: string,
-    amount: number
+    amount: number,
+    order_index: number;
   }>,
   items: Array<{
     vouchar_id: string;
@@ -428,6 +432,7 @@ export interface CreateInvoiceWithTAXData {
     total_amount: number;
     godown: string;
     godown_id: string;
+    order_index: number;
   }>
 }
 
@@ -671,7 +676,8 @@ export interface GetInvoiceData {
       godown: string,
       godown_id: string,
       created_at: string,
-      updated_at: string
+      updated_at: string,
+      order_index: number
     }
   ],
   accounting_entries: [
@@ -682,7 +688,8 @@ export interface GetInvoiceData {
       ledger_id: string,
       amount: number,
       created_at: string,
-      updated_at: string
+      updated_at: string,
+      order_index: number
     },
   ]
 };

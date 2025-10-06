@@ -269,6 +269,7 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         onView(inv);
+                                        handleClose();
                                     }}
                                 >
                                     <VisibilityIcon fontSize="small" sx={{ color: theme.palette.info.main }} />
@@ -287,6 +288,7 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         onEdit(inv);
+                                        handleClose();
                                     }}
                                 >
                                     <EditIcon fontSize="small" sx={{ color: theme.palette.warning.light }} />
@@ -305,6 +307,7 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                                     onClick={(e) => {
                                         setOpenDeleteDialog(true);
                                         e.stopPropagation();
+                                        handleClose();
                                     }}
                                 >
                                     <DeleteIcon fontSize="small" sx={{ color: theme.palette.error.light }} />
@@ -324,6 +327,7 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                                         e.stopPropagation();
                                         if (onPrint)
                                             onPrint(inv);
+                                        handleClose();
                                     }}
                                 >
                                     <Print fontSize="small" sx={{ color: theme.palette.success.light }} />
