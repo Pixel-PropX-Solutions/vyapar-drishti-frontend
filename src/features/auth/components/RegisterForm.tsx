@@ -27,8 +27,8 @@ import {
   Info,
   PersonAdd
 } from "@mui/icons-material";
-import Logo from "../../../assets/Logo.png";
-import logoText from "../../../assets/Logo_Text.png";
+import Logo from "../../../assets/Logo.webp";
+import logoText from "../../../assets/Logo_Text.webp";
 import { register } from "@/services/auth";
 import { AppDispatch } from "@/store/store";
 import toast from "react-hot-toast";

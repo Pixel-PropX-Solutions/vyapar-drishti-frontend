@@ -21,6 +21,7 @@ import {
     Card,
     CardContent,
     Grid,
+    Checkbox,
 } from "@mui/material";
 import {
     Search as SearchIcon,
@@ -60,6 +61,7 @@ const Transactions: React.FC = () => {
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
     const [visible, setVisible] = useState<boolean>(false);
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const { invoices, loading, pageMeta, invoiceGroups } = useSelector((state: RootState) => state.invoice);
     const { user, current_company_id } = useSelector((state: RootState) => state.auth);
     const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
@@ -447,11 +449,27 @@ const Transactions: React.FC = () => {
                                         padding: '8px 16px',
                                     },
                                 }}>
+                                {/* Select Check Box */}
+                                <TableCell align="left" sx={{ px: 1, }}>
+                                    <Checkbox
+                                        indeterminate={selectedIds.length > 0 && selectedIds.length < invoices.length}
+                                        checked={invoices.length > 0 && selectedIds.length === invoices.length}
+                                        onChange={(_, checked) => {
+                                            if (checked) {
+                                                setSelectedIds(invoices.map((inv) => inv._id));
+                                            } else {
+                                                setSelectedIds([]);
+                                            }
+                                        }}
+                                    />
+                                </TableCell>
+
                                 <TableCell sx={{ pl: 3, pr: 1 }}>
                                     <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
                                         Sr. No.
                                     </Typography>
                                 </TableCell>
+
                                 <TableCell align="left" sx={{ px: 1 }}>
                                     <Tooltip title="Sort by State" arrow>
                                         <TableSortLabel
@@ -468,6 +486,7 @@ const Transactions: React.FC = () => {
                                         </TableSortLabel>
                                     </Tooltip>
                                 </TableCell>
+
                                 <TableCell align="left" sx={{ px: 1 }}>
                                     <Tooltip title="Sort by Name">
                                         <TableSortLabel
@@ -485,12 +504,8 @@ const Transactions: React.FC = () => {
                                 <TableCell align="left" sx={{ px: 1 }}>
                                     <Tooltip title="Sort by Item Quantity" arrow>
                                         <TableSortLabel
-                                        // active={sortField === "name"}
-                                        // direction={sortField === "name" ? sortOrder : "asc"}
-                                        // onClick={() => handleSortRequest("name")}
                                         >
                                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                                                {/* <Contacts fontSize="small" /> */}
                                                 <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
                                                     Transaction Type
                                                 </Typography>
@@ -507,7 +522,6 @@ const Transactions: React.FC = () => {
                                             onClick={() => handleSortRequest("state")}
                                         >
                                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                                                {/* <LocationOn fontSize="small" /> */}
                                                 <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
                                                     Transaction No.
                                                 </Typography>
@@ -521,6 +535,7 @@ const Transactions: React.FC = () => {
                                         Debit
                                     </Typography>
                                 </TableCell>
+
                                 <TableCell align="center" sx={{ px: 1 }}>
                                     <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
                                         Credit
@@ -544,11 +559,19 @@ const Transactions: React.FC = () => {
                                     <InvoicerRow
                                         key={inv._id}
                                         inv={inv}
+                                        selected={selectedIds.includes(inv._id)}
+                                        onSelect={(checked: boolean) => {
+                                            setSelectedIds((prev) =>
+                                                checked ? [...prev, inv._id] : prev.filter((id) => id !== inv._id)
+                                            );
+                                        }}
                                         index={index + 1 + (page - 1) * rowsPerPage}
                                         onView={() => handleViewInvoice(inv)}
                                         onEdit={() => {
                                             dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes(inv.voucher_type))?._id || ''));
-                                            navigate(`/transactions/update/${inv.voucher_type.toLowerCase()}/${inv._id}`);
+                                            if (inv.voucher_type !== 'Payment' && inv.voucher_type !== "receipt") {
+                                                navigate(`/invoices/update/${inv.voucher_type.toLowerCase()}/${inv._id}`);
+                                            }
                                         }}
                                         onDelete={async () => {
                                             dispatch(deleteInvoice({ vouchar_id: inv._id, company_id: currentCompanyId })).unwrap().then(() => {

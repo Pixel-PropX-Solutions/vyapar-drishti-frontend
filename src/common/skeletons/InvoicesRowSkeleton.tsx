@@ -8,7 +8,10 @@ import {
 
 export const InvoicesRowSkeleton: React.FC = () => (
     <TableRow >
-        <TableCell align="center">
+        <TableCell align="left">
+            <Skeleton variant="rectangular" width={20} height={20} sx={{ borderRadius: 1 }} />
+        </TableCell>
+        <TableCell align="left">
             <Skeleton variant="text" width={20} height={32} />
         </TableCell>
         <TableCell align="left">
@@ -32,9 +35,9 @@ export const InvoicesRowSkeleton: React.FC = () => (
         <TableCell align="center">
             <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
                 <Skeleton variant="rectangular" width={32} height={32} sx={{ borderRadius: 1 }} />
+                {/* <Skeleton variant="rectangular" width={32} height={32} sx={{ borderRadius: 1 }} />
                 <Skeleton variant="rectangular" width={32} height={32} sx={{ borderRadius: 1 }} />
-                <Skeleton variant="rectangular" width={32} height={32} sx={{ borderRadius: 1 }} />
-                <Skeleton variant="rectangular" width={32} height={32} sx={{ borderRadius: 1 }} />
+                <Skeleton variant="rectangular" width={32} height={32} sx={{ borderRadius: 1 }} /> */}
             </Box>
         </TableCell>
     </TableRow>

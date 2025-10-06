@@ -85,7 +85,7 @@ const PaymentReceiptSideModal: React.FC<CreateInventoryGroupModalProps> = ({
     const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
     const [data, setData] = useState<InventoryGroupFormData>({
         amount: 0,
-        date: new Date().toISOString().split('T')[0],
+        date: new Date().toISOString(),
         notes: '',
         sendSms: false,
         sendEmail: false,
@@ -170,7 +170,7 @@ const PaymentReceiptSideModal: React.FC<CreateInventoryGroupModalProps> = ({
         const payload = {
             voucher_type: type === 'receipt' ? 'Receipt' : 'Payment',
             voucher_type_id: invoiceType_id || '',
-            date: data.date.split('T')[0],
+            date: data.date.slice(0, 10),
             voucher_number: data.transactionNumber || '',
             party_name: customerName,
             party_name_id: customerId ?? '',
@@ -437,7 +437,7 @@ const PaymentReceiptSideModal: React.FC<CreateInventoryGroupModalProps> = ({
                                     <DatePicker
                                         value={new Date(data.date)}
                                         format="dd-MM-yyyy"
-                                        onChange={(newValue) => handleInputChange('date', newValue)}
+                                        onChange={(newValue) => handleInputChange('date', newValue?.toISOString() || '')}
                                         slotProps={{
                                             textField: {
                                                 fullWidth: true,

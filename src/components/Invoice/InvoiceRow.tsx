@@ -3,29 +3,31 @@ import {
     Box,
     Typography,
     useTheme,
-    Tooltip,
     alpha,
     DialogActions,
     Dialog,
     DialogTitle,
     DialogContent,
     Button,
-    IconButton,
     TableCell,
     TableRow,
     Fade,
-    Zoom,
     Alert,
+    Menu,
+    MenuItem,
+    Checkbox,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { GetAllVouchars } from "@/utils/types";
 import {
+    MoreVert,
     Print,
     Today
 } from "@mui/icons-material";
 import { formatDate } from "@/utils/functions";
+import MenuButton from "../MaterialUI/MenuButton";
 
 interface ProductRowProps {
     inv: GetAllVouchars;
@@ -34,13 +36,24 @@ interface ProductRowProps {
     onView: (inv: GetAllVouchars) => void;
     onPrint?: (inv: GetAllVouchars) => void;
     index: number;
+    selected?: boolean;
+    onSelect?: (checked: boolean) => void;
 }
 
-
-export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, onView, onPrint, index }) => {
+export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, onView, onPrint, index, selected, onSelect }) => {
     const theme = useTheme();
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
+    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+    const open = Boolean(anchorEl);
+
+    const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
 
     const confirmDelete = () => {
         onDelete(inv?._id ?? '');
@@ -67,8 +80,14 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                         },
                         borderLeft: `4px solid ${isHovered ? theme.palette.primary.main : 'transparent'}`,
                     }}
-                    onClick={() => onView(inv)}
                 >
+                    {/* Select Check Box */}
+                    <TableCell align="left" sx={{ px: 1, }}>
+                        <Checkbox checked={!!selected} onChange={(_, checked) => {
+                            if (onSelect) onSelect(checked);
+                        }} />
+                    </TableCell>
+
                     {/* Serial No */}
                     <TableCell align="left" sx={{ px: 1, }}>
                         <Typography
@@ -202,94 +221,122 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
 
                     {/* Actions */}
                     <TableCell align="center" >
-                        <Zoom appear in>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'center' }}>
-                                {['Sales', 'Purchase'].includes(inv.voucher_type) && <Tooltip title="View Details" arrow>
-                                    <IconButton
-                                        size="small"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onView(inv);
-                                        }}
-                                        sx={{
-                                            bgcolor: alpha(theme.palette.info.main, 0.1),
-                                            color: theme.palette.info.main,
-                                            transition: 'all 0.3s ease',
-                                            '&:hover': {
-                                                bgcolor: alpha(theme.palette.info.main, 0.2),
-                                                transform: 'scale(1.1)',
-                                            },
-                                        }}
-                                    >
-                                        <VisibilityIcon fontSize="small" />
-                                    </IconButton>
-                                </Tooltip>}
+                        <>
+                            <MenuButton
+                                data-screenshot="toggle-mode"
+                                onClick={(e) => {
+                                    handleClick(e);
+                                    e.stopPropagation();
+                                }}
+                                disableRipple
+                                size="small"
+                                aria-label="Open Menu"
+                                aria-controls={open ? "notifications-menu" : undefined}
+                                aria-haspopup="true"
+                                aria-expanded={open ? "true" : undefined}
+                            >
+                                <MoreVert />
+                            </MenuButton>
+                            <Menu
+                                anchorEl={anchorEl}
+                                id="notifications-menu"
+                                open={open}
+                                onClose={handleClose}
+                                onClick={handleClose}
+                                slotProps={{
+                                    paper: {
+                                        variant: "outlined",
 
-                                {['Sales', 'Purchase'].includes(inv.voucher_type) && <Tooltip title="Edit Invoice" arrow>
-                                    <IconButton
-                                        size="small"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onEdit(inv);
-                                        }}
-                                        sx={{
-                                            bgcolor: alpha(theme.palette.warning.main, 0.1),
-                                            color: theme.palette.warning.main,
-                                            transition: 'all 0.3s ease',
-                                            '&:hover': {
-                                                bgcolor: alpha(theme.palette.warning.main, 0.2),
-                                                transform: 'scale(1.1)',
-                                            },
-                                        }}
-                                    >
-                                        <EditIcon fontSize="small" />
-                                    </IconButton>
-                                </Tooltip>}
+                                        elevation: 0,
+                                        sx: {
+                                            my: "4px",
+                                            maxHeight: "400px",
+                                            overflowY: "auto",
+                                            borderColor: theme.palette.primary.main,
+                                        },
+                                    },
+                                }}
+                                transformOrigin={{ horizontal: "right", vertical: "top" }}
+                                anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+                            >
+                                {['Sales', 'Purchase'].includes(inv.voucher_type) && <MenuItem
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 1,
+                                        py: .5
+                                    }}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onView(inv);
+                                        handleClose();
+                                    }}
+                                >
+                                    <VisibilityIcon fontSize="small" sx={{ color: theme.palette.info.main }} />
+                                    <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.info.main }}>
+                                        View
+                                    </Typography>
+                                </MenuItem>}
 
-                                <Tooltip title="Delete Invoice" arrow>
-                                    <IconButton
-                                        size="small"
-                                        onClick={(e) => {
-                                            setOpenDeleteDialog(true);
-                                            e.stopPropagation();
-                                        }}
-                                        sx={{
-                                            bgcolor: alpha(theme.palette.error.main, 0.1),
-                                            color: theme.palette.error.main,
-                                            transition: 'all 0.3s ease',
-                                            '&:hover': {
-                                                bgcolor: alpha(theme.palette.error.main, 0.2),
-                                                transform: 'scale(1.1)',
-                                            },
-                                        }}
-                                    >
-                                        <DeleteIcon fontSize="small" />
-                                    </IconButton>
-                                </Tooltip>
+                                {['Sales', 'Purchase'].includes(inv.voucher_type) && <MenuItem
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 1,
+                                        py: .5
+                                    }}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onEdit(inv);
+                                        handleClose();
+                                    }}
+                                >
+                                    <EditIcon fontSize="small" sx={{ color: theme.palette.warning.light }} />
+                                    <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.warning.light }}>
+                                        Edit
+                                    </Typography>
+                                </MenuItem>}
 
-                                <Tooltip title="Print Invoice" arrow>
-                                    <IconButton
-                                        size="small"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            if (onPrint)
-                                                onPrint(inv);
-                                        }}
-                                        sx={{
-                                            bgcolor: alpha(theme.palette.success.main, 0.1),
-                                            color: theme.palette.success.main,
-                                            transition: 'all 0.3s ease',
-                                            '&:hover': {
-                                                bgcolor: alpha(theme.palette.success.main, 0.2),
-                                                transform: 'scale(1.1)',
-                                            },
-                                        }}
-                                    >
-                                        <Print fontSize="small" />
-                                    </IconButton>
-                                </Tooltip>
-                            </Box>
-                        </Zoom>
+                                <MenuItem
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 1,
+                                        py: .5
+                                    }}
+                                    onClick={(e) => {
+                                        setOpenDeleteDialog(true);
+                                        e.stopPropagation();
+                                        handleClose();
+                                    }}
+                                >
+                                    <DeleteIcon fontSize="small" sx={{ color: theme.palette.error.light }} />
+                                    <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.error.light }}>
+                                        Delete
+                                    </Typography>
+                                </MenuItem>
+
+                                <MenuItem
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 1,
+                                        py: .5
+                                    }}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (onPrint)
+                                            onPrint(inv);
+                                        handleClose();
+                                    }}
+                                >
+                                    <Print fontSize="small" sx={{ color: theme.palette.success.light }} />
+                                    <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.success.light }}>
+                                        Print
+                                    </Typography>
+                                </MenuItem>
+                            </Menu>
+                        </>
                     </TableCell>
                 </TableRow>
             </Fade>

@@ -14,8 +14,8 @@ import {
   Email,
   // Lock, Visibility, VisibilityOff
 } from "@mui/icons-material";
-import Logo from "../../../assets/Logo.png";
-import logoText from "../../../assets/Logo_Text.png";
+import Logo from "../../../assets/Logo.webp";
+import logoText from "../../../assets/Logo_Text.webp";
 
 const CreateUserForm = (): JSX.Element => {
   //   const navigate = useNavigate();

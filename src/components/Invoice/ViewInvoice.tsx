@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
     Box,
     Grid,
@@ -63,10 +63,9 @@ export const ViewInvoiceInfo = () => {
     const dispatch = useDispatch<AppDispatch>();
     const [visible, setVisible] = useState<boolean>(false);
     const { current_company_id, user } = useSelector((state: RootState) => state.auth);
-    const { invoiceData } = useSelector((state: RootState) => state.invoice);
+    const { invoiceData, isInvoiceFecthing } = useSelector((state: RootState) => state.invoice);
     const currentCompanyDetails = user?.company?.find((company: any) => company._id === current_company_id);
     const tax_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_tax;
-    const [loading, _setIsLoading] = useState<boolean>(false);
 
     const { init, setLoading, PDFViewModal, handleShare, handleDownload, handlePrint, isLoading } = usePDFHandler();
 
@@ -151,6 +150,10 @@ export const ViewInvoiceInfo = () => {
         }
     };
 
+    const sortedInventory = useMemo(
+        () => [...(invoiceData?.inventory ?? [])].sort((a, b) => a.order_index - b.order_index),
+        [invoiceData]
+    );
 
     return (
         <Container maxWidth="xl" sx={{ py: 3 }}>
@@ -187,7 +190,7 @@ export const ViewInvoiceInfo = () => {
                                 </Avatar>
                             </Box>
                             <Box>
-                                {loading ? (
+                                {isInvoiceFecthing ? (
                                     <Skeleton width={200} height={40} />
                                 ) : (
                                     <>
@@ -257,7 +260,7 @@ export const ViewInvoiceInfo = () => {
                                 </Box>
                                 <Divider sx={{ mb: 1 }} />
 
-                                {loading ? (
+                                {isInvoiceFecthing ? (
                                     <Box sx={{ '& > *': { mb: 2 } }}>
                                         {[...Array(4)].map((_, index) => (
                                             <Skeleton key={index} height={60} />
@@ -331,7 +334,7 @@ export const ViewInvoiceInfo = () => {
                                 </Box>
                                 <Divider sx={{ mb: 1 }} />
 
-                                {loading ? (
+                                {isInvoiceFecthing ? (
                                     <Box sx={{ '& > *': { mb: 2 } }}>
                                         {[...Array(5)].map((_, index) => (
                                             <Skeleton key={index} height={40} />
@@ -390,7 +393,7 @@ export const ViewInvoiceInfo = () => {
                                 </Box>
                                 <Divider sx={{ mb: 1 }} />
 
-                                {loading ? (
+                                {isInvoiceFecthing ? (
                                     <Box sx={{ '& > *': { mb: 2 } }}>
                                         {[...Array(6)].map((_, index) => (
                                             <Skeleton key={index} height={40} />
@@ -451,7 +454,7 @@ export const ViewInvoiceInfo = () => {
                                     </Typography>
                                 </Box>
 
-                                {loading ? (
+                                {isInvoiceFecthing ? (
                                     <>
                                         <LinearProgress sx={{ mb: 2 }} />
                                         <Box sx={{ '& > *': { mb: 2 } }}>
@@ -485,7 +488,7 @@ export const ViewInvoiceInfo = () => {
                                                 </TableRow>
                                             </TableHead>
                                             <TableBody>
-                                                {invoiceData?.inventory.map((item, index) => (
+                                                {sortedInventory.map((item, index) => (
                                                     <TableRow
                                                         key={item._id + index}
                                                         hover
