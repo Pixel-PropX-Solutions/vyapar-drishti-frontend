@@ -10,7 +10,6 @@ export const createInvoice = createAsyncThunk(
         { rejectWithValue }
     ) => {
         try {
-            console.log("Data in createInvoice:", data);
             const createRes = await userApi.post(`/invoices/create/vouchar`, data);
             console.log("Response from createInvoice:", createRes);
 

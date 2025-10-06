@@ -13,8 +13,8 @@
 //     useTheme,
 // } from "@mui/material";
 // import { Person, Lock, Visibility, VisibilityOff } from "@mui/icons-material";
-// import Logo from "../../../assets/Logo.webp";
-// import logoText from "../../../assets/Logo_Text.webp";
+// import Logo from "../../../assets/Logo.png";
+// import logoText from "../../../assets/Logo_Text.png";
 // import { getCurrentUser, login, register } from "@/services/auth";
 // import { useDispatch, useSelector } from "react-redux";
 // import { AppDispatch, RootState } from "@/store/store";

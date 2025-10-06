@@ -42,7 +42,7 @@ interface MenuItem {
   requiredRole?: 'admin' | 'user';
 }
 
-const createMainListItems = (role: string, tax_enable: boolean): MenuItem[] => {
+const createMainListItems = (role: string): MenuItem[] => {
   const adminItems: MenuItem[] = [
     // { text: "Dashboard", path: "/dashboard", icon: <DashboardIcon />, requiredRole: 'admin' },
     // { text: "Inventory", path: "/inventory", icon: <InventoryIcon />, requiredRole: 'admin' },
@@ -52,23 +52,15 @@ const createMainListItems = (role: string, tax_enable: boolean): MenuItem[] => {
   ];
 
 
-  const userItems: MenuItem[] = tax_enable ? [
+  const userItems: MenuItem[] = [
     { text: "WareHouse", path: "/warehouses", icon: <InventoryIcon />, requiredRole: 'user' },
     { text: "Timeline", path: "/timeline", icon: <ViewTimelineIcon />, requiredRole: 'user' },
     { text: "Products", path: "/products", icon: <ProductIcon />, requiredRole: 'user' },
     { text: "Customers", path: "/customers", icon: <People />, requiredRole: 'user' },
     { text: "Invoices", path: "/invoices", icon: <ReceiptOutlined />, requiredRole: 'user' },
     { text: "Transactions", path: "/transactions", icon: <PaymentsOutlined />, requiredRole: 'user' },
-    { text: "Reports", path: "/reports", icon: <Assessment />, requiredRole: 'user' },
-    { text: "Summary", path: "/summary", icon: <Assessment />, requiredRole: 'user' }
-  ] :
-    [{ text: "WareHouse", path: "/warehouses", icon: <InventoryIcon />, requiredRole: 'user' },
-    { text: "Timeline", path: "/timeline", icon: <ViewTimelineIcon />, requiredRole: 'user' },
-    { text: "Products", path: "/products", icon: <ProductIcon />, requiredRole: 'user' },
-    { text: "Customers", path: "/customers", icon: <People />, requiredRole: 'user' },
-    { text: "Invoices", path: "/invoices", icon: <ReceiptOutlined />, requiredRole: 'user' },
-    { text: "Transactions", path: "/transactions", icon: <PaymentsOutlined />, requiredRole: 'user' },
-    { text: "Reports", path: "/reports", icon: <Assessment />, requiredRole: 'user' }];
+    { text: "Reports", path: "/reports", icon: <Assessment />, requiredRole: 'user' }
+  ];
 
   // const userItems: MenuItem[] = [
   // { text: "Dashboard", path: "/dashboard", icon: <DashboardIcon />, requiredRole: 'user' },
@@ -110,14 +102,10 @@ export default function MenuContent({ toggleDrawer }: SideMenuMobileProps) {
   const navigate = useNavigate();
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
-  const { user, current_company_id } = useSelector((state: RootState) => state.auth);
-  const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
-  const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
-  const tax_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_tax;
-
+  const { user } = useSelector((state: RootState) => state.auth);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
 
-  const mainListItems = createMainListItems(user?.user_type ?? ROLE_ENUM.NULL, tax_enable);
+  const mainListItems = createMainListItems(user?.user_type ?? ROLE_ENUM.NULL);
 
   const handleNavigation = (path: string) => {
     navigate(path);

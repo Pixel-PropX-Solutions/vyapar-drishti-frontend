@@ -345,8 +345,8 @@ export default function SalePurchaseInvoiceCreation() {
             total: Number(total).toFixed(2),
             discount: Number(discount).toFixed(2),
             total_amount: Number(total_amount).toFixed(2),
-            total_tax: Number(total_tax).toFixed(2),
-            additional_charge: Number(additional_charge).toFixed(2),
+            total_tax: Number(total_tax).toLocaleString('en-IN', { minimumFractionDigits: 2 }),
+            additional_charge: Number(additional_charge).toLocaleString('en-IN', { minimumFractionDigits: 2 }),
             roundoff: Number(roundoff).toFixed(2),
             grandTotal: Number(grandTotal).toFixed(2)
         };
@@ -388,7 +388,7 @@ export default function SalePurchaseInvoiceCreation() {
                     total_tax: Number(total_tax),
                     roundoff: Number(roundoff),
                     grand_total: Number(grandTotal),
-                    items: data.items.map((item, index) => ({
+                    items: data.items.map(item => ({
                         ...item,
                         entry_id: item.entry_id || '',
                         vouchar_id: data._id,
@@ -403,18 +403,14 @@ export default function SalePurchaseInvoiceCreation() {
                         total_amount: Number(item.total_amount?.toFixed(2)) || 0,
                         godown: '',
                         godown_id: '',
-                        order_index: index
                     })),
                     accounting:
-                        data.accounting.map((acc) => {
+                        data.accounting.map(acc => {
                             let amount = 0;
-                            let order_index = 0;
                             if (type?.toLowerCase() === 'purchase') {
                                 amount = acc.ledger === data.party_name ? Number(grandTotal) : -Number(grandTotal);
-                                order_index = 0;
                             } else if (type?.toLowerCase() === 'sales') {
                                 amount = acc.ledger === data.party_name ? -Number(grandTotal) : Number(grandTotal);
-                                order_index = 1;
                             }
                             return {
                                 entry_id: acc.entry_id || '',
@@ -422,7 +418,6 @@ export default function SalePurchaseInvoiceCreation() {
                                 ledger: acc.ledger,
                                 ledger_id: acc.ledger_id,
                                 amount,
-                                order_index,
                             };
                         }),
                 };
@@ -452,7 +447,7 @@ export default function SalePurchaseInvoiceCreation() {
                     total_tax: Number(total_tax),
                     roundoff: Number(roundoff),
                     grand_total: Number(grandTotal),
-                    items: data.items.map((item, index) => ({
+                    items: data.items.map(item => ({
                         ...item,
                         entry_id: item.entry_id || '',
                         vouchar_id: data._id,
@@ -464,17 +459,13 @@ export default function SalePurchaseInvoiceCreation() {
                         total_amount: Number(item.total_amount?.toFixed(2)) || 0,
                         godown: '',
                         godown_id: '',
-                        order_index: index
                     })),
                     accounting: data.accounting.map(acc => {
                         let amount = 0;
-                        let order_index = 0;
                         if (type?.toLowerCase() === 'purchase') {
                             amount = acc.ledger === data.party_name ? Number(grandTotal) : -Number(grandTotal);
-                            order_index = 0;
                         } else if (type?.toLowerCase() === 'sales') {
                             amount = acc.ledger === data.party_name ? -Number(grandTotal) : Number(grandTotal);
-                            order_index = 1;
                         }
                         return {
                             entry_id: acc.entry_id || '',
@@ -482,7 +473,6 @@ export default function SalePurchaseInvoiceCreation() {
                             ledger: acc.ledger,
                             ledger_id: acc.ledger_id,
                             amount,
-                            order_index
                         };
                     }),
                 };
@@ -1898,12 +1888,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                 fullWidth
                                                 size="small"
                                                 value={data.additional_charge || ''}
-                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                                    // Replace the entire value with the new input
-                                                    const newValue = e.target.value.replace(/[^0-9.]/g, '');
-                                                    handleChange('additional_charge', newValue === '' ? 0 : Number(newValue));
-                                                    // Select all text on focus for easy overwrite
-                                                }}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange('additional_charge', Number(e.target.value))}
                                                 name="additional_charge"
                                                 variant="outlined"
                                                 type="number"
@@ -1913,9 +1898,6 @@ export default function SalePurchaseInvoiceCreation() {
                                                             <Add color="secondary" />
                                                         </InputAdornment>
                                                     ),
-                                                    inputProps: {
-                                                        onFocus: (e: React.FocusEvent<HTMLInputElement>) => e.target.select(),
-                                                    }
                                                 }}
                                             />
                                         </Grid>
@@ -1984,10 +1966,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                 type="number"
                                                 fullWidth
                                                 value={data.paid_amount}
-                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                                    const newValue = e.target.value.replace(/[^0-9.]/g, '');
-                                                    handleChange('paid_amount', newValue === '' ? 0 : Number(newValue));
-                                                }}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange('paid_amount', e.target.value)}
                                                 name="paid_amount"
                                                 variant="outlined"
                                                 InputProps={{
@@ -1996,9 +1975,6 @@ export default function SalePurchaseInvoiceCreation() {
                                                             <CurrencyRupee color='primary' />
                                                         </InputAdornment>
                                                     ),
-                                                    inputProps: {
-                                                        onFocus: (e: React.FocusEvent<HTMLInputElement>) => e.target.select(),
-                                                    }
                                                 }}
                                                 sx={{ flex: 1 }}
                                             />

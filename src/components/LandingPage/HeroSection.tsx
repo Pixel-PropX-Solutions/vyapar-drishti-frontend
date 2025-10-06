@@ -9,7 +9,7 @@ import {
     useTheme,
     useMediaQuery,
 } from '@mui/material';
-import HeroSectionImage from "../../assets/herosection.webp";
+import HeroSectionImage from "../../assets/herosection.png";
 import {
     ArrowForward,
 } from '@mui/icons-material';

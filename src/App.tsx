@@ -47,7 +47,6 @@ import VerifyEmail from "./pages/VerifyEmail";
 import ResetPassword from "./pages/ResetPassword";
 import ForgotPassword from "./pages/ForgotPassword";
 import Analytics from "./pages/Analytics";
-import Summary from "./pages/Summary";
 // import PromptModal from "./common/modals/PromptModal";
 
 const xThemeComponents = {
@@ -60,13 +59,9 @@ const xThemeComponents = {
 const App: React.FC<{ themeComponents?: object }> = (props) => {
   // const [showProfileModal, setShowProfileModal] = React.useState(false);
 
-  const { authState, user, isUserFetched, switchCompanyLoading, deleteCompanyLoading, current_company_id } = useSelector(
+  const { authState, user, isUserFetched, switchCompanyLoading, deleteCompanyLoading } = useSelector(
     (state: RootState) => state.auth
   );
-  const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
-  const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
-  const tax_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_tax;
-
   const dispatch = useDispatch<AppDispatch>();
 
   const isInitialized = useRef<boolean>(false);
@@ -169,8 +164,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/invoices/update/:type/:voucher_id" element={<UpdateSalePurchase />} />
 
                 <Route path="/reports" element={<Analytics />} />
-                {tax_enable && <Route path="/summary" element={<Summary />} />}
-
+                
                 <Route path="/xyz" element={<Xyz />} />
                 {/* <Route path="/*" element={<Navigate to="/" replace />} /> */}
               </Route>

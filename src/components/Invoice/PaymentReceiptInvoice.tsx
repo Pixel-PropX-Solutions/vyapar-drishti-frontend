@@ -111,14 +111,12 @@ const PaymentReceiptInvoice: React.FC = () => {
                     ledger: partyName,
                     ledger_id: customersList.find(c => c.ledger_name === partyName)?._id || '',
                     amount: transactionType === "Payment" ? -singleEntry.amount : singleEntry.amount,
-                    order_index: 0
                 },
                 {
                     vouchar_id: '',
                     ledger: singleEntry.customer,
                     ledger_id: customerTypes.find(c => c.ledger_name === singleEntry.customer)?._id || '',
                     amount: transactionType === "Payment" ? singleEntry.amount : -singleEntry.amount,
-                    order_index: 1
                 },
             ];
 

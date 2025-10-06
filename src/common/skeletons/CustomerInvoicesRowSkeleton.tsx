@@ -1,5 +1,6 @@
 import React from "react";
 import {
+    Box,
     Skeleton,
     TableCell,
     TableRow,
@@ -7,9 +8,6 @@ import {
 
 export const CustomerInvoicesRowSkeleton: React.FC = () => (
     <TableRow >
-        <TableCell align="left">
-            <Skeleton variant="rectangular" width={20} height={20} sx={{ borderRadius: 1 }} />
-        </TableCell>
         <TableCell align="left">
             <Skeleton variant="text" width={20} height={32} />
         </TableCell>
@@ -34,12 +32,12 @@ export const CustomerInvoicesRowSkeleton: React.FC = () => (
         <TableCell align="center">
             <Skeleton variant="text" width={40} height={20} sx={{ mx: 'auto' }} />
         </TableCell>
-        {/* <TableCell align="center">
+        <TableCell align="center">
             <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
                 <Skeleton variant="rectangular" width={32} height={32} sx={{ borderRadius: 1 }} />
                 <Skeleton variant="rectangular" width={32} height={32} sx={{ borderRadius: 1 }} />
                 <Skeleton variant="rectangular" width={32} height={32} sx={{ borderRadius: 1 }} />
             </Box>
-        </TableCell> */}
+        </TableCell>
     </TableRow>
 );

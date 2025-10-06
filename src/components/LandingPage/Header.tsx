@@ -16,8 +16,8 @@ import {
     Menu as MenuIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
-import Logo from "../../assets/Logo.webp";
-import logoText from "../../assets/Logo_Text.webp";
+import Logo from "../../assets/Logo.png";
+import logoText from "../../assets/Logo_Text.png";
 import ColorModeIconDropdown from '@/theme/ColorModeIconDropdown';
 
 const Header: React.FC = () => {

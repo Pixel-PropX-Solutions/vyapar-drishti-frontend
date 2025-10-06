@@ -22,8 +22,8 @@ import {
     Check,
     Security
 } from "@mui/icons-material";
-import Logo from "../../../assets/Logo.webp";
-import logoText from "../../../assets/Logo_Text.webp";
+import Logo from "../../../assets/Logo.png";
+import logoText from "../../../assets/Logo_Text.png";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/store/store";
 import { forgetPassword } from "@/services/auth";

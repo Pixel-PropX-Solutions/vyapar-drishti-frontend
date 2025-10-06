@@ -25,8 +25,8 @@ import {
     Cancel,
     Security
 } from "@mui/icons-material";
-import Logo from "../../../assets/Logo.webp";
-import logoText from "../../../assets/Logo_Text.webp";
+import Logo from "../../../assets/Logo.png";
+import logoText from "../../../assets/Logo_Text.png";
 import { getCurrentUser, resetPassword } from "@/services/auth";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/store/store";

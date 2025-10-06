@@ -12,8 +12,8 @@
 //   Autocomplete,
 // } from "@mui/material";
 // import { Email } from "@mui/icons-material";
-// import Logo from "../../../assets/Logo.webp";
-// import logoText from "../../../assets/Logo_Text.webp";
+// import Logo from "../../../assets/Logo.png";
+// import logoText from "../../../assets/Logo_Text.png";
 // import { getCurrentUser, register, sendOTP } from "@/services/auth";
 // import { AppDispatch } from "@/store/store";
 // import toast from "react-hot-toast";
