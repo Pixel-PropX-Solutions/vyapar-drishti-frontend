@@ -26,10 +26,10 @@ export const InvoicesRowSkeleton: React.FC = () => (
         <TableCell align="center">
             <Skeleton variant="text" width={80} height={20} sx={{ mx: 'auto' }} />
         </TableCell>
-        <TableCell align="center">
+        <TableCell align="right">
             <Skeleton variant="text" width={40} height={20} sx={{ mx: 'auto' }} />
         </TableCell>
-        <TableCell align="center">
+        <TableCell align="right">
             <Skeleton variant="text" width={40} height={20} sx={{ mx: 'auto' }} />
         </TableCell>
         <TableCell align="center">
