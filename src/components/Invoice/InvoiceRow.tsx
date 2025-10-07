@@ -166,8 +166,8 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                     </TableCell>
 
                     {/* Debit Invoice amount */}
-                    <TableCell align="center" sx={{ px: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <TableCell align="right" sx={{ px: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
                             {inv.is_deemed_positive && <Typography
                                 variant="body1"
                                 sx={{
@@ -193,8 +193,8 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                     </TableCell>
 
                     {/* Credit Invoice amount */}
-                    <TableCell align="center" sx={{ px: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <TableCell align="right" sx={{ px: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
                             {!inv.is_deemed_positive && <Typography
                                 variant="body1"
                                 sx={{

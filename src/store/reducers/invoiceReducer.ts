@@ -16,7 +16,13 @@ interface InvoiceState {
     }>;
     viewInvoiceGroups: Array<GetAllInvoiceGroups>;
     invoiceGroupPageMeta: PageMeta
-    pageMeta: PageMeta;
+    pageMeta: {
+        page: number;
+        limit: number;
+        total: number;
+        total_debit: number;
+        total_credit: number;
+    };
     loading: boolean;
     isInvoiceFecthing: boolean;
     error: string | null;
@@ -51,7 +57,8 @@ const initialState: InvoiceState = {
         page: 0,
         limit: 0,
         total: 0,
-        unique: [],
+        total_debit: 0,
+        total_credit: 0,
     },
     loading: false,
     isInvoiceFecthing: false,

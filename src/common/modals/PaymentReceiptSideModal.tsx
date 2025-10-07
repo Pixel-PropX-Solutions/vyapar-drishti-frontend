@@ -158,12 +158,14 @@ const PaymentReceiptSideModal: React.FC<CreateInventoryGroupModalProps> = ({
                 ledger: customerName,
                 ledger_id: customerId,
                 amount: !isReceipt ? -data.amount : data.amount,
+                order_index: 0
             },
             {
                 vouchar_id: '',
                 ledger: data.accounts,
                 ledger_id: customerTypes.find(c => c.ledger_name === data.accounts)?._id || '',
                 amount: !isReceipt ? data.amount : -data.amount,
+                order_index: 1
             },
         ];
 
