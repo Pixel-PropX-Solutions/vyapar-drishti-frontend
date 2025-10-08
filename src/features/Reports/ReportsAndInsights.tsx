@@ -74,7 +74,7 @@ const KPICard: React.FC<{
                     background: value > 0 ?
                         `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.02)} 0%, ${alpha(theme.palette.primary.main, 0.08)} 100%)`
                         : `linear-gradient(135deg, ${alpha(theme.palette.error.main, 0.02)} 0%, ${alpha(theme.palette.error.main, 0.08)} 100%)`,
-                    border: value > 0 ? `1px solid ${alpha(theme.palette.primary.main, 0.12)}` : `1px solid ${alpha(theme.palette.error.main, 0.12)}`,
+                    border:  value > 0 ? `1px solid ${alpha(theme.palette.primary.main, 0.12)}` : `1px solid ${alpha(theme.palette.error.main, 0.12)}`,
                 }}
             >
                 <CardContent>
@@ -531,12 +531,12 @@ const ReportsAndInsights: React.FC = () => {
                                                             Purchases
                                                         </Typography>
                                                     </Box>
-                                                    {/* <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+                                                    <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
                                                         <Circle sx={{ color: "hsl(195, 85%, 40%)", fontSize: 12 }} />
                                                         <Typography variant="caption" sx={{ fontWeight: 500 }}>
                                                             Profit
                                                         </Typography>
-                                                    </Box> */}
+                                                    </Box>
                                                 </Stack>
 
                                             </Box>
@@ -554,53 +554,44 @@ const ReportsAndInsights: React.FC = () => {
                                             ]}
                                             series={[
                                                 {
-                                                    id: 'sales',
+                                                    id: 'series-0',
                                                     label: monthlyData?.data.find(d => d.id === 'sales')?.label || 'Monthly Sales (₹)',
                                                     showMark: true,
                                                     curve: 'catmullRom',
                                                     connectNulls: true,
-                                                    area: true,
                                                     data: shiftToFinancialYear(monthlyData?.data.find(d => d.id === 'sales')?.data),
                                                 },
                                                 {
-                                                    id: 'purchase',
+                                                    id: 'series-1',
                                                     label: monthlyData?.data.find(d => d.id === 'purchase')?.label || 'Monthly Purchases (₹)',
                                                     showMark: true,
                                                     curve: 'catmullRom',
                                                     connectNulls: true,
                                                     data: shiftToFinancialYear(monthlyData?.data.find(d => d.id === 'purchase')?.data),
                                                 },
-                                                // {
-                                                //     id: 'profit',
-                                                //     label: monthlyData?.data.find(d => d.id === 'profit')?.label || 'Monthly Profit (₹)',
-                                                //     showMark: true,
-                                                //     curve: 'catmullRom',
-                                                //     connectNulls: true,
-                                                //     area: true,
-                                                //     data: shiftToFinancialYear(monthlyData?.data.find(d => d.id === 'profit')?.data),
-                                                // },
+                                                {
+                                                    id: 'profit',
+                                                    label: monthlyData?.data.find(d => d.id === 'profit')?.label || 'Monthly Profit (₹)',
+                                                    showMark: true,
+                                                    curve: 'catmullRom',
+                                                    connectNulls: true,
+                                                    area: true,
+                                                    data: shiftToFinancialYear(monthlyData?.data.find(d => d.id === 'profit')?.data),
+                                                },
                                             ]}
                                             height={280}
                                             margin={{ left: 60, right: 20, top: 20, bottom: 40 }}
                                             grid={{ horizontal: true }}
                                             sx={{
-                                                // '& .MuiAreaElement-series-profit': {
-                                                //     fill: "url('#series')",
-                                                // },
-                                                // '& .MuiAreaElement-series-purchase': {
-                                                //     fill: "url('#purchase')",
-                                                // },
-                                                '& .MuiAreaElement-series-sales': {
-                                                    fill: "url('#sales')",
+                                                '& .MuiAreaElement-series-profit': {
+                                                    fill: "url('#series')",
                                                 },
                                             }}
                                             slotProps={{
                                                 legend: { hidden: true },
                                             }}
                                         >
-                                            {/* <AreaGradient color={"hsl(195, 70%, 65%)"} id="series" /> */}
-                                            {/* <AreaGradient color={"#2e7d32"} id="purchase" /> */}
-                                            <AreaGradient color={"#c62828"} id="sales" />
+                                            <AreaGradient color={"hsl(195, 70%, 65%)"} id="series" />
                                         </LineChart>
                                     </CardContent>
                                 </Card>
