@@ -427,7 +427,7 @@ const Summary: React.FC = () => {
                             {
                                 title: 'Monthly Revenue',
                                 value: `₹${summaryStats.total_revenue}`,
-                                desc: 'Total revenue generated this month',
+                                desc: 'Total revenue generated in this period',
                                 color: '#e8f4fd',
                                 borderColor: '#1976d2',
                                 icon: <TrendingUpIcon sx={{ fontSize: 40, opacity: 0.3 }} />,
@@ -436,7 +436,7 @@ const Summary: React.FC = () => {
                             {
                                 title: 'Tax Amount',
                                 value: `₹${summaryStats.total_tax}`,
-                                desc: 'Total tax collected this month',
+                                desc: 'Total tax amount for this period',
                                 color: '#fff8e1',
                                 borderColor: '#ff9800',
                                 icon: <AssessmentIcon sx={{ fontSize: 40, opacity: 0.3 }} />,
@@ -456,14 +456,14 @@ const Summary: React.FC = () => {
                                             right: 0,
                                             color: item.borderColor
                                         }}>
-                                            <Tooltip title={`${item.trend} from last month`} arrow>
+                                            {/* <Tooltip title={`${item.trend} from last month`} arrow>
                                                 <Chip
                                                     label={item.trend}
                                                     size="small"
                                                     color="success"
                                                     sx={{ fontSize: '0.7rem', height: 20 }}
                                                 />
-                                            </Tooltip>
+                                            </Tooltip> */}
                                         </Box>
                                         <Box>
                                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
