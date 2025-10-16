@@ -11,7 +11,7 @@ import {
   useMediaQuery,
   useTheme
 } from '@mui/material';
-// import DashboardIcon from '@mui/icons-material/Dashboard';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 // import ChemistIcon from '@mui/icons-material/Store';
 // import StockistIcon from '@mui/icons-material/Warehouse';
 // import UploadBillIcon from '@mui/icons-material/UploadFile';
@@ -44,9 +44,9 @@ interface MenuItem {
 
 const createMainListItems = (role: string, tax_enable: boolean): MenuItem[] => {
   const adminItems: MenuItem[] = [
-    // { text: "Dashboard", path: "/dashboard", icon: <DashboardIcon />, requiredRole: 'admin' },
+    { text: "Dashboard", path: "/dashboard", icon: <DashboardIcon />, requiredRole: 'admin' },
     // { text: "Inventory", path: "/inventory", icon: <InventoryIcon />, requiredRole: 'admin' },
-    { text: "Products", path: "/products", icon: <ProductIcon />, requiredRole: 'admin' },
+    // { text: "Products", path: "/products", icon: <ProductIcon />, requiredRole: 'admin' },
     // { text: "Stockists", path: "/stockists", icon: <StockistIcon />, requiredRole: 'admin' },
     // { text: "Chemists", path: "/chemists", icon: <ChemistIcon />, requiredRole: 'admin' },
   ];

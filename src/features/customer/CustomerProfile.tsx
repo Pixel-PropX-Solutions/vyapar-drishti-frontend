@@ -665,7 +665,7 @@ const CustomerProfile: React.FC = () => {
                                         </TableCell>
                                         <TableCell align="right" colSpan={1} >
                                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                                {customer.closing_balance < 0 && <Typography
+                                                {customer.closing_balance > 0 && <Typography
                                                     variant="body1"
                                                     sx={{
                                                         fontWeight: 700,
@@ -676,13 +676,13 @@ const CustomerProfile: React.FC = () => {
                                                     &#8377;
                                                 </Typography>}
                                                 <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.error.main, }}>
-                                                    {customer.closing_balance < 0 ? Math.abs(customer.closing_balance) : ''}
+                                                    {customer.closing_balance > 0 ? Math.abs(customer.closing_balance) : ''}
                                                 </Typography>
                                             </Box>
                                         </TableCell>
                                         <TableCell align="right" colSpan={1}>
                                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                                {!(customer.closing_balance < 0) && <Typography
+                                                {!(customer.closing_balance > 0) && <Typography
                                                     variant="body1"
                                                     sx={{
                                                         fontWeight: 700,
@@ -693,7 +693,7 @@ const CustomerProfile: React.FC = () => {
                                                     &#8377;
                                                 </Typography>}
                                                 <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.success.main, }}>
-                                                    {customer.closing_balance < 0 ? '' : Math.abs(customer.closing_balance)}
+                                                    {customer.closing_balance > 0 ? '' : Math.abs(customer.closing_balance)}
                                                 </Typography>
                                             </Box>
                                         </TableCell>

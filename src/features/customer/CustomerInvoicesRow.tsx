@@ -177,7 +177,7 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, i
                     {/* Debit Invoice amount */}
                     <TableCell align="right" sx={{ px: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                            {(inv.amount < 0) && <Typography
+                            {(inv.amount > 0) && <Typography
                                 variant="body1"
                                 sx={{
                                     fontWeight: 700,
@@ -194,7 +194,7 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, i
                                     color: theme.palette.error.main,
                                 }}
                             >
-                                {inv.amount < 0 ? Math.abs(inv.amount) : " "}
+                                {inv.amount > 0 ? Math.abs(inv.amount) : " "}
                             </Typography>
                         </Box>
                     </TableCell>
@@ -202,7 +202,7 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, i
                     {/* Credit Invoice amount */}
                     <TableCell align="right" sx={{ px: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                            {!(inv.amount < 0) && <Typography
+                            {!(inv.amount > 0) && <Typography
                                 variant="body1"
                                 sx={{
                                     fontWeight: 700,
@@ -219,7 +219,7 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, i
                                     color: theme.palette.success.main,
                                 }}
                             >
-                                {inv.amount < 0 ? "" : Math.abs(inv.amount)}
+                                {inv.amount > 0 ? "" : Math.abs(inv.amount)}
                             </Typography>
                         </Box>
                     </TableCell>

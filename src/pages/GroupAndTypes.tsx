@@ -33,18 +33,15 @@ import { deleteProduct } from "@/services/products";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import toast from "react-hot-toast";
-import { GetAllAccountingGroups, GetInventoryGroups, SortOrder, UpdateAccountingGroup, UpdateInventoryGroup, } from "@/utils/types";
+import { GetInventoryGroups, SortOrder, UpdateInventoryGroup, } from "@/utils/types";
 import TabPanel from "@/features/upload-documents/components/TabPanel";
 import { viewAllCustomerGroups } from "@/services/accountingGroup";
-import { CustomerGroupsRow } from "@/components/GroupsAndTypes/CustomerGroupsRow";
 import InvoiceTypeCardSkeleton from "@/components/GroupsAndTypes/InvoiceTypeCardSkeleton";
 import InvoiceTypesCard from "@/components/GroupsAndTypes/InvoiceTypesCard";
 import { viewAllInventoryGroup } from "@/services/inventoryGroup";
 import { InventoryGroupsRow } from "@/features/Group/InventoryGroupRow";
 import { InventoryGroupRowSkeleton } from "@/features/Group/InventoryGroupRowSkeleton";
 import CreateInventoryGroupModal from "@/features/Group/CreateInventoryGroupModal";
-import CreateCustomerGroupModal from "@/features/Group/CreateCustomerGroupModal";
-import { CustomerGroupRowSkeleton } from "@/features/Group/CustomerGroupRowSkeleton";
 import { viewAllInvoiceGroups } from "@/services/invoice";
 
 const GroupAndTypes: React.FC = () => {
@@ -56,8 +53,8 @@ const GroupAndTypes: React.FC = () => {
     const { invoiceGroups, invoiceGroupPageMeta } = useSelector((state: RootState) => state.invoice);
     const [openInventoryGroupModal, setOpenInventoryGroupModal] = useState<boolean>(false);
     const [selectedInventoryGroup, setSelectedInventoryGroup] = useState<UpdateInventoryGroup | null>(null);
-    const [openCustomerGroupModal, setOpenCustomerGroupModal] = useState<boolean>(false);
-    const [selectedCustomerGroup, setSelectedCustomerGroup] = useState<UpdateAccountingGroup | null>(null);
+    // const [openCustomerGroupModal, setOpenCustomerGroupModal] = useState<boolean>(false);
+    // const [selectedCustomerGroup, setSelectedCustomerGroup] = useState<UpdateAccountingGroup | null>(null);
 
     const [data, setData] = useState({
         searchTerm: '',
@@ -113,14 +110,14 @@ const GroupAndTypes: React.FC = () => {
             });
     };
 
-    const handleCustomerGroupEdit = (cusGroup: GetAllAccountingGroups) => {
-        setOpenCustomerGroupModal(true);
-        setSelectedCustomerGroup(cusGroup);
-    };
-    const handleCustomerGroupView = (cusGroup: GetAllAccountingGroups) => {
-        setOpenCustomerGroupModal(true);
-        setSelectedCustomerGroup(cusGroup);
-    };
+    // const handleCustomerGroupEdit = (cusGroup: GetAllAccountingGroups) => {
+    //     setOpenCustomerGroupModal(true);
+    //     setSelectedCustomerGroup(cusGroup);
+    // };
+    // const handleCustomerGroupView = (cusGroup: GetAllAccountingGroups) => {
+    //     setOpenCustomerGroupModal(true);
+    //     setSelectedCustomerGroup(cusGroup);
+    // };
 
     const handleInventoryGroupEdit = (inventoryGroup: GetInventoryGroups) => {
         setOpenInventoryGroupModal(true);
@@ -240,14 +237,15 @@ const GroupAndTypes: React.FC = () => {
                                 color="primary"
                                 startIcon={<AddCircleIcon fontSize="large" />}
                                 onClick={() => {
-                                    if (selectedTab === 0) {
-                                        setOpenCustomerGroupModal(true);
-                                        setSelectedCustomerGroup(null);
-                                    }
-                                    else if (selectedTab === 1) {
-                                        // do nothing
-                                    }
-                                    else if (selectedTab === 2) {
+                                    // if (selectedTab === 0) {
+                                    //     setOpenCustomerGroupModal(true);
+                                    //     setSelectedCustomerGroup(null);
+                                    // }
+                                    // else if (selectedTab === 1) {
+                                    //     // do nothing
+                                    // }
+                                    // else
+                                     if (selectedTab === 2) {
                                         setOpenInventoryGroupModal(true);
                                         setSelectedInventoryGroup(null);
                                     }
@@ -367,9 +365,8 @@ const GroupAndTypes: React.FC = () => {
                 </Grid>
             </Grid>
 
-
+{/* 
             <TabPanel value={selectedTab} index={0}>
-                {/* Enhanced Table */}
                 <TableContainer
                     component={Paper}
                     elevation={0}
@@ -378,7 +375,6 @@ const GroupAndTypes: React.FC = () => {
                         borderRadius: 1,
                         border: `1px solid ${alpha(theme.palette.divider, 1)}`,
                         boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
-                        // overflow: 'hidden',
                     }}
                 >
                     <Table sx={{ width: '100%' }}>
@@ -428,7 +424,6 @@ const GroupAndTypes: React.FC = () => {
                                             }}
                                         >
                                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                                                {/* <InventoryIcon fontSize="small" /> */}
                                                 <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary }}>
                                                     Under Group
                                                 </Typography>
@@ -436,44 +431,6 @@ const GroupAndTypes: React.FC = () => {
                                         </TableSortLabel>
                                     </Tooltip>
                                 </TableCell>
-                                {/* <TableCell align="right" sx={{ px: 1 }}>
-                                    <Tooltip title="Sort by Bar-Code" arrow>
-                                        <TableSortLabel
-                                            active={sortBy === "barcode"}
-                                            direction={sortBy === "barcode" ? sortOrder : "asc"}
-                                            onClick={() => {
-                                                setData((prevState) => ({
-                                                    ...prevState,
-                                                    sortBy: "barcode",
-                                                    sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
-                                                }));
-                                            }}
-                                        >
-                                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                                                Primary group
-                                            </Typography>
-                                        </TableSortLabel>
-                                    </Tooltip>
-                                </TableCell> */}
-                                {/* <TableCell align="right" sx={{ px: 1 }}>
-                                    <Tooltip title="Sort by Selling Price" arrow>
-                                        <TableSortLabel
-                                            active={sortBy === "selling_price"}
-                                            direction={sortBy === "selling_price" ? sortOrder : "asc"}
-                                            onClick={() => {
-                                                setData((prevState) => ({
-                                                    ...prevState,
-                                                    sortBy: "selling_price",
-                                                    sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
-                                                }));
-                                            }}
-                                        >
-                                            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                                                Selling Price
-                                            </Typography>
-                                        </TableSortLabel>
-                                    </Tooltip>
-                                </TableCell> */}
                                 <TableCell align="right" >
                                     <Tooltip title="Sort by Purchase Price" arrow>
                                         <TableSortLabel
@@ -547,7 +504,7 @@ const GroupAndTypes: React.FC = () => {
                         </TableBody>
                     </Table>
                 </TableContainer>
-            </TabPanel>
+            </TabPanel> */}
 
             <TabPanel value={selectedTab} index={1}>
                 <Grid container spacing={3}>
@@ -906,7 +863,7 @@ const GroupAndTypes: React.FC = () => {
                 inventoryGroup={selectedInventoryGroup}
                 onCreated={function (inventoryGroup: { name: string; _id: string; }): void { console.log("Inventory group created:", inventoryGroup.name); }} />
 
-            <CreateCustomerGroupModal
+            {/* <CreateCustomerGroupModal
                 open={openCustomerGroupModal}
                 onClose={() => {
                     setOpenCustomerGroupModal(false);
@@ -917,7 +874,7 @@ const GroupAndTypes: React.FC = () => {
                 onCreated={function (accountingGroup: { name: string; _id: string; }): void {
                     console.log("Customer group created:", accountingGroup.name);
                     setOpenCustomerGroupModal(false);
-                }} />
+                }} /> */}
         </Box>
     );
 };

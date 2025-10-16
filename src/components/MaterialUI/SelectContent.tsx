@@ -76,7 +76,9 @@ export default function SelectContent() {
   };
 
   useEffect(() => {
-    dispatch(getCurrentCompany());
+    if (user.user_type !== 'admin') {
+      dispatch(getCurrentCompany());
+    }
   }, [dispatch]);
 
   const handleChangeCompany = async (com: string) => {
@@ -84,7 +86,9 @@ export default function SelectContent() {
       .unwrap().then((response) => {
         if (response) {
           dispatch(getCurrentUser());
-          dispatch(getCurrentCompany());
+          if (user.user_type !== 'admin') {
+            dispatch(getCurrentCompany());
+          }
           toast.success("Company changed successfully!");
         }
       }).catch((error) => {
@@ -235,8 +239,10 @@ export default function SelectContent() {
           localStorage.setItem("current_company_id", id);
           setIsCompanyEditing(false);
           dispatch(getCurrentUser());
-          dispatch(getCurrentCompany());
-          dispatch(getAllCompanies());
+          if (user.user_type !== 'admin') {
+            dispatch(getCurrentCompany());
+            dispatch(getAllCompanies());
+          }
         }}
       />
     </>

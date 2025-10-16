@@ -30,7 +30,7 @@ adminApi.interceptors.response.use(
 
             try {
                 const {data} = await axios.post<Token>(
-                    `${import.meta.env.VITE_LOCAL_BACKEND_ADMIN_URL}/auth/handleadminRefreshToken`,
+                    `${import.meta.env.VITE_LOCAL_BACKEND_ADMIN_URL}/auth/refresh`,
                     {},
                     {withCredentials : true}
                 );
