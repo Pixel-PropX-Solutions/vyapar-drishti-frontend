@@ -74,7 +74,7 @@ const KPICard: React.FC<{
                     background: value > 0 ?
                         `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.02)} 0%, ${alpha(theme.palette.primary.main, 0.08)} 100%)`
                         : `linear-gradient(135deg, ${alpha(theme.palette.error.main, 0.02)} 0%, ${alpha(theme.palette.error.main, 0.08)} 100%)`,
-                    border: value > 0 ? `1px solid ${alpha(theme.palette.primary.main, 0.12)}` : `1px solid ${alpha(theme.palette.error.main, 0.12)}`,
+                    border:  value > 0 ? `1px solid ${alpha(theme.palette.primary.main, 0.12)}` : `1px solid ${alpha(theme.palette.error.main, 0.12)}`,
                 }}
             >
                 <CardContent>
@@ -554,7 +554,7 @@ const ReportsAndInsights: React.FC = () => {
                                             ]}
                                             series={[
                                                 {
-                                                    id: 'sales',
+                                                    id: 'series-0',
                                                     label: monthlyData?.data.find(d => d.id === 'sales')?.label || 'Monthly Sales (₹)',
                                                     showMark: true,
                                                     curve: 'catmullRom',
@@ -562,7 +562,7 @@ const ReportsAndInsights: React.FC = () => {
                                                     data: shiftToFinancialYear(monthlyData?.data.find(d => d.id === 'sales')?.data),
                                                 },
                                                 {
-                                                    id: 'purchase',
+                                                    id: 'series-1',
                                                     label: monthlyData?.data.find(d => d.id === 'purchase')?.label || 'Monthly Purchases (₹)',
                                                     showMark: true,
                                                     curve: 'catmullRom',
