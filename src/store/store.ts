@@ -10,6 +10,7 @@ import analyticsReducer from "./reducers/analyticsReducer";
 import customerReducer from "./reducers/customersReducer";
 import accountingGroupReducer from "./reducers/accountingGroupReducer";
 import inventoryGroupReducer from "./reducers/inventoryGroupReducer";
+import adminReducer from "./reducers/adminReducer";
 
 const store = configureStore({
   reducer: {
@@ -21,6 +22,7 @@ const store = configureStore({
     inventoryGroup: inventoryGroupReducer,
     customersLedger: customerReducer,
 
+    admin: adminReducer,
     auth: authReducer,
     user: userReducer,
     inventory: inventoryReducer,

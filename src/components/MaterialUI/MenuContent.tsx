@@ -11,7 +11,7 @@ import {
   useMediaQuery,
   useTheme
 } from '@mui/material';
-// import DashboardIcon from '@mui/icons-material/Dashboard';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 // import ChemistIcon from '@mui/icons-material/Store';
 // import StockistIcon from '@mui/icons-material/Warehouse';
 // import UploadBillIcon from '@mui/icons-material/UploadFile';
@@ -44,9 +44,9 @@ interface MenuItem {
 
 const createMainListItems = (role: string, tax_enable: boolean): MenuItem[] => {
   const adminItems: MenuItem[] = [
-    // { text: "Dashboard", path: "/dashboard", icon: <DashboardIcon />, requiredRole: 'admin' },
+    { text: "Dashboard", path: "/dashboard", icon: <DashboardIcon />, requiredRole: 'admin' },
     // { text: "Inventory", path: "/inventory", icon: <InventoryIcon />, requiredRole: 'admin' },
-    { text: "Products", path: "/products", icon: <ProductIcon />, requiredRole: 'admin' },
+    // { text: "Products", path: "/products", icon: <ProductIcon />, requiredRole: 'admin' },
     // { text: "Stockists", path: "/stockists", icon: <StockistIcon />, requiredRole: 'admin' },
     // { text: "Chemists", path: "/chemists", icon: <ChemistIcon />, requiredRole: 'admin' },
   ];
@@ -69,21 +69,6 @@ const createMainListItems = (role: string, tax_enable: boolean): MenuItem[] => {
     { text: "Invoices", path: "/invoices", icon: <ReceiptOutlined />, requiredRole: 'user' },
     { text: "Transactions", path: "/transactions", icon: <PaymentsOutlined />, requiredRole: 'user' },
     { text: "Reports", path: "/reports", icon: <Assessment />, requiredRole: 'user' }];
-
-  // const userItems: MenuItem[] = [
-  // { text: "Dashboard", path: "/dashboard", icon: <DashboardIcon />, requiredRole: 'user' },
-  //   { text: "Inventory", path: "/inventory", icon: <InventoryIcon />, requiredRole: 'user' },
-  //   { text: "Timeline", path: "/timeline", icon: <ViewTimelineIcon />, requiredRole: 'user' },
-  //   { text: "Products", path: "/products", icon: <ProductIcon />, requiredRole: 'user' },
-  // { text: "Groups & Types", path: "/groups", icon: <ProductIcon />, requiredRole: 'user' },
-  //   { text: "Customers", path: "/customers", icon: <People />, requiredRole: 'user' },
-  //   { text: "Invoices", path: "/invoices", icon: <LocalShippingIcon />, requiredRole: 'user' },
-  //   { text: "Transactions", path: "/transactions", icon: <LocalShippingIcon />, requiredRole: 'user' },
-  // { text: "Sell Products", path: "/sell", icon: <ProductIcon />, requiredRole: 'user' },
-  // { text: "Upload Bills", path: "/upload", icon: <UploadBillIcon />, requiredRole: 'user' },
-  // { text: "Debitors", path: "/debitors", icon: <StockistIcon />, requiredRole: 'user' },
-  // { text: "Sales", path: "/sales", icon: <LocalShippingIcon />, requiredRole: 'user' },
-  // ];
 
   if (role === ROLE_ENUM.USER)
     return userItems;

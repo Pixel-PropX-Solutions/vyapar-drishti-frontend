@@ -221,16 +221,16 @@ export const CustomerRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit,
                             {(cus.mailing_country && !cus.mailing_state) && `${cus.mailing_country}`}
                         </Typography>
                     </TableCell>
-                    {/* Customer Type */}
+                    {/* Closing Balance */}
                     <TableCell align="center">
                         <Typography
                             variant="body1"
                             sx={{
                                 fontWeight: 700,
-                                color: cus.total_amount < 0 ? theme.palette.success.main : theme.palette.error.main,
+                                color: cus.total_amount === 0 ? theme.palette.common.black : cus.total_amount < 0 ? theme.palette.success.main : theme.palette.error.main,
                             }}
                         >
-                            {Math.abs(cus.total_amount)}{cus.total_amount < 0 ? ' DR' : ' CR'}
+                            {Math.abs(cus.total_amount)}{cus.total_amount === 0 ? '' : cus.total_amount < 0 ? ' CR' : ' DR'}
                         </Typography>
                     </TableCell>
 

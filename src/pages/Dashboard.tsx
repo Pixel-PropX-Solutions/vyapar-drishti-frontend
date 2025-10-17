@@ -47,7 +47,7 @@ export default function Dashboard(props: {
               alignItems: "center",
               mx: { xs: 0, md: 5 },
               pb: 5,
-              mt: { xs: 5, md: 0 },
+              mt: { xs: 8, md: 0 },
             }}
           >
             <Header />

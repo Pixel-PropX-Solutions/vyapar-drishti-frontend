@@ -48,6 +48,7 @@ import ResetPassword from "./pages/ResetPassword";
 import ForgotPassword from "./pages/ForgotPassword";
 import Analytics from "./pages/Analytics";
 import Summary from "./pages/Summary";
+import UserAdminDashboard from "./pages/AdminDashboard";
 // import PromptModal from "./common/modals/PromptModal";
 
 const xThemeComponents = {
@@ -128,18 +129,12 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
           <>
             {user?.user_type === ROLE_ENUM.ADMIN && (
               <Route element={<Dashboard />}>
-                {/* <Route path="/dashboard" element={<AdminDashboard />} /> */}
-                {/* <Route path="/" element={<AdminDashboard />} /> */}
+                <Route path="/" element={<UserAdminDashboard />} />
+                <Route path="/dashboard" element={<UserAdminDashboard />} />
                 <Route path="/account" element={<ProfilePage />} />
-                <Route path="/" element={<ProfilePage />} />
-                <Route path="/products/:id" element={<ViewItem />} />
-                <Route path="/products" element={<Products />} />
-                {/* <Route path="/inventory" element={<AdminInventory />} /> */}
-                {/* <Route path="/upload" element={<UploadDocuments />} /> */}
+                {/* <Route path="/" element={<ProfilePage />} /> */}
                 {/* <Route path="/settings" element={<Settings />} /> */}
                 <Route path="/about" element={<AboutPage />} />
-                {/* <Route path="/create/user" element={<CreateUserProfile />} /> */}
-                <Route path="/customers" element={<CustomerLedger />} />
                 {/* <Route path="/*" element={<Navigate to="/" replace />} /> */}
 
               </Route>
@@ -147,8 +142,8 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
 
             {user?.user_type === ROLE_ENUM.USER && (
               <Route element={<Dashboard />}>
-                <Route path="/account" element={<ProfilePage />} />
                 <Route path="/" element={<ProfilePage />} />
+                <Route path="/account" element={<ProfilePage />} />
                 <Route path="/products/:id" element={<ViewItem />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/warehouses" element={<Inventory />} />
