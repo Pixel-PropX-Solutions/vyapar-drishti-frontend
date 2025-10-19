@@ -3,12 +3,22 @@ import { GridColDef } from "@mui/x-data-grid-pro";
 import ProductIcon from "@mui/icons-material/LocalPharmacyOutlined";
 import QuantityIcon from "@mui/icons-material/LocalOffer";
 import ExpiryIcon from "@mui/icons-material/CalendarToday";
-import { ProductSortField, SortOrder } from "./types";
+import { MenuItem, ProductSortField, SortOrder } from "./types";
 import ImageIcon from '@mui/icons-material/Image';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import VideoFileIcon from '@mui/icons-material/VideoFile';
 import AttachFileIcon from "@mui/icons-material/AttachFile";
+import DashboardIcon from '@mui/icons-material/Dashboard';
+// import ChemistIcon from '@mui/icons-material/Store';
+// import StockistIcon from '@mui/icons-material/Warehouse';
+// import UploadBillIcon from '@mui/icons-material/UploadFile';
+import InventoryIcon from "@mui/icons-material/Inventory";
+import ViewTimelineIcon from '@mui/icons-material/ViewTimeline';
+// import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
+import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
+import { ROLE_ENUM } from '@/utils/enums';
+import { Assessment, PaymentsOutlined, People, Person2, ReceiptOutlined } from '@mui/icons-material';
 
 type ProductSortState = {
   search: string;
@@ -298,3 +308,48 @@ export function generateAccounting({
     },
   ];
 }
+
+export const createMainListItems = (role: string, tax_enable: boolean): MenuItem[] => {
+  const adminItems: MenuItem[] = [
+    { text: "Dashboard", path: "/dashboard", icon: <DashboardIcon />, requiredRole: 'admin' },
+    // { text: "Inventory", path: "/inventory", icon: <InventoryIcon />, requiredRole: 'admin' },
+    // { text: "Products", path: "/products", icon: <ProductIcon />, requiredRole: 'admin' },
+    // { text: "Stockists", path: "/stockists", icon: <StockistIcon />, requiredRole: 'admin' },
+    // { text: "Chemists", path: "/chemists", icon: <ChemistIcon />, requiredRole: 'admin' },
+  ];
+
+
+  const userItems: MenuItem[] = tax_enable ? [
+    { text: "WareHouse", path: "/warehouses", icon: <InventoryIcon />, requiredRole: 'user' },
+    { text: "Timeline", path: "/timeline", icon: <ViewTimelineIcon />, requiredRole: 'user' },
+    { text: "Products", path: "/products", icon: <ProductIcon />, requiredRole: 'user' },
+    { text: "Customers", path: "/customers", icon: <People />, requiredRole: 'user' },
+    { text: "Accounts", path: "/accounts", icon: <People />, requiredRole: 'user' },
+    { text: "Invoices", path: "/invoices", icon: <ReceiptOutlined />, requiredRole: 'user' },
+    { text: "Transactions", path: "/transactions", icon: <PaymentsOutlined />, requiredRole: 'user' },
+    { text: "Reports", path: "/reports", icon: <Assessment />, requiredRole: 'user' },
+    { text: "Summary", path: "/summary", icon: <Assessment />, requiredRole: 'user' }
+  ] :
+    [{ text: "WareHouse", path: "/warehouses", icon: <InventoryIcon />, requiredRole: 'user' },
+    { text: "Timeline", path: "/timeline", icon: <ViewTimelineIcon />, requiredRole: 'user' },
+    { text: "Products", path: "/products", icon: <ProductIcon />, requiredRole: 'user' },
+    { text: "Customers", path: "/customers", icon: <People />, requiredRole: 'user' },
+    { text: "Accounts", path: "/accounts", icon: <People />, requiredRole: 'user' },
+    { text: "Invoices", path: "/invoices", icon: <ReceiptOutlined />, requiredRole: 'user' },
+    { text: "Transactions", path: "/transactions", icon: <PaymentsOutlined />, requiredRole: 'user' },
+    { text: "Reports", path: "/reports", icon: <Assessment />, requiredRole: 'user' }];
+
+  if (role === ROLE_ENUM.USER)
+    return userItems;
+  else if (role === ROLE_ENUM.ADMIN)
+    return adminItems;
+  else {
+    return [];
+  }
+};
+
+export const secondaryListItems: MenuItem[] = [
+  // { text: "Settings", path: "/settings", icon: <SettingsRoundedIcon /> },
+  { text: "Profile", path: "/profile", icon: <Person2 /> },
+  { text: "About", path: "/about", icon: <InfoRoundedIcon /> },
+];

@@ -166,7 +166,6 @@ export interface GetUserLedgers {
   mailing_country?: string,
   opening_balance: number,
   total_amount: number,
-  is_deemed_positive: boolean,
   is_positive: boolean,
   image?: string | File | null,
   mailing_state: string,
@@ -186,7 +185,6 @@ export interface GetUserLedgers {
 
 export interface GetCustomerInvoices {
   amount: number,
-  is_deemed_positive: boolean,
   vouchar_id: string,
   date: string,
   voucher_number: string,
@@ -643,7 +641,6 @@ export interface GetInvoiceData {
     tin: string,
     image: string | File | null,
     is_deleted: boolean,
-    is_deemed_positive: boolean,
     is_revenue: boolean,
     ledger_name: string,
     mailing_address: string,
@@ -821,7 +818,6 @@ export interface GetAllVouchars {
   party_name: string;
   created_at: string;
   amount: number,
-  is_deemed_positive: boolean
 }
 
 export interface GetAllAccountingGroups {
@@ -1085,6 +1081,14 @@ export interface StatsData {
   current: number,
   profit: number,
   profit_percent: number,
+}
+
+export interface MenuItem {
+  text: string;
+  path: string;
+  icon: React.ReactNode;
+  children?: MenuItem[];
+  requiredRole?: 'admin' | 'user';
 }
 
 export interface UsersList {

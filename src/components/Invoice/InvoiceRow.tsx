@@ -168,13 +168,13 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                     {/* Debit Invoice amount */}
                     <TableCell align="right" sx={{ px: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                            {(inv.amount > 0) && <Typography
+                            {inv.amount > 0 && <Typography
                                 variant="body1"
                                 sx={{
                                     fontWeight: 700,
                                     // fontSize: '1.1rem',
                                     mr: 0.5,
-                                    color: theme.palette.error.main,
+                                    color: !(inv.amount > 0) ? theme.palette.error.main : theme.palette.success.main,
                                 }}
                             >
                                 &#8377;
@@ -184,7 +184,7 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                                 sx={{
                                     fontWeight: 700,
                                     // fontSize: '1.1rem',
-                                    color: theme.palette.error.main,
+                                    color: !(inv.amount > 0) ? theme.palette.error.main : theme.palette.success.main,
                                 }}
                             >
                                 {inv.amount > 0 ? Math.abs(inv.amount) : " "}
@@ -201,7 +201,7 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                                     fontWeight: 700,
                                     // fontSize: '1.1rem',
                                     mr: 0.5,
-                                    color: theme.palette.success.main,
+                                    color: inv.amount > 0 ? theme.palette.success.main : theme.palette.error.main,
                                 }}
                             >
                                 &#8377;
@@ -211,10 +211,10 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                                 sx={{
                                     fontWeight: 700,
                                     // fontSize: '1.1rem',
-                                    color: theme.palette.success.main,
+                                    color: inv.amount > 0 ? theme.palette.success.main : theme.palette.error.main,
                                 }}
                             >
-                                {inv.amount > 0 ? "" : Math.abs(inv.amount)}
+                                {inv.amount > 0 ? " " : Math.abs(inv.amount)}
                             </Typography>
                         </Box>
                     </TableCell>
