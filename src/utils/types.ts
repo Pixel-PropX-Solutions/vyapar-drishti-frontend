@@ -1090,3 +1090,54 @@ export interface MenuItem {
   children?: MenuItem[];
   requiredRole?: 'admin' | 'user';
 }
+
+export interface UsersList {
+  _id: string,
+  name: {
+    first: string,
+    last: string
+  },
+  email: string,
+  phone: {
+    code: string,
+    number: string
+  },
+  image: string | null,
+  user_type: string,
+  is_verified: boolean,
+  created_at: string,
+  latest_invoice_date: string,
+  total_invoices_created: number,
+  latest_invoice_created_at: string,
+  user_settings: {
+    _id: string,
+    user_id: string,
+    current_company_id: string,
+    current_company_name: string,
+    last_login: string,
+    last_login_ip: string,
+    last_login_device: string
+  },
+  companies: Array<
+    {
+      _id: string,
+      pinCode: string | null,
+      state: string,
+      phone: string | null,
+      email: string | null,
+      created_at: string,
+      company_name: string,
+      country: string,
+      last_invoice_date: string,
+      last_invoice_created_at: string,
+      total_invoices: number,
+      bank_details: {
+        account_holder: string | null,
+        account_number: string | null,
+        bank_ifsc: string | null,
+        bank_name: string | null,
+        bank_branch: string | null,
+        qr_code_url: string | null
+      }
+    }>
+}
