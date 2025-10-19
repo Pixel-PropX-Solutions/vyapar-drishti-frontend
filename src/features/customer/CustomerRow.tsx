@@ -221,7 +221,7 @@ export const CustomerRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit,
                             {(cus.mailing_country && !cus.mailing_state) && `${cus.mailing_country}`}
                         </Typography>
                     </TableCell>
-                    {/* Customer Type */}
+                    {/* Closing Balance */}
                     <TableCell align="center">
                         <Typography
                             variant="body1"

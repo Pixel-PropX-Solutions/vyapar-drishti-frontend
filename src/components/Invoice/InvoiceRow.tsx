@@ -316,7 +316,7 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                                     </Typography>
                                 </MenuItem>
 
-                                <MenuItem
+                                {['Sales', 'Purchase', "Payment", "Receipt"].includes(inv.voucher_type) && <MenuItem
                                     sx={{
                                         display: 'flex',
                                         alignItems: 'center',
@@ -334,7 +334,7 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                                     <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.success.light }}>
                                         Print
                                     </Typography>
-                                </MenuItem>
+                                </MenuItem>}
                             </Menu>
                         </>
                     </TableCell>

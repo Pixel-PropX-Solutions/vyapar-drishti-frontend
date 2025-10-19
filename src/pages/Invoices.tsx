@@ -665,12 +665,12 @@ const Invoices: React.FC = () => {
                           sx={{
                             fontWeight: 700,
                             mr: 0.5,
-                            color: theme.palette.success.main,
+                            color: theme.palette.error.main,
                           }}
                         >
                           &#8377;
                         </Typography>
-                        <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.success.main, }}>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.error.main, }}>
                           {Math.abs(pageMeta.total_debit)}
                         </Typography>
                       </Box>
@@ -682,12 +682,12 @@ const Invoices: React.FC = () => {
                           sx={{
                             fontWeight: 700,
                             mr: 0.5,
-                            color: theme.palette.error.main,
+                            color: theme.palette.success.main,
                           }}
                         >
                           &#8377;
                         </Typography>
-                        <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.error.main, }}>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.success.main, }}>
                           {Math.abs(pageMeta.total_credit)}
                         </Typography>
                       </Box>

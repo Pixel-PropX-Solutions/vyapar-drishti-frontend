@@ -136,7 +136,7 @@ const ProductsSideModal = (props: SideModalProps) => {
         hsn_code: '',
         taxability: '',
         tax_rate: 0,
-        low_stock_alert: 0,
+        low_stock_alert: 5,
     });
 
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -273,7 +273,7 @@ const ProductsSideModal = (props: SideModalProps) => {
             if (data.opening_balance) sanitizedData.opening_balance = data.opening_balance;
             if (data.opening_rate) sanitizedData.opening_rate = data.opening_rate;
             if (openingValue) sanitizedData.opening_value = openingValue;
-            if (data.low_stock_alert) sanitizedData.low_stock_alert = data.low_stock_alert;
+            if (data.low_stock_alert) sanitizedData.low_stock_alert = data.low_stock_alert ?? 5;
             if (data.tax_rate) sanitizedData.tax_rate = data.tax_rate;
 
             const formData = new FormData();

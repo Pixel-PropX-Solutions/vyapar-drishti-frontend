@@ -37,15 +37,6 @@ export const ProfileHeader: React.FC<{
     return `${first?.[0] ?? ''}${last?.[0] ?? ''}`.toUpperCase();
   };
 
-  // const getCompanyInitials = () => {
-  //   if (!company?.company_name) return 'TK';
-  //   const companyName = company.company_name.split(" ");
-  //   const first = companyName[0];
-  //   const last = companyName[companyName.length - 1];
-  //   return `${first?.[0] ?? ''}${last?.[0] ?? ''}`.toUpperCase();
-  // };
-
-
   return (
     <Card
       elevation={0}
@@ -70,6 +61,7 @@ export const ProfileHeader: React.FC<{
           <ButtonGroup
             variant="contained"
             sx={{
+              display: { xs: 'none', md: 'flex' },
               bgcolor: alpha("hsl(0, 0%, 100%)", 0.15),
               border: `1px solid ${alpha("hsl(0, 0%, 100%)", 0.2)}`,
             }}
@@ -85,9 +77,19 @@ export const ProfileHeader: React.FC<{
               Edit Profile
             </Button>
           </ButtonGroup>
+          <IconButton
+            size="large"
+            onClick={onEditToggle}
+            sx={{
+              transition: 'color 0.2s ease',
+              display: { xs: 'flex', sm: 'none', md: 'none', lg: 'none', xl: 'none' },
+            }}
+          >
+            <EditIcon fontSize="medium" />
+          </IconButton>
         </Box>
 
-        <Box display="flex" flexDirection={{ xs: "column", md: "row" }} alignItems="center" gap={6}>
+        <Box display="flex" flexDirection="row" alignItems="center" gap={6}>
           <Box position="relative">
             {(user?.image !== '' && typeof user?.image === 'string') ? (
               <img
@@ -143,7 +145,7 @@ export const ProfileHeader: React.FC<{
                 label={user?.user_type === 'admin' ? "Admin" : user?.user_type === 'user' ? "User" : "Guest"}
                 icon={<Business fontSize="small" />}
                 sx={{
-                  bgcolor: alpha("hsl(0, 0%, 100%)", 0.2),
+                  bgcolor: alpha("hsl(0, 0%, 100%)", .7),
                   color: "white",
                   fontWeight: 700,
                   fontSize: '0.9rem',
@@ -153,11 +155,11 @@ export const ProfileHeader: React.FC<{
                 }}
               />
               <Chip
-                label="Premium"
+                label="Basic Plan"
                 icon={<Star fontSize="small" />}
                 sx={{
-                  bgcolor: alpha(theme.palette.warning.main, 0.2),
-                  color: theme.palette.warning.main,
+                  bgcolor: alpha(theme.palette.warning.light, 0.5),
+                  color: theme.palette.warning.dark,
                   fontWeight: 700,
                   fontSize: '0.9rem',
                   height: 36,

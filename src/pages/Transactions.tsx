@@ -581,7 +581,11 @@ const Transactions: React.FC = () => {
                                                 toast.error(error || 'An unexpected error occurred. Please try again later.');
                                             })
                                         }}
-                                        onPrint={() => { handleInvoice(inv, () => { setVisible(true); }) }}
+                                        onPrint={() => {
+                                            if (['Receipt', "Payment", "Purchase", "Sales"].includes(inv.voucher_type)) {
+                                                handleInvoice(inv, () => { setVisible(true); })
+                                            }
+                                        }}
                                     />))
                             ) : (
                                 <TableRow>

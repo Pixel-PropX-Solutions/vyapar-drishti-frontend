@@ -295,7 +295,7 @@ const AdditionalInfoSection: React.FC<AdditionalInfoSectionProps> = ({
                                         )
                                     }}
                                     error={!!validationErrors.low_stock_alert}
-                                    helperText={validationErrors.low_stock_alert || 'Get notified when stock falls below this level'}
+                                    helperText={validationErrors.low_stock_alert || 'Get notified when stock falls below this level. Default is 5 units.'}
                                     sx={{
                                         '& .MuiOutlinedInput-root': {
                                             borderRadius: 1,

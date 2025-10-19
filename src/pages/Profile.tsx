@@ -235,7 +235,6 @@ const ProfilePage: React.FC = () => {
                   borderRadius: 1,
                   border: `1px solid ${alpha(theme.palette.divider, 1)}`,
                   boxShadow: `0 4px 20px ${alpha('#000', 0.05)}`,
-                  // overflow: 'hidden',
                 }}
               >
                 <Table sx={{ width: '100%' }}>
@@ -274,17 +273,7 @@ const ProfilePage: React.FC = () => {
                       </TableCell>
                       <TableCell align="center" sx={{ px: 1 }}>
                         <Tooltip title="Sort by Date Created" arrow>
-                          <TableSortLabel
-                          // active={sortBy === "purchase_price"}
-                          // direction={sortBy === "purchase_price" ? sortOrder : "asc"}
-                          // onClick={() => {
-                          //   setData((prevState) => ({
-                          //     ...prevState,
-                          //     sortBy: "purchase_price",
-                          //     sortOrder: prevState.sortOrder === 'asc' ? 'desc' : 'asc'
-                          //   }));
-                          // }}
-                          >
+                          <TableSortLabel>
                             <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
                               Created on
                             </Typography>
@@ -330,25 +319,6 @@ const ProfilePage: React.FC = () => {
                       }
                     // badge={1}
                     />
-                    {/* <InfoRow
-                      icon={<PhoneIcon />}
-                      label="Phone Number"
-                      value={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          {user?.phone?.code || ''} {" "}
-                          {user?.phone?.number || 'Not provided'}
-                        </Box>
-                      }
-                    />
-                    <InfoRow
-                      icon={<AccessTime />}
-                      label="Member Since"
-                      value={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          {formatDatewithTime(user?.created_at ?? '')}
-                        </Box>
-                      }
-                    /> */}
                   </Stack>
                 </SettingsCard>
               </Grid>
@@ -367,25 +337,6 @@ const ProfilePage: React.FC = () => {
                       }
                     // badge={1}
                     />
-                    {/* <InfoRow
-                      icon={<PhoneIcon />}
-                      label="Phone Number"
-                      value={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          {user?.phone?.code || ''} {" "}
-                          {user?.phone?.number || 'Not provided'}
-                        </Box>
-                      }
-                    />
-                    <InfoRow
-                      icon={<AccessTime />}
-                      label="Member Since"
-                      value={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          {formatDatewithTime(user?.created_at ?? '')}
-                        </Box>
-                      }
-                    /> */}
                   </Stack>
                 </SettingsCard>
               </Grid>
@@ -408,6 +359,54 @@ const ProfilePage: React.FC = () => {
                       }
                     // badge={1}
                     />
+                    <Box>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={true}
+                            disabled
+                            // onChange={(e) => setNotifications({ ...notifications, [key]: e.target.checked })}
+                            color="primary"
+                          />
+                        }
+                        label={
+                          <Box>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600, textTransform: 'capitalize' }}>
+                              Invoice alert Notification
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              Send Email to customer when Invoice is created via email.
+                            </Typography>
+                          </Box>
+                        }
+                        sx={{ width: '100%', margin: 0 }}
+                      />
+                      <Divider sx={{ mt: 2 }} />
+                    </Box>
+                    <Box>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            disabled
+                            checked={true}
+                            // onChange={(e) => setNotifications({ ...notifications, [key]: e.target.checked })}
+                            color="primary"
+                          />
+                        }
+                        label={
+                          <Box>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600, textTransform: 'capitalize' }}>
+                              Transaction alert Notification
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              Send Email to customer when Transaction is created via email.
+                            </Typography>
+                          </Box>
+                        }
+                        sx={{ width: '100%', margin: 0 }}
+                      />
+                      <Divider sx={{ mt: 2 }} />
+                    </Box>
                     {/* {Object.entries(notifications).map(([key, value]) => (
                       <Box key={key}>
                         <FormControlLabel
