@@ -41,7 +41,7 @@ interface CustomerInvoicesRowProps {
 }
 
 
-export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, index, selected, onSelect }) => {
+export const AccountsInvoiceRow: React.FC<CustomerInvoicesRowProps> = ({ inv, index, selected, onSelect }) => {
     const theme = useTheme();
     // const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
@@ -182,7 +182,7 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, i
                                 sx={{
                                     fontWeight: 700,
                                     mr: 0.5,
-                                    color: theme.palette.error.main,
+                                    color: theme.palette.success.main,
                                 }}
                             >
                                 &#8377;
@@ -191,7 +191,7 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, i
                                 variant="body1"
                                 sx={{
                                     fontWeight: 700,
-                                    color: theme.palette.error.main,
+                                    color: theme.palette.success.main,
                                 }}
                             >
                                 {inv.amount > 0 ? Math.abs(inv.amount) : " "}
@@ -207,7 +207,7 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, i
                                 sx={{
                                     fontWeight: 700,
                                     mr: 0.5,
-                                    color: theme.palette.success.main,
+                                    color: theme.palette.error.main,
                                 }}
                             >
                                 &#8377;
@@ -216,7 +216,7 @@ export const CustomerInvoicesRow: React.FC<CustomerInvoicesRowProps> = ({ inv, i
                                 variant="body1"
                                 sx={{
                                     fontWeight: 700,
-                                    color: theme.palette.success.main,
+                                    color: theme.palette.error.main,
                                 }}
                             >
                                 {inv.amount > 0 ? "" : Math.abs(inv.amount)}

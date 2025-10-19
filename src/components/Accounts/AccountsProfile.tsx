@@ -27,7 +27,6 @@ import {
 } from "@mui/material";
 import {
     ArrowBack,
-    Edit as EditIcon,
     FilterListOutlined,
     PeopleAlt,
     RefreshOutlined,
@@ -36,28 +35,27 @@ import {
 } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
-import { getCustomer, getCustomerInvoices } from "@/services/customers";
+import { getAccount, getCustomerInvoices } from "@/services/customers";
 import { useNavigate, useParams } from "react-router-dom";
 import { formatLocalDate, getInitials } from "@/utils/functions";
 import { ActionButton } from "@/common/buttons/ActionButton";
-import { setCustomersFilters, setEditingCustomer } from "@/store/reducers/customersReducer";
-import { CustomerInvoicesRow } from "./CustomerInvoicesRow";
+import { setCustomersFilters } from "@/store/reducers/customersReducer";
 import { SortOrder } from "@/utils/types";
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { BottomPagination } from "@/common/modals/BottomPagination";
 import { CustomerInvoicesRowSkeleton } from "@/common/skeletons/CustomerInvoicesRowSkeleton";
-import ActionButtonSuccess from "@/common/buttons/ActionButtonSuccess";
+import { AccountsInvoiceRow } from "./AccountsInvoiceRow";
 
-const CustomerProfile: React.FC = () => {
-    const { customer, loading, customerInvoices, customerInvoicesMeta } = useSelector((state: RootState) => state.customersLedger);
+const AccountsProfile: React.FC = () => {
+    const { account, loading, customerInvoices, customerInvoicesMeta } = useSelector((state: RootState) => state.customersLedger);
     const { user, current_company_id } = useSelector((state: RootState) => state.auth);
     const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
-    const { customer_id } = useParams();
+    const { account_id } = useParams();
     const theme = useTheme();
     const { searchQuery, page, rowsPerPage, startDate, endDate, type, sortField, sortOrder } = useSelector((state: RootState) => state.customersLedger.customersFilters);
 
@@ -67,7 +65,7 @@ const CustomerProfile: React.FC = () => {
         dispatch(getCustomerInvoices({
             searchQuery: debouncedQuery,
             company_id: currentCompanyId || "",
-            customer_id: customer_id || "",
+            customer_id: account_id || "",
             pageNumber: page,
             type,
             limit: rowsPerPage,
@@ -76,16 +74,16 @@ const CustomerProfile: React.FC = () => {
             start_date: formatLocalDate(startDate),
             end_date: formatLocalDate(endDate),
         }));
-    }, [currentCompanyId, customer_id, dispatch, endDate, page, rowsPerPage, debouncedQuery, sortField, sortOrder, startDate, type]);
+    }, [currentCompanyId, account_id, dispatch, endDate, page, rowsPerPage, debouncedQuery, sortField, sortOrder, startDate, type]);
 
     useEffect(() => {
-        if (customer_id) {
-            dispatch(getCustomer({
-                id: customer_id, start_date: formatLocalDate(startDate),
+        if (account_id) {
+            dispatch(getAccount({
+                id: account_id, start_date: formatLocalDate(startDate),
                 end_date: formatLocalDate(endDate),
             }));
         }
-    }, [dispatch, customer_id, startDate, endDate]);
+    }, [dispatch, account_id, startDate, endDate]);
 
     useEffect(() => {
         fetchCustomersInvoices();
@@ -105,7 +103,7 @@ const CustomerProfile: React.FC = () => {
     // Fetch customers when debouncedQuery or other filters change
     useEffect(() => {
         fetchCustomersInvoices();
-    }, [currentCompanyId, customer_id, dispatch, endDate, page, rowsPerPage, debouncedQuery, sortField, sortOrder, startDate, type, fetchCustomersInvoices]);
+    }, [currentCompanyId, account_id, dispatch, endDate, page, rowsPerPage, debouncedQuery, sortField, sortOrder, startDate, type, fetchCustomersInvoices]);
 
     // Handle sorting change
     const handleSortRequest = (field: string) => {
@@ -149,7 +147,7 @@ const CustomerProfile: React.FC = () => {
         }));
     }, []);
 
-    if (!customer) {
+    if (!account) {
         return <p>Customer Profile not found</p>;
     }
 
@@ -193,15 +191,15 @@ const CustomerProfile: React.FC = () => {
                                         // bgcolor: theme.palette.primary.main,
                                     }}
                                 >
-                                    {getInitials(customer.ledger_name)}
+                                    {getInitials(account.ledger_name)}
                                 </Avatar>
                                 <Box>
                                     <Typography variant="h6">
-                                        {customer.ledger_name}
+                                        {account.ledger_name}
                                     </Typography>
                                     <Chip
                                         size="small"
-                                        label={customer.parent}
+                                        label={account.parent}
                                         style={{
                                             color: theme.palette.primary.main,
                                         }}
@@ -209,23 +207,22 @@ const CustomerProfile: React.FC = () => {
                                 </Box>
                             </Grid>
 
-                            <Grid
+                            {/* <Grid
                                 sx={{
                                     display: "flex",
                                     justifyContent: "space-between",
                                     alignItems: "center",
                                 }}
                             >
-                                {/* Edit Details Button */}
                                 <ActionButtonSuccess
                                     startIcon={<EditIcon />}
                                     onClick={() => {
-                                        dispatch(setEditingCustomer(customer));
-                                        navigate(`/customers/edit/${customer.parent.toLowerCase()}`);
+                                        dispatch(setEditingCustomer(account));
+                                        navigate(`/customers/edit/${account.parent.toLowerCase()}`);
                                     }}
-                                    text={`Edit ${customer.ledger_name}`}
+                                    text={`Edit ${account.ledger_name}`}
                                 />
-                            </Grid>
+                            </Grid> */}
                         </Paper>
                     </CardContent>
                 </Card>
@@ -508,7 +505,7 @@ const CustomerProfile: React.FC = () => {
                                     .map((_, index) => <CustomerInvoicesRowSkeleton key={`skeleton-${index}`} />)
                             ) : customerInvoices?.length > 0 ? (
                                 customerInvoices?.map((inv, index) => (
-                                    <CustomerInvoicesRow
+                                    <AccountsInvoiceRow
                                         key={`${inv.vouchar_id}-${index}`}
                                         inv={inv}
                                         selected={selectedIds.includes(inv.vouchar_id)}
@@ -534,7 +531,7 @@ const CustomerProfile: React.FC = () => {
                                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                                             <PeopleAlt sx={{ fontSize: '4rem', color: theme.palette.text.disabled }} />
                                             <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 600 }}>
-                                                There are no invoices for this customer in the current month.
+                                                There are no invoices for this account in the current month.
                                             </Typography>
                                             <Typography variant="body2" color="text.secondary">
                                                 You can create a new invoice from the invoices page.
@@ -571,24 +568,7 @@ const CustomerProfile: React.FC = () => {
                                         </TableCell>
                                         <TableCell align="right" colSpan={1} >
                                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                                {customer.opening_balance < 0 && <Typography
-                                                    variant="body1"
-                                                    sx={{
-                                                        fontWeight: 700,
-                                                        mr: 0.5,
-                                                        color: theme.palette.error.main,
-                                                    }}
-                                                >
-                                                    &#8377;
-                                                </Typography>}
-                                                <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.error.main, }}>
-                                                    {customer.opening_balance > 0 ? Math.abs(customer.opening_balance) : ''}
-                                                </Typography>
-                                            </Box>
-                                        </TableCell>
-                                        <TableCell align="right" colSpan={1}>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                                {!(customer.opening_balance > 0) && <Typography
+                                                {account.opening_balance > 0 && <Typography
                                                     variant="body1"
                                                     sx={{
                                                         fontWeight: 700,
@@ -599,7 +579,24 @@ const CustomerProfile: React.FC = () => {
                                                     &#8377;
                                                 </Typography>}
                                                 <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.success.main, }}>
-                                                    {customer.opening_balance > 0 ? '' : Math.abs(customer.opening_balance)}
+                                                    {account.opening_balance > 0 ? Math.abs(account.opening_balance) : ''}
+                                                </Typography>
+                                            </Box>
+                                        </TableCell>
+                                        <TableCell align="right" colSpan={1}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                                                {!(account.opening_balance > 0) && <Typography
+                                                    variant="body1"
+                                                    sx={{
+                                                        fontWeight: 700,
+                                                        mr: 0.5,
+                                                        color: theme.palette.error.main,
+                                                    }}
+                                                >
+                                                    &#8377;
+                                                </Typography>}
+                                                <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.error.main, }}>
+                                                    {account.opening_balance > 0 ? '' : Math.abs(account.opening_balance)}
                                                 </Typography>
                                             </Box>
                                         </TableCell>
@@ -623,13 +620,13 @@ const CustomerProfile: React.FC = () => {
                                                     sx={{
                                                         fontWeight: 700,
                                                         mr: 0.5,
-                                                        color: theme.palette.error.main,
+                                                        color: theme.palette.success.main,
                                                     }}
                                                 >
                                                     &#8377;
                                                 </Typography>
-                                                <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.error.main, }}>
-                                                    {Math.abs(customer.total_debit)}
+                                                <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.success.main, }}>
+                                                    {Math.abs(account.total_credit)}
                                                 </Typography>
                                             </Box>
                                         </TableCell>
@@ -640,13 +637,13 @@ const CustomerProfile: React.FC = () => {
                                                     sx={{
                                                         fontWeight: 700,
                                                         mr: 0.5,
-                                                        color: theme.palette.success.main,
+                                                        color: theme.palette.error.main,
                                                     }}
                                                 >
                                                     &#8377;
                                                 </Typography>
-                                                <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.success.main, }}>
-                                                    {Math.abs(customer.total_credit)}
+                                                <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.error.main, }}>
+                                                    {Math.abs(account.total_debit)}
                                                 </Typography>
                                             </Box>
                                         </TableCell>
@@ -665,24 +662,7 @@ const CustomerProfile: React.FC = () => {
                                         </TableCell>
                                         <TableCell align="right" colSpan={1} >
                                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                                {customer.closing_balance > 0 && <Typography
-                                                    variant="body1"
-                                                    sx={{
-                                                        fontWeight: 700,
-                                                        mr: 0.5,
-                                                        color: theme.palette.error.main,
-                                                    }}
-                                                >
-                                                    &#8377;
-                                                </Typography>}
-                                                <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.error.main, }}>
-                                                    {customer.closing_balance > 0 ? Math.abs(customer.closing_balance) : ''}
-                                                </Typography>
-                                            </Box>
-                                        </TableCell>
-                                        <TableCell align="right" colSpan={1}>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                                {!(customer.closing_balance > 0) && <Typography
+                                                {account.closing_balance > 0 && <Typography
                                                     variant="body1"
                                                     sx={{
                                                         fontWeight: 700,
@@ -693,7 +673,24 @@ const CustomerProfile: React.FC = () => {
                                                     &#8377;
                                                 </Typography>}
                                                 <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.success.main, }}>
-                                                    {customer.closing_balance > 0 ? '' : Math.abs(customer.closing_balance)}
+                                                    {account.closing_balance > 0 ? Math.abs(account.closing_balance) : ''}
+                                                </Typography>
+                                            </Box>
+                                        </TableCell>
+                                        <TableCell align="right" colSpan={1}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                                                {!(account.closing_balance > 0) && <Typography
+                                                    variant="body1"
+                                                    sx={{
+                                                        fontWeight: 700,
+                                                        mr: 0.5,
+                                                        color: theme.palette.error.main,
+                                                    }}
+                                                >
+                                                    &#8377;
+                                                </Typography>}
+                                                <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.error.main, }}>
+                                                    {account.closing_balance > 0 ? '' : Math.abs(account.closing_balance)}
                                                 </Typography>
                                             </Box>
                                         </TableCell>
@@ -718,4 +715,4 @@ const CustomerProfile: React.FC = () => {
     );
 };
 
-export default CustomerProfile;
+export default AccountsProfile;

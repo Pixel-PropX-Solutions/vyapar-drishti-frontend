@@ -1,10 +1,15 @@
-import { updateCustomer, getCustomer, createCustomer, deleteCustomer, viewAllCustomer, viewAllCustomers, getCustomerInvoices, viewAllCustomerWithTypes } from "@/services/customers";
+import { updateCustomer, getCustomer, createCustomer, deleteCustomer, viewAllCustomer, viewAllCustomers, getCustomerInvoices, viewAllCustomerWithTypes, getAccount } from "@/services/customers";
 import { PageMeta, GetUserLedgers, CustomersList, GetCustomerInvoices, SortOrder } from "@/utils/types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface CustomerState {
     customers: Array<GetUserLedgers>;
     customer: any | null;
+    account: any | null;
+    accountType: Array<{
+        _id: string;
+        name: string;
+    }>;
     editingCustomer: GetUserLedgers | null;
     customerType_id: string | null;
     customersList: Array<CustomersList> | [];
@@ -32,6 +37,8 @@ const initialState: CustomerState = {
     customerInvoices: [],
     customerTypes: [],
     customer: null,
+    account: null,
+    accountType: [],
     editingCustomer: null,
     customerType_id: null,
     pageMeta: {
@@ -52,7 +59,7 @@ const initialState: CustomerState = {
         searchQuery: "",
         type: "all",
         page: 1,
-        startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString( ),
+        startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString(),
         endDate: new Date().toISOString(),
         rowsPerPage: 10,
         sortField: "date",
@@ -75,6 +82,9 @@ const customerSlice = createSlice({
                 ...state.customersFilters,
                 ...action.payload,
             };
+        },
+        setAccountType: (state, action: PayloadAction<Array<{ _id: string; name: string }>>) => {
+            state.accountType = action.payload;
         }
 
     },
@@ -151,6 +161,21 @@ const customerSlice = createSlice({
                 state.loading = false;
             })
 
+            .addCase(getAccount.pending, (state) => {
+                state.error = null;
+                state.loading = true;
+            })
+            .addCase(getAccount.fulfilled,
+                (state, action: PayloadAction<any>) => {
+                    state.account = action.payload.account;
+                    state.loading = false;
+                }
+            )
+            .addCase(getAccount.rejected, (state, action) => {
+                state.error = action.payload as string;
+                state.loading = false;
+            })
+
             .addCase(getCustomerInvoices.pending, (state) => {
                 state.error = null;
                 state.loading = true;
@@ -196,6 +221,6 @@ const customerSlice = createSlice({
     }
 });
 
-export const { setEditingCustomer, setCustomerTypeId, setCustomersFilters } = customerSlice.actions;
+export const { setEditingCustomer, setCustomerTypeId, setCustomersFilters, setAccountType } = customerSlice.actions;
 
 export default customerSlice.reducer;

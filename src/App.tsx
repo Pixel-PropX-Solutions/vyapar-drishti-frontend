@@ -48,6 +48,8 @@ import ResetPassword from "./pages/ResetPassword";
 import ForgotPassword from "./pages/ForgotPassword";
 import Analytics from "./pages/Analytics";
 import Summary from "./pages/Summary";
+import Accounts from "./pages/Accounts";
+import AccountsProfile from "./components/Accounts/AccountsProfile";
 // import PromptModal from "./common/modals/PromptModal";
 
 const xThemeComponents = {
@@ -130,7 +132,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
               <Route element={<Dashboard />}>
                 {/* <Route path="/dashboard" element={<AdminDashboard />} /> */}
                 {/* <Route path="/" element={<AdminDashboard />} /> */}
-                <Route path="/account" element={<ProfilePage />} />
+                <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/" element={<ProfilePage />} />
                 <Route path="/products/:id" element={<ViewItem />} />
                 <Route path="/products" element={<Products />} />
@@ -147,7 +149,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
 
             {user?.user_type === ROLE_ENUM.USER && (
               <Route element={<Dashboard />}>
-                <Route path="/account" element={<ProfilePage />} />
+                <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/" element={<ProfilePage />} />
                 <Route path="/products/:id" element={<ViewItem />} />
                 <Route path="/products" element={<Products />} />
@@ -155,6 +157,8 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/timeline" element={<Timeline />} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/customers" element={<CustomerLedger />} />
+                <Route path="/accounts" element={<Accounts />} />
+                <Route path="/accounts/:account_id" element={<AccountsProfile />} />
                 <Route path="/customers/:customer_id" element={<CustomerProfile />} />
                 <Route path="/customers/create/:type" element={<EditCustomer />} />
                 <Route path="/customers/edit/:type" element={<EditCustomer />} />

@@ -195,6 +195,35 @@ export const getCustomer = createAsyncThunk(
     }
 );
 
+
+export const getAccount = createAsyncThunk(
+    "get/account",
+    async ({
+        id,
+        start_date,
+        end_date,
+    }: {
+        id: string;
+        start_date: string;
+        end_date: string;
+    }, { rejectWithValue }) => {
+        try {
+            const response = await userApi.get(`/ledger/view/account/${id}?start_date=${start_date}&end_date=${end_date}`);
+
+            console.log("Get Account API Response", response);
+
+            if (response.data.success === true) {
+                const account = response.data.data[0];
+                return { account };
+            }
+            else
+                return rejectWithValue("Failed to fetch Account profile");
+        } catch (error: any) {
+            return rejectWithValue(error?.response?.data?.message);
+        }
+    }
+);
+
 export const getCustomerInvoices = createAsyncThunk(
     "get/customer/invoices",
     async ({

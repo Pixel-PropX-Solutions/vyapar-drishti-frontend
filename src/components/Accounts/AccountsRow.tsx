@@ -28,10 +28,8 @@ import { GetUserLedgers } from "@/utils/types";
 import {
     AddCircle,
     Close,
-    Email,
     MoreVert,
     PeopleAlt,
-    Phone,
     RemoveCircle,
     Today
 } from "@mui/icons-material";
@@ -51,7 +49,7 @@ interface CustomerRowProps {
 }
 
 
-export const CustomerRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit, onView, index }) => {
+export const AccountsRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit, onView, index }) => {
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
@@ -117,6 +115,23 @@ export const CustomerRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit,
                     }}
                     onClick={() => onView(cus)}
                 >
+
+                    {/* Created At Date */}
+                    <TableCell align="left">
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
+                            <Today sx={{ mr: 0.5, fontSize: '.9rem', color: theme.palette.text.secondary }} />
+                            <Typography
+                                variant="body1"
+                                sx={{
+                                    fontWeight: 700,
+                                    color: theme.palette.text.primary,
+                                }}
+                            >
+                                {formatDate(cus.created_at) || "N/A"}
+                            </Typography>
+                        </Box>
+                    </TableCell>
+
                     {/* Customer Info */}
                     <TableCell sx={{ pl: 3, pr: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
@@ -169,232 +184,200 @@ export const CustomerRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit,
                         </Box>
                     </TableCell>
 
-                    {/* Contact Information */}
-                    <TableCell align="center" sx={{ px: 1 }}>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', }}>
-
-                            {cus?.phone?.number && (<Typography
-                                variant="body1"
-                                sx={{
-                                    fontWeight: 700,
-                                    fontSize: '.9rem',
-                                    color: theme.palette.text.primary,
-                                }}
-                            >
-                                <Phone
-                                    fontSize="small"
-                                    sx={{ verticalAlign: "middle", fontSize: '.9rem', mr: 1 }}
-                                />
-                                {cus.phone?.code}{" "}
-                                {cus?.phone?.number || ""}
-                            </Typography>)}
-                            {cus.email && (<Typography
-                                variant="body1"
-                                sx={{
-                                    fontWeight: 700,
-                                    fontSize: '.8rem',
-                                    color: theme.palette.text.primary,
-                                }}
-                            >
-                                <Email sx={{ mr: 0.5, fontSize: '.9rem', color: theme.palette.text.secondary }} />
-                                {cus.email || ''}
-                            </Typography>)}
-                            {!cus.email && !cus.phone?.number && (
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                    No data
-                                </Box>
-                            )}
-                        </Box>
-                    </TableCell>
-
-                    {/* Customer Mailing State */}
-                    <TableCell align="center" sx={{ px: 1 }}>
-                        <Typography
-                            variant="body1"
-                            sx={{
-                                fontWeight: 600,
-                                color: theme.palette.text.secondary,
-                            }}
-                        >
-                            {cus.mailing_state}
-                            {(cus.mailing_country && cus.mailing_state) && `, ${cus.mailing_country}`}
-                            {(cus.mailing_country && !cus.mailing_state) && `${cus.mailing_country}`}
-                        </Typography>
-                    </TableCell>
-                    {/* Customer Type */}
+                    {/* Account Name */}
                     <TableCell align="center">
                         <Typography
                             variant="body1"
                             sx={{
                                 fontWeight: 700,
-                                color: cus.total_amount === 0 ? '' : cus.total_amount < 0 ? theme.palette.success.main : theme.palette.error.main,
+                                color: theme.palette.text.primary,
                             }}
                         >
-                            {cus.total_amount === 0 ? '-' : Math.abs(cus.total_amount)}{cus.total_amount === 0 ? '' : cus.total_amount > 0 ? ' DR' : ' CR'}
+                            {cus.account_holder || "-"}
                         </Typography>
                     </TableCell>
 
-                    {/* Created At Date */}
+                    {/* Account Number */}
                     <TableCell align="center">
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Today sx={{ mr: 0.5, fontSize: '.9rem', color: theme.palette.text.secondary }} />
-                            <Typography
-                                variant="body1"
-                                sx={{
-                                    fontWeight: 700,
-                                    color: theme.palette.text.primary,
-                                }}
-                            >
-                                {formatDate(cus.created_at) || "N/A"}
-                            </Typography>
-                        </Box>
+                        <Typography
+                            variant="body1"
+                            sx={{
+                                fontWeight: 700,
+                                color: theme.palette.text.primary,
+                            }}
+                        >
+                            {cus.account_number || "-"}
+                        </Typography>
+                    </TableCell>
+
+
+                    {/* Debit Amount */}
+                    <TableCell align="right">
+                        <Typography
+                            variant="body1"
+                            sx={{
+                                fontWeight: 700,
+                                color: cus.total_amount > 0 ? theme.palette.success.main : theme.palette.error.main,
+                            }}
+                        >
+                            {cus.total_amount === 0 ? '' : cus.total_amount > 0 ? `${Math.abs(cus.total_amount)} ₹` : '-'}
+                        </Typography>
+                    </TableCell>
+
+                    {/* Credit Amount */}
+                    <TableCell align="right" sx={{ px: 1 }}>
+                        <Typography
+                            variant="body1"
+                            sx={{
+                                fontWeight: 700,
+                                color: cus.total_amount > 0 ? theme.palette.success.main : theme.palette.error.main,
+                            }}
+                        >
+                            {cus.total_amount === 0 ? '' : cus.total_amount > 0 ? "-" : `${Math.abs(cus.total_amount)} ₹`}
+                        </Typography>
                     </TableCell>
 
                     {/* Actions */}
-                    <TableCell align="center">
+                    <TableCell align="right" sx={{ pr: 2 }}>
                         <Zoom appear in timeout={200}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'center' }}>
-                                <Tooltip title="View Details" arrow>
-                                    <IconButton
-                                        size="small"
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'flex-end' }}>
+                                <MenuButton
+                                    data-screenshot="toggle-mode"
+                                    onClick={(e) => {
+                                        handleClick(e);
+                                        e.stopPropagation();
+                                    }}
+                                    disableRipple
+                                    size="small"
+                                    aria-label="Open notifications"
+                                    aria-controls={open ? "notifications-menu" : undefined}
+                                    aria-haspopup="true"
+                                    aria-expanded={open ? "true" : undefined}
+                                >
+                                    <MoreVert />
+                                </MenuButton>
+                                <Menu
+                                    anchorEl={anchorEl}
+                                    id="notifications-menu"
+                                    open={open}
+                                    onClose={(e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+                                        handleClose();
+                                        e.stopPropagation();
+                                    }}
+                                    onClick={(e) => {
+                                        handleClose();
+                                        e.stopPropagation();
+                                    }}
+                                    slotProps={{
+                                        paper: {
+                                            variant: "outlined",
+
+                                            elevation: 0,
+                                            sx: {
+                                                my: "4px",
+                                                maxHeight: "400px",
+                                                overflowY: "auto",
+                                                borderColor: theme.palette.primary.main,
+                                            },
+                                        },
+                                    }}
+                                    transformOrigin={{ horizontal: "right", vertical: "top" }}
+                                    anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+                                >
+                                    <MenuItem
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1,
+                                            py: .5
+                                        }}
+                                        onClick={(e) => {
+                                            dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Receipt'))?._id || ''));
+                                            handleClose();
+                                            setType('receipt');
+                                            setOpenExpenseIncomeModal(true);
+                                            e.stopPropagation();
+                                        }}
+                                    >
+                                        <AddCircle fontSize="small" sx={{ color: theme.palette.success.main }} />
+                                        <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.success.main }}>
+                                            You Got
+                                        </Typography>
+                                    </MenuItem>
+
+                                    <MenuItem
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1,
+                                            py: .5
+                                        }}
+                                        onClick={(e) => {
+                                            handleClose();
+                                            dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Payment'))?._id || ''));
+                                            setType('payment');
+                                            setOpenExpenseIncomeModal(true);
+                                            e.stopPropagation();
+                                        }}
+                                    >
+                                        <RemoveCircle fontSize="small" sx={{ color: theme.palette.error.light }} />
+                                        <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.error.light }}>
+                                            You give
+                                        </Typography>
+                                    </MenuItem>
+
+                                    <MenuItem
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1,
+                                            py: .5
+                                        }}
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             onView(cus);
                                         }}
-                                        sx={{
-                                            bgcolor: alpha(theme.palette.info.main, 0.1),
-                                            color: theme.palette.info.main,
-                                            transition: 'all 0.3s ease',
-                                            '&:hover': {
-                                                bgcolor: alpha(theme.palette.info.main, 0.2),
-                                                transform: 'scale(1.1)',
-                                            },
-                                        }}
                                     >
-                                        <VisibilityIcon fontSize="small" />
-                                    </IconButton>
-                                </Tooltip>
-
-                                <Tooltip title="Edit Customer" arrow>
-                                    <IconButton
-                                        size="small"
+                                        <VisibilityIcon fontSize="small" sx={{ color: theme.palette.info.dark }} />
+                                        <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.info.dark }}>
+                                            View
+                                        </Typography>
+                                    </MenuItem>
+                                    <MenuItem
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1,
+                                            py: .5
+                                        }}
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             onEdit(cus);
                                         }}
+                                    >
+                                        <EditIcon fontSize="small" sx={{ color: theme.palette.warning.dark }} />
+                                        <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.warning.dark }}>
+                                            Edit
+                                        </Typography>
+                                    </MenuItem>
+                                    <MenuItem
                                         sx={{
-                                            bgcolor: alpha(theme.palette.warning.main, 0.1),
-                                            color: theme.palette.warning.main,
-                                            transition: 'all 0.3s ease',
-                                            '&:hover': {
-                                                bgcolor: alpha(theme.palette.warning.main, 0.2),
-                                                transform: 'scale(1.1)',
-                                            },
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1,
+                                            py: .5
                                         }}
-                                    >
-                                        <EditIcon fontSize="small" />
-                                    </IconButton>
-                                </Tooltip>
-
-                                <>
-                                    <MenuButton
-                                        data-screenshot="toggle-mode"
                                         onClick={(e) => {
+                                            setOpenDeleteDialog(true);
                                             e.stopPropagation();
-                                            handleClick(e);
                                         }}
-                                        disableRipple
-                                        size="small"
-                                        aria-label="Open notifications"
-                                        aria-controls={open ? "notifications-menu" : undefined}
-                                        aria-haspopup="true"
-                                        aria-expanded={open ? "true" : undefined}
                                     >
-                                        <MoreVert />
-                                    </MenuButton>
-                                    <Menu
-                                        anchorEl={anchorEl}
-                                        id="notifications-menu"
-                                        open={open}
-                                        onClose={handleClose}
-                                        onClick={handleClose}
-                                        slotProps={{
-                                            paper: {
-                                                variant: "outlined",
-
-                                                elevation: 0,
-                                                sx: {
-                                                    my: "4px",
-                                                    maxHeight: "400px",
-                                                    overflowY: "auto",
-                                                    borderColor: theme.palette.primary.main,
-                                                },
-                                            },
-                                        }}
-                                        transformOrigin={{ horizontal: "right", vertical: "top" }}
-                                        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-                                    >
-                                        <MenuItem
-                                            sx={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: 1,
-                                                py: .5
-                                            }}
-                                            onClick={(e) => {
-                                                dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Receipt'))?._id || ''));
-                                                handleClose();
-                                                setType('receipt');
-                                                setOpenExpenseIncomeModal(true);
-                                                e.stopPropagation();
-                                            }}
-                                        >
-                                            <AddCircle fontSize="small" sx={{ color: theme.palette.success.main }} />
-                                            <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.success.main }}>
-                                                You Got
-                                            </Typography>
-                                        </MenuItem>
-
-                                        <MenuItem
-                                            sx={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: 1,
-                                                py: .5
-                                            }}
-                                            onClick={(e) => {
-                                                handleClose();
-                                                dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Payment'))?._id || ''));
-                                                setType('payment');
-                                                setOpenExpenseIncomeModal(true);
-                                                e.stopPropagation();
-                                            }}
-                                        >
-                                            <RemoveCircle fontSize="small" sx={{ color: theme.palette.error.light }} />
-                                            <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.error.light }}>
-                                                You give
-                                            </Typography>
-                                        </MenuItem>
-
-                                        <MenuItem
-                                            sx={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: 1,
-                                                py: .5
-                                            }}
-                                            onClick={(e) => {
-                                                setOpenDeleteDialog(true);
-                                                e.stopPropagation();
-                                            }}
-                                        >
-                                            <DeleteIcon fontSize="small" />
-                                            <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', }}>
-                                                Delete
-                                            </Typography>
-                                        </MenuItem>
-                                    </Menu>
-                                </>
+                                        <DeleteIcon fontSize="small" sx={{ color: theme.palette.error.light }} />
+                                        <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.error.light }}>
+                                            Delete
+                                        </Typography>
+                                    </MenuItem>
+                                </Menu>
                             </Box>
                         </Zoom>
                     </TableCell>

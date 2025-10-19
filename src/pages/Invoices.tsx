@@ -166,7 +166,7 @@ const Invoices: React.FC = () => {
   };
 
   // Reset filters
-  const handleResetFilters = useCallback(() => {
+  const handleResetFilters = () => {
     dispatch(setInvoicesFilters({
       searchQuery: "",
       filterState: "All-States",
@@ -178,7 +178,7 @@ const Invoices: React.FC = () => {
       sortField: "date" as InvoicesSortField,
       sortOrder: "desc" as SortOrder,
     }));
-  }, []);
+  };
 
   // managing searchQuery, filterState, page, rowsPerPage
   const handleStateChange = (field: string, value: string | number) => {
@@ -692,7 +692,7 @@ const Invoices: React.FC = () => {
                         </Typography>
                       </Box>
                     </TableCell>
-                     <TableCell colSpan={1} sx={{ textAlign: "center", }}>
+                    <TableCell colSpan={1} sx={{ textAlign: "center", }}>
                     </TableCell>
                   </TableRow>
 

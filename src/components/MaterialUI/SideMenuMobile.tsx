@@ -1,5 +1,4 @@
 import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Drawer, { drawerClasses } from '@mui/material/Drawer';
 import Stack from '@mui/material/Stack';
@@ -10,9 +9,10 @@ import { useTheme } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { logout } from "@/services/auth";
-import CustomNotification from './CustomNotifications';
 import toast from 'react-hot-toast';
 import {
+  Box,
+  IconButton,
   List,
   ListItem,
   ListItemButton,
@@ -21,74 +21,14 @@ import {
   Tooltip,
   useMediaQuery,
 } from '@mui/material';
-// import DashboardIcon from '@mui/icons-material/Dashboard';
-// import ChemistIcon from '@mui/icons-material/Store';
-// import StockistIcon from '@mui/icons-material/Warehouse';
-// import UploadBillIcon from '@mui/icons-material/UploadFile';
-import ProductIcon from '@mui/icons-material/LocalPharmacy';
-import InventoryIcon from "@mui/icons-material/Inventory";
-import ViewTimelineIcon from '@mui/icons-material/ViewTimeline';
-// import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
-import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ROLE_ENUM } from '@/utils/enums';
-import { Assessment, PaymentsOutlined, People, ReceiptOutlined, Security } from '@mui/icons-material';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { Collapse } from '@mui/material';
 import { useState } from 'react';
-
-// Define menu item type
-interface MenuItem {
-  text: string;
-  path: string;
-  icon: React.ReactNode;
-  children?: MenuItem[];
-  requiredRole?: 'admin' | 'user';
-}
-
-const createMainListItems = (role: string, tax_enable: boolean): MenuItem[] => {
-  const adminItems: MenuItem[] = [
-    // { text: "Dashboard", path: "/dashboard", icon: <DashboardIcon />, requiredRole: 'admin' },
-    // { text: "Inventory", path: "/inventory", icon: <InventoryIcon />, requiredRole: 'admin' },
-    { text: "Products", path: "/products", icon: <ProductIcon />, requiredRole: 'admin' },
-    // { text: "Stockists", path: "/stockists", icon: <StockistIcon />, requiredRole: 'admin' },
-    // { text: "Chemists", path: "/chemists", icon: <ChemistIcon />, requiredRole: 'admin' },
-  ];
-
-
-  const userItems: MenuItem[] = tax_enable ? [
-    { text: "WareHouse", path: "/warehouses", icon: <InventoryIcon />, requiredRole: 'user' },
-    { text: "Timeline", path: "/timeline", icon: <ViewTimelineIcon />, requiredRole: 'user' },
-    { text: "Products", path: "/products", icon: <ProductIcon />, requiredRole: 'user' },
-    { text: "Customers", path: "/customers", icon: <People />, requiredRole: 'user' },
-    { text: "Invoices", path: "/invoices", icon: <ReceiptOutlined />, requiredRole: 'user' },
-    { text: "Transactions", path: "/transactions", icon: <PaymentsOutlined />, requiredRole: 'user' },
-    { text: "Reports", path: "/reports", icon: <Assessment />, requiredRole: 'user' },
-    { text: "Summary", path: "/summary", icon: <Assessment />, requiredRole: 'user' }
-  ] :
-    [{ text: "WareHouse", path: "/warehouses", icon: <InventoryIcon />, requiredRole: 'user' },
-    { text: "Timeline", path: "/timeline", icon: <ViewTimelineIcon />, requiredRole: 'user' },
-    { text: "Products", path: "/products", icon: <ProductIcon />, requiredRole: 'user' },
-    { text: "Customers", path: "/customers", icon: <People />, requiredRole: 'user' },
-    { text: "Invoices", path: "/invoices", icon: <ReceiptOutlined />, requiredRole: 'user' },
-    { text: "Transactions", path: "/transactions", icon: <PaymentsOutlined />, requiredRole: 'user' },
-    { text: "Reports", path: "/reports", icon: <Assessment />, requiredRole: 'user' }];
-
-  if (role === ROLE_ENUM.USER)
-    return userItems;
-  else if (role === ROLE_ENUM.ADMIN)
-    return adminItems;
-  else {
-    return [];
-  }
-};
-
-const secondaryListItems: MenuItem[] = [
-  // { text: "Settings", path: "/settings", icon: <SettingsRoundedIcon /> },
-  { text: "Account", path: "/account", icon: <Security /> },
-  { text: "About", path: "/about", icon: <InfoRoundedIcon /> },
-];
-
+import SelectContent from './SelectContent';
+import { MenuItem } from '@/utils/types';
+import { createMainListItems, secondaryListItems } from '@/utils/functions';
 
 interface SideMenuMobileProps {
   open: boolean | undefined;
@@ -254,35 +194,22 @@ export default function SideMenuMobile({ open, toggleDrawer }: SideMenuMobilePro
         sx={{
           maxWidth: '70dvw',
           height: '100%',
+          position: 'relative',
         }}
       >
-        <Stack direction="row" alignItems='center' sx={{ p: 2, pb: 0, gap: 1 }}>
+        <Stack direction="row" alignItems='center' sx={{ p: 2, gap: 1 }}>
           <Stack
             direction="row"
-            sx={{ gap: 1, alignItems: 'center', flexGrow: 1, p: 1 }}
+            sx={{ gap: 1, alignItems: 'center', flexGrow: 1 }}
           >
-            <Avatar
+            <Box
               sx={{
-                width: 40,
-                height: 40,
-                bgcolor: theme.palette.primary.main,
-                color: theme.palette.primary.contrastText,
-                transition: 'transform 0.2s ease',
-                ':hover': {
-                  transform: 'scale(1.1)',
-                }
+                display: "flex",
               }}
             >
-              {getUserInitials()}
-            </Avatar>
-            <Typography variant="body1">
-              {user?.name ?
-                `${user.name.first ?? ''} ${user.name.last ?? ''}`.trim()
-                : "DristiDocs Team"
-              }
-            </Typography>
+              <SelectContent />
+            </Box>
           </Stack>
-          <CustomNotification />
         </Stack>
         <Divider />
         <Stack sx={{ flexGrow: 1 }}>
@@ -304,11 +231,48 @@ export default function SideMenuMobile({ open, toggleDrawer }: SideMenuMobilePro
           <Divider />
         </Stack>
         {/* <CardAlert /> */}
-        <Stack sx={{ p: 2 }}>
-          <Button variant="outlined" fullWidth startIcon={<LogoutRoundedIcon />}
-            onClick={handleLogout}>
-            Logout
-          </Button>
+        <Stack sx={{ py: 1, px: 2 }}>
+          <Stack
+            direction="row"
+            sx={{ gap: 1, alignItems: 'center', justifyContent: 'space-between', flexGrow: 1 }}
+          >
+            <Avatar
+              sx={{
+                width: 40,
+                height: 40,
+                bgcolor: theme.palette.primary.main,
+                color: theme.palette.primary.contrastText,
+                transition: 'transform 0.2s ease',
+                ':hover': {
+                  transform: 'scale(1.1)',
+                }
+              }}
+            >
+              {getUserInitials()}
+            </Avatar>
+            <Typography variant="body1">
+              {user?.name ?
+                `${user.name.first ?? ''} ${user.name.last ?? ''}`.trim()
+                : "Vyapar Drishti Team"
+              }
+            </Typography>
+            <Tooltip
+              title="Logout"
+              placement="top"
+              arrow
+            >
+              <IconButton
+                size="small"
+                onClick={handleLogout}
+                sx={{
+                  color: theme.palette.text.secondary,
+                  transition: 'color 0.2s ease',
+                }}
+              >
+                <LogoutRoundedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Stack>
         </Stack>
       </Stack>
     </Drawer>
