@@ -50,6 +50,8 @@ import Analytics from "./pages/Analytics";
 import Summary from "./pages/Summary";
 import Accounts from "./pages/Accounts";
 import AccountsProfile from "./components/Accounts/AccountsProfile";
+import UserAdminDashboard from "./pages/AdminDashboard";
+import CompanyProfile from "./pages/CompanyProfile";
 // import PromptModal from "./common/modals/PromptModal";
 
 const xThemeComponents = {
@@ -130,8 +132,8 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
           <>
             {user?.user_type === ROLE_ENUM.ADMIN && (
               <Route element={<Dashboard />}>
-                {/* <Route path="/dashboard" element={<AdminDashboard />} /> */}
-                {/* <Route path="/" element={<AdminDashboard />} /> */}
+                <Route path="/dashboard" element={<UserAdminDashboard />} />
+                <Route path="/" element={<UserAdminDashboard />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/" element={<ProfilePage />} />
                 <Route path="/products/:id" element={<ViewItem />} />
@@ -148,6 +150,7 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
             {user?.user_type === ROLE_ENUM.USER && (
               <Route element={<Dashboard />}>
                 <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/profile/company/:company_id" element={<CompanyProfile />} />
                 <Route path="/" element={<ProfilePage />} />
                 <Route path="/account" element={<ProfilePage />} />
                 <Route path="/products/:id" element={<ViewItem />} />

@@ -47,13 +47,13 @@ import ActionButtonSuccess from "../buttons/ActionButtonSuccess";
 import ActionButtonCancel from "../buttons/ActionButtonCancel";
 import BackDropLoading from "../loaders/BackDropLoading";
 
-interface CreateInventoryGroupModalProps {
+interface ContraSideModalProps {
     open: boolean;
     onClose: () => void;
-    type: 'payment' | 'receipt' | null;
-    customerName: string;
-    customerId: string;
-    closingBalance: number;
+    type?: 'payment' | 'receipt' | null;
+    customerName?: string;
+    customerId?: string;
+    closingBalance?: number;
 }
 
 interface InventoryGroupFormData {
@@ -66,7 +66,7 @@ interface InventoryGroupFormData {
     transactionNumber: string;
 }
 
-const PaymentReceiptSideModal: React.FC<CreateInventoryGroupModalProps> = ({
+const ContraSideModal: React.FC<ContraSideModalProps> = ({
     open,
     onClose,
     type,
@@ -157,14 +157,14 @@ const PaymentReceiptSideModal: React.FC<CreateInventoryGroupModalProps> = ({
                 vouchar_id: '',
                 ledger: customerName,
                 ledger_id: customerId,
-                amount: isReceipt ? -data.amount : data.amount,
+                amount: !isReceipt ? -data.amount : data.amount,
                 order_index: 0
             },
             {
                 vouchar_id: '',
                 ledger: data.accounts,
                 ledger_id: customerTypes.find(c => c.ledger_name === data.accounts)?._id || '',
-                amount: isReceipt ? data.amount : -data.amount,
+                amount: !isReceipt ? data.amount : -data.amount,
                 order_index: 1
             },
         ];
@@ -623,4 +623,4 @@ const PaymentReceiptSideModal: React.FC<CreateInventoryGroupModalProps> = ({
     );
 };
 
-export default PaymentReceiptSideModal;
+export default ContraSideModal;

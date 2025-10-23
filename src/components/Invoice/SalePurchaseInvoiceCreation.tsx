@@ -71,7 +71,7 @@ import { createInvoice, createInvoiceWithTAX, getInvoiceCounter } from '@/servic
 import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import AddItemModal from '@/common/modals/AddItemModal';
-import { capitalizeInput, formatLocalDate, getInitials } from '@/utils/functions';
+import { capitalizeInput, formatLocalDate, generateAccounting, getInitials } from '@/utils/functions';
 import ActionButtonSuccess from '@/common/buttons/ActionButtonSuccess';
 import ActionButtonCancel from '@/common/buttons/ActionButtonCancel';
 import CreateCustomerModal from '@/common/modals/CreateCustomerModal';
@@ -404,22 +404,12 @@ export default function SalePurchaseInvoiceCreation() {
                         hsn_code: item?.hsn_code || '',
                         order_index: index
                     })),
-                    accounting: [
-                        {
-                            vouchar_id: '',
-                            ledger: data.party_name,
-                            ledger_id: data.party_id,
-                            amount: type === 'sales' ? -Number(grandTotal) : Number(grandTotal),
-                            order_index: 0
-                        },
-                        {
-                            vouchar_id: '',
-                            ledger: data.counter_party,
-                            ledger_id: data.counter_id,
-                            amount: type === 'sales' ? Number(grandTotal) : -Number(grandTotal),
-                            order_index: 1
-                        }
-                    ],
+                    accounting: generateAccounting({
+                        type: invoiceType as 'Sales' | 'Purchase',
+                        party: { name: data.party_name, id: data.party_id },
+                        counter: { name: data.counter_party, id: data.counter_id },
+                        amount: Number(grandTotal),
+                    }),
                 };
 
                 await dispatch(createInvoiceWithTAX(dataToSend));
@@ -450,22 +440,12 @@ export default function SalePurchaseInvoiceCreation() {
                         vouchar_id: '',
                         order_index: index
                     })),
-                    accounting: [
-                        {
-                            vouchar_id: '',
-                            ledger: data.party_name,
-                            ledger_id: data.party_id,
-                            amount: type === 'sales' ? -Number(grandTotal) : Number(grandTotal),
-                            order_index: 0
-                        },
-                        {
-                            vouchar_id: '',
-                            ledger: data.counter_party,
-                            ledger_id: data.counter_id,
-                            amount: type === 'sales' ? Number(grandTotal) : -Number(grandTotal),
-                            order_index: 1
-                        }
-                    ],
+                    accounting: generateAccounting({
+                        type: invoiceType as 'Sales' | 'Purchase',
+                        party: { name: data.party_name, id: data.party_id },
+                        counter: { name: data.counter_party, id: data.counter_id },
+                        amount: Number(grandTotal),
+                    }),
                 };
 
                 await dispatch(createInvoice(dataToSend));

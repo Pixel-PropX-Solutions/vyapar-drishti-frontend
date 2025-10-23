@@ -246,13 +246,14 @@ export function roundToDigits({ num, digits = 2 }: { num: number, digits?: numbe
   return res;
 }
 
-type VoucherType = "sales" | "purchase" | "payment" | "receipt";
+type VoucherType = "Sales" | "Purchase" | "Payment" | "Receipt";
 
 interface AccountingEntry {
   vouchar_id: string;
   ledger: string;
   ledger_id: string;
   amount: number;
+  order_index: number;
 }
 
 interface GenerateAccountingParams {
@@ -272,24 +273,24 @@ export function generateAccounting({
   let counterAmount = 0;
 
   switch (type) {
-    case "payment":
-      partyAmount = -amount;
-      counterAmount = +amount;
-      break;
-
-    case "receipt":
+    case "Payment":
       partyAmount = +amount;
       counterAmount = -amount;
       break;
 
-    case "sales":
+    case "Receipt":
       partyAmount = -amount;
       counterAmount = +amount;
       break;
 
-    case "purchase":
+    case 'Sales':
       partyAmount = +amount;
       counterAmount = -amount;
+      break;
+
+    case 'Purchase':
+      partyAmount = -amount;
+      counterAmount = +amount;
       break;
   }
 
@@ -299,12 +300,14 @@ export function generateAccounting({
       ledger: party.name,
       ledger_id: party.id,
       amount: partyAmount,
+      order_index: 0,
     },
     {
       vouchar_id: "",
       ledger: counter.name,
       ledger_id: counter.id,
       amount: counterAmount,
+      order_index: 1,
     },
   ];
 }

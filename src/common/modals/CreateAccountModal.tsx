@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
     Box,
     TextField,
@@ -11,103 +11,77 @@ import {
     Tooltip,
     Stack,
     Chip,
-    Avatar,
     useMediaQuery,
-    Card,
-    CardContent,
-    Divider,
-    Alert,
     InputAdornment,
-    Switch,
-    FormControlLabel,
 } from "@mui/material";
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import {
     Close as CloseIcon,
     Timeline,
-    Person as PersonIcon,
-    AccountBalance as BalanceIcon,
     CurrencyRupee as CurrencyIcon,
-    Email as EmailIcon,
     Info,
-    CheckCircle,
-    Warning,
-    SmsRounded,
     Check,
 } from "@mui/icons-material";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
-import { createInvoice, getInvoiceCounter } from "@/services/invoice";
 import { useNavigate } from "react-router-dom";
 import ActionButtonSuccess from "../buttons/ActionButtonSuccess";
-import ActionButtonCancel from "../buttons/ActionButtonCancel";
 import BackDropLoading from "../loaders/BackDropLoading";
+import { createCustomer } from "@/services/customers";
 
 interface AccountModalProps {
     open: boolean;
     onClose: () => void;
-    type: 'payment' | 'receipt' | null;
-    customerName: string;
-    customerId: string;
-    closingBalance: number;
 }
 
 interface AccountFormData {
-    amount: number;
-    date: string;
-    notes: string;
-    sendSms: boolean;
-    sendEmail: boolean;
-    accounts: string;
-    transactionNumber: string;
+    bank_account_number: string;
+    bank_account_holder: string;
+    bank_ifsc: string;
+    bank_name: string;
+    bank_branch: string;
+    opening_balance: number;
 }
 
 const AccountModal: React.FC<AccountModalProps> = ({
     open,
-    onClose,
-    type,
-    customerName,
-    customerId,
-    closingBalance,
+    onClose
 }) => {
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const { customerTypes } = useSelector((state: RootState) => state.customersLedger);
-    const { invoiceType_id } = useSelector((state: RootState) => state.invoice);
     const { current_company_id } = useSelector((state: RootState) => state.auth);
     const [isLoading, setIsLoading] = useState(false);
     const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
     const [data, setData] = useState<AccountFormData>({
-        amount: 0,
-        date: new Date().toISOString(),
-        notes: '',
-        sendSms: false,
-        sendEmail: false,
-        accounts: 'Cash',
-        transactionNumber: '',
+        bank_account_number: '',
+        bank_account_holder: '',
+        bank_ifsc: '',
+        bank_name: '',
+        bank_branch: '',
+        opening_balance: 0,
     });
-
-    const isReceipt = type === 'receipt';
+    const [balanceType, setBalanceType] = useState<'Debit' | 'Credit'>('Debit');
 
     const validateForm = (): boolean => {
         const errors: { [key: string]: string } = {};
 
-        if (!data.amount || data.amount <= 0) {
-            errors.amount = 'Amount must be greater than 0';
+        if (!data.bank_account_holder.trim()) {
+            errors.bank_account_holder = 'Account holder name is required';
         }
-
-        if (!data.date) {
-            errors.date = 'Date is required';
+        if (!data.bank_ifsc.trim()) {
+            errors.bank_ifsc = 'IFSC code is required';
         }
-
-        if (data.notes && data.notes.length > 500) {
-            errors.notes = 'Notes must be less than 500 characters';
+        if (!data.bank_name.trim()) {
+            errors.bank_name = 'Bank name is required';
+        }
+        if (!data.bank_branch.trim()) {
+            errors.bank_branch = 'Bank branch is required';
+        }
+        if (!data.bank_account_number.trim()) {
+            errors.bank_account_number = 'Account number is required';
         }
 
         setFormErrors(errors);
@@ -134,119 +108,59 @@ const AccountModal: React.FC<AccountModalProps> = ({
 
     const resetForm = () => {
         setData({
-            amount: 0,
-            date: new Date().toISOString().split('T')[0],
-            notes: '',
-            sendSms: false,
-            sendEmail: false,
-            accounts: 'Cash',
-            transactionNumber: '',
+            bank_account_number: '',
+            bank_account_holder: '',
+            bank_ifsc: '',
+            bank_name: '',
+            bank_branch: '',
         });
         setFormErrors({});
     };
 
     const handleSubmit = async () => {
         if (!validateForm()) {
-            toast.error('Please fix the form errors before submitting');
+            const firstErrorField = Object.keys(formErrors)[0];
+            toast.error(formErrors[firstErrorField]);
             return;
         }
 
         setIsLoading(true);
-        const accounting = [
-            {
-                vouchar_id: '',
-                ledger: customerName,
-                ledger_id: customerId,
-                amount: !isReceipt ? -data.amount : data.amount,
-                order_index: 0
-            },
-            {
-                vouchar_id: '',
-                ledger: data.accounts,
-                ledger_id: customerTypes.find(c => c.ledger_name === data.accounts)?._id || '',
-                amount: !isReceipt ? data.amount : -data.amount,
-                order_index: 1
-            },
-        ];
 
         const payload = {
-            voucher_type: type === 'receipt' ? 'Receipt' : 'Payment',
-            voucher_type_id: invoiceType_id || '',
-            date: data.date.slice(0, 10),
-            voucher_number: data.transactionNumber || '',
-            party_name: customerName,
-            party_name_id: customerId ?? '',
-            narration: data.notes,
-            company_id: '',
-            reference_number: "",
-            reference_date: "",
-            place_of_supply: "",
-            mode_of_transport: "",
-            vehicle_number: "",
-            payment_mode: "Cash",
-            due_date: "",
-            paid_amount: data.amount,
-            total: data.amount,
-            discount: 0,
-            total_amount: data.amount,
-            total_tax: 0,
-            additional_charge: 0,
-            roundoff: 0,
-            grand_total: data.amount,
-            accounting,
-            items: []
+            company_id: current_company_id || '',
+            opening_balance: balanceType === 'Debit' ? data.opening_balance : -data.opening_balance,
+            bank_account_number: data.bank_account_number,
+            bank_account_holder: data.bank_account_holder,
+            bank_ifsc: data.bank_ifsc,
+            bank_name: data.bank_name,
+            bank_branch: data.bank_branch,
+            name: `${data.bank_name} - ${data.bank_account_number}`,
+            parent: 'Bank Accounts',
+            parent_id: 'caea08ac-37fe-4f3b-9577-a6ed78777fa3',
         };
 
-        dispatch(createInvoice(payload)).then(() => {
-            toast.success(`Payment ${isReceipt ? 'received' : 'given'} successfully!`);
+        const formData = new FormData();
+        Object.entries(payload).forEach(([key, value]) => {
+            formData.append(key, value as any);
+        });
+
+        dispatch(createCustomer(formData)).then(() => {
+            toast.success(`Accounts created successfully!`);
             resetForm();
             onClose();
             setIsLoading(false);
-            navigate('/transactions');
+            navigate('/accounts');
         }).catch((error) => {
             setIsLoading(false);
-            toast.error(error || "Failed to add transaction. 🚫");
+            toast.error(error || "Failed to add account. 🚫");
         }).finally(() => {
             setIsLoading(false);
         })
     };
 
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-            minimumFractionDigits: 2,
-        }).format(amount);
-    };
-
-    const getBalanceColor = (balance: number) => {
-        if (balance > 0) return theme.palette.success.main;
-        if (balance < 0) return theme.palette.error.main;
-        return theme.palette.text.secondary;
-    };
-
-    const getBalanceIcon = (balance: number) => {
-        if (balance > 0) return <CheckCircle fontSize="small" />;
-        if (balance < 0) return <Warning fontSize="small" />;
-        return <BalanceIcon fontSize="small" />;
-    };
-
-    useEffect(() => {
-        dispatch(getInvoiceCounter({
-            company_id: current_company_id || '',
-            voucher_type: type === 'receipt' ? 'Receipt' : 'Payment',
-        })).then((response) => {
-            if (response.meta.requestStatus === 'fulfilled') {
-                handleInputChange('transactionNumber', response.payload.current_number || '');
-            }
-        }).catch((error) => {
-            toast.error(error || "An unexpected error occurred. Please try again later.");
-        });
-    }, [dispatch, current_company_id, type]);
-
 
     return (
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
+        <>
             <Drawer
                 anchor="right"
                 PaperProps={{
@@ -274,8 +188,8 @@ const AccountModal: React.FC<AccountModalProps> = ({
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    borderBottom: `2px solid ${isReceipt ? theme.palette.success.main : theme.palette.error.main}`,
-                    background: `linear-gradient(135deg, ${isReceipt ? theme.palette.success.main : theme.palette.error.main}20 0%, ${isReceipt ? theme.palette.success.light : theme.palette.error.light}15 100%)`,
+                    borderBottom: `2px solid ${theme.palette.success.main}`,
+                    background: `linear-gradient(135deg, ${theme.palette.success.main}20 0%, ${theme.palette.success.light}15 100%)`,
                     backdropFilter: 'blur(20px)',
                     position: 'sticky',
                     top: 0,
@@ -302,7 +216,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
                         <Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <Typography variant="h6" fontWeight={700}>
-                                    {isReceipt ? 'Receipt' : 'Payment'}
+                                    Add Bank Account
                                 </Typography>
                             </Box>
                         </Box>
@@ -315,8 +229,8 @@ const AccountModal: React.FC<AccountModalProps> = ({
                             size="small"
                             variant="outlined"
                             sx={{
-                                borderColor: isReceipt ? theme.palette.success.main : theme.palette.error.main,
-                                color: isReceipt ? theme.palette.success.main : theme.palette.error.main,
+                                borderColor: theme.palette.success.main,
+                                color: theme.palette.success.main,
                             }}
                         />
                     )}
@@ -336,68 +250,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
                     }
                 }}>
                     <Box sx={{ p: 3 }}>
-                        {/* Customer Information Card */}
-                        <Card
-                            elevation={0}
-                            sx={{
-                                mb: 3,
-                                borderRadius: 2,
-                                background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover}10 100%)`,
-                                border: `1px solid ${theme.palette.divider}`,
-                            }}
-                        >
-                            <CardContent sx={{ p: 0 }}>
-                                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'space-between', }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                                        <Avatar
-                                            sx={{
-                                                bgcolor: theme.palette.primary.main,
-                                                width: 48,
-                                                height: 48,
-                                            }}
-                                        >
-                                            <PersonIcon />
-                                        </Avatar>
-                                        <Typography variant="h6" fontWeight={600} color="primary">
-                                            {customerName}
-                                        </Typography>
-                                    </Box>
-
-                                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', }}>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                            <Typography variant="body1" fontWeight={600}>
-                                                Current Balance:
-                                            </Typography>
-                                        </Box>
-                                        <Typography
-                                            variant="h6"
-                                            fontWeight={700}
-                                            sx={{ color: getBalanceColor(closingBalance) }}
-                                        >
-                                            {getBalanceIcon(closingBalance)}{" "}
-                                            {formatCurrency(closingBalance)}
-                                        </Typography>
-                                    </Box>
-                                </Box>
-
-                                <Divider sx={{ my: 1 }} />
-
-
-                                {closingBalance !== 0 && (
-                                    <Alert
-                                        severity={closingBalance > 0 ? "success" : "error"}
-                                        sx={{ mt: 1 }}
-                                    >
-                                        {closingBalance > 0
-                                            ? `Customer has a credit balance of ${formatCurrency(Math.abs(closingBalance))}`
-                                            : `Customer has a pending balance of ${formatCurrency(Math.abs(closingBalance))}`
-                                        }
-                                    </Alert>
-                                )}
-                            </CardContent>
-                        </Card>
-
-                        {/* Payment Form */}
+                        {/* Bank Info Form */}
                         <Paper
                             elevation={1}
                             sx={{
@@ -410,17 +263,17 @@ const AccountModal: React.FC<AccountModalProps> = ({
                             }}
                         >
                             <Stack spacing={3}>
-                                {/* Amount Field */}
+
                                 <Box sx={{ display: 'flex', gap: 2 }}>
+                                    {/* Account Holder Name */}
                                     <TextField
                                         fullWidth
-                                        type="number"
-                                        placeholder="Enter amount"
-                                        label="Amount"
-                                        value={data.amount || ''}
-                                        onChange={(e) => handleInputChange('amount', parseFloat(e.target.value) || 0)}
-                                        error={!!formErrors.amount}
-                                        helperText={formErrors.amount}
+                                        placeholder="Enter Account Holder Name"
+                                        label="Account Holder Name"
+                                        value={data.bank_account_holder}
+                                        onChange={(e) => handleInputChange('bank_account_holder', e.target.value)}
+                                        error={!!formErrors.bank_account_holder}
+                                        helperText={formErrors.bank_account_holder}
                                         InputProps={{
                                             startAdornment: (
                                                 <InputAdornment position="start">
@@ -434,34 +287,134 @@ const AccountModal: React.FC<AccountModalProps> = ({
                                             }
                                         }}
                                     />
-
-                                    {/* Date Field */}
-                                    <DatePicker
-                                        value={new Date(data.date)}
-                                        format="dd-MM-yyyy"
-                                        onChange={(newValue) => handleInputChange('date', newValue?.toISOString() || '')}
-                                        slotProps={{
-                                            textField: {
-                                                fullWidth: true,
-                                                label: "Select Date",
-                                                error: !!formErrors.date,
-                                                helperText: formErrors.date,
-                                                sx: {
-                                                    '& .MuiOutlinedInput-root': {
-                                                        borderRadius: 1,
-                                                    }
-                                                }
+                                    {/* Account Holder Number */}
+                                    <TextField
+                                        fullWidth
+                                        placeholder="Enter Account Number"
+                                        label="Account Number"
+                                        value={data.bank_account_number}
+                                        onChange={(e) => handleInputChange('bank_account_number', e.target.value)}
+                                        error={!!formErrors.bank_account_number}
+                                        helperText={formErrors.bank_account_number}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <CurrencyIcon fontSize="small" />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 1,
                                             }
                                         }}
                                     />
                                 </Box>
 
+
+                                <Box sx={{ display: 'flex', gap: 2 }}>
+                                    {/* Bank Name */}
+                                    <TextField
+                                        fullWidth
+                                        placeholder="Enter Bank Name"
+                                        label="Bank Name"
+                                        value={data.bank_name}
+                                        onChange={(e) => handleInputChange('bank_name', e.target.value)}
+                                        error={!!formErrors.bank_name}
+                                        helperText={formErrors.bank_name}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <CurrencyIcon fontSize="small" />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 1,
+                                            }
+                                        }}
+                                    />
+                                </Box>
+
+                                <Box sx={{ display: 'flex', gap: 2 }}>
+                                    {/* Bank IFSC */}
+                                    <TextField
+                                        fullWidth
+                                        placeholder="Enter Bank IFSC"
+                                        label="Bank IFSC"
+                                        value={data.bank_ifsc}
+                                        onChange={(e) => handleInputChange('bank_ifsc', e.target.value)}
+                                        error={!!formErrors.bank_ifsc}
+                                        helperText={formErrors.bank_ifsc}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <CurrencyIcon fontSize="small" />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 1,
+                                            }
+                                        }}
+                                    />
+                                    {/* Branch Name */}
+                                    <TextField
+                                        fullWidth
+                                        placeholder="Enter Branch Name"
+                                        label="Branch Name"
+                                        value={data.bank_branch}
+                                        onChange={(e) => handleInputChange('bank_branch', e.target.value)}
+                                        error={!!formErrors.bank_branch}
+                                        helperText={formErrors.bank_branch}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <CurrencyIcon fontSize="small" />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 1,
+                                            }
+                                        }}
+                                    />
+                                </Box>
+
+                                {/* Opening Balance */}
+                                <TextField
+                                    fullWidth
+                                    label="Opening Balance"
+                                    type="number"
+                                    placeholder="Enter Opening Balance"
+                                    value={data.opening_balance}
+                                    onChange={(e) => handleInputChange('opening_balance', e.target.value)}
+                                    error={!!formErrors.opening_balance}
+                                    helperText={formErrors.opening_balance || `Enter the opening balance for this account`}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <CurrencyIcon fontSize="small" />
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            borderRadius: 1,
+                                            transition: 'all 0.3s ease',
+                                        }
+                                    }}
+                                />
+
                                 <Stack direction="row" spacing={1} sx={{ height: '100%', alignItems: 'center' }}>
-                                    {customerTypes.map((type) => (
-                                        <Tooltip key={type._id} title={`Select ${type.ledger_name}`}>
+                                    {['Debit', 'Credit'].map((type) => (
+                                        <Tooltip key={type} title={`You ${type === 'Debit' ? 'have' : 'owe'} ${data.opening_balance}`} arrow>
                                             <Button
-                                                variant={data.accounts === type.ledger_name ? "contained" : "outlined"}
-                                                onClick={() => { handleInputChange('accounts', type.ledger_name) }}
+                                                variant={balanceType === type ? "contained" : "outlined"}
+                                                onClick={() => { setBalanceType(type as 'Debit' | 'Credit') }}
                                                 sx={{
                                                     borderRadius: 1,
                                                     px: 2,
@@ -476,82 +429,15 @@ const AccountModal: React.FC<AccountModalProps> = ({
                                                         boxShadow: theme.shadows[4],
                                                     },
                                                 }}
-                                                endIcon={data.accounts === type.ledger_name ? <Check /> : null}
+                                                endIcon={balanceType === type ? <Check /> : null}
                                             >
-                                                {type.ledger_name}
+                                                {type === 'Debit' ? 'You have' : 'You owe'}
                                             </Button>
                                         </Tooltip>
                                     ))}
                                 </Stack>
 
-                                {/* Notes Field */}
-                                <TextField
-                                    fullWidth
-                                    multiline
-                                    rows={3}
-                                    label="Additional Notes (optional)"
-                                    placeholder="Enter any additional notes (optional)"
-                                    value={data.notes}
-                                    onChange={(e) => handleInputChange('notes', e.target.value)}
-                                    error={!!formErrors.notes}
-                                    helperText={formErrors.notes || `${data.notes.length}/500 characters`}
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': {
-                                            borderRadius: 1,
-                                            transition: 'all 0.3s ease',
-                                        }
-                                    }}
-                                />
 
-                                {/* Communication Options */}
-                                <Box>
-                                    <Typography variant="body1" fontWeight={600} sx={{ mb: 2 }}>
-                                        Notification Options Coming Soon
-                                    </Typography>
-                                    <Stack spacing={2} direction={'row'}>
-                                        <Card variant="outlined" sx={{ px: 2, py: 1, borderRadius: 1, width: '50%' }}>
-                                            <FormControlLabel
-                                                control={
-                                                    <Switch
-                                                        disabled
-                                                        checked={data.sendSms}
-                                                        onChange={(e) => handleInputChange('sendSms', e.target.checked)}
-                                                        color="primary"
-                                                    />
-                                                }
-                                                label={
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                        <SmsRounded color="primary" fontSize="small" />
-                                                        <Typography variant="body1" fontWeight={500}>
-                                                            Send SMS to Customer
-                                                        </Typography>
-                                                    </Box>
-                                                }
-                                            />
-                                        </Card>
-
-                                        <Card variant="outlined" sx={{ px: 2, py: 1, borderRadius: 1, width: '50%' }}>
-                                            <FormControlLabel
-                                                control={
-                                                    <Switch
-                                                        disabled
-                                                        checked={data.sendEmail}
-                                                        onChange={(e) => handleInputChange('sendEmail', e.target.checked)}
-                                                        color="primary"
-                                                    />
-                                                }
-                                                label={
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                        <EmailIcon color="primary" fontSize="small" />
-                                                        <Typography variant="body1" fontWeight={500}>
-                                                            Send Email to Customer
-                                                        </Typography>
-                                                    </Box>
-                                                }
-                                            />
-                                        </Card>
-                                    </Stack>
-                                </Box>
                             </Stack>
                         </Paper>
                     </Box>
@@ -579,7 +465,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
                                 fullWidth={isMobile}
                                 sx={{
                                     textTransform: 'none',
-                                    borderRadius: 2,
+                                    borderRadius: 1,
                                     px: 3,
                                     py: 1.5,
                                     fontWeight: 600,
@@ -593,33 +479,21 @@ const AccountModal: React.FC<AccountModalProps> = ({
                                 Reset Form
                             </Button>
 
-                            {isReceipt ? (
-                                <ActionButtonSuccess
-                                    onClick={handleSubmit}
-                                    startIcon={isLoading ? <Timeline className="animate-spin" /> : <AddCircleOutlineIcon />}
-                                    disabled={isLoading || !data.amount || data.amount <= 0 || !data.date}
-                                    text={isLoading
-                                        ? 'Recording Receipt...'
-                                        : 'Record  Receipt'
-                                    }
-                                />
-                            ) : (
-                                <ActionButtonCancel
-                                    startIcon={isLoading ? <Timeline className="animate-spin" /> : <AddCircleOutlineIcon />}
-                                    disabled={isLoading || !data.amount || data.amount <= 0 || !data.date}
-                                    onClick={handleSubmit}
-                                    text={isLoading
-                                        ? 'Recording Payment...'
-                                        : 'Record Payment'
-                                    }
-                                />
-                            )}
+                            <ActionButtonSuccess
+                                onClick={handleSubmit}
+                                startIcon={isLoading ? <Timeline className="animate-spin" /> : <AddCircleOutlineIcon />}
+                                disabled={isLoading}
+                                text={isLoading
+                                    ? 'Adding bank...'
+                                    : 'Add bank'
+                                }
+                            />
                         </Stack>
                     </Stack>
                 </Box>
             </Drawer>
-            <BackDropLoading isLoading={isLoading} text={`Recording ${isReceipt ? 'Receipt' : 'Payment'} entry.`} />
-        </LocalizationProvider>
+            <BackDropLoading isLoading={isLoading} text={`Adding Bank Account...`} />
+        </>
     );
 };
 

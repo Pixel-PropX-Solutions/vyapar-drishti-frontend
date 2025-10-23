@@ -11,9 +11,6 @@ export const CustomerInvoicesRowSkeleton: React.FC = () => (
             <Skeleton variant="rectangular" width={20} height={20} sx={{ borderRadius: 1 }} />
         </TableCell>
         <TableCell align="left">
-            <Skeleton variant="text" width={20} height={32} />
-        </TableCell>
-        <TableCell align="left">
             <Skeleton variant="text" width={100} height={20} />
         </TableCell>
         <TableCell align="left">
@@ -34,12 +31,5 @@ export const CustomerInvoicesRowSkeleton: React.FC = () => (
         <TableCell align="center">
             <Skeleton variant="text" width={40} height={20} sx={{ mx: 'auto' }} />
         </TableCell>
-        {/* <TableCell align="center">
-            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
-                <Skeleton variant="rectangular" width={32} height={32} sx={{ borderRadius: 1 }} />
-                <Skeleton variant="rectangular" width={32} height={32} sx={{ borderRadius: 1 }} />
-                <Skeleton variant="rectangular" width={32} height={32} sx={{ borderRadius: 1 }} />
-            </Box>
-        </TableCell> */}
     </TableRow>
 );

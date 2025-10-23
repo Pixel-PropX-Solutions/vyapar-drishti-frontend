@@ -170,9 +170,8 @@ export const CustomerRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit,
                     </TableCell>
 
                     {/* Contact Information */}
-                    <TableCell align="center" sx={{ px: 1 }}>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', }}>
-
+                    <TableCell align="left" sx={{ px: 1 }}>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                             {cus?.phone?.number && (<Typography
                                 variant="body1"
                                 sx={{
@@ -199,12 +198,12 @@ export const CustomerRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit,
                                 <Email sx={{ mr: 0.5, fontSize: '.9rem', color: theme.palette.text.secondary }} />
                                 {cus.email || ''}
                             </Typography>)}
-                            {!cus.email && !cus.phone?.number && (
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                    No data
-                                </Box>
-                            )}
                         </Box>
+                        {!cus.email && !cus.phone?.number && (
+                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
+                                
+                            </Box>
+                        )}
                     </TableCell>
 
                     {/* Customer Mailing State */}

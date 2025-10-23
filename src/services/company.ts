@@ -40,6 +40,25 @@ export const getCompany = createAsyncThunk(
   }
 );
 
+
+export const getCompanyDetails = createAsyncThunk(
+  "get/company/details",
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const response = await userApi.get(`/user/company/details/${id}`);
+      console.log('response get company details', response);
+
+      if (response.data.success) {
+        const company = response.data.data[0];
+        localStorage.setItem("company", company);
+        return { company };
+      } else return rejectWithValue(" No access token recieved.");
+    } catch (error: any) {
+      return rejectWithValue(error?.response?.data?.message);
+    }
+  }
+);
+
 export const getAllCompanies = createAsyncThunk(
   "get/all/company",
   async (_, { rejectWithValue }) => {

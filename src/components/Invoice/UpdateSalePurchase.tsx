@@ -470,10 +470,10 @@ export default function SalePurchaseInvoiceCreation() {
                         let amount = 0;
                         let order_index = 0;
                         if (type?.toLowerCase() === 'purchase') {
-                            amount = acc.ledger === data.party_name ? Number(grandTotal) : -Number(grandTotal);
+                            amount = acc.ledger === data.party_name ? -Number(grandTotal) : Number(grandTotal);
                             order_index = 0;
                         } else if (type?.toLowerCase() === 'sales') {
-                            amount = acc.ledger === data.party_name ? -Number(grandTotal) : Number(grandTotal);
+                            amount = acc.ledger === data.party_name ? Number(grandTotal) : -Number(grandTotal);
                             order_index = 1;
                         }
                         return {

@@ -397,11 +397,6 @@ const CustomerProfile: React.FC = () => {
                                         }}
                                     />
                                 </TableCell>
-                                <TableCell sx={{ pl: 3, pr: 1 }}>
-                                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                                        Sr. No.
-                                    </Typography>
-                                </TableCell>
                                 <TableCell align="left" sx={{ px: 1 }}>
                                     <Tooltip title="Sort by State" arrow>
                                         <TableSortLabel
@@ -493,13 +488,6 @@ const CustomerProfile: React.FC = () => {
                                         Credit
                                     </Typography>
                                 </TableCell>
-
-
-                                {/* <TableCell align="center" >
-                                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                                        Actions
-                                    </Typography>
-                                </TableCell> */}
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -521,16 +509,10 @@ const CustomerProfile: React.FC = () => {
                                         onView={() => {
                                             navigate(`/invoices/${inv.vouchar_id}`);
                                         }}
-                                    // onEdit={() => {
-                                    //     navigate(`/invoices/update/${inv.voucher_type.toLowerCase()}/${inv.vouchar_id}`);
-                                    // }}
-                                    // onDelete={() => {
-                                    //     handleDeleteInvoice(inv.vouchar_id);
-                                    // }}
                                     />))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={9} sx={{ textAlign: "center", py: 8 }}>
+                                    <TableCell colSpan={8} sx={{ textAlign: "center", py: 8 }}>
                                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                                             <PeopleAlt sx={{ fontSize: '4rem', color: theme.palette.text.disabled }} />
                                             <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 600 }}>
@@ -554,7 +536,7 @@ const CustomerProfile: React.FC = () => {
                                             bgcolor: alpha(theme.palette.grey[50], 0.8),
                                         },
                                     }}>
-                                        <TableCell colSpan={9}>
+                                        <TableCell colSpan={8}>
                                         </TableCell>
                                     </TableRow>
                                     <TableRow sx={{
@@ -562,7 +544,7 @@ const CustomerProfile: React.FC = () => {
                                             padding: '8px 16px',
                                         },
                                     }}>
-                                        <TableCell colSpan={6} sx={{ textAlign: "center", }}>
+                                        <TableCell colSpan={5} sx={{ textAlign: "center", }}>
                                         </TableCell>
                                         <TableCell colSpan={1} sx={{ textAlign: "left", }}>
                                             <Typography variant="body1" color="text.primary" sx={{ fontWeight: 600, textDecoration: 'underline', whiteSpace: 'nowrap' }}>
@@ -609,7 +591,7 @@ const CustomerProfile: React.FC = () => {
                                             padding: '8px 16px',
                                         },
                                     }}>
-                                        <TableCell colSpan={6} sx={{ textAlign: "center", }}>
+                                        <TableCell colSpan={5} sx={{ textAlign: "center", }}>
                                         </TableCell>
                                         <TableCell colSpan={1} sx={{ textAlign: "left", }}>
                                             <Typography variant="body1" color="text.primary" sx={{ fontWeight: 600, textDecoration: 'underline' }}>
@@ -656,7 +638,7 @@ const CustomerProfile: React.FC = () => {
                                             padding: '8px 16px',
                                         },
                                     }}>
-                                        <TableCell colSpan={6} sx={{ textAlign: "center", }}>
+                                        <TableCell colSpan={5} sx={{ textAlign: "center", }}>
                                         </TableCell>
                                         <TableCell colSpan={1} sx={{ textAlign: "left", }}>
                                             <Typography variant="body1" color="text.primary" sx={{ fontWeight: 600, textDecoration: 'underline', whiteSpace: 'nowrap' }}>
