@@ -394,11 +394,6 @@ const AccountsProfile: React.FC = () => {
                                         }}
                                     />
                                 </TableCell>
-                                <TableCell sx={{ pl: 3, pr: 1 }}>
-                                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                                        Sr. No.
-                                    </Typography>
-                                </TableCell>
                                 <TableCell align="left" sx={{ px: 1 }}>
                                     <Tooltip title="Sort by State" arrow>
                                         <TableSortLabel
@@ -437,7 +432,6 @@ const AccountsProfile: React.FC = () => {
                                             onClick={() => handleSortRequest("name")}
                                         >
                                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                                                {/* <Contacts fontSize="small" /> */}
                                                 <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
                                                     Invoice Type
                                                 </Typography>
@@ -454,7 +448,6 @@ const AccountsProfile: React.FC = () => {
                                             onClick={() => handleSortRequest("name")}
                                         >
                                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                                                {/* <Contacts fontSize="small" /> */}
                                                 <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
                                                     Payment Status
                                                 </Typography>
@@ -471,7 +464,6 @@ const AccountsProfile: React.FC = () => {
                                             onClick={() => handleSortRequest("state")}
                                         >
                                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                                                {/* <LocationOn fontSize="small" /> */}
                                                 <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
                                                     Invoice No.
                                                 </Typography>
@@ -490,13 +482,6 @@ const AccountsProfile: React.FC = () => {
                                         Credit
                                     </Typography>
                                 </TableCell>
-
-
-                                {/* <TableCell align="center" >
-                                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                                        Actions
-                                    </Typography>
-                                </TableCell> */}
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -518,16 +503,10 @@ const AccountsProfile: React.FC = () => {
                                         onView={() => {
                                             navigate(`/invoices/${inv.vouchar_id}`);
                                         }}
-                                    // onEdit={() => {
-                                    //     navigate(`/invoices/update/${inv.voucher_type.toLowerCase()}/${inv.vouchar_id}`);
-                                    // }}
-                                    // onDelete={() => {
-                                    //     handleDeleteInvoice(inv.vouchar_id);
-                                    // }}
                                     />))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={9} sx={{ textAlign: "center", py: 8 }}>
+                                    <TableCell colSpan={8} sx={{ textAlign: "center", py: 8 }}>
                                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                                             <PeopleAlt sx={{ fontSize: '4rem', color: theme.palette.text.disabled }} />
                                             <Typography variant="h5" color="text.secondary" sx={{ fontWeight: 600 }}>
@@ -540,10 +519,7 @@ const AccountsProfile: React.FC = () => {
                                     </TableCell>
                                 </TableRow>
                             )}
-                            {loading ? (
-                                Array([1, 2, 3, 4, 5])
-                                    .map((_, index) => <CustomerInvoicesRowSkeleton key={`skeleton1-${index}`} />)
-                            ) : customerInvoices?.length > 0 && (
+                            {!loading && (
                                 <>
                                     <TableRow sx={{
                                         "& .MuiTableCell-root": {
@@ -551,7 +527,7 @@ const AccountsProfile: React.FC = () => {
                                             bgcolor: alpha(theme.palette.grey[50], 0.8),
                                         },
                                     }}>
-                                        <TableCell colSpan={9}>
+                                        <TableCell colSpan={8}>
                                         </TableCell>
                                     </TableRow>
                                     <TableRow sx={{
@@ -559,7 +535,7 @@ const AccountsProfile: React.FC = () => {
                                             padding: '8px 16px',
                                         },
                                     }}>
-                                        <TableCell colSpan={6} sx={{ textAlign: "center", }}>
+                                        <TableCell colSpan={5} sx={{ textAlign: "center", }}>
                                         </TableCell>
                                         <TableCell colSpan={1} sx={{ textAlign: "left", }}>
                                             <Typography variant="body1" color="text.primary" sx={{ fontWeight: 600, textDecoration: 'underline', whiteSpace: 'nowrap' }}>
@@ -606,7 +582,7 @@ const AccountsProfile: React.FC = () => {
                                             padding: '8px 16px',
                                         },
                                     }}>
-                                        <TableCell colSpan={6} sx={{ textAlign: "center", }}>
+                                        <TableCell colSpan={5} sx={{ textAlign: "center", }}>
                                         </TableCell>
                                         <TableCell colSpan={1} sx={{ textAlign: "left", }}>
                                             <Typography variant="body1" color="text.primary" sx={{ fontWeight: 600, textDecoration: 'underline' }}>
@@ -653,7 +629,7 @@ const AccountsProfile: React.FC = () => {
                                             padding: '8px 16px',
                                         },
                                     }}>
-                                        <TableCell colSpan={6} sx={{ textAlign: "center", }}>
+                                        <TableCell colSpan={5} sx={{ textAlign: "center", }}>
                                         </TableCell>
                                         <TableCell colSpan={1} sx={{ textAlign: "left", }}>
                                             <Typography variant="body1" color="text.primary" sx={{ fontWeight: 600, textDecoration: 'underline', whiteSpace: 'nowrap' }}>

@@ -16,6 +16,7 @@ import {
   treeViewCustomizations,
 } from "@/theme/customizations";
 import { Outlet } from "react-router-dom";
+import RoundedButton from "@/common/buttons/RoundedButton";
 
 const xThemeComponents = {
   ...chartsCustomizations,
@@ -34,6 +35,7 @@ export default function Dashboard(props: {
       <Box sx={{ display: "flex", position: "relative" }}>
         <SideMenu />
         <AppNavbar />
+        <RoundedButton />
         {/* Main content */}
         <Box
           component="main"

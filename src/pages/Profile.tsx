@@ -70,11 +70,13 @@ import { ProfileHeader } from "@/common/ProfileHeader";
 import { CompanyRow } from "@/common/CompanyRow";
 import { GetCompany } from "@/utils/types";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 // Main Enhanced Component
 const ProfilePage: React.FC = () => {
   const theme = useTheme();
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const { mode, setMode } = useColorScheme();
 
   const { user, current_company_id } = useSelector((state: RootState) => state.auth);
@@ -134,9 +136,7 @@ const ProfilePage: React.FC = () => {
   };
 
   const handleView = (company: GetCompany) => {
-    console.log('Viewing company:', company);
-    toast.success(`Comming Soon`);
-    // navigate(`/company/${company._id}`);
+    navigate(`/profile/company/${company._id}`);
   };
 
 
@@ -200,7 +200,7 @@ const ProfilePage: React.FC = () => {
                 },
               }}
             >
-              <Tab label="Company Info" icon={<BusinessSharp />} iconPosition="start" />
+              <Tab label="Company List" icon={<BusinessSharp />} iconPosition="start" />
               <Tab label="Templates" icon={<Print />} iconPosition="start" />
               <Tab label="Preferences" icon={<Tune />} iconPosition="start" />
               <Tab label="Settings" icon={<Settings />} iconPosition="start" />

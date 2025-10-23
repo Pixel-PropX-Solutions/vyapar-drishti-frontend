@@ -72,6 +72,7 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                         transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
                         boxShadow: isHovered ? `0 8px 25px ${alpha(theme.palette.primary.main, 0.15)}` : 'none',
+                        background: selected ? alpha(theme.palette.primary.main, 0.15) : 'inherit',
                         "&:hover": {
                             bgcolor: alpha(theme.palette.primary.main, 0.02),
                         },
@@ -89,7 +90,7 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                     </TableCell>
 
                     {/* Serial No */}
-                    <TableCell align="left" sx={{ px: 1, }}>
+                    {/* <TableCell align="left" sx={{ px: 1, }}>
                         <Typography
                             variant="subtitle1"
                             sx={{
@@ -102,7 +103,7 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                         >
                             {index}
                         </Typography>
-                    </TableCell>
+                    </TableCell> */}
 
                     {/* Invoice Creation Date */}
                     <TableCell align="left" sx={{ px: 1 }}>

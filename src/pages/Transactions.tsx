@@ -406,7 +406,7 @@ const Transactions: React.FC = () => {
                                 handleStateChange("page", 1);
                             }}
                         >
-                            {[10, 15, 20].map((option) => (
+                            {[10, 20, 50, 100, 200].map((option) => (
                                 <MenuItem key={option} value={option.toString()}>
                                     {option} rows
                                 </MenuItem>
@@ -463,13 +463,6 @@ const Transactions: React.FC = () => {
                                         }}
                                     />
                                 </TableCell>
-
-                                <TableCell sx={{ pl: 3, pr: 1 }}>
-                                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
-                                        Sr. No.
-                                    </Typography>
-                                </TableCell>
-
                                 <TableCell align="left" sx={{ px: 1 }}>
                                     <Tooltip title="Sort by State" arrow>
                                         <TableSortLabel
@@ -661,74 +654,69 @@ const Transactions: React.FC = () => {
                                     </TableCell>
                                 </TableRow>
                             )}
-                            {loading ? (
-                                Array([1, 2, 3, 4, 5])
-                                    .map((_, index) => <InvoicesRowSkeleton key={`skeleton1-${index}`} />)
-                            ) : invoices?.length > 0 && (
-                                <>
-                                    <TableRow sx={{
-                                        "& .MuiTableCell-root": {
-                                            padding: '8px 16px',
-                                            bgcolor: alpha(theme.palette.grey[100], 0.8),
-                                        },
-                                    }}>
-                                        <TableCell colSpan={9}>
-                                        </TableCell>
-                                    </TableRow>
-                                    <TableRow sx={{
-                                        "& .MuiTableCell-root": {
-                                            padding: '8px 16px',
-                                        },
-                                    }}>
-                                        <TableCell colSpan={2} sx={{ textAlign: "center", }}>
-                                        </TableCell>
-                                        <TableCell colSpan={1} sx={{ textAlign: "left", }}>
-                                            <Typography variant="h6" color="text.primary" sx={{ fontWeight: 600, textDecoration: 'underline' }}>
-                                                Totals
+                            {type !== 'All' && <>
+                                <TableRow sx={{
+                                    "& .MuiTableCell-root": {
+                                        padding: '8px 16px',
+                                        bgcolor: alpha(theme.palette.grey[100], 0.8),
+                                    },
+                                }}>
+                                    <TableCell colSpan={8}>
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow sx={{
+                                    "& .MuiTableCell-root": {
+                                        padding: '8px 16px',
+                                    },
+                                }}>
+                                    <TableCell colSpan={1} sx={{ textAlign: "center", }}>
+                                    </TableCell>
+                                    <TableCell colSpan={1} sx={{ textAlign: "left", }}>
+                                        <Typography variant="h6" color="text.primary" sx={{ fontWeight: 600, textDecoration: 'underline' }}>
+                                            Totals
+                                        </Typography>
+                                    </TableCell>
+                                    <TableCell colSpan={3} sx={{ textAlign: "center", }}>
+                                    </TableCell>
+                                    <TableCell align="right" colSpan={1} >
+                                        {pageMeta.total_debit !== 0 && <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                                            <Typography
+                                                variant="h6"
+                                                sx={{
+                                                    fontWeight: 700,
+                                                    mr: 0.5,
+                                                    color: theme.palette.success.main,
+                                                }}
+                                            >
+                                                &#8377;
                                             </Typography>
-                                        </TableCell>
-                                        <TableCell colSpan={3} sx={{ textAlign: "center", }}>
-                                        </TableCell>
-                                        <TableCell align="right" colSpan={1} >
-                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                                <Typography
-                                                    variant="h6"
-                                                    sx={{
-                                                        fontWeight: 700,
-                                                        mr: 0.5,
-                                                        color: theme.palette.success.main,
-                                                    }}
-                                                >
-                                                    &#8377;
-                                                </Typography>
-                                                <Typography variant="h6" sx={{ fontWeight: 600, color: theme.palette.success.main, }}>
-                                                    {Math.abs(pageMeta.total_debit)}
-                                                </Typography>
-                                            </Box>
-                                        </TableCell>
-                                        <TableCell align="right" colSpan={1} >
-                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                                                <Typography
-                                                    variant="h6"
-                                                    sx={{
-                                                        fontWeight: 700,
-                                                        mr: 0.5,
-                                                        color: theme.palette.error.main,
-                                                    }}
-                                                >
-                                                    &#8377;
-                                                </Typography>
-                                                <Typography variant="h6" sx={{ fontWeight: 600, color: theme.palette.error.main, }}>
-                                                    {Math.abs(pageMeta.total_credit)}
-                                                </Typography>
-                                            </Box>
-                                        </TableCell>
-                                        <TableCell colSpan={1} sx={{ textAlign: "center", }}>
-                                        </TableCell>
-                                    </TableRow>
+                                            <Typography variant="h6" sx={{ fontWeight: 600, color: theme.palette.success.main, }}>
+                                                {Math.abs(pageMeta.total_debit)}
+                                            </Typography>
+                                        </Box>}
+                                    </TableCell>
+                                    <TableCell align="right" colSpan={1} >
+                                        {pageMeta.total_credit !== 0 && <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                                            <Typography
+                                                variant="h6"
+                                                sx={{
+                                                    fontWeight: 700,
+                                                    mr: 0.5,
+                                                    color: theme.palette.error.main,
+                                                }}
+                                            >
+                                                &#8377;
+                                            </Typography>
+                                            <Typography variant="h6" sx={{ fontWeight: 600, color: theme.palette.error.main, }}>
+                                                {Math.abs(pageMeta.total_credit)}
+                                            </Typography>
+                                        </Box>}
+                                    </TableCell>
+                                    <TableCell colSpan={1} sx={{ textAlign: "center", }}>
+                                    </TableCell>
+                                </TableRow>
 
-                                </>
-                            )}
+                            </>}
                         </TableBody>
                     </Table>
 

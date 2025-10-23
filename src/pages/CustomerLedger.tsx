@@ -366,9 +366,9 @@ const CustomerLedger: React.FC = () => {
                   </TableSortLabel>
                 </Tooltip>
               </TableCell>
-              <TableCell align="center" sx={{ px: 1 }}>
+              <TableCell align="left" sx={{ px: 1 }}>
                 <Tooltip title="Contact Information" arrow>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-start', gap: 1 }}>
                     <Contacts fontSize="small" />
                     <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
                       Contact Information

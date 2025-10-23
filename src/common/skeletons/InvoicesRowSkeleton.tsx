@@ -11,9 +11,9 @@ export const InvoicesRowSkeleton: React.FC = () => (
         <TableCell align="left">
             <Skeleton variant="rectangular" width={20} height={20} sx={{ borderRadius: 1 }} />
         </TableCell>
-        <TableCell align="left">
+        {/* <TableCell align="left">
             <Skeleton variant="text" width={20} height={32} />
-        </TableCell>
+        </TableCell> */}
         <TableCell align="left">
             <Skeleton variant="text" width={100} height={20} />
         </TableCell>

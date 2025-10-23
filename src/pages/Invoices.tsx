@@ -415,7 +415,7 @@ const Invoices: React.FC = () => {
                 handleStateChange("page", 1);
               }}
             >
-              {[10, 15, 20].map((option) => (
+              {[10, 20, 50, 100, 200].map((option) => (
                 <MenuItem key={option} value={option.toString()}>
                   {option} rows
                 </MenuItem>
@@ -472,11 +472,11 @@ const Invoices: React.FC = () => {
                     }}
                   />
                 </TableCell>
-                <TableCell sx={{ px: 1 }}>
+                {/* <TableCell sx={{ px: 1 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
                     Sr. No.
                   </Typography>
-                </TableCell>
+                </TableCell> */}
                 <TableCell align="left" sx={{ px: 1 }}>
                   <Tooltip title="Sort by State" arrow>
                     <TableSortLabel
@@ -641,7 +641,7 @@ const Invoices: React.FC = () => {
                       bgcolor: alpha(theme.palette.grey[50], 0.8),
                     },
                   }}>
-                    <TableCell colSpan={9}>
+                    <TableCell colSpan={8}>
                     </TableCell>
                   </TableRow>
                   <TableRow sx={{
@@ -649,36 +649,19 @@ const Invoices: React.FC = () => {
                       padding: '8px 16px',
                     },
                   }}>
-                    <TableCell colSpan={2} sx={{ textAlign: "center", }}>
+                    <TableCell colSpan={1} sx={{ textAlign: "center", }}>
                     </TableCell>
                     <TableCell colSpan={1} sx={{ textAlign: "left", }}>
-                      <Typography variant="body1" color="text.primary" sx={{ fontWeight: 600, textDecoration: 'underline' }}>
+                      <Typography variant="subtitle1" color="text.primary" sx={{ fontWeight: 600, textDecoration: 'underline' }}>
                         Total
                       </Typography>
                     </TableCell>
                     <TableCell colSpan={3} sx={{ textAlign: "center", }}>
                     </TableCell>
                     <TableCell align="right" colSpan={1} >
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                      {pageMeta.total_debit !== 0 && <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
                         <Typography
-                          variant="body1"
-                          sx={{
-                            fontWeight: 700,
-                            mr: 0.5,
-                            color: theme.palette.error.main,
-                          }}
-                        >
-                          &#8377;
-                        </Typography>
-                        <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.error.main, }}>
-                          {Math.abs(pageMeta.total_debit)}
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell align="right" colSpan={1} >
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                        <Typography
-                          variant="body1"
+                          variant="subtitle1"
                           sx={{
                             fontWeight: 700,
                             mr: 0.5,
@@ -687,10 +670,27 @@ const Invoices: React.FC = () => {
                         >
                           &#8377;
                         </Typography>
-                        <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.success.main, }}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 600, color: theme.palette.success.main, }}>
+                          {Math.abs(pageMeta.total_debit)}
+                        </Typography>
+                      </Box>}
+                    </TableCell>
+                    <TableCell align="right" colSpan={1} >
+                      {pageMeta.total_credit !== 0 && <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                        <Typography
+                          variant="subtitle1"
+                          sx={{
+                            fontWeight: 700,
+                            mr: 0.5,
+                            color: theme.palette.error.main,
+                          }}
+                        >
+                          &#8377;
+                        </Typography>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 600, color: theme.palette.error.main, }}>
                           {Math.abs(pageMeta.total_credit)}
                         </Typography>
-                      </Box>
+                      </Box>}
                     </TableCell>
                     <TableCell colSpan={1} sx={{ textAlign: "center", }}>
                     </TableCell>

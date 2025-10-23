@@ -3,24 +3,12 @@ import {
     Box,
     Typography,
     useTheme,
-    // Tooltip,
     alpha,
-    // DialogActions,
-    // Dialog,
-    // DialogTitle,
-    // DialogContent,
-    // Button,
-    // IconButton,
     TableCell,
     TableRow,
     Fade,
     Checkbox,
-    // Zoom,
-    // Alert,
 } from "@mui/material";
-// import DeleteIcon from "@mui/icons-material/Delete";
-// import EditIcon from "@mui/icons-material/Edit";
-// import VisibilityIcon from "@mui/icons-material/Visibility";
 import { GetAllVouchars } from "@/utils/types";
 import {
     CancelOutlined,
@@ -32,8 +20,6 @@ import { formatDate } from "@/utils/functions";
 
 interface CustomerInvoicesRowProps {
     inv: any;
-    // onDelete: (id: string) => void;
-    // onEdit: (inv: GetAllVouchars) => void;
     onView: (inv: GetAllVouchars) => void;
     index: number;
     selected?: boolean;
@@ -43,13 +29,7 @@ interface CustomerInvoicesRowProps {
 
 export const AccountsInvoiceRow: React.FC<CustomerInvoicesRowProps> = ({ inv, index, selected, onSelect }) => {
     const theme = useTheme();
-    // const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
-
-    // const confirmDelete = () => {
-    //     onDelete(inv?._id ?? '');
-    //     setOpenDeleteDialog(false);
-    // };
 
     return (
         <>
@@ -79,20 +59,6 @@ export const AccountsInvoiceRow: React.FC<CustomerInvoicesRowProps> = ({ inv, in
                             e.stopPropagation();
                             if (onSelect) onSelect(checked);
                         }} />
-                    </TableCell>
-                    {/* Serial No */}
-                    <TableCell align="left" sx={{ pl: 3, }}>
-                        <Typography
-                            variant="body1"
-                            sx={{
-                                fontWeight: 600,
-                                color: theme.palette.text.primary,
-                                mb: 0.5,
-                                transition: 'color 0.3s ease',
-                            }}
-                        >
-                            {index}
-                        </Typography>
                     </TableCell>
 
                     {/* Invoice Creation Date */}
@@ -223,130 +189,8 @@ export const AccountsInvoiceRow: React.FC<CustomerInvoicesRowProps> = ({ inv, in
                             </Typography>
                         </Box>
                     </TableCell>
-
-                    {/* Actions */}
-                    {/* <TableCell align="center" sx={{ px: 1 }}>
-                        <Zoom appear in timeout={200}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'center' }}>
-                                {['Sales', 'Purchase'].includes(inv.voucher_type) && <Tooltip title="View Details" arrow>
-                                    <IconButton
-                                        size="small"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onView(inv);
-                                        }}
-                                        sx={{
-                                            bgcolor: alpha(theme.palette.info.main, 0.1),
-                                            color: theme.palette.info.main,
-                                            transition: 'all 0.3s ease',
-                                            '&:hover': {
-                                                bgcolor: alpha(theme.palette.info.main, 0.2),
-                                                transform: 'scale(1.1)',
-                                            },
-                                        }}
-                                    >
-                                        <VisibilityIcon fontSize="small" />
-                                    </IconButton>
-                                </Tooltip>}
-
-                                {['Sales', 'Purchase'].includes(inv.voucher_type) && <Tooltip title="Edit Invoice" arrow>
-                                    <IconButton
-                                        size="small"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onEdit(inv);
-                                        }}
-                                        sx={{
-                                            bgcolor: alpha(theme.palette.warning.main, 0.1),
-                                            color: theme.palette.warning.main,
-                                            transition: 'all 0.3s ease',
-                                            '&:hover': {
-                                                bgcolor: alpha(theme.palette.warning.main, 0.2),
-                                                transform: 'scale(1.1)',
-                                            },
-                                        }}
-                                    >
-                                        <EditIcon fontSize="small" />
-                                    </IconButton>
-                                </Tooltip>}
-
-                                <Tooltip title="Delete Invoice" arrow>
-                                    <IconButton
-                                        size="small"
-                                        onClick={(e) => {
-                                            setOpenDeleteDialog(true);
-                                            e.stopPropagation();
-                                        }}
-                                        sx={{
-                                            bgcolor: alpha(theme.palette.error.main, 0.1),
-                                            color: theme.palette.error.main,
-                                            transition: 'all 0.3s ease',
-                                            '&:hover': {
-                                                bgcolor: alpha(theme.palette.error.main, 0.2),
-                                                transform: 'scale(1.1)',
-                                            },
-                                        }}
-                                    >
-                                        <DeleteIcon fontSize="small" />
-                                    </IconButton>
-                                </Tooltip>
-                            </Box>
-                        </Zoom>
-                    </TableCell> */}
                 </TableRow>
             </Fade>
-            {/* 
-            <Dialog
-                open={openDeleteDialog}
-                onClose={() => setOpenDeleteDialog(false)}
-                aria-labelledby="delete-dialog-title"
-                PaperProps={{
-                    sx: {
-                        borderRadius: 1,
-                        boxShadow: `0 24px 50px ${alpha(theme.palette.error.main, 0.2)}`,
-                    }
-                }}
-            >
-                <DialogTitle
-                    id="delete-dialog-title"
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 2,
-                        color: theme.palette.error.main,
-                        fontWeight: 600,
-                    }}
-                >
-                    <DeleteIcon />
-                    Delete {inv.voucher_number}?
-                </DialogTitle>
-                <DialogContent>
-                    <Alert severity="warning" sx={{ mb: 2 }}>
-                        This action cannot be undone. The product will be permanently removed from your company database.
-                    </Alert>
-                    <Typography>
-                        Are you sure you want to delete "<strong>{inv.voucher_number}</strong>"?
-                    </Typography>
-                </DialogContent>
-                <DialogActions sx={{ p: 3, gap: 1 }}>
-                    <Button
-                        onClick={() => setOpenDeleteDialog(false)}
-                        variant="outlined"
-                        sx={{ borderRadius: 2 }}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        onClick={confirmDelete}
-                        color="error"
-                        variant="contained"
-                        sx={{ borderRadius: 2 }}
-                        startIcon={<DeleteIcon />}
-                    >
-                        Delete Customer
-                    </Button>
-                </DialogActions>
-            </Dialog> */}
         </>
     );
 };

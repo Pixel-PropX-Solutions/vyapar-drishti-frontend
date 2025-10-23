@@ -47,13 +47,13 @@ import ActionButtonSuccess from "../buttons/ActionButtonSuccess";
 import ActionButtonCancel from "../buttons/ActionButtonCancel";
 import BackDropLoading from "../loaders/BackDropLoading";
 
-interface CreateInventoryGroupModalProps {
+interface ContraSideModalProps {
     open: boolean;
     onClose: () => void;
-    type: 'payment' | 'receipt' | null;
-    customerName: string;
-    customerId: string;
-    closingBalance: number;
+    type?: 'payment' | 'receipt' | null;
+    customerName?: string;
+    customerId?: string;
+    closingBalance?: number;
 }
 
 interface InventoryGroupFormData {
@@ -66,7 +66,7 @@ interface InventoryGroupFormData {
     transactionNumber: string;
 }
 
-const PaymentReceiptSideModal: React.FC<CreateInventoryGroupModalProps> = ({
+const ContraSideModal: React.FC<ContraSideModalProps> = ({
     open,
     onClose,
     type,
@@ -155,16 +155,16 @@ const PaymentReceiptSideModal: React.FC<CreateInventoryGroupModalProps> = ({
         const accounting = [
             {
                 vouchar_id: '',
-                ledger: customerName,
-                ledger_id: customerId,
-                amount: isReceipt ? -data.amount : data.amount,
+                ledger: customerName ?? '',
+                ledger_id: customerId ?? '',
+                amount: !isReceipt ? -data.amount : data.amount,
                 order_index: 0
             },
             {
                 vouchar_id: '',
-                ledger: data.accounts,
+                ledger: data.accounts ?? '',
                 ledger_id: customerTypes.find(c => c.ledger_name === data.accounts)?._id || '',
-                amount: isReceipt ? data.amount : -data.amount,
+                amount: !isReceipt ? data.amount : -data.amount,
                 order_index: 1
             },
         ];
@@ -174,7 +174,7 @@ const PaymentReceiptSideModal: React.FC<CreateInventoryGroupModalProps> = ({
             voucher_type_id: invoiceType_id || '',
             date: data.date.slice(0, 10),
             voucher_number: data.transactionNumber || '',
-            party_name: customerName,
+            party_name: customerName ?? '',
             party_name_id: customerId ?? '',
             narration: data.notes,
             company_id: '',
@@ -372,10 +372,10 @@ const PaymentReceiptSideModal: React.FC<CreateInventoryGroupModalProps> = ({
                                         <Typography
                                             variant="h6"
                                             fontWeight={700}
-                                            sx={{ color: getBalanceColor(closingBalance) }}
+                                            sx={{ color: getBalanceColor(closingBalance ?? 0) }}
                                         >
-                                            {getBalanceIcon(closingBalance)}{" "}
-                                            {formatCurrency(closingBalance)}
+                                            {getBalanceIcon(closingBalance ?? 0)}{" "}
+                                            {formatCurrency(closingBalance ?? 0)}
                                         </Typography>
                                     </Box>
                                 </Box>
@@ -385,12 +385,12 @@ const PaymentReceiptSideModal: React.FC<CreateInventoryGroupModalProps> = ({
 
                                 {closingBalance !== 0 && (
                                     <Alert
-                                        severity={closingBalance > 0 ? "success" : "error"}
+                                        severity={(closingBalance ?? 0) > 0 ? "success" : "error"}
                                         sx={{ mt: 1 }}
                                     >
-                                        {closingBalance > 0
-                                            ? `Customer has a credit balance of ${formatCurrency(Math.abs(closingBalance))}`
-                                            : `Customer has a pending balance of ${formatCurrency(Math.abs(closingBalance))}`
+                                        {(closingBalance ?? 0) > 0
+                                            ? `Customer has a credit balance of ${formatCurrency(Math.abs(closingBalance ?? 0))}`
+                                            : `Customer has a pending balance of ${formatCurrency(Math.abs(closingBalance ?? 0))}`
                                         }
                                     </Alert>
                                 )}
@@ -623,4 +623,4 @@ const PaymentReceiptSideModal: React.FC<CreateInventoryGroupModalProps> = ({
     );
 };
 
-export default PaymentReceiptSideModal;
+export default ContraSideModal;
