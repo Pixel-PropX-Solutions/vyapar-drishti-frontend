@@ -113,6 +113,7 @@ const AccountModal: React.FC<AccountModalProps> = ({
             bank_ifsc: '',
             bank_name: '',
             bank_branch: '',
+            opening_balance: 0,
         });
         setFormErrors({});
     };

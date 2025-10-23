@@ -38,20 +38,18 @@ import { getAllCompanies, getCompanyDetails } from "@/services/company";
 import CompanyEditingModal from "@/common/modals/CompanyEditingModal";
 import { GetCompany } from "@/utils/types";
 import toast from "react-hot-toast";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { SettingsCard } from "@/common/SettingsCard";
 import { InfoRow } from "@/common/InfoRow";
 import { formatDatewithTime } from "@/utils/functions";
 import { CompanyProfileHeader } from "@/common/CompanyProfileHeader";
-import { getCurrentCompany } from "@/services/auth";
 import AccountModal from "@/common/modals/CreateAccountModal";
 
 const CompanyProfile: React.FC = () => {
     const theme = useTheme();
     const { company_id } = useParams();
     const dispatch = useDispatch<AppDispatch>();
-    const navigate = useNavigate();
-    const { mode, setMode } = useColorScheme();
+    const { mode } = useColorScheme();
     const { user, current_company_id } = useSelector((state: RootState) => state.auth);
     const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
     const currentCompanyDetails = user?.company?.find((c: any) => c._id === currentCompanyId);
