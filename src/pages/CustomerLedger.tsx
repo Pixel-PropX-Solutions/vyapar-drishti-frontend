@@ -18,8 +18,6 @@ import {
   alpha,
   useTheme,
   Button,
-  Card,
-  CardContent,
   Grid,
 } from "@mui/material";
 import {
@@ -31,7 +29,6 @@ import {
   LocationOn,
   Today,
   AddCircleOutline,
-  ArrowBack,
 } from "@mui/icons-material";
 import { CustomerSortField, SortOrder, GetUserLedgers } from "@/utils/types";
 import { useDispatch, useSelector } from "react-redux";
@@ -41,13 +38,13 @@ import { deleteCustomer, viewAllCustomer, viewAllCustomerWithTypes } from "@/ser
 import { CustomerRowSkeleton } from "@/common/skeletons/CustomerRowSkeleton";
 import { CustomerRow } from "@/features/customer/CustomerRow";
 import { viewAllAccountingGroups } from "@/services/accountingGroup";
-import { ActionButton } from "@/common/buttons/ActionButton";
 import { setCustomerTypeId, setEditingCustomer } from "@/store/reducers/customersReducer";
 import toast from "react-hot-toast";
 import { BottomPagination } from "@/common/modals/BottomPagination";
 import { getAllInvoiceGroups } from "@/services/invoice";
 import ActionButtonSuccess from "@/common/buttons/ActionButtonSuccess";
 import ActionButtonCancel from "@/common/buttons/ActionButtonCancel";
+import PageHeader from "@/common/Headers/PageHeader";
 
 const CustomerLedger: React.FC = () => {
   const { customers, pageMeta, loading } = useSelector((state: RootState) => state.customersLedger);
@@ -170,61 +167,41 @@ const CustomerLedger: React.FC = () => {
 
   return (
     <Box sx={{ p: 3, width: "100%" }}>
+
       {/* Page Title */}
-      <Card sx={{ mb: 3, p: 2, boxShadow: '0 2px 4px rgba(0,0,0,0.05)', borderRadius: '8px' }}>
-        <CardContent>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={8}>
-              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                <ActionButton
-                  icon={<ArrowBack fontSize="small" />}
-                  title="Back"
-                  color="primary"
-                  onClick={() => navigate(-1)}
-                />
-                <Box>
-                  <Typography variant="h5" component="h1" fontWeight="700" color="text.primary">
-                    Customers Directory
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Manage your customers, view their details, and perform actions like adding, editing, or deleting customers.
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, flexWrap: 'wrap' }}>
-                <ActionButtonSuccess
-                  startIcon={<AddCircleOutline />}
-                  text="Add Debtors"
-                  onClick={() => {
-                    if (!currentCompanyDetails?._id) {
-                      toast.error('Please create a company first.');
-                      return;
-                    }
-                    navigate('/customers/create/debtors');
-                    dispatch(setCustomerTypeId(accountingGroups.find((group) => group.name.includes('Debtors'))?._id || ''))
-                  }}
-                />
+      <PageHeader
+        title="Customers Directory"
+        subtitle="Manage your customers, view their details, and perform actions like adding, editing, or deleting customers."
+        children={
+          <>
+            <ActionButtonSuccess
+              startIcon={<AddCircleOutline />}
+              text="Add Debtors"
+              onClick={() => {
+                if (!currentCompanyDetails?._id) {
+                  toast.error('Please create a company first.');
+                  return;
+                }
+                navigate('/customers/create/debtors');
+                dispatch(setCustomerTypeId(accountingGroups.find((group) => group.name.includes('Debtors'))?._id || ''))
+              }}
+            />
 
-                <ActionButtonCancel
-                  startIcon={<AddCircleOutline />}
-                  text="Add Creditors"
-                  onClick={() => {
-                    if (!currentCompanyDetails?._id) {
-                      toast.error('Please create a company first.');
-                      return;
-                    }
-                    navigate('/customers/create/creditors');
-                    dispatch(setCustomerTypeId(accountingGroups.find((group) => group.name.includes('Creditors'))?._id || ''))
-                  }}
-                />
-
-              </Box>
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
+            <ActionButtonCancel
+              startIcon={<AddCircleOutline />}
+              text="Add Creditors"
+              onClick={() => {
+                if (!currentCompanyDetails?._id) {
+                  toast.error('Please create a company first.');
+                  return;
+                }
+                navigate('/customers/create/creditors');
+                dispatch(setCustomerTypeId(accountingGroups.find((group) => group.name.includes('Creditors'))?._id || ''))
+              }}
+            />
+          </>
+        }
+      />
 
       {/* Search and Filter Controls */}
       <Box sx={{ display: "flex", mb: 3, gap: 2, flexWrap: "wrap" }}>

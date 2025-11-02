@@ -397,6 +397,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
                     backgroundColor: theme.palette.background.default,
                     backgroundImage: `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${alpha(theme.palette.primary.main, 0.02)} 100%)`,
                     overflow: 'hidden',
+                    zIndex: 1400,
 
                 }
             }}
@@ -404,6 +405,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
                 '& .MuiBackdrop-root': {
                     backgroundColor: 'rgba(0, 0, 0, 0.8)',
                     backdropFilter: 'blur(12px)',
+                    zIndex: 1400,
                 }
             }}
             open={open}
@@ -420,7 +422,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({
                     background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.08)} 0%, ${alpha(theme.palette.secondary.main, 0.05)} 100%)`,
                     position: 'sticky',
                     top: 0,
-                    zIndex: 1200,
+                    zIndex: 1400,
                 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         <Tooltip title="Close" arrow placement="bottom">

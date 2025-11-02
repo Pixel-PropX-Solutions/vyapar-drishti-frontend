@@ -7,12 +7,11 @@ import {
 import { LineChart } from '@mui/x-charts';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
-import { ArrowBack, Circle } from '@mui/icons-material';
+import { Circle } from '@mui/icons-material';
 import { viewAnalyticsData, viewDailyData, viewMonthlyData } from '@/services/analytics';
 import MonthYearSelector from '@/common/MonthYearSelector';
 import { getMonthName } from '@/utils/functions';
-import { ActionButton } from '@/common/buttons/ActionButton';
-import { useNavigate } from 'react-router-dom';
+import PageHeader from '@/common/Headers/PageHeader';
 
 function AreaGradient({ color, id }: { color: string; id: string }) {
     return (
@@ -74,7 +73,7 @@ const KPICard: React.FC<{
                     background: value > 0 ?
                         `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.02)} 0%, ${alpha(theme.palette.primary.main, 0.08)} 100%)`
                         : `linear-gradient(135deg, ${alpha(theme.palette.error.main, 0.02)} 0%, ${alpha(theme.palette.error.main, 0.08)} 100%)`,
-                    border:  value > 0 ? `1px solid ${alpha(theme.palette.primary.main, 0.12)}` : `1px solid ${alpha(theme.palette.error.main, 0.12)}`,
+                    border: value > 0 ? `1px solid ${alpha(theme.palette.primary.main, 0.12)}` : `1px solid ${alpha(theme.palette.error.main, 0.12)}`,
                 }}
             >
                 <CardContent>
@@ -167,7 +166,6 @@ const ChartSkeleton: React.FC<{ height?: number }> = ({ height = 250 }) => (
 
 const ReportsAndInsights: React.FC = () => {
     const theme = useTheme();
-    const navigate = useNavigate();
     const { monthlyData, dailyData, statsData } = useSelector((state: RootState) => state.analytics);
     const { user, current_company_id } = useSelector((state: RootState) => state.auth);
     const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
@@ -245,30 +243,11 @@ const ReportsAndInsights: React.FC = () => {
     return (
         <Fade in timeout={500}>
             <Box>
-                <Card sx={{ mb: 3, p: 2, boxShadow: '0 2px 4px rgba(0,0,0,0.05)', borderRadius: '8px' }}>
-                    <CardContent>
-                        <Grid container spacing={2} alignItems="center">
-                            <Grid item xs={12} md={8}>
-                                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                                    <ActionButton
-                                        icon={<ArrowBack fontSize="small" />}
-                                        title="Back"
-                                        color="primary"
-                                        onClick={() => navigate(-1)}
-                                    />
-                                    <Box>
-                                        <Typography variant="h5" component="h1" fontWeight="700" color="text.primary">
-                                            Reports & Analytics
-                                        </Typography>
-                                        <Typography variant="body2" color="text.secondary">
-                                            View comprehensive reports and analytics for better insights.
-                                        </Typography>
-                                    </Box>
-                                </Box>
-                            </Grid>
-                        </Grid>
-                    </CardContent>
-                </Card>
+                {/* Page Title */}
+                <PageHeader
+                    title="Reports & Analytics"
+                    subtitle='View comprehensive reports and analytics for better insights.'
+                />
 
                 {/* Enhanced KPI Cards */}
                 <Grid container spacing={3} sx={{ mb: 2 }}>

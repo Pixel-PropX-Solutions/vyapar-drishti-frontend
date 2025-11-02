@@ -11,8 +11,6 @@ import {
     TableRow,
     Typography,
     Button,
-    Card,
-    CardContent,
     Grid,
     Stack,
     TextField,
@@ -26,7 +24,6 @@ import {
     RefreshOutlined,
     Search as SearchIcon,
     Inventory as InventoryIcon,
-    ArrowBack,
 } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -36,12 +33,10 @@ import { AppDispatch, RootState } from '@/store/store';
 import { getStockMovement } from '@/services/inventory';
 import { SortField, SortOrder } from '@/utils/types';
 import { BottomPagination } from '@/common/modals/BottomPagination';
-import { ActionButton } from '@/common/buttons/ActionButton';
-import { useNavigate } from 'react-router-dom';
+import PageHeader from '@/common/Headers/PageHeader';
 
 const Timeline: React.FC = () => {
     const theme = useTheme();
-    const navigate = useNavigate();
     const dispatch = useDispatch<AppDispatch>();
     const { stockMovement, timelinePageMeta } = useSelector((state: RootState) => state.inventory);
     const [debounceQuery, setDebounceQuery] = useState<string>('');
@@ -153,29 +148,11 @@ const Timeline: React.FC = () => {
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
             <Box sx={{ width: "100%", p: { xs: 2, md: 3 } }}>
-                {/* Header Card */}
-                <Card sx={{ mb: 3, p: 2, boxShadow: '0 2px 4px rgba(0,0,0,0.05)', borderRadius: '8px' }}>
-                    <CardContent>
-                        <Grid item xs={12} md={12}>
-                            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                                <ActionButton
-                                    icon={<ArrowBack fontSize="small" />}
-                                    title="Back"
-                                    color="primary"
-                                    onClick={() => navigate(-1)}
-                                />
-                                <Box>
-                                    <Typography variant="h5" component="h1" fontWeight="700" color="text.primary">
-                                        Inventory Timeline
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        Track all stock movements, analyze trends, and monitor inventory performance
-                                    </Typography>
-                                </Box>
-                            </Box>
-                        </Grid>
-                    </CardContent>
-                </Card>
+                {/* Page Title */}
+                <PageHeader
+                    title="Inventory Timeline"
+                    subtitle="Track all stock movements, analyze trends, and monitor inventory performance."
+                />
 
                 {/* Filters Section */}
                 <Grid container spacing={2} sx={{ mb: 2 }}>

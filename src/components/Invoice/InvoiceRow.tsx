@@ -279,7 +279,7 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                                     </Typography>
                                 </MenuItem>}
 
-                                {['Sales', 'Purchase'].includes(inv.voucher_type) && <MenuItem
+                                {['Sales', 'Purchase', 'Contra'].includes(inv.voucher_type) && <MenuItem
                                     sx={{
                                         display: 'flex',
                                         alignItems: 'center',

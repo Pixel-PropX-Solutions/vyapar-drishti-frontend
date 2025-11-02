@@ -18,8 +18,6 @@ import {
   alpha,
   useTheme,
   Button,
-  Card,
-  CardContent,
   Grid,
   Checkbox,
 } from "@mui/material";
@@ -29,7 +27,6 @@ import {
   RefreshOutlined,
   PeopleAlt,
   Today,
-  ArrowBack,
 } from "@mui/icons-material";
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
@@ -44,7 +41,6 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { InvoicesRowSkeleton } from "@/common/skeletons/InvoicesRowSkeleton";
-import { ActionButton } from "@/common/buttons/ActionButton";
 import { setInvoicesFilters, setInvoiceTypeId } from "@/store/reducers/invoiceReducer";
 import toast from "react-hot-toast";
 import { BottomPagination } from "@/common/modals/BottomPagination";
@@ -52,6 +48,7 @@ import { formatLocalDate } from "@/utils/functions";
 import ActionButtonSuccess from "@/common/buttons/ActionButtonSuccess";
 import ActionButtonCancel from "@/common/buttons/ActionButtonCancel";
 import usePDFHandler from "@/common/hooks/usePDFHandler";
+import PageHeader from "@/common/Headers/PageHeader";
 
 
 const Invoices: React.FC = () => {
@@ -215,101 +212,37 @@ const Invoices: React.FC = () => {
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Box sx={{ p: 3, width: "100%", position: 'relative' }}>
         {/* Page Title */}
-        <Card sx={{ mb: 3, p: 2, }}>
-          <CardContent>
-            <Paper
-              sx={{
-                display: "flex",
-                width: "100%",
-                justifyContent: "space-between",
-                alignItems: "center",
-                background: 'transparent'
+        <PageHeader
+          title="Invoices Directory"
+          subtitle={`${pageMeta.total} Invoices available in your database after applying filters`}
+          children={<>
+            <ActionButtonSuccess
+              onClick={() => {
+                if (!currentCompanyDetails?._id) {
+                  toast.error('Please create a company first.');
+                  return;
+                }
+                dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Sales'))?._id || ''));
+                navigate('/invoices/create/sales')
               }}
-            >
-              <Grid item sx={{ width: "50%" }}>
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                  <ActionButton
-                    icon={<ArrowBack fontSize="small" />}
-                    title="Back"
-                    color="primary"
-                    onClick={() => navigate(-1)}
-                  />
-                  <Box>
-                    <Typography
-                      variant="h5" component="h1" fontWeight="700" color="text.primary"
-                    >
-                      Invoices Directory
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" >
-                      {pageMeta.total} Invoices available in your database after applying
-                      filters
-                    </Typography>
-                  </Box>
-                </Box>
-              </Grid>
+              text='Add Sales'
+              startIcon={<AddCircleOutlineIcon />}
+            />
 
-              <Grid
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                  <ActionButtonSuccess
-                    onClick={() => {
-                      if (!currentCompanyDetails?._id) {
-                        toast.error('Please create a company first.');
-                        return;
-                      }
-                      dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Sales'))?._id || ''));
-                      navigate('/invoices/create/sales')
-                    }}
-                    text='Add Sales'
-                    startIcon={<AddCircleOutlineIcon />}
-                  />
-
-                  <ActionButtonCancel
-                    startIcon={<RemoveCircleOutlineIcon />}
-                    onClick={() => {
-                      if (!currentCompanyDetails?._id) {
-                        toast.error('Please create a company first.');
-                        return;
-                      }
-                      dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Purchase'))?._id || ''));
-                      navigate('/invoices/create/purchase');
-                    }}
-                    text='Add Purchase'
-                  />
-
-                  {/* <ActionButton
-                    variant="contained"
-                    startIcon={<RemoveCircleOutlineIcon />}
-                    onClick={() => {
-                      if (!currentCompanyDetails?._id) {
-                        toast.error('Please create a company first.');
-                        return;
-                      }
-                      dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Quotations'))?._id || ''));
-                      navigate('/invoices/create/quotations');
-                    }}
-                    sx={{
-                      background: alpha(theme.palette.info.main, 0.1),
-                      color: theme.palette.info.dark,
-                      border: `1px solid ${theme.palette.info.dark}`,
-                      '&:hover': {
-                        color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                        background: theme.palette.info.dark,
-                      },
-                    }}
-                  >
-                    Add Quotations
-                  </ActionButton> */}
-                </Box>
-              </Grid>
-            </Paper>
-          </CardContent>
-        </Card>
+            <ActionButtonCancel
+              startIcon={<RemoveCircleOutlineIcon />}
+              onClick={() => {
+                if (!currentCompanyDetails?._id) {
+                  toast.error('Please create a company first.');
+                  return;
+                }
+                dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Purchase'))?._id || ''));
+                navigate('/invoices/create/purchase');
+              }}
+              text='Add Purchase'
+            />
+          </>}
+        />
 
         {/* Search and Filter Controls */}
         <Box sx={{ display: "flex", mb: 3, gap: 2, flexWrap: "wrap" }}>

@@ -44,7 +44,7 @@ import { roundToDigits } from '@/utils/functions';
 
 interface SideModalProps {
     drawer: boolean;
-    setRefreshKey: React.Dispatch<React.SetStateAction<number>>;
+    setRefreshKey?: React.Dispatch<React.SetStateAction<number>>;
     setDrawer: React.Dispatch<React.SetStateAction<boolean>>;
     setSelectedProduct?: React.Dispatch<React.SetStateAction<ProductUpdate | null>>;
     product?: ProductUpdate | null;
@@ -285,7 +285,7 @@ const ProductsSideModal = (props: SideModalProps) => {
                 await dispatch(updateProduct({ data: formData, id: product._id }))
                     .unwrap()
                     .then(() => {
-                        setRefreshKey(prev => prev + 1);
+                        setRefreshKey?.(prev => prev + 1);
                         setSelectedProduct?.(null);
                         toast.success("Product successfully updated! 🎉")
                     }).catch((error) => {
@@ -295,7 +295,7 @@ const ProductsSideModal = (props: SideModalProps) => {
                 await dispatch(createProduct({ productData: formData }))
                     .unwrap()
                     .then(() => {
-                        setRefreshKey(prev => prev + 1);
+                        setRefreshKey?.(prev => prev + 1);
                         setSelectedProduct?.(null);
                         toast.success("Product successfully created! 🎉")
                     }).catch((error) => {
@@ -353,7 +353,7 @@ const ProductsSideModal = (props: SideModalProps) => {
         setSelectedCategoryOption(null);
         setSelectedGroupOption(null);
         setImagePreview(null);
-        setRefreshKey(prev => prev + 1);
+        setRefreshKey?.(prev => prev + 1);
         resetForm();
     }, [resetForm, setDrawer, setRefreshKey, setSelectedProduct]);
 
