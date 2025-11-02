@@ -15,7 +15,6 @@ import {
   treeViewCustomizations,
 } from "./theme/customizations";
 import Products from "./pages/Products";
-// import CreateUserProfile from "./features/profile/createUser";
 import { getCurrentUser } from "./services/auth";
 import LandingPage from "./components/LandingPage/LandingPage";
 import AboutPage from "./components/About/AboutPage";
@@ -52,7 +51,6 @@ import Accounts from "./pages/Accounts";
 import AccountsProfile from "./components/Accounts/AccountsProfile";
 import UserAdminDashboard from "./pages/AdminDashboard";
 import CompanyProfile from "./pages/CompanyProfile";
-// import PromptModal from "./common/modals/PromptModal";
 
 const xThemeComponents = {
   ...chartsCustomizations,
@@ -62,7 +60,6 @@ const xThemeComponents = {
 };
 
 const App: React.FC<{ themeComponents?: object }> = (props) => {
-  // const [showProfileModal, setShowProfileModal] = React.useState(false);
 
   const { authState, user, isUserFetched, switchCompanyLoading, deleteCompanyLoading, current_company_id } = useSelector(
     (state: RootState) => state.auth
@@ -110,17 +107,6 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
     window.scrollTo(0, 0);
   }, [location]);
 
-  // useEffect(() => {
-  //   if (authState === AuthStates.AUTHENTICATED && user) {
-  //     const isProfileComplete = false;
-  //     const modalDismissed = localStorage.getItem("company");
-
-  //     if (!isProfileComplete && !modalDismissed) {
-  //       setShowProfileModal(true);
-  //     }
-  //   }
-  // }, [authState, user]);
-
 
   return (
     <AppTheme {...props} themeComponents={xThemeComponents}>
@@ -138,12 +124,8 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/" element={<ProfilePage />} />
                 <Route path="/products/:id" element={<ViewItem />} />
                 <Route path="/products" element={<Products />} />
-                {/* <Route path="/inventory" element={<AdminInventory />} /> */}
-                {/* <Route path="/upload" element={<UploadDocuments />} /> */}
-                {/* <Route path="/settings" element={<Settings />} /> */}
                 <Route path="/about" element={<AboutPage />} />
                 {/* <Route path="/*" element={<Navigate to="/" replace />} /> */}
-
               </Route>
             )}
 
@@ -220,17 +202,6 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
       {deleteCompanyLoading &&
         <CenterLoader size={80} />
       }
-      {/* <PromptModal
-        open={showProfileModal}
-        onClose={() => {
-          localStorage.setItem("profilePromptDismissed", "true");
-          setShowProfileModal(false);
-        }}
-        onSubmit={(data) => {
-          localStorage.setItem("profilePromptDismissed", "true");
-          setShowProfileModal(false);
-        }}
-      /> */}
     </AppTheme >
   );
 };
