@@ -123,7 +123,7 @@ const Summary: React.FC = () => {
         limit: 10,
         startDate: new Date('2025-04-01'),
         endDate: new Date('2026-03-31'),
-        sortField: "created_at" as SummarySortField,
+        sortField: "date" as SummarySortField,
         sortOrder: "asc" as SortOrder,
     });
     const { search, category, page_no, startDate, endDate, limit, sortField, sortOrder } = data;
@@ -279,8 +279,30 @@ const Summary: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        fetchSummary();
-    }, [dispatch, endDate, limit, page_no, category, debounceQuery, sortField, currentCompanyId, sortOrder, startDate, fetchSummary]);
+        if (activeSummaryType === 'hsn') {
+            fetchSummary();
+        } else if (activeSummaryType === 'party') {
+            fetchPartySummary();
+        } else if (activeSummaryType === 'bill') {
+            fetchInvoiceSummary();
+        }
+    }, [
+        activeSummaryType,
+        dispatch,
+        endDate,
+        limit,
+        page_no,
+        category,
+        debounceQuery,
+        sortField,
+        currentCompanyId,
+        sortOrder,
+        startDate,
+        fetchSummary,
+        fetchPartySummary,
+        fetchInvoiceSummary
+    ]);
+
 
 
     useEffect(() => {

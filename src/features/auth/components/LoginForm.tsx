@@ -161,7 +161,7 @@ const LoginForm: React.FC = () => {
         minHeight: "100vh",
       }}
     >
-      <Container component="main" maxWidth={false} sx={{ width: { sm: '400px', xs: '100%', md: '550px', lg: '700px' } }}>
+      <Container component="main" maxWidth={false} sx={{ width: { sm: '100%', xs: '100%', md: '550px', lg: '700px' } }}>
         <Fade in timeout={800}>
           <Paper
             elevation={0}
@@ -169,7 +169,7 @@ const LoginForm: React.FC = () => {
               padding: { xs: 3, sm: 4, md: 5 },
               borderRadius: 3,
               border: `1px solid ${theme.palette.divider}`,
-              background: 'rgba(255, 255, 255, 0.9)',
+              background: 'rgba(255, 255, 255, 0.2)',
               backdropFilter: 'blur(10px)',
             }}
           >
@@ -184,35 +184,36 @@ const LoginForm: React.FC = () => {
                 justifyContent: "center",
               }}
             >
-              <img
+              <Box
+                component="img"
                 src={Logo}
                 alt="Logo"
-                style={{
-                  height: "40px",
-                  // width: "40px",
+                sx={{
+                  height: { xs: "24px", sm: "32px", md: "40px" },
                   borderRadius: "8px",
                 }}
               />
-              <img
+              <Box
+                component="img"
                 src={logoText}
                 alt="Logo Text"
-                style={{ height: "32px" }}
+                sx={{ height: { xs: "24px", sm: "30px", md: "32px" } }}
               />
             </Box>
 
             {/* Header Section */}
             <Box sx={{ mb: 3, textAlign: 'center' }}>
               <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 2 }}>
-                <Login color="primary" sx={{ fontSize: 40, mr: 1 }} />
+                <Login color="primary" sx={{ fontSize: { xs: 24, sm: 32, md: 40 }, mr: 1 }} />
               </Box>
               <Typography
-                component="h1"
                 variant="h4"
                 sx={{
                   fontWeight: 700,
                   background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
                   backgroundClip: 'text',
                   WebkitBackgroundClip: 'text',
+                  fontSize: { xs: '1.2rem', sm: '1.8rem', md: '2.4rem' },
                   WebkitTextFillColor: 'transparent',
                 }}
               >
@@ -221,11 +222,11 @@ const LoginForm: React.FC = () => {
               <Typography
                 variant="body1"
                 color="text.secondary"
-                sx={{ fontSize: '1.1rem', lineHeight: 1.6 }}
+                sx={{ fontSize: { xs: '.9rem', sm: '1.4rem', md: '2rem' }, lineHeight: 1.6 }}
               >
                 Sign in to your {isAdmin ? 'Admin' : 'User'} Account
               </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary', }}>
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: { xs: '.8rem', sm: '1rem', md: '1.2rem' } }}>
                 Empower your business with advanced document handling and insightful billing analysis.
               </Typography>
             </Box>
@@ -343,7 +344,7 @@ const LoginForm: React.FC = () => {
               />
 
               {/* Remember Me */}
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: { xs: 'flex-start', sm: 'center' }, flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', mt: 1 }}>
                 <FormControlLabel
                   control={
                     <Checkbox
@@ -354,17 +355,17 @@ const LoginForm: React.FC = () => {
                     />
                   }
                   label={
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: { xs: '.7rem', sm: '.9rem', md: '1rem' } }}>
                       Remember me for 30 days
                     </Typography>
                   }
                 />
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '.7rem', sm: '.9rem', md: '1rem' } }}>
                   Can't remember password?{" "}
                   <Button
                     onClick={() => navigate("/forgot-password")}
                     sx={{
-                      fontSize: 'inherit',
+                      fontSize: { xs: '.7rem', sm: '.9rem', md: '1rem' },
                       fontWeight: 600,
                       textTransform: 'none',
                       p: 0,

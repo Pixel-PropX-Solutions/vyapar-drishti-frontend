@@ -48,7 +48,7 @@ const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
         )
     `,
     backdropFilter: 'blur(20px)',
-    overflow: 'hidden',
+    overflowX: 'scroll',
     transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
     '&::before': {
         content: '""',
@@ -254,12 +254,12 @@ const BillSummaryTable = (props: InventoryTableProps) => {
                             }}>
                                 <TableRow>
                                     <TableCell >
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Box sx={{ whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 1 }}>
                                             <Typography variant="inherit"># Sr. No.</Typography>
                                         </Box>
                                     </TableCell>
 
-                                    <TableCell>
+                                    <TableCell sx={{ whiteSpace: 'nowrap', }}>
                                         <Tooltip
                                             title={'Sort by HSN/SAC Code'}
                                             arrow
@@ -276,7 +276,7 @@ const BillSummaryTable = (props: InventoryTableProps) => {
                                         </Tooltip>
                                     </TableCell>
 
-                                    <TableCell>
+                                    <TableCell sx={{ whiteSpace: 'nowrap', }}>
                                         <Tooltip
                                             title={'Sort by HSN/SAC Code'}
                                             arrow
@@ -294,7 +294,7 @@ const BillSummaryTable = (props: InventoryTableProps) => {
                                         </Tooltip>
                                     </TableCell>
 
-                                    <TableCell>
+                                    <TableCell sx={{ whiteSpace: 'nowrap', }}>
                                         <Tooltip
                                             title={'Sort by Product Name'}
                                             arrow
@@ -311,7 +311,7 @@ const BillSummaryTable = (props: InventoryTableProps) => {
                                         </Tooltip>
                                     </TableCell>
 
-                                    <TableCell>
+                                    <TableCell sx={{ whiteSpace: 'nowrap', }}>
                                         <Tooltip
                                             title={'Sort by Product Name'}
                                             arrow
@@ -329,19 +329,19 @@ const BillSummaryTable = (props: InventoryTableProps) => {
                                     </TableCell>
 
 
-                                    <TableCell sx={{ textAlign: 'right', }}>
+                                    <TableCell sx={{ whiteSpace: 'nowrap', textAlign: 'right', }}>
                                         <Typography variant="inherit">Type</Typography>
                                     </TableCell>
 
-                                    <TableCell sx={{ textAlign: 'right', }}>
+                                    <TableCell sx={{ whiteSpace: 'nowrap', textAlign: 'right', }}>
                                         <Typography variant="inherit">Total Value</Typography>
                                     </TableCell>
 
-                                    <TableCell sx={{ textAlign: 'right', }}>
+                                    <TableCell sx={{ whiteSpace: 'nowrap', textAlign: 'right', }}>
                                         <Typography variant="inherit">Taxable Value</Typography>
                                     </TableCell>
 
-                                    <TableCell sx={{ textAlign: 'right', }}>
+                                    <TableCell sx={{ whiteSpace: 'nowrap', textAlign: 'right', }}>
                                         <Typography variant="inherit">Tax Amount</Typography>
                                     </TableCell>
                                 </TableRow>
@@ -381,6 +381,7 @@ const BillSummaryTable = (props: InventoryTableProps) => {
                                             width: 'fit-content',
                                             gap: 1.5,
                                             py: 1,
+                                            whiteSpace: 'nowrap',
                                             px: 2,
                                             borderRadius: 1,
                                             bgcolor: alpha(theme.palette.primary.main, 0.08),
@@ -402,6 +403,7 @@ const BillSummaryTable = (props: InventoryTableProps) => {
 
                                     <TableCell sx={{ textAlign: 'right' }}>
                                         <Box sx={{
+                                            whiteSpace: 'nowrap',
                                             display: 'flex',
                                             flexDirection: 'column',
                                             alignItems: 'flex-end'
@@ -416,6 +418,7 @@ const BillSummaryTable = (props: InventoryTableProps) => {
                                     </TableCell>
                                     <TableCell sx={{ textAlign: 'right' }}>
                                         <Box sx={{
+                                            whiteSpace: 'nowrap',
                                             display: 'flex',
                                             flexDirection: 'column',
                                             alignItems: 'flex-end'
@@ -430,6 +433,7 @@ const BillSummaryTable = (props: InventoryTableProps) => {
                                     </TableCell>
                                     <TableCell sx={{ textAlign: 'right' }}>
                                         <Box sx={{
+                                            whiteSpace: 'nowrap',
                                             display: 'flex',
                                             flexDirection: 'column',
                                             alignItems: 'flex-end'

@@ -47,7 +47,7 @@ const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
         )
     `,
     backdropFilter: 'blur(20px)',
-    overflow: 'hidden',
+    overflowX: 'scroll',
     transition: 'all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
     '&::before': {
         content: '""',
@@ -253,13 +253,13 @@ const CustomerSummaryTable = (props: InventoryTableProps) => {
                             }}>
                                 <TableRow>
                                     <TableCell >
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, whiteSpace: 'nowrap', }}>
                                             <Typography variant="inherit">Sr. No.</Typography>
                                         </Box>
                                     </TableCell>
 
 
-                                    <TableCell>
+                                    <TableCell sx={{ whiteSpace: 'nowrap', }}>
                                         <Tooltip
                                             title={'Sort by Product Name'}
                                             arrow
@@ -277,7 +277,7 @@ const CustomerSummaryTable = (props: InventoryTableProps) => {
                                     </TableCell>
 
 
-                                    <TableCell>
+                                    <TableCell sx={{ whiteSpace: 'nowrap', }}>
                                         <Tooltip
                                             title={'Sort by HSN/SAC Code'}
                                             arrow
@@ -311,15 +311,15 @@ const CustomerSummaryTable = (props: InventoryTableProps) => {
                                         </Tooltip>
                                     </TableCell>
 
-                                    <TableCell sx={{ textAlign: 'right', }}>
+                                    <TableCell sx={{ textAlign: 'right', whiteSpace: 'nowrap', }}>
                                         <Typography variant="inherit">Total Value</Typography>
                                     </TableCell>
 
-                                    <TableCell sx={{ textAlign: 'right', }}>
+                                    <TableCell sx={{ textAlign: 'right', whiteSpace: 'nowrap', }}>
                                         <Typography variant="inherit">Taxable Value</Typography>
                                     </TableCell>
 
-                                    <TableCell sx={{ textAlign: 'right', }}>
+                                    <TableCell sx={{ textAlign: 'right', whiteSpace: 'nowrap', }}>
                                         <Typography variant="inherit">Tax Amount</Typography>
                                     </TableCell>
                                 </TableRow>
@@ -377,6 +377,7 @@ const CustomerSummaryTable = (props: InventoryTableProps) => {
 
                                     <TableCell sx={{ textAlign: 'right' }}>
                                         <Box sx={{
+                                            whiteSpace: 'nowrap',
                                             display: 'flex',
                                             flexDirection: 'column',
                                             alignItems: 'flex-end'
@@ -391,6 +392,7 @@ const CustomerSummaryTable = (props: InventoryTableProps) => {
                                     </TableCell>
                                     <TableCell sx={{ textAlign: 'right' }}>
                                         <Box sx={{
+                                            whiteSpace: 'nowrap',
                                             display: 'flex',
                                             flexDirection: 'column',
                                             alignItems: 'flex-end'
@@ -405,6 +407,7 @@ const CustomerSummaryTable = (props: InventoryTableProps) => {
                                     </TableCell>
                                     <TableCell sx={{ textAlign: 'right' }}>
                                         <Box sx={{
+                                            whiteSpace: 'nowrap',
                                             display: 'flex',
                                             flexDirection: 'column',
                                             alignItems: 'flex-end'

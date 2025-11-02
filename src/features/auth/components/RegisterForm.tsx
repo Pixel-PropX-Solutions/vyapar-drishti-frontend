@@ -25,7 +25,9 @@ import {
   Check,
   Close,
   Info,
-  PersonAdd
+  PersonAdd,
+  Phone,
+  LocationCity
 } from "@mui/icons-material";
 import Logo from "../../../assets/Logo.webp";
 import logoText from "../../../assets/Logo_Text.webp";
@@ -263,157 +265,123 @@ const RegistrationForm: React.FC = () => {
               padding: { xs: 3, sm: 4, md: 5 },
               borderRadius: 3,
               border: `1px solid ${theme.palette.divider}`,
-              background: 'rgba(255, 255, 255, 0.9)',
+              background: 'rgba(255, 255, 255, 0.2)',
               backdropFilter: 'blur(10px)',
             }}
           >
+            {/* Logo Section */}
             <Box
               sx={{
                 display: "flex",
-                flexDirection: "column",
-                alignItems: "start",
+                width: "100%",
+                mb: 2,
+                gap: 2,
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              {/* Logo Section */}
-              <Box
+              <img
+                src={Logo}
+                alt="Logo"
+                style={{
+                  height: "40px",
+                  borderRadius: "8px",
+                }}
+              />
+              <img
+                src={logoText}
+                alt="Logo Text"
+                style={{ height: "32px" }}
+              />
+            </Box>
+
+            {/* Header */}
+            <Box sx={{ mb: 3, width: '100%', textAlign: 'center' }}>
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 2 }}>
+                <PersonAdd color="primary" sx={{ fontSize: 40, mr: 1 }} />
+              </Box>
+              <Typography
+                component="h1"
+                variant="h4"
                 sx={{
-                  display: "flex",
-                  width: "100%",
-                  mb: 2,
-                  gap: 2,
-                  alignItems: "center",
-                  justifyContent: "center",
+                  fontWeight: 700,
+                  background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
                 }}
               >
-                <img
-                  src={Logo}
-                  alt="Logo"
-                  style={{
-                    height: "40px",
-                    // width: "40px",
-                    borderRadius: "8px",
-                  }}
-                />
-                <img
-                  src={logoText}
-                  alt="Logo Text"
-                  style={{ height: "32px" }}
-                />
-              </Box>
+                Create Account
+              </Typography>
+              <Typography
+                variant="body1"
+                color="text.secondary"
+                sx={{ fontSize: '1.1rem', lineHeight: 1.6 }}
+              >
+                Join us today and start your journey to financial protection
+              </Typography>
+            </Box>
 
-              {/* Header */}
-              <Box sx={{ mb: 3, width: '100%', textAlign: 'center' }}>
-                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 2 }}>
-                  <PersonAdd color="primary" sx={{ fontSize: 40, mr: 1 }} />
-                </Box>
-                <Typography
-                  component="h1"
-                  variant="h4"
-                  sx={{
-                    fontWeight: 700,
-                    background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-                    backgroundClip: 'text',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                  }}
-                >
-                  Create Account
-                </Typography>
-                <Typography
-                  variant="body1"
-                  color="text.secondary"
-                  sx={{ fontSize: '1.1rem', lineHeight: 1.6 }}
-                >
-                  Join us today and start your journey to financial protection
-                </Typography>
-              </Box>
-
-              {/* Form */}
-              <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
-                {/* Name Fields */}
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
-                  <TextField
-                    required
-                    fullWidth
-                    id="first"
-                    label="First Name"
-                    name="first"
-                    placeholder="Enter your first name"
-                    onChange={changeHandler}
-                    value={data.first}
-                    error={!!validationErrors.first}
-                    helperText={validationErrors.first}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <Person sx={{ color: 'action.active' }} />
-                        </InputAdornment>
-                      ),
-                      endAdornment: data.first && (
-                        <InputAdornment position="end">
-                          {getFieldIcon('first', !!validationErrors.first, !!data.first)}
-                        </InputAdornment>
-                      ),
-                    }}
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: 1,
-                        transition: 'all 0.3s ease',
-                        '&:hover': {
-                          boxShadow: `0 0 0 2px ${theme.palette.primary.main}20`,
-                        },
-                        '&.Mui-focused': {
-                          boxShadow: `0 0 0 2px ${theme.palette.primary.main}40`,
-                        }
-                      }
-                    }}
-                  />
-
-                  <TextField
-                    fullWidth
-                    id="last"
-                    label="Last Name"
-                    name="last"
-                    placeholder="Enter your last name"
-                    onChange={changeHandler}
-                    value={data.last}
-                    error={!!validationErrors.last}
-                    helperText={validationErrors.last}
-                    InputProps={{
-                      endAdornment: data.last && (
-                        <InputAdornment position="end">
-                          {getFieldIcon('last', !!validationErrors.last, !!data.last)}
-                        </InputAdornment>
-                      ),
-                    }}
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: 1,
-                        transition: 'all 0.3s ease',
-                        '&:hover': {
-                          boxShadow: `0 0 0 2px ${theme.palette.primary.main}20`,
-                        },
-                        '&.Mui-focused': {
-                          boxShadow: `0 0 0 2px ${theme.palette.primary.main}40`,
-                        }
-                      }
-                    }}
-                  />
-                </Stack>
-
-                {/* Email Field */}
+            {/* Form */}
+            <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
+              {/* Name Fields */}
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
                 <TextField
                   required
                   fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
+                  id="first"
+                  label="First Name"
+                  name="first"
+                  placeholder="Enter your first name"
                   onChange={changeHandler}
-                  value={data.email}
-                  placeholder="Enter your email address"
-                  error={!!validationErrors.email}
-                  helperText={validationErrors.email}
+                  value={data.first}
+                  error={!!validationErrors.first}
+                  helperText={validationErrors.first}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Person sx={{ color: 'action.active' }} />
+                      </InputAdornment>
+                    ),
+                    endAdornment: data.first && (
+                      <InputAdornment position="end">
+                        {getFieldIcon('first', !!validationErrors.first, !!data.first)}
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 1,
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: theme.palette.primary.main,
+                        }
+                      },
+                      '&.Mui-focused': {
+                        boxShadow: `0 0 0 3px ${theme.palette.primary.main}20`,
+                      }
+                    }
+                  }}
+                />
+
+                <TextField
+                  fullWidth
+                  id="last"
+                  label="Last Name"
+                  name="last"
+                  placeholder="Enter your last name"
+                  onChange={changeHandler}
+                  value={data.last}
+                  error={!!validationErrors.last}
+                  helperText={validationErrors.last}
+                  InputProps={{
+                    endAdornment: data.last && (
+                      <InputAdornment position="end">
+                        {getFieldIcon('last', !!validationErrors.last, !!data.last)}
+                      </InputAdornment>
+                    ),
+                  }}
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 1,
@@ -426,225 +394,254 @@ const RegistrationForm: React.FC = () => {
                       }
                     }
                   }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Email sx={{ color: 'action.active' }} />
-                      </InputAdornment>
-                    ),
-                    endAdornment: data.email && (
-                      <InputAdornment position="end">
-                        {getFieldIcon('email', !!validationErrors.email, !!data.email)}
-                      </InputAdornment>
-                    ),
-                  }}
                 />
+              </Stack>
 
-                {/* Phone Number */}
-                <Box sx={{ mb: 2 }}>
-                  <PhoneNumber
-                    code={data.code}
-                    number={data.number}
-                    codeWidth="40%"
-                    codeHandler={changeCountryCode}
-                    numberHandler={changeHandler}
-                    codeLabel="Country Code"
-                    required={true}
-                    codeError={!!validationErrors.code}
-                    numberError={!!validationErrors.number}
-                    numberHelperText={validationErrors.number}
-                    codePlaceholder="+91"
-                    numberLabel="Phone Number"
-                    numberPlaceholder="Enter your phone number"
-                  />
-                </Box>
-
-                {/* Password Field */}
-                <TextField
-                  onChange={changeHandler}
-                  fullWidth
-                  required
-                  name="password"
-                  variant="outlined"
-                  value={data.password}
-                  label="Password"
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  placeholder="Create a strong password"
-                  error={!!validationErrors.password}
-                  helperText={validationErrors.password}
-                  sx={{
-                    mb: 1,
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 1,
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        boxShadow: `0 0 0 2px ${theme.palette.primary.main}20`,
-                      },
-                      '&.Mui-focused': {
-                        boxShadow: `0 0 0 2px ${theme.palette.primary.main}40`,
-                      }
+              {/* Email Field */}
+              <TextField
+                required
+                fullWidth
+                id="email"
+                label="Email Address"
+                name="email"
+                autoComplete="email"
+                onChange={changeHandler}
+                value={data.email}
+                placeholder="Enter your email address"
+                error={!!validationErrors.email}
+                helperText={validationErrors.email}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 1,
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      boxShadow: `0 0 0 2px ${theme.palette.primary.main}20`,
+                    },
+                    '&.Mui-focused': {
+                      boxShadow: `0 0 0 2px ${theme.palette.primary.main}40`,
                     }
-                  }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Lock sx={{ color: 'action.active' }} />
-                      </InputAdornment>
-                    ),
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          {data.password && getFieldIcon('password', !!validationErrors.password, !!data.password)}
-                          <IconButton
-                            onClick={handleTogglePasswordVisibility}
-                            edge="end"
-                            size="small"
-                          >
-                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                        </Stack>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
+                  }
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Email sx={{ color: 'action.active' }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: data.email && (
+                    <InputAdornment position="end">
+                      {getFieldIcon('email', !!validationErrors.email, !!data.email)}
+                    </InputAdornment>
+                  ),
+                }}
+              />
 
-                {/* Password Strength Indicator */}
-                {data.password && (
-                  <Fade in timeout={300}>
-                    <Box sx={{ mb: 1 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: .5 }}>
-                        <Typography variant="caption" color="text.secondary">
-                          Password Strength
-                        </Typography>
-                        <Tooltip title="A strong password helps protect your account">
-                          <Info sx={{ fontSize: 14, ml: 0.5, color: 'text.secondary' }} />
-                        </Tooltip>
-                      </Box>
-                      <LinearProgress
-                        variant="determinate"
-                        value={(passwordStrength.score / 5) * 100}
-                        color={passwordStrength.color}
-                        sx={{
-                          height: 6,
-                          borderRadius: 2,
-                          mb: 1.5,
-                          backgroundColor: theme.palette.grey[200],
-                        }}
-                      />
-                      {passwordStrength.feedback.length > 0 && (
-                        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                          {passwordStrength.feedback.map((feedback, index) => (
-                            <Chip
-                              key={index}
-                              label={feedback}
-                              size="small"
-                              color={passwordStrength.color}
-                              variant="outlined"
-                              sx={{ fontSize: '0.7rem', height: 20 }}
-                            />
-                          ))}
-                        </Stack>
-                      )}
+              {/* Phone Number */}
+              <Box sx={{ mb: 2 }}>
+                <PhoneNumber
+                  code={data.code}
+                  number={data.number}
+                  codeWidth="40%"
+                  codeHandler={changeCountryCode}
+                  numberHandler={changeHandler}
+                  codeLabel="Country Code"
+                  required={true}
+                  codeError={!!validationErrors.code}
+                  numberError={!!validationErrors.number}
+                  numberHelperText={validationErrors.number}
+                  codePlaceholder="+91"
+                  numberLabel="Phone Number"
+                  numberIcon={<Phone />}
+                  codeIcon={<LocationCity />}
+                  numberPlaceholder="Enter your phone number"
+                />
+              </Box>
+
+              {/* Password Field */}
+              <TextField
+                onChange={changeHandler}
+                fullWidth
+                required
+                name="password"
+                variant="outlined"
+                value={data.password}
+                label="Password"
+                type={showPassword ? "text" : "password"}
+                id="password"
+                placeholder="Create a strong password"
+                error={!!validationErrors.password}
+                helperText={validationErrors.password}
+                sx={{
+                  mb: 1,
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 1,
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      boxShadow: `0 0 0 2px ${theme.palette.primary.main}20`,
+                    },
+                    '&.Mui-focused': {
+                      boxShadow: `0 0 0 2px ${theme.palette.primary.main}40`,
+                    }
+                  }
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Lock sx={{ color: 'action.active' }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        {data.password && getFieldIcon('password', !!validationErrors.password, !!data.password)}
+                        <IconButton
+                          onClick={handleTogglePasswordVisibility}
+                          edge="end"
+                          size="small"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </Stack>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              {/* Password Strength Indicator */}
+              {data.password && (
+                <Fade in timeout={300}>
+                  <Box sx={{ mb: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: .5 }}>
+                      <Typography variant="caption" color="text.secondary">
+                        Password Strength
+                      </Typography>
+                      <Tooltip title="A strong password helps protect your account">
+                        <Info sx={{ fontSize: 14, ml: 0.5, color: 'text.secondary' }} />
+                      </Tooltip>
                     </Box>
-                  </Fade>
-                )}
+                    <LinearProgress
+                      variant="determinate"
+                      value={(passwordStrength.score / 5) * 100}
+                      color={passwordStrength.color}
+                      sx={{
+                        height: 6,
+                        borderRadius: 2,
+                        mb: 1.5,
+                        backgroundColor: theme.palette.grey[200],
+                      }}
+                    />
+                    {passwordStrength.feedback.length > 0 && (
+                      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                        {passwordStrength.feedback.map((feedback, index) => (
+                          <Chip
+                            key={index}
+                            label={feedback}
+                            size="small"
+                            color={passwordStrength.color}
+                            variant="outlined"
+                            sx={{ fontSize: '0.7rem', height: 20 }}
+                          />
+                        ))}
+                      </Stack>
+                    )}
+                  </Box>
+                </Fade>
+              )}
 
-                {/* Submit Button */}
-                <Button
-                  type="submit"
-                  fullWidth
-                  disabled={!isFormValid || isSubmitting}
-                  variant="contained"
-                  size="large"
-                  sx={{
-                    mt: 1,
-                    mb: 1,
-                    py: 1.5,
-                    borderRadius: 2,
-                    fontSize: '1.1rem',
-                    fontWeight: 600,
-                    textTransform: 'none',
+              {/* Submit Button */}
+              <Button
+                type="submit"
+                fullWidth
+                disabled={!isFormValid || isSubmitting}
+                variant="contained"
+                size="large"
+                sx={{
+                  mt: 1,
+                  mb: 1,
+                  py: 1.5,
+                  borderRadius: 2,
+                  fontSize: '1.1rem',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  background: isFormValid && !isSubmitting
+                    ? `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`
+                    : undefined,
+                  boxShadow: isFormValid && !isSubmitting
+                    ? `0 4px 20px ${theme.palette.primary.main}40`
+                    : undefined,
+                  '&:hover': {
                     background: isFormValid && !isSubmitting
-                      ? `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`
+                      ? `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`
                       : undefined,
                     boxShadow: isFormValid && !isSubmitting
-                      ? `0 4px 20px ${theme.palette.primary.main}40`
+                      ? `0 6px 25px ${theme.palette.primary.main}50`
                       : undefined,
-                    '&:hover': {
-                      background: isFormValid && !isSubmitting
-                        ? `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`
-                        : undefined,
-                      boxShadow: isFormValid && !isSubmitting
-                        ? `0 6px 25px ${theme.palette.primary.main}50`
-                        : undefined,
-                    },
-                    '&:disabled': {
-                      background: theme.palette.grey[300],
-                      color: theme.palette.grey[500],
-                    }
-                  }}
-                >
-                  {isSubmitting ? 'Creating Account...' : 'Create Account'}
-                </Button>
+                  },
+                  '&:disabled': {
+                    background: theme.palette.grey[300],
+                    color: theme.palette.grey[500],
+                  }
+                }}
+              >
+                {isSubmitting ? 'Creating Account...' : 'Create Account'}
+              </Button>
 
-                {/* Footer Links */}
-                <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Already have an account?{" "}
-                    <Button
-                      onClick={() => navigate("/login")}
-                      sx={{
-                        fontSize: 'inherit',
-                        fontWeight: 600,
-                        textTransform: 'none',
-                        p: 0,
-                        minWidth: 'auto',
-                        '&:hover': {
-                          background: 'transparent',
-                          textDecoration: 'underline'
-                        }
-                      }}
-                    >
-                      Sign In
-                    </Button>
-                  </Typography>
+              {/* Footer Links */}
+              <Box sx={{ textAlign: 'center' }}>
+                <Typography variant="body2" color="text.secondary">
+                  Already have an account?{" "}
+                  <Button
+                    onClick={() => navigate("/login")}
+                    sx={{
+                      fontSize: 'inherit',
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      p: 0,
+                      minWidth: 'auto',
+                      '&:hover': {
+                        background: 'transparent',
+                        textDecoration: 'underline'
+                      }
+                    }}
+                  >
+                    Sign In
+                  </Button>
+                </Typography>
 
-                  <Typography variant="caption" color="text.secondary">
-                    By creating an account, you agree to our{" "}
-                    <Button
-                      onClick={() => navigate("/terms")}
-                      sx={{
-                        fontSize: 'inherit',
-                        p: 0,
-                        minWidth: 'auto',
-                        textTransform: 'none',
-                        textDecoration: 'underline',
-                        '&:hover': {
-                          background: 'transparent'
-                        }
-                      }}
-                    >
-                      Terms of Service
-                    </Button>
-                    {" "}and{" "}
-                    <Button
-                      onClick={() => navigate("/privacy")}
-                      sx={{
-                        fontSize: 'inherit',
-                        p: 0,
-                        minWidth: 'auto',
-                        textTransform: 'none',
-                        textDecoration: 'underline',
-                        '&:hover': {
-                          background: 'transparent'
-                        }
-                      }}
-                    >
-                      Privacy Policy
-                    </Button>
-                  </Typography>
-                </Box>
+                <Typography variant="caption" color="text.secondary">
+                  By creating an account, you agree to our{" "}
+                  <Button
+                    onClick={() => navigate("/terms")}
+                    sx={{
+                      fontSize: 'inherit',
+                      p: 0,
+                      minWidth: 'auto',
+                      textTransform: 'none',
+                      textDecoration: 'underline',
+                      '&:hover': {
+                        background: 'transparent'
+                      }
+                    }}
+                  >
+                    Terms of Service
+                  </Button>
+                  {" "}and{" "}
+                  <Button
+                    onClick={() => navigate("/privacy")}
+                    sx={{
+                      fontSize: 'inherit',
+                      p: 0,
+                      minWidth: 'auto',
+                      textTransform: 'none',
+                      textDecoration: 'underline',
+                      '&:hover': {
+                        background: 'transparent'
+                      }
+                    }}
+                  >
+                    Privacy Policy
+                  </Button>
+                </Typography>
               </Box>
             </Box>
           </Paper>

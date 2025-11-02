@@ -18,8 +18,6 @@ import {
     alpha,
     useTheme,
     Button,
-    Card,
-    CardContent,
     Grid,
     Checkbox,
 } from "@mui/material";
@@ -29,7 +27,6 @@ import {
     RefreshOutlined,
     PeopleAlt,
     Today,
-    ArrowBack,
 } from "@mui/icons-material";
 import { CustomerSortField, SortOrder, GetAllVouchars } from "@/utils/types";
 import { useDispatch, useSelector } from "react-redux";
@@ -53,13 +50,16 @@ import { BottomPagination } from "@/common/modals/BottomPagination";
 import { setInvoiceTypeId } from "@/store/reducers/invoiceReducer";
 import toast from "react-hot-toast";
 import usePDFHandler from "@/common/hooks/usePDFHandler";
-import { ActionButton } from "@/common/buttons/ActionButton";
+import PageHeader from "@/common/Headers/PageHeader";
+import ContraSideModal from "@/common/modals/ContraSideModal";
 
 
 const Transactions: React.FC = () => {
     const navigate = useNavigate();
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
+    const [isContraModalOpen, setContraModalOpen] = useState<boolean>(false);
+    const [contraId, setContraId] = useState<string | null>(null);
     const [visible, setVisible] = useState<boolean>(false);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const { invoices, loading, pageMeta, invoiceGroups } = useSelector((state: RootState) => state.invoice);
@@ -69,7 +69,6 @@ const Transactions: React.FC = () => {
     const tax_enable: boolean = currentCompanyDetails?.company_settings?.features?.enable_tax;
 
     const { init, setLoading, PDFViewModal } = usePDFHandler();
-
 
     async function handleInvoice(invoice: any, callback: () => void) {
 
@@ -104,7 +103,6 @@ const Transactions: React.FC = () => {
             setLoading(false);
         }
     }
-
 
     const [state, setState] = useState({
         searchQuery: "",
@@ -201,100 +199,11 @@ const Transactions: React.FC = () => {
         <LocalizationProvider dateAdapter={AdapterDateFns}>
             <Box sx={{ p: 3, width: "100%", position: 'relative' }}>
                 {/* Page Title */}
-                <Card sx={{ mb: 3, p: 2, }}>
-                    <CardContent>
-                        <Paper
-                            sx={{
-                                display: "flex",
-                                width: "100%",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                background: 'transparent'
-                            }}
-                        >
-                            <Grid item sx={{ width: "50%" }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                    <ActionButton
-                                        icon={<ArrowBack fontSize="small" />}
-                                        title="Back"
-                                        color="primary"
-                                        onClick={() => navigate(-1)}
-                                    />
-                                    <Box>
-                                        <Typography
-                                            variant="h5" component="h1" fontWeight="700" color="text.primary"
-                                        >
-                                            Transactions Directory
-                                        </Typography>
-                                        <Typography variant="body2" color="text.secondary" >
-                                            {pageMeta.total} Transactions found
-                                        </Typography>
-                                    </Box>
-                                </Box>
-                            </Grid>
+                <PageHeader
+                    title="Transactions Directory"
+                    subtitle={`${pageMeta.total} Transactions available in your database after applying filters`}
+                />
 
-                            <Grid
-                                sx={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    alignItems: "center",
-                                }}
-                            >
-                                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                                    {/* <ActionButton
-                                        variant="contained"
-                                        startIcon={<AddCircleOutlineIcon />}
-                                        color="success"
-                                        onClick={() => {
-                                            if (!currentCompanyDetails?._id) {
-                                                toast.error('Please create a company first.');
-                                                return;
-                                            }
-                                            dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Receipt'))?._id || ''));
-                                            navigate('/transactions/create/receipt');
-                                        }}
-                                        sx={{
-                                            background: theme.palette.mode === 'dark' ? '#2e7d32' : '#e8f5e9',
-                                            color: theme.palette.mode === 'dark' ? '#fff' : '#2e7d32',
-                                            border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#2e7d32'}`,
-                                            '&:hover': {
-                                                color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                                                background: theme.palette.mode === 'dark' ? '#e8f5e9' : '#2e7d32',
-                                            },
-                                        }}
-                                    >
-                                        Income
-                                    </ActionButton>
-
-                                    <ActionButton
-                                        variant="contained"
-                                        startIcon={<RemoveCircleOutlineIcon />}
-                                        color="error"
-                                        onClick={() => {
-                                            if (!currentCompanyDetails?._id) {
-                                                toast.error('Please create a company first.');
-                                                return;
-                                            }
-                                            dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Payment'))?._id || ''));
-                                            navigate('/transactions/create/payment');
-                                        }}
-                                        sx={{
-                                            background: theme.palette.mode === 'dark' ? '#c62828' : '#ffebee',
-                                            color: theme.palette.mode === 'dark' ? '#fff' : '#c62828',
-                                            border: `1px solid ${theme.palette.mode === 'dark' ? '#fff' : '#c62828'}`,
-                                            '&:hover': {
-                                                color: theme.palette.mode === 'dark' ? '#000' : '#fff',
-                                                background: theme.palette.mode === 'dark' ? '#ffebee' : '#c62828',
-                                            },
-                                        }}
-                                    >
-                                        Expense
-                                    </ActionButton> */}
-                                </Box>
-                            </Grid>
-                        </Paper>
-                    </CardContent>
-                </Card>
 
                 {/* Search and Filter Controls */}
                 <Box sx={{ display: "flex", mb: 3, gap: 2, flexWrap: "wrap" }}>
@@ -562,8 +471,11 @@ const Transactions: React.FC = () => {
                                         onView={() => handleViewInvoice(inv)}
                                         onEdit={() => {
                                             dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes(inv.voucher_type))?._id || ''));
-                                            if (inv.voucher_type !== 'Payment' && inv.voucher_type !== "receipt") {
+                                            if (inv.voucher_type === 'Sales' || inv.voucher_type === "Purchase") {
                                                 navigate(`/invoices/update/${inv.voucher_type.toLowerCase()}/${inv._id}`);
+                                            } else if (inv.voucher_type === 'Contra') {
+                                                setContraId(inv._id);
+                                                setContraModalOpen(true);
                                             }
                                         }}
                                         onDelete={async () => {
@@ -733,6 +645,11 @@ const Transactions: React.FC = () => {
                 />
 
                 {visible && <PDFViewModal visible={visible} setVisible={setVisible} />}
+                {contraId !== null && <ContraSideModal
+                    open={isContraModalOpen}
+                    onClose={() => setContraModalOpen(false)}
+                    contraId={contraId}
+                    setContraId={setContraId} />}
             </Box >
         </LocalizationProvider>
 

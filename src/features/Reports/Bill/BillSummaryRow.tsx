@@ -64,6 +64,7 @@ const ValueBox = styled(Box)(({ theme }) => ({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'flex-end',
+    whiteSpace: 'nowrap',
     '& .value': {
         fontWeight: 700,
         fontSize: '0.95rem',
@@ -133,7 +134,7 @@ export const BillSummaryRow = (props: InventoryRowRowProps) => {
                 </TableCell>
 
                 <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, whiteSpace: 'nowrap' }}>
                         <Box>
                             <Typography variant="body1" fontWeight="600" color="primary.main">
                                 {row.voucher_number}
@@ -156,7 +157,7 @@ export const BillSummaryRow = (props: InventoryRowRowProps) => {
                 </TableCell>
 
                 <TableCell>
-                    <Box>
+                    <Box sx={{ whiteSpace: 'nowrap', }}>
                         <Typography variant="body2" fontWeight={600}>
                             {formatDate(row.date)}
                         </Typography>
@@ -172,6 +173,7 @@ export const BillSummaryRow = (props: InventoryRowRowProps) => {
                             variant="body1"
                             fontWeight="600"
                             sx={{
+                                whiteSpace: 'nowrap',
                                 mb: 0.5,
                                 display: '-webkit-box',
                                 WebkitLineClamp: 2,
@@ -191,6 +193,7 @@ export const BillSummaryRow = (props: InventoryRowRowProps) => {
                             variant="body1"
                             fontWeight="600"
                             sx={{
+                                whiteSpace: 'nowrap',
                                 mb: 0.5,
                                 display: '-webkit-box',
                                 WebkitLineClamp: 2,
@@ -211,6 +214,7 @@ export const BillSummaryRow = (props: InventoryRowRowProps) => {
                         color="default"
                         variant="outlined"
                         sx={{
+                            whiteSpace: 'nowrap',
                             fontWeight: 600,
                             minWidth: 50,
                             fontSize: '0.75rem'

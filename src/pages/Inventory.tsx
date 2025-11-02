@@ -10,8 +10,6 @@ import {
     Typography,
     Tooltip,
     MenuItem,
-    Card,
-    CardContent,
     IconButton,
     Tabs,
     Tab,
@@ -37,12 +35,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { InventorySortField, SortOrder } from '@/utils/types';
 import { getInventoryItems, getInventoryStats } from '@/services/inventory';
-import { ArrowBack, WarningOutlined } from '@mui/icons-material';
-import { ActionButton } from "@/common/buttons/ActionButton";
+import { WarningOutlined } from '@mui/icons-material';
 import InventoryStockCardSkeleton from '@/common/skeletons/InventoryStockCardSkeleton';
 import toast from 'react-hot-toast';
 import ActionButtonSuccess from '@/common/buttons/ActionButtonSuccess';
 import ActionButtonCancel from '@/common/buttons/ActionButtonCancel';
+import PageHeader from '@/common/Headers/PageHeader';
 
 // Styled Components with enhanced visuals
 const StockCard = styled(Paper)(({ theme }) => ({
@@ -235,58 +233,38 @@ const Inventory: React.FC = () => {
 
     return (
         <Container maxWidth={false} sx={{ mt: 3, width: '100%', scrollBehavior: 'smooth' }}>
-            {/* Header Section with enhanced styling */}
-            <Card sx={{ mb: 2, p: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.05)', borderRadius: '12px' }}>
-                <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-                        <Box>
-                            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                                <ActionButton
-                                    icon={<ArrowBack fontSize="small" />}
-                                    title="Back"
-                                    color="primary"
-                                    onClick={() => navigate(-1)}
-                                />
-                                <Box>
-                                    <Typography variant="h5" component="h1" fontWeight="700" color="text.primary">
-                                        Inventory Management
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        Includes the items which have been added to at least a single invoice.
-                                    </Typography>
-                                </Box>
-                            </Box>
-                        </Box>
+            {/* Page Title */}
+            <PageHeader
+                title="Inventory Management"
+                subtitle="Includes the items which have been added to at least a single invoice."
+                children={
+                    <>
+                        <ActionButtonSuccess
+                            startIcon={<AddCircleOutlineIcon />}
+                            onClick={() => {
+                                if (!currentCompanyDetails?._id) {
+                                    toast.error('Please create a company first.');
+                                    return;
+                                }
+                                navigate('/invoices/create/purchase');
+                            }}
+                            text='Add Purchase'
+                        />
 
-                        {/* Top Action Buttons with improved styling */}
-                        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                            <ActionButtonSuccess
-                                startIcon={<AddCircleOutlineIcon />}
-                                onClick={() => {
-                                    if (!currentCompanyDetails?._id) {
-                                        toast.error('Please create a company first.');
-                                        return;
-                                    }
-                                    navigate('/invoices/create/purchase');
-                                }}
-                                text='Add Purchase'
-                            />
-
-                            <ActionButtonCancel
-                                startIcon={<RemoveCircleOutlineIcon />}
-                                onClick={() => {
-                                    if (!currentCompanyDetails?._id) {
-                                        toast.error('Please create a company first.');
-                                        return;
-                                    }
-                                    navigate('/invoices/create/sales');
-                                }}
-                                text='Add Sales'
-                            />
-                        </Box>
-                    </Box>
-                </CardContent>
-            </Card>
+                        <ActionButtonCancel
+                            startIcon={<RemoveCircleOutlineIcon />}
+                            onClick={() => {
+                                if (!currentCompanyDetails?._id) {
+                                    toast.error('Please create a company first.');
+                                    return;
+                                }
+                                navigate('/invoices/create/sales');
+                            }}
+                            text='Add Sales'
+                        />
+                    </>
+                }
+            />
 
             {/* Tab Navigation for quick filtering */}
             <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>

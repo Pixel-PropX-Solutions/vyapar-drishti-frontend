@@ -781,29 +781,6 @@ export default function SalePurchaseInvoiceCreation() {
                                         </Typography>
                                     </Box>
                                 </Box>
-
-                                {/* <Stack direction={{ xs: 'column', sm: 'row' }} alignItems="center" spacing={2}>
-                                    <Button
-                                        variant="contained"
-                                        startIcon={<AddCircleOutline />}
-                                        onClick={() => { }}
-                                        sx={{
-                                            borderRadius: 2,
-                                            textTransform: 'none',
-                                            fontWeight: 600,
-                                            px: 3,
-                                            py: 1,
-                                            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                                            boxShadow: theme.shadows[4],
-                                            '&:hover': {
-                                                transform: 'translateY(-1px)',
-                                                boxShadow: theme.shadows[8],
-                                            }
-                                        }}
-                                    >
-                                        Create New Customer
-                                    </Button>
-                                </Stack> */}
                             </Box>
 
                             <Grid container spacing={4}>
@@ -1149,41 +1126,41 @@ export default function SalePurchaseInvoiceCreation() {
                                                     }
                                                 }}
                                             >
-                                                <TableCell align="left" sx={{ minWidth: 200 }}>
+                                                <TableCell align="left" sx={{ whiteSpace: 'nowrap', minWidth: 200 }}>
                                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                                         <Inventory fontSize="small" />
                                                         Item Details
                                                     </Box>
                                                 </TableCell>
-                                                <TableCell align="center" sx={{ minWidth: 100 }}>
+                                                <TableCell align="center" sx={{ whiteSpace: 'nowrap', minWidth: 100 }}>
                                                     Quantity
                                                 </TableCell>
-                                                <TableCell align="center" sx={{ minWidth: 120 }}>
+                                                <TableCell align="center" sx={{ whiteSpace: 'nowrap', minWidth: 120 }}>
                                                     Rate (₹)
                                                 </TableCell>
-                                                <TableCell align="center" sx={{ minWidth: 120 }}>
+                                                <TableCell align="center" sx={{ whiteSpace: 'nowrap', minWidth: 120 }}>
                                                     Price (₹)
                                                 </TableCell>
-                                                <TableCell align="center" sx={{ minWidth: 120 }}>
+                                                <TableCell align="center" sx={{ whiteSpace: 'nowrap', minWidth: 120 }}>
                                                     Discount (₹)
                                                 </TableCell>
                                                 {tax_enable && (
                                                     <>
-                                                        <TableCell align="center" sx={{ minWidth: 100 }}>
+                                                        <TableCell align="center" sx={{ whiteSpace: 'nowrap', minWidth: 100 }}>
                                                             Tax (%)
                                                         </TableCell>
-                                                        <TableCell align="center" sx={{ minWidth: 120 }}>
+                                                        <TableCell align="center" sx={{ whiteSpace: 'nowrap', minWidth: 120 }}>
                                                             Tax Amount (₹)
                                                         </TableCell>
                                                     </>
                                                 )}
-                                                <TableCell align="center" sx={{ minWidth: 140 }}>
+                                                <TableCell align="center" sx={{ whiteSpace: 'nowrap', minWidth: 140 }}>
                                                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
                                                         <TrendingUp fontSize="small" />
                                                         Total (₹)
                                                     </Box>
                                                 </TableCell>
-                                                <TableCell align="center" sx={{ minWidth: 120 }}>
+                                                <TableCell align="center" sx={{ whiteSpace: 'nowrap', minWidth: 120 }}>
                                                     Actions
                                                 </TableCell>
                                             </TableRow>
@@ -1205,7 +1182,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                         }}
                                                     >
                                                         <TableCell align="left">
-                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                            <Box sx={{ display: 'flex', whiteSpace: 'nowrap', alignItems: 'center', gap: 2 }}>
                                                                 <Avatar
                                                                     sx={{
                                                                         width: 36,
@@ -1236,6 +1213,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                                 label={`${item.quantity} ` + `${tax_enable ? (item.unit ?? 'PCS') : ''}`}
                                                                 size="small"
                                                                 sx={{
+                                                                    whiteSpace: 'nowrap',
                                                                     bgcolor: alpha(theme.palette.info.main, 0.1),
                                                                     color: 'info.main',
                                                                     fontWeight: 600,
@@ -1246,19 +1224,19 @@ export default function SalePurchaseInvoiceCreation() {
                                                             />
                                                         </TableCell>
 
-                                                        <TableCell align="center">
+                                                        <TableCell align="center" sx={{ whiteSpace: 'nowrap', }}>
                                                             <Typography variant="body1" fontWeight="600" color="text.primary">
                                                                 ₹{Number(item.rate).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                                             </Typography>
                                                         </TableCell>
 
-                                                        <TableCell align="center">
+                                                        <TableCell align="center" sx={{ whiteSpace: 'nowrap', }}>
                                                             <Typography variant="body1" fontWeight="600" color="text.primary">
                                                                 ₹{Number(item.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                                             </Typography>
                                                         </TableCell>
 
-                                                        <TableCell align="center">
+                                                        <TableCell align="center" sx={{ whiteSpace: 'nowrap', }}>
                                                             <Typography variant="body1" fontWeight="600" color="text.primary">
                                                                 ₹{Number(item.discount_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                                             </Typography>
@@ -1266,7 +1244,7 @@ export default function SalePurchaseInvoiceCreation() {
 
                                                         {tax_enable && (
                                                             <>
-                                                                <TableCell align="center">
+                                                                <TableCell align="center" sx={{ whiteSpace: 'nowrap', }}>
                                                                     <Chip
                                                                         label={`${item?.tax_rate || 0}%`}
                                                                         size="small"
@@ -1275,7 +1253,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                                     />
                                                                 </TableCell>
 
-                                                                <TableCell align="center">
+                                                                <TableCell align="center" sx={{ whiteSpace: 'nowrap', }}>
                                                                     <Typography variant="body1" fontWeight="600" color="warning.main">
                                                                         ₹{Number(item.tax_amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                                                     </Typography>
@@ -1286,6 +1264,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                         <TableCell align="center">
                                                             <Box
                                                                 sx={{
+                                                                    whiteSpace: 'nowrap',
                                                                     display: 'inline-flex',
                                                                     alignItems: 'center',
                                                                     px: 2,
@@ -1301,7 +1280,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                             </Box>
                                                         </TableCell>
                                                         <TableCell align="center">
-                                                            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
+                                                            <Box sx={{ display: 'flex', whiteSpace: 'nowrap', justifyContent: 'center', gap: 1 }}>
                                                                 <Tooltip title="Edit Item" arrow>
                                                                     <IconButton
                                                                         size="small"
@@ -1358,7 +1337,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                     }}
                                                 >
                                                     <TableCell align="left">
-                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                        <Box sx={{ whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 1 }}>
                                                             <Calculate color="primary" />
                                                             <Typography variant="h6" fontWeight="700" color="primary.main">
                                                                 Subtotals
@@ -1366,7 +1345,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                         </Box>
                                                     </TableCell>
 
-                                                    <TableCell align="center">
+                                                    <TableCell align="center" sx={{ whiteSpace: 'nowrap', }}>
                                                         <Typography variant="h6" fontWeight="700" color="success.main">
                                                             {Number(data.items.reduce((total, item) => total + (Number(item.quantity) || 0), 0)).toLocaleString('en-IN', { minimumFractionDigits: 2 })} Units
                                                         </Typography>
@@ -1376,13 +1355,13 @@ export default function SalePurchaseInvoiceCreation() {
                                                         <Typography color="text.secondary">—</Typography>
                                                     </TableCell>
 
-                                                    <TableCell align="center">
+                                                    <TableCell align="center" sx={{ whiteSpace: 'nowrap', }}>
                                                         <Typography variant="h6" fontWeight="700" color="text.primary">
                                                             ₹ {Number(data.items.reduce((total, item) => total + (item.amount || 0), 0)).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                                         </Typography>
                                                     </TableCell>
 
-                                                    <TableCell align="center">
+                                                    <TableCell align="center" sx={{ whiteSpace: 'nowrap', }}>
                                                         <Typography variant="h6" fontWeight="700" color="text.primary">
                                                             ₹ {Number(data.items.reduce((total, item) => total + Number(item.discount_amount || 0), 0)).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                                         </Typography>
@@ -1393,7 +1372,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                             <TableCell align="center">
                                                                 <Typography color="text.secondary">—</Typography>
                                                             </TableCell>
-                                                            <TableCell align="center">
+                                                            <TableCell align="center" sx={{ whiteSpace: 'nowrap', }}>
                                                                 <Typography variant="h6" fontWeight="700" color="warning.main">
                                                                     ₹ {Number(data.items.reduce((total, item) => total + Number(item.tax_amount || 0), 0)).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                                                                 </Typography>
@@ -1404,6 +1383,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                     <TableCell align="center">
                                                         <Box
                                                             sx={{
+                                                                whiteSpace: 'nowrap',
                                                                 display: 'inline-flex',
                                                                 alignItems: 'center',
                                                                 px: 2,
@@ -1419,7 +1399,7 @@ export default function SalePurchaseInvoiceCreation() {
                                                         </Box>
                                                     </TableCell>
 
-                                                    <TableCell align="center">
+                                                    <TableCell align="center" sx={{ whiteSpace: 'nowrap', }}>
                                                         <Button
                                                             variant="contained"
                                                             startIcon={<AddCircleOutline />}

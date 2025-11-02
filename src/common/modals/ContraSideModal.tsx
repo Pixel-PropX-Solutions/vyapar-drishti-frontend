@@ -10,93 +10,103 @@ import {
     useTheme,
     Tooltip,
     Stack,
-    Chip,
-    Avatar,
     useMediaQuery,
     Card,
-    CardContent,
-    Divider,
-    Alert,
     InputAdornment,
     Switch,
     FormControlLabel,
+    Chip,
+    alpha,
+    Autocomplete,
 } from "@mui/material";
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import {
     Close as CloseIcon,
     Timeline,
-    Person as PersonIcon,
-    AccountBalance as BalanceIcon,
     CurrencyRupee as CurrencyIcon,
     Email as EmailIcon,
-    Info,
-    CheckCircle,
-    Warning,
     SmsRounded,
-    Check,
+    AccountBalance,
+    SwapHoriz,
+    EventNote,
+    InfoOutlined,
 } from "@mui/icons-material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
-import { createInvoice, getInvoiceCounter } from "@/services/invoice";
-import { useNavigate } from "react-router-dom";
-import ActionButtonSuccess from "../buttons/ActionButtonSuccess";
-import ActionButtonCancel from "../buttons/ActionButtonCancel";
-import BackDropLoading from "../loaders/BackDropLoading";
+import { createInvoice, getInvoiceCounter, updateInvoice, viewInvoice } from "@/services/invoice";
+import toast from "react-hot-toast";
+import { viewAllCustomerWithType } from "@/services/customers";
 
 interface ContraSideModalProps {
     open: boolean;
     onClose: () => void;
-    type?: 'payment' | 'receipt' | null;
-    customerName?: string;
-    customerId?: string;
-    closingBalance?: number;
+    contraId: string | null;
+    setContraId?: React.Dispatch<React.SetStateAction<string | null>>;
+
 }
 
-interface InventoryGroupFormData {
+interface ContraFormData {
+    id: string;
     amount: number;
     date: string;
     notes: string;
     sendSms: boolean;
     sendEmail: boolean;
-    accounts: string;
+    fromAccount: string;
+    toAccount: string;
+    fromAccountId: string;
+    toAccountId: string;
+    fromAccountEntry: string;
+    toAccountEntry: string;
     transactionNumber: string;
 }
 
 const ContraSideModal: React.FC<ContraSideModalProps> = ({
     open,
+    contraId,
     onClose,
-    type,
-    customerName,
-    customerId,
-    closingBalance,
+    setContraId,
 }) => {
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
-    const navigate = useNavigate();
+    const { user, current_company_id } = useSelector((state: RootState) => state.auth);
+    const currentCompanyId = current_company_id || localStorage.getItem("current_company_id") || user?.user_settings?.current_company_id || '';
+    const { invoiceData } = useSelector((state: RootState) => state.invoice);
+
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const { customerTypes } = useSelector((state: RootState) => state.customersLedger);
-    const { invoiceType_id } = useSelector((state: RootState) => state.invoice);
-    const { current_company_id } = useSelector((state: RootState) => state.auth);
     const [isLoading, setIsLoading] = useState(false);
     const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
-    const [data, setData] = useState<InventoryGroupFormData>({
+    const [accounts, setAccounts] = useState<{ id: string; name: string; }[]>([]);
+
+    const [data, setData] = useState<ContraFormData>({
+        id: '',
         amount: 0,
         date: new Date().toISOString(),
         notes: '',
         sendSms: false,
         sendEmail: false,
-        accounts: 'Cash',
-        transactionNumber: '',
+        fromAccount: '',
+        fromAccountId: '',
+        fromAccountEntry: '',
+        toAccount: '',
+        toAccountId: '',
+        toAccountEntry: '',
+        transactionNumber: 'Auto-Gen',
     });
-
-    const isReceipt = type === 'receipt';
 
     const validateForm = (): boolean => {
         const errors: { [key: string]: string } = {};
+
+        if (!data.fromAccount) {
+            errors.fromAccount = 'From account is required';
+        }
+
+        if (!data.toAccount) {
+            errors.toAccount = 'To account is required';
+        }
 
         if (!data.amount || data.amount <= 0) {
             errors.amount = 'Amount must be greater than 0';
@@ -115,15 +125,23 @@ const ContraSideModal: React.FC<ContraSideModalProps> = ({
     };
 
     const handleInputChange = (
-        field: keyof InventoryGroupFormData,
+        field: keyof ContraFormData,
         value: any
     ) => {
-        setData(prev => ({
-            ...prev,
-            [field]: value
-        }));
 
-        // Clear error when user starts typing
+        if (field === 'amount') {
+            const intVal = Math.max(0, Math.floor(Number(value)));
+            setData(prev => ({
+                ...prev,
+                [field]: intVal
+            }));
+        } else {
+            setData(prev => ({
+                ...prev,
+                [field]: value
+            }));
+        }
+
         if (formErrors[field]) {
             setFormErrors(prev => ({
                 ...prev,
@@ -134,107 +152,167 @@ const ContraSideModal: React.FC<ContraSideModalProps> = ({
 
     const resetForm = () => {
         setData({
+            id: '',
             amount: 0,
-            date: new Date().toISOString().split('T')[0],
+            date: new Date().toISOString(),
             notes: '',
             sendSms: false,
             sendEmail: false,
-            accounts: 'Cash',
-            transactionNumber: '',
+            fromAccount: '',
+            fromAccountId: '',
+            fromAccountEntry: '',
+            toAccount: '',
+            toAccountId: '',
+            toAccountEntry: '',
+            // keep a sensible default for newly opened creation form
+            transactionNumber: 'Auto-Gen',
         });
         setFormErrors({});
     };
 
     const handleSubmit = async () => {
         if (!validateForm()) {
-            toast.error('Please fix the form errors before submitting');
             return;
         }
-
         setIsLoading(true);
-        const accounting = [
-            {
-                vouchar_id: '',
-                ledger: customerName ?? '',
-                ledger_id: customerId ?? '',
-                amount: !isReceipt ? -data.amount : data.amount,
-                order_index: 0
-            },
-            {
-                vouchar_id: '',
-                ledger: data.accounts ?? '',
-                ledger_id: customerTypes.find(c => c.ledger_name === data.accounts)?._id || '',
-                amount: !isReceipt ? data.amount : -data.amount,
-                order_index: 1
-            },
-        ];
 
-        const payload = {
-            voucher_type: type === 'receipt' ? 'Receipt' : 'Payment',
-            voucher_type_id: invoiceType_id || '',
-            date: data.date.slice(0, 10),
-            voucher_number: data.transactionNumber || '',
-            party_name: customerName ?? '',
-            party_name_id: customerId ?? '',
-            narration: data.notes,
-            company_id: '',
-            reference_number: "",
-            reference_date: "",
-            place_of_supply: "",
-            mode_of_transport: "",
-            vehicle_number: "",
-            payment_mode: "Cash",
-            due_date: "",
-            paid_amount: data.amount,
-            total: data.amount,
-            discount: 0,
-            total_amount: data.amount,
-            total_tax: 0,
-            additional_charge: 0,
-            roundoff: 0,
-            grand_total: data.amount,
-            accounting,
-            items: []
-        };
+        if (!contraId) {
+            const accounting = [
+                {
+                    vouchar_id: '',
+                    ledger: data.fromAccount,
+                    ledger_id: data.fromAccountId,
+                    amount: -Number(data.amount),
+                    order_index: 0
+                },
+                {
+                    vouchar_id: '',
+                    ledger: data.toAccount,
+                    ledger_id: data.toAccountId,
+                    amount: Number(data.amount),
+                    order_index: 1
+                },
+            ];
 
-        dispatch(createInvoice(payload)).then(() => {
-            toast.success(`Payment ${isReceipt ? 'received' : 'given'} successfully!`);
-            resetForm();
-            onClose();
-            setIsLoading(false);
-            navigate('/transactions');
+            const payload = {
+                voucher_type: 'Contra',
+                voucher_type_id: 'c9d0e664-900d-4736-adfb-495ccca2bf3e',
+                date: data.date.slice(0, 10),
+                voucher_number: data.transactionNumber,
+                party_name: data.fromAccount,
+                party_name_id: data.fromAccountId,
+                narration: data.notes,
+                company_id: currentCompanyId || '',
+                reference_number: "",
+                reference_date: "",
+                place_of_supply: "",
+                mode_of_transport: "",
+                vehicle_number: "",
+                payment_mode: "",
+                due_date: "",
+                paid_amount: Number(data.amount),
+                total: Number(data.amount),
+                discount: 0,
+                total_amount: Number(data.amount),
+                total_tax: 0,
+                additional_charge: 0,
+                roundoff: 0,
+                grand_total: Number(data.amount),
+                accounting,
+                items: []
+            };
+            dispatch(createInvoice(payload)).then(() => {
+                setIsLoading(false);
+                resetForm();
+                onClose();
+                setContraId?.(null);
+                toast.success(`Contra added successfully!`);
+            }).catch((error) => {
+                setIsLoading(false);
+                toast.error(error || "Failed to add transaction. 🚫");
+            });
+        } else {
+            const accounting = [
+                {
+                    entry_id: data.fromAccountEntry,
+                    vouchar_id: data.id,
+                    ledger: data.fromAccount,
+                    ledger_id: data.fromAccountId,
+                    amount: -Number(data.amount),
+                    order_index: 0
+                },
+                {
+                    entry_id: data.toAccountEntry,
+                    vouchar_id: data.id,
+                    ledger: data.toAccount,
+                    ledger_id: data.toAccountId,
+                    amount: Number(data.amount),
+                    order_index: 1
+                },
+            ];
+
+            const payload = {
+                vouchar_id: data.id,
+                user_id: user?._id,
+                voucher_type: 'Contra',
+                voucher_type_id: 'c9d0e664-900d-4736-adfb-495ccca2bf3e',
+                date: data.date.slice(0, 10),
+                voucher_number: data.transactionNumber,
+                party_name: data.fromAccount,
+                party_name_id: data.fromAccountId,
+                narration: data.notes,
+                company_id: currentCompanyId || '',
+                reference_number: "",
+                reference_date: "",
+                place_of_supply: "",
+                mode_of_transport: "",
+                vehicle_number: "",
+                payment_mode: "",
+                due_date: "",
+                paid_amount: Number(data.amount),
+                total: Number(data.amount),
+                discount: 0,
+                total_amount: Number(data.amount),
+                total_tax: 0,
+                additional_charge: 0,
+                roundoff: 0,
+                grand_total: Number(data.amount),
+                accounting,
+                items: []
+            };
+            dispatch(updateInvoice(payload)).then(() => {
+                setIsLoading(false);
+                resetForm();
+                onClose();
+                setContraId?.(null);
+                toast.success(`Contra update successfully!`);
+            }).catch((error) => {
+                setIsLoading(false);
+                toast.error(error || "Failed to update transaction. 🚫");
+            });
+        }
+    };
+
+    const isFormValid = data.fromAccount && data.toAccount && data.amount > 0 && data.date;
+
+    const loadAccounts = async () => {
+        dispatch(viewAllCustomerWithType({
+            company_id: currentCompanyId || '',
+            customerType: 'Accounts',
+        })).then((response) => {
+            if (response.meta.requestStatus === 'fulfilled') {
+                const ledgersWithType = response.payload;
+                setAccounts(ledgersWithType.map((part: any) => ({ name: part.ledger_name, id: part._id })));
+            }
         }).catch((error) => {
-            setIsLoading(false);
-            toast.error(error || "Failed to add transaction. 🚫");
-        }).finally(() => {
-            setIsLoading(false);
-        })
-    };
+            toast.error(error || "An unexpected error occurred. Please try again later.");
+        });
+    }
 
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-            minimumFractionDigits: 2,
-        }).format(amount);
-    };
-
-    const getBalanceColor = (balance: number) => {
-        if (balance > 0) return theme.palette.success.main;
-        if (balance < 0) return theme.palette.error.main;
-        return theme.palette.text.secondary;
-    };
-
-    const getBalanceIcon = (balance: number) => {
-        if (balance > 0) return <CheckCircle fontSize="small" />;
-        if (balance < 0) return <Warning fontSize="small" />;
-        return <BalanceIcon fontSize="small" />;
-    };
-
-    useEffect(() => {
+    const loadCounter = async () => {
         dispatch(getInvoiceCounter({
-            company_id: current_company_id || '',
-            voucher_type: type === 'receipt' ? 'Receipt' : 'Payment',
+            company_id: currentCompanyId || '',
+            voucher_type: 'Contra',
         })).then((response) => {
             if (response.meta.requestStatus === 'fulfilled') {
                 handleInputChange('transactionNumber', response.payload.current_number || '');
@@ -242,8 +320,59 @@ const ContraSideModal: React.FC<ContraSideModalProps> = ({
         }).catch((error) => {
             toast.error(error || "An unexpected error occurred. Please try again later.");
         });
-    }, [dispatch, current_company_id, type]);
+    }
 
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                await loadAccounts();
+                if (!contraId) {
+                    await loadCounter();
+                }
+            } catch (error) {
+                console.error("Failed to load initial data:", error);
+                toast.error("Failed to load data. Please refresh the page.");
+            }
+        };
+
+        if (open) {
+            loadData();
+        }
+    }, [dispatch, currentCompanyId, open, contraId]);
+
+    useEffect(() => {
+        if (contraId != null) {
+            dispatch(viewInvoice({
+                vouchar_id: contraId,
+                company_id: currentCompanyId || '',
+            }));
+        } else {
+            resetForm();
+        }
+    }, [dispatch, currentCompanyId, contraId]);
+
+    useEffect(() => {
+        if (invoiceData && contraId !== null) {
+            const otherEntry = (invoiceData.accounting_entries || []).find((acc: any) => acc.ledger !== invoiceData.party_name) || { _id: '', ledger: '', ledger_id: '' };
+            setData({
+                id: invoiceData._id,
+                amount: invoiceData.grand_total || 0,
+                date: invoiceData.date,
+                notes: invoiceData.narration || '',
+                fromAccount: invoiceData.party_name,
+                fromAccountId: invoiceData.party_name_id,
+                transactionNumber: invoiceData.voucher_number,
+                toAccount: otherEntry.ledger || '',
+                toAccountId: otherEntry.ledger_id || '',
+                fromAccountEntry: (invoiceData.accounting_entries || []).find((acc: any) => acc.ledger === invoiceData.party_name)?._id || '',
+                toAccountEntry: otherEntry._id || '',
+                sendEmail: false,
+                sendSms: false,
+            });
+        } else {
+            resetForm();
+        }
+    }, [invoiceData]);
 
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -251,171 +380,322 @@ const ContraSideModal: React.FC<ContraSideModalProps> = ({
                 anchor="right"
                 PaperProps={{
                     sx: {
-                        width: { xs: '100%', sm: 650, md: 750 },
+                        width: { xs: '100%', sm: 600, md: 700 },
                         backgroundColor: theme.palette.background.default,
-                        backgroundImage: `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 100%)`,
-                        overflow: 'hidden',
+                        backgroundImage: 'none',
                     }
                 }}
                 sx={{
                     '& .MuiBackdrop-root': {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        backdropFilter: 'blur(8px)',
-                    }
+                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                        backdropFilter: 'blur(4px)',
+                    },
+                    zIndex: 1300,
                 }}
                 open={open}
-                onClose={onClose}
-                transitionDuration={300}
+                onClose={() => {
+                    onClose();
+                    resetForm();
+                    setContraId?.(null);
+                }}
+                transitionDuration={400}
             >
                 {/* Header */}
                 <Box sx={{
                     px: 3,
-                    py: 2,
+                    py: 2.5,
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    borderBottom: `2px solid ${isReceipt ? theme.palette.success.main : theme.palette.error.main}`,
-                    background: `linear-gradient(135deg, ${isReceipt ? theme.palette.success.main : theme.palette.error.main}20 0%, ${isReceipt ? theme.palette.success.light : theme.palette.error.light}15 100%)`,
-                    backdropFilter: 'blur(20px)',
+                    borderBottom: `1px solid ${theme.palette.divider}`,
+                    background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.08)} 0%, ${alpha(theme.palette.success.main, 0.08)} 100%)`,
                     position: 'sticky',
                     top: 0,
                     zIndex: 100,
+                    backdropFilter: 'blur(20px)',
                 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Tooltip title="Close" arrow>
-                            <IconButton
-                                onClick={onClose}
-                                sx={{
-                                    backgroundColor: theme.palette.background.paper,
-                                    boxShadow: theme.shadows[2],
-                                    '&:hover': {
-                                        backgroundColor: theme.palette.action.hover,
-                                        transform: 'scale(1.1) rotate(90deg)',
-                                        boxShadow: theme.shadows[4],
-                                    },
-                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                                }}
-                            >
-                                <CloseIcon />
-                            </IconButton>
-                        </Tooltip>
+                        <Box sx={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.success.main} 100%)`,
+                            boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`,
+                        }}>
+                            <SwapHoriz sx={{ color: 'white', fontSize: 24 }} />
+                        </Box>
                         <Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Typography variant="h6" fontWeight={700}>
-                                    {isReceipt ? 'Receipt' : 'Payment'}
-                                </Typography>
-                            </Box>
+                            <Typography variant="h6" fontWeight={700} sx={{ lineHeight: 1.2 }}>
+                                Contra Entry
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+                                <Chip
+                                    label={data.transactionNumber}
+                                    size="small"
+                                    sx={{
+                                        height: 20,
+                                        fontSize: '0.7rem',
+                                        fontWeight: 600,
+                                        bgcolor: alpha(theme.palette.primary.main, 0.1),
+                                        color: theme.palette.primary.main,
+                                    }}
+                                />
+                            </Typography>
                         </Box>
                     </Box>
-
-                    {!isMobile && (
-                        <Chip
-                            icon={<Info />}
-                            label="Fill required fields"
-                            size="small"
-                            variant="outlined"
-                            sx={{
-                                borderColor: isReceipt ? theme.palette.success.main : theme.palette.error.main,
-                                color: isReceipt ? theme.palette.success.main : theme.palette.error.main,
+                    <Tooltip title="Close" arrow placement="left">
+                        <IconButton
+                            onClick={() => {
+                                onClose();
+                                resetForm();
+                                setContraId?.(null);
                             }}
-                        />
-                    )}
+                            sx={{
+                                backgroundColor: alpha(theme.palette.error.main, 0.1),
+                                color: theme.palette.error.main,
+                                '&:hover': {
+                                    backgroundColor: alpha(theme.palette.error.main, 0.2),
+                                    transform: 'rotate(90deg)',
+                                },
+                                transition: 'all 0.3s ease'
+                            }}
+                        >
+                            <CloseIcon />
+                        </IconButton>
+                    </Tooltip>
                 </Box>
 
                 {/* Content */}
                 <Box sx={{
                     flex: 1,
                     overflow: 'auto',
-                    position: 'relative',
-                    '&::-webkit-scrollbar': { width: 8 },
-                    '&::-webkit-scrollbar-track': { backgroundColor: theme.palette.background.default },
+                    px: 3,
+                    pb: 3,
+                    '&::-webkit-scrollbar': { width: 6 },
+                    '&::-webkit-scrollbar-track': { backgroundColor: 'transparent' },
                     '&::-webkit-scrollbar-thumb': {
-                        backgroundColor: theme.palette.divider,
-                        borderRadius: 1,
-                        '&:hover': { backgroundColor: theme.palette.action.hover }
+                        backgroundColor: alpha(theme.palette.primary.main, 0.2),
+                        borderRadius: 3,
+                        '&:hover': { backgroundColor: alpha(theme.palette.primary.main, 0.3) }
                     }
                 }}>
-                    <Box sx={{ p: 3 }}>
-                        {/* Customer Information Card */}
-                        <Card
+                    {/* Info Banner */}
+                    <Box sx={{
+                        mt: 2,
+                        p: 2,
+                        borderRadius: 1,
+                        bgcolor: alpha(theme.palette.info.main, 0.08),
+                        border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+                        display: 'flex',
+                        gap: 1.5,
+                    }}>
+                        <InfoOutlined sx={{ color: theme.palette.info.main, fontSize: 20, mt: 0.2 }} />
+                        <Box>
+                            <Typography variant="body2" fontWeight={600} color="info.main" sx={{ mb: 0.5 }}>
+                                What is a Contra Entry?
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.5 }}>
+                                Record fund transfers between your bank and cash accounts. This transaction affects only your balance sheet.
+                            </Typography>
+                        </Box>
+                    </Box>
+
+                    <Box>
+                        {/* Account Transfer Section */}
+                        <Paper
                             elevation={0}
                             sx={{
-                                mb: 3,
+                                p: 3,
+                                mt: 2,
                                 borderRadius: 2,
-                                background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover}10 100%)`,
                                 border: `1px solid ${theme.palette.divider}`,
+                                background: theme.palette.background.paper,
+                                position: 'relative',
+                                overflow: 'hidden',
+                                '&::before': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    height: '4px',
+                                    background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.success.main} 100%)`,
+                                }
                             }}
                         >
-                            <CardContent sx={{ p: 0 }}>
-                                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'space-between', }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                                        <Avatar
-                                            sx={{
-                                                bgcolor: theme.palette.primary.main,
-                                                width: 48,
-                                                height: 48,
-                                            }}
-                                        >
-                                            <PersonIcon />
-                                        </Avatar>
-                                        <Typography variant="h6" fontWeight={600} color="primary">
-                                            {customerName}
-                                        </Typography>
-                                    </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                                <AccountBalance sx={{ color: theme.palette.primary.main, fontSize: 20 }} />
+                                <Typography variant="subtitle1" fontWeight={700}>
+                                    Account Transfer Details
+                                </Typography>
+                            </Box>
 
-                                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', }}>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                            <Typography variant="body1" fontWeight={600}>
-                                                Current Balance:
-                                            </Typography>
-                                        </Box>
-                                        <Typography
-                                            variant="h6"
-                                            fontWeight={700}
-                                            sx={{ color: getBalanceColor(closingBalance ?? 0) }}
-                                        >
-                                            {getBalanceIcon(closingBalance ?? 0)}{" "}
-                                            {formatCurrency(closingBalance ?? 0)}
-                                        </Typography>
+                            <Stack spacing={1}>
+                                {/* From Account */}
+                                <Box>
+                                    <Typography variant="caption" fontWeight={600} sx={{ mb: 1, color: 'text.secondary' }}>
+                                        TRANSFER FROM
+                                    </Typography>
+                                    <Autocomplete
+                                        options={accounts}
+                                        getOptionLabel={(option) => option.name}
+                                        value={accounts.find(p => p.id === data.fromAccountId) || null}
+                                        onChange={(_, newValue) => {
+                                            handleInputChange('fromAccount', newValue?.name);
+                                            handleInputChange('fromAccountId', newValue?.id);
+                                            setFormErrors(prev => ({ ...prev, fromAccount: '' }));
+                                        }}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                fullWidth
+                                                placeholder="Select or enter from account"
+                                                error={!!formErrors.fromAccount}
+                                                helperText={formErrors.fromAccount}
+                                                InputProps={{
+                                                    ...params.InputProps,
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <Box sx={{
+                                                                width: 32,
+                                                                height: 32,
+                                                                borderRadius: '8px',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                bgcolor: alpha(theme.palette.error.main, 0.1),
+                                                            }}>
+                                                                <AccountBalance sx={{ fontSize: 16, color: theme.palette.error.main }} />
+                                                            </Box>
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: 1,
+                                                        transition: 'all 0.3s ease',
+                                                        '&:hover': {
+                                                            boxShadow: `0 0 0 4px ${alpha(theme.palette.error.main, 0.08)}`,
+                                                        },
+                                                        '&.Mui-focused': {
+                                                            boxShadow: `0 0 0 4px ${alpha(theme.palette.error.main, 0.12)}`,
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        )}
+                                        sx={{ flex: 1 }}
+                                    />
+                                </Box>
+
+                                {/* Transfer Arrow */}
+                                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                                    <Box sx={{
+                                        width: 48,
+                                        height: 48,
+                                        borderRadius: '50%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.success.main} 100%)`,
+                                        boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`,
+                                        animation: 'pulse 2s ease-in-out infinite',
+                                        '@keyframes pulse': {
+                                            '0%, 100%': { transform: 'scale(1)' },
+                                            '50%': { transform: 'scale(1.05)' },
+                                        }
+                                    }}>
+                                        <SwapHoriz sx={{ color: 'white', fontSize: 28, transform: 'rotate(90deg)' }} />
                                     </Box>
                                 </Box>
 
-                                <Divider sx={{ my: 1 }} />
+                                {/* To Account */}
+                                <Box>
+                                    <Typography variant="caption" fontWeight={600} sx={{ mb: 1, color: 'text.secondary' }}>
+                                        TRANSFER TO
+                                    </Typography>
+                                    <Autocomplete
+                                        options={accounts}
+                                        getOptionLabel={(option) => option.name}
+                                        value={accounts.find(p => p.id === data.toAccountId) || null}
+                                        onChange={(_, newValue) => {
+                                            handleInputChange('toAccount', newValue?.name);
+                                            handleInputChange('toAccountId', newValue?.id);
+                                            setFormErrors(prev => ({ ...prev, toAccount: '' }));
+                                        }}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                fullWidth
+                                                placeholder="Select or enter to account"
+                                                error={!!formErrors.toAccount}
+                                                helperText={formErrors.toAccount}
+                                                InputProps={{
+                                                    ...params.InputProps,
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <Box sx={{
+                                                                width: 32,
+                                                                height: 32,
+                                                                borderRadius: '8px',
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                bgcolor: alpha(theme.palette.success.main, 0.1),
+                                                            }}>
+                                                                <AccountBalance sx={{ fontSize: 16, color: theme.palette.success.main }} />
+                                                            </Box>
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: 1,
+                                                        transition: 'all 0.3s ease',
+                                                        '&:hover': {
+                                                            boxShadow: `0 0 0 4px ${alpha(theme.palette.success.main, 0.08)}`,
+                                                        },
+                                                        '&.Mui-focused': {
+                                                            boxShadow: `0 0 0 4px ${alpha(theme.palette.success.main, 0.12)}`,
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        )}
+                                        sx={{ flex: 1 }}
+                                    />
+                                </Box>
+                            </Stack>
+                        </Paper>
 
-
-                                {closingBalance !== 0 && (
-                                    <Alert
-                                        severity={(closingBalance ?? 0) > 0 ? "success" : "error"}
-                                        sx={{ mt: 1 }}
-                                    >
-                                        {(closingBalance ?? 0) > 0
-                                            ? `Customer has a credit balance of ${formatCurrency(Math.abs(closingBalance ?? 0))}`
-                                            : `Customer has a pending balance of ${formatCurrency(Math.abs(closingBalance ?? 0))}`
-                                        }
-                                    </Alert>
-                                )}
-                            </CardContent>
-                        </Card>
-
-                        {/* Payment Form */}
+                        {/* Amount and Date Section */}
                         <Paper
-                            elevation={1}
+                            elevation={0}
                             sx={{
-                                px: 3,
-                                py: 3,
-                                mb: 3,
-                                borderRadius: 2,
-                                background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover}20 100%)`,
+                                p: 3,
+                                mt: 3,
+                                borderRadius: 3,
                                 border: `1px solid ${theme.palette.divider}`,
+                                background: theme.palette.background.paper,
                             }}
                         >
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+                                <CurrencyIcon sx={{ color: theme.palette.success.main, fontSize: 20 }} />
+                                <Typography variant="subtitle1" fontWeight={700}>
+                                    Transaction Details
+                                </Typography>
+                            </Box>
+
                             <Stack spacing={3}>
-                                {/* Amount Field */}
-                                <Box sx={{ display: 'flex', gap: 2 }}>
+                                <Box sx={{ display: 'flex', gap: 2, flexDirection: isMobile ? 'column' : 'row' }}>
+                                    {/* Amount Field */}
                                     <TextField
                                         fullWidth
                                         type="number"
-                                        placeholder="Enter amount"
+                                        placeholder="0.00"
                                         label="Amount"
                                         value={data.amount || ''}
                                         onChange={(e) => handleInputChange('amount', parseFloat(e.target.value) || 0)}
@@ -424,13 +704,24 @@ const ContraSideModal: React.FC<ContraSideModalProps> = ({
                                         InputProps={{
                                             startAdornment: (
                                                 <InputAdornment position="start">
-                                                    <CurrencyIcon fontSize="small" />
+                                                    <CurrencyIcon sx={{ color: theme.palette.success.main }} />
                                                 </InputAdornment>
                                             ),
                                         }}
+                                        inputProps={{ step: 1, min: 0 }}
                                         sx={{
                                             '& .MuiOutlinedInput-root': {
                                                 borderRadius: 1,
+                                                fontSize: '1.1rem',
+                                                '&:hover': {
+                                                    boxShadow: `0 0 0 4px ${alpha(theme.palette.success.main, 0.08)}`,
+                                                },
+                                                '&.Mui-focused': {
+                                                    boxShadow: `0 0 0 4px ${alpha(theme.palette.success.main, 0.12)}`,
+                                                }
+                                            },
+                                            '& input': {
+                                                fontWeight: 700,
                                             }
                                         }}
                                     />
@@ -443,12 +734,25 @@ const ContraSideModal: React.FC<ContraSideModalProps> = ({
                                         slotProps={{
                                             textField: {
                                                 fullWidth: true,
-                                                label: "Select Date",
+                                                label: "Transaction Date",
                                                 error: !!formErrors.date,
                                                 helperText: formErrors.date,
+                                                InputProps: {
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <EventNote sx={{ color: theme.palette.primary.main }} />
+                                                        </InputAdornment>
+                                                    ),
+                                                },
                                                 sx: {
                                                     '& .MuiOutlinedInput-root': {
                                                         borderRadius: 1,
+                                                        '&:hover': {
+                                                            boxShadow: `0 0 0 4px ${alpha(theme.palette.primary.main, 0.08)}`,
+                                                        },
+                                                        '&.Mui-focused': {
+                                                            boxShadow: `0 0 0 4px ${alpha(theme.palette.primary.main, 0.12)}`,
+                                                        }
                                                     }
                                                 }
                                             }
@@ -456,41 +760,13 @@ const ContraSideModal: React.FC<ContraSideModalProps> = ({
                                     />
                                 </Box>
 
-                                <Stack direction="row" spacing={1} sx={{ height: '100%', alignItems: 'center' }}>
-                                    {customerTypes.map((type) => (
-                                        <Tooltip key={type._id} title={`Select ${type.ledger_name}`}>
-                                            <Button
-                                                variant={data.accounts === type.ledger_name ? "contained" : "outlined"}
-                                                onClick={() => { handleInputChange('accounts', type.ledger_name) }}
-                                                sx={{
-                                                    borderRadius: 1,
-                                                    px: 2,
-                                                    py: 3,
-                                                    textTransform: 'none',
-                                                    fontWeight: 600,
-                                                    minWidth: 'auto',
-                                                    flex: 1,
-                                                    transition: 'all 0.2s ease',
-                                                    '&:hover': {
-                                                        transform: 'translateY(-1px)',
-                                                        boxShadow: theme.shadows[4],
-                                                    },
-                                                }}
-                                                endIcon={data.accounts === type.ledger_name ? <Check /> : null}
-                                            >
-                                                {type.ledger_name}
-                                            </Button>
-                                        </Tooltip>
-                                    ))}
-                                </Stack>
-
                                 {/* Notes Field */}
                                 <TextField
                                     fullWidth
                                     multiline
-                                    rows={3}
-                                    label="Additional Notes (optional)"
-                                    placeholder="Enter any additional notes (optional)"
+                                    rows={4}
+                                    label="Additional Notes"
+                                    placeholder="Add notes or description for this transaction (optional)"
                                     value={data.notes}
                                     onChange={(e) => handleInputChange('notes', e.target.value)}
                                     error={!!formErrors.notes}
@@ -498,60 +774,125 @@ const ContraSideModal: React.FC<ContraSideModalProps> = ({
                                     sx={{
                                         '& .MuiOutlinedInput-root': {
                                             borderRadius: 1,
-                                            transition: 'all 0.3s ease',
+                                            '&:hover': {
+                                                boxShadow: `0 0 0 4px ${alpha(theme.palette.primary.main, 0.05)}`,
+                                            },
+                                            '&.Mui-focused': {
+                                                boxShadow: `0 0 0 4px ${alpha(theme.palette.primary.main, 0.1)}`,
+                                            }
                                         }
                                     }}
                                 />
+                            </Stack>
+                        </Paper>
 
-                                {/* Communication Options */}
-                                <Box>
-                                    <Typography variant="body1" fontWeight={600} sx={{ mb: 2 }}>
-                                        Notification Options Coming Soon
-                                    </Typography>
-                                    <Stack spacing={2} direction={'row'}>
-                                        <Card variant="outlined" sx={{ px: 2, py: 1, borderRadius: 1, width: '50%' }}>
-                                            <FormControlLabel
-                                                control={
-                                                    <Switch
-                                                        disabled
-                                                        checked={data.sendSms}
-                                                        onChange={(e) => handleInputChange('sendSms', e.target.checked)}
-                                                        color="primary"
-                                                    />
-                                                }
-                                                label={
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                        <SmsRounded color="primary" fontSize="small" />
-                                                        <Typography variant="body1" fontWeight={500}>
-                                                            Send SMS to Customer
-                                                        </Typography>
-                                                    </Box>
-                                                }
-                                            />
-                                        </Card>
+                        {/* Notification Options */}
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                p: 3,
+                                mt: 3,
+                                mb: 2,
+                                borderRadius: 3,
+                                border: `1px dashed ${theme.palette.divider}`,
+                                background: alpha(theme.palette.warning.main, 0.03),
+                            }}
+                        >
+                            <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Chip label="Coming Soon" size="small" color="warning" sx={{ height: 20 }} />
+                                Notification Options
+                            </Typography>
 
-                                        <Card variant="outlined" sx={{ px: 2, py: 1, borderRadius: 1, width: '50%' }}>
-                                            <FormControlLabel
-                                                control={
-                                                    <Switch
-                                                        disabled
-                                                        checked={data.sendEmail}
-                                                        onChange={(e) => handleInputChange('sendEmail', e.target.checked)}
-                                                        color="primary"
-                                                    />
-                                                }
-                                                label={
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                        <EmailIcon color="primary" fontSize="small" />
-                                                        <Typography variant="body1" fontWeight={500}>
-                                                            Send Email to Customer
-                                                        </Typography>
-                                                    </Box>
-                                                }
+                            <Stack spacing={2}>
+                                <Card
+                                    variant="outlined"
+                                    sx={{
+                                        px: 2,
+                                        py: 1.5,
+                                        borderRadius: 1,
+                                        bgcolor: 'background.paper',
+                                        opacity: 0.6,
+                                        border: `1px solid ${theme.palette.divider}`,
+                                    }}
+                                >
+                                    <FormControlLabel
+                                        control={
+                                            <Switch
+                                                disabled
+                                                checked={data.sendSms}
+                                                size="small"
                                             />
-                                        </Card>
-                                    </Stack>
-                                </Box>
+                                        }
+                                        label={
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                                <Box sx={{
+                                                    width: 32,
+                                                    height: 32,
+                                                    borderRadius: '8px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    bgcolor: alpha(theme.palette.primary.main, 0.1),
+                                                }}>
+                                                    <SmsRounded sx={{ color: theme.palette.primary.main, fontSize: 16 }} />
+                                                </Box>
+                                                <Box>
+                                                    <Typography variant="body2" fontWeight={600}>
+                                                        SMS Notification
+                                                    </Typography>
+                                                    <Typography variant="caption" color="text.secondary">
+                                                        Send SMS to customer
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+                                        }
+                                    />
+                                </Card>
+
+                                <Card
+                                    variant="outlined"
+                                    sx={{
+                                        px: 2,
+                                        py: 1.5,
+                                        borderRadius: 1,
+                                        bgcolor: 'background.paper',
+                                        opacity: 0.6,
+                                        border: `1px solid ${theme.palette.divider}`,
+                                    }}
+                                >
+                                    <FormControlLabel
+                                        control={
+                                            <Switch
+                                                disabled
+                                                checked={data.sendEmail}
+                                                size="small"
+                                            />
+                                        }
+                                        label={
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                                <Box sx={{
+                                                    width: 32,
+                                                    height: 32,
+                                                    borderRadius: '8px',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    bgcolor: alpha(theme.palette.error.main, 0.1),
+                                                }}>
+                                                    <EmailIcon sx={{ color: theme.palette.error.main, fontSize: 16 }} />
+                                                </Box>
+                                                <Box>
+                                                    <Typography variant="body2" fontWeight={600}>
+                                                        Email Notification
+                                                    </Typography>
+                                                    <Typography variant="caption" color="text.secondary">
+                                                        Send email to customer
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+                                        }
+                                    />
+                                </Card>
                             </Stack>
                         </Paper>
                     </Box>
@@ -561,64 +902,102 @@ const ContraSideModal: React.FC<ContraSideModalProps> = ({
                 <Box sx={{
                     p: 3,
                     borderTop: `1px solid ${theme.palette.divider}`,
-                    backgroundColor: theme.palette.background.paper,
-                    background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.action.hover}20 100%)`,
-                    backdropFilter: 'blur(20px)',
+                    background: theme.palette.background.paper,
+                    position: 'sticky',
+                    bottom: 0,
+                    zIndex: 100,
                 }}>
                     <Stack
                         direction={isMobile ? "column" : "row"}
                         spacing={2}
                         justifyContent="space-between"
-                        alignItems="center"
                     >
-                        <Stack direction={isMobile ? "column" : "row"} spacing={2} sx={{ width: isMobile ? '100%' : 'auto' }}>
-                            <Button
-                                variant="outlined"
-                                onClick={resetForm}
-                                disabled={isLoading}
-                                fullWidth={isMobile}
-                                sx={{
-                                    textTransform: 'none',
-                                    borderRadius: 2,
-                                    px: 3,
-                                    py: 1.5,
-                                    fontWeight: 600,
-                                    transition: 'all 0.3s ease',
-                                    '&:hover': {
-                                        transform: 'translateY(-2px)',
-                                        boxShadow: theme.shadows[4]
-                                    }
-                                }}
-                            >
-                                Reset Form
-                            </Button>
+                        <Button
+                            variant="outlined"
+                            onClick={resetForm}
+                            disabled={isLoading}
+                            fullWidth={isMobile}
+                            sx={{
+                                textTransform: 'none',
+                                borderRadius: 1,
+                                px: 3,
+                                py: 1.5,
+                                fontWeight: 600,
+                                borderColor: theme.palette.divider,
+                                color: 'text.secondary',
+                                '&:hover': {
+                                    borderColor: theme.palette.primary.main,
+                                    bgcolor: alpha(theme.palette.primary.main, 0.05),
+                                    color: theme.palette.primary.main,
+                                }
+                            }}
+                        >
+                            Reset Form
+                        </Button>
 
-                            {isReceipt ? (
-                                <ActionButtonSuccess
-                                    onClick={handleSubmit}
-                                    startIcon={isLoading ? <Timeline className="animate-spin" /> : <AddCircleOutlineIcon />}
-                                    disabled={isLoading || !data.amount || data.amount <= 0 || !data.date}
-                                    text={isLoading
-                                        ? 'Recording Receipt...'
-                                        : 'Record  Receipt'
-                                    }
-                                />
-                            ) : (
-                                <ActionButtonCancel
-                                    startIcon={isLoading ? <Timeline className="animate-spin" /> : <AddCircleOutlineIcon />}
-                                    disabled={isLoading || !data.amount || data.amount <= 0 || !data.date}
-                                    onClick={handleSubmit}
-                                    text={isLoading
-                                        ? 'Recording Payment...'
-                                        : 'Record Payment'
-                                    }
-                                />
-                            )}
-                        </Stack>
+                        <Button
+                            variant="contained"
+                            onClick={handleSubmit}
+                            startIcon={isLoading ? <Timeline className="animate-spin" /> : <AddCircleOutlineIcon />}
+                            disabled={isLoading || !isFormValid}
+                            fullWidth={isMobile}
+                            sx={{
+                                textTransform: 'none',
+                                borderRadius: 1,
+                                px: 4,
+                                py: 1.5,
+                                fontWeight: 700,
+                                background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.success.main} 100%)`,
+                                boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.4)}`,
+                                '&:hover': {
+                                    background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.success.dark} 100%)`,
+                                    boxShadow: `0 6px 16px ${alpha(theme.palette.primary.main, 0.5)}`,
+                                    transform: 'translateY(-2px)',
+                                },
+                                '&:disabled': {
+                                    background: theme.palette.action.disabledBackground,
+                                    color: theme.palette.action.disabled,
+                                },
+                                transition: 'all 0.3s ease'
+                            }}
+                        >
+                            {isLoading ? 'Recording Contra...' : 'Record Contra Entry'}
+                        </Button>
                     </Stack>
                 </Box>
+
+                {/* Loading Overlay */}
+                {isLoading && (
+                    <Box sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        bgcolor: alpha(theme.palette.background.default, 0.9),
+                        backdropFilter: 'blur(4px)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 1000,
+                    }}>
+                        <Box sx={{ textAlign: 'center' }}>
+                            <Timeline sx={{
+                                fontSize: 48,
+                                color: theme.palette.primary.main,
+                                animation: 'spin 1s linear infinite',
+                                '@keyframes spin': {
+                                    '0%': { transform: 'rotate(0deg)' },
+                                    '100%': { transform: 'rotate(360deg)' },
+                                }
+                            }} />
+                            <Typography variant="body1" fontWeight={600} sx={{ mt: 2 }}>
+                                Recording Contra Entry...
+                            </Typography>
+                        </Box>
+                    </Box>
+                )}
             </Drawer>
-            <BackDropLoading isLoading={isLoading} text={`Recording ${isReceipt ? 'Receipt' : 'Payment'} entry.`} />
         </LocalizationProvider>
     );
 };

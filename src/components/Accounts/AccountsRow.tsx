@@ -22,23 +22,24 @@ import {
     MenuItem,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
+// import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { GetUserLedgers } from "@/utils/types";
 import {
-    AddCircle,
+    // AddCircle,
     Close,
     MoreVert,
     PeopleAlt,
-    RemoveCircle,
+    // RemoveCircle,
+    SwapHoriz,
     Today
 } from "@mui/icons-material";
 import { formatDate } from "@/utils/functions";
 import MenuButton from "@/components/MaterialUI/MenuButton";
-import PaymentReceiptSideModal from "@/common/modals/PaymentReceiptSideModal";
 import { setInvoiceTypeId } from "@/store/reducers/invoiceReducer";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
+import ContraSideModal from "@/common/modals/ContraSideModal";
 
 interface CustomerRowProps {
     cus: GetUserLedgers;
@@ -49,14 +50,13 @@ interface CustomerRowProps {
 }
 
 
-export const AccountsRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit, onView, index }) => {
+export const AccountsRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onView, index }) => {
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-    const [openExpenseIncomeModal, setOpenExpenseIncomeModal] = useState(false);
+    const [contraModal, setContraModal] = useState(false);
     const { invoiceGroups } = useSelector((state: RootState) => state.invoice);
     const [isHovered, setIsHovered] = useState(false);
-    const [type, setType] = useState<'payment' | 'receipt' | null>(null);
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
@@ -132,7 +132,7 @@ export const AccountsRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit,
                         </Box>
                     </TableCell>
 
-                    {/* Customer Info */}
+                    {/* Account Info */}
                     <TableCell sx={{ pl: 3, pr: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
                             <Avatar
@@ -294,35 +294,13 @@ export const AccountsRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit,
                                         onClick={(e) => {
                                             dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Receipt'))?._id || ''));
                                             handleClose();
-                                            setType('receipt');
-                                            setOpenExpenseIncomeModal(true);
+                                            setContraModal(true);
                                             e.stopPropagation();
                                         }}
                                     >
-                                        <AddCircle fontSize="small" sx={{ color: theme.palette.success.main }} />
+                                        <SwapHoriz fontSize="small" sx={{ color: theme.palette.success.main }} />
                                         <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.success.main }}>
-                                            You Got
-                                        </Typography>
-                                    </MenuItem>
-
-                                    <MenuItem
-                                        sx={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 1,
-                                            py: .5
-                                        }}
-                                        onClick={(e) => {
-                                            handleClose();
-                                            dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Payment'))?._id || ''));
-                                            setType('payment');
-                                            setOpenExpenseIncomeModal(true);
-                                            e.stopPropagation();
-                                        }}
-                                    >
-                                        <RemoveCircle fontSize="small" sx={{ color: theme.palette.error.light }} />
-                                        <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.error.light }}>
-                                            You give
+                                            Transfer funds
                                         </Typography>
                                     </MenuItem>
 
@@ -343,7 +321,7 @@ export const AccountsRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit,
                                             View
                                         </Typography>
                                     </MenuItem>
-                                    <MenuItem
+                                    {/* <MenuItem
                                         sx={{
                                             display: 'flex',
                                             alignItems: 'center',
@@ -359,7 +337,7 @@ export const AccountsRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit,
                                         <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.warning.dark }}>
                                             Edit
                                         </Typography>
-                                    </MenuItem>
+                                    </MenuItem> */}
                                     <MenuItem
                                         sx={{
                                             display: 'flex',
@@ -460,14 +438,7 @@ export const AccountsRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit,
                 </DialogActions>
             </Dialog>
 
-            <PaymentReceiptSideModal
-                open={openExpenseIncomeModal}
-                customerName={cus.ledger_name}
-                customerId={cus._id}
-                type={type}
-                closingBalance={cus.total_amount}
-                onClose={() => setOpenExpenseIncomeModal(false)}
-            />
+            <ContraSideModal open={contraModal} onClose={() => setContraModal(false)} contraId={null} />
         </>
     );
 };

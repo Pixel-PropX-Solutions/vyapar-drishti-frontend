@@ -143,6 +143,7 @@ const InvoiceChip = styled(Chip)(({ theme }) => ({
 
 const ValueBox = styled(Box)(({ theme }) => ({
     display: 'flex',
+    whiteSpace: 'nowrap',
     flexDirection: 'column',
     alignItems: 'flex-end',
     '& .value': {
@@ -276,7 +277,7 @@ export const HSNSummaryRow = (props: InventoryRowRowProps) => {
                 </TableCell>
 
                 <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, whiteSpace: 'nowrap', }}>
                         <Avatar
                             sx={{
                                 width: 32,
@@ -306,6 +307,7 @@ export const HSNSummaryRow = (props: InventoryRowRowProps) => {
                             variant="body1"
                             fontWeight="600"
                             sx={{
+                                whiteSpace: 'nowrap',
                                 mb: 0.5,
                                 display: '-webkit-box',
                                 WebkitLineClamp: 2,
@@ -334,7 +336,7 @@ export const HSNSummaryRow = (props: InventoryRowRowProps) => {
                 </TableCell>
 
                 <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, whiteSpace: 'nowrap', }}>
                         <Typography variant="h6" fontWeight="700" color="primary.main">
                             {formatNumber(row.quantity || 0)}
                         </Typography>
@@ -362,7 +364,7 @@ export const HSNSummaryRow = (props: InventoryRowRowProps) => {
                         </Typography>
                     </ValueBox>
                 </TableCell>
-               
+
                 <TableCell>
                     <ValueBox>
                         <Typography className="value" color="primary.main">
@@ -487,13 +489,13 @@ export const HSNSummaryRow = (props: InventoryRowRowProps) => {
                                                         <TableCell sx={{ textAlign: 'right' }}>
                                                             QTY
                                                         </TableCell>
-                                                        <TableCell sx={{ textAlign: 'right' }}>
+                                                        <TableCell sx={{ textAlign: 'right', whiteSpace: 'nowrap', }}>
                                                             Total Amount
                                                         </TableCell>
-                                                        <TableCell sx={{ textAlign: 'right' }}>
+                                                        <TableCell sx={{ textAlign: 'right', whiteSpace: 'nowrap', }}>
                                                             Taxable Value
                                                         </TableCell>
-                                                        <TableCell sx={{ textAlign: 'right' }}>
+                                                        <TableCell sx={{ textAlign: 'right', whiteSpace: 'nowrap', }}>
                                                             Tax Amount
                                                         </TableCell>
                                                     </TableRow>
@@ -519,7 +521,7 @@ export const HSNSummaryRow = (props: InventoryRowRowProps) => {
                                                                     }}
                                                                 >
                                                                     <TableCell>
-                                                                        <Box>
+                                                                        <Box sx={{ whiteSpace: 'nowrap', }}>
                                                                             <Typography variant="body2" fontWeight={600}>
                                                                                 {formatDate(invoice.date)}
                                                                             </Typography>
@@ -535,6 +537,7 @@ export const HSNSummaryRow = (props: InventoryRowRowProps) => {
                                                                                 variant="body2"
                                                                                 fontWeight={600}
                                                                                 sx={{
+                                                                                    whiteSpace: 'nowrap',
                                                                                     display: '-webkit-box',
                                                                                     WebkitLineClamp: 1,
                                                                                     WebkitBoxOrient: 'vertical',
@@ -558,6 +561,7 @@ export const HSNSummaryRow = (props: InventoryRowRowProps) => {
                                                                             size="small"
                                                                             variant="outlined"
                                                                             sx={{
+                                                                                whiteSpace: 'nowrap',
                                                                                 fontSize: '0.7rem',
                                                                                 maxWidth: '100%'
                                                                             }}
@@ -573,7 +577,7 @@ export const HSNSummaryRow = (props: InventoryRowRowProps) => {
                                                                     </TableCell>
 
                                                                     <TableCell>
-                                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                        <Box sx={{ display: 'flex', whiteSpace: 'nowrap', alignItems: 'center', gap: 1 }}>
                                                                             <Typography variant="body2" fontWeight={600} color="primary.main">
                                                                                 {invoice.voucher_number}
                                                                             </Typography>
@@ -595,11 +599,11 @@ export const HSNSummaryRow = (props: InventoryRowRowProps) => {
                                                                             label={row.unit || 'N/A'}
                                                                             size="small"
                                                                             color="default"
-                                                                            sx={{ fontSize: '0.7rem' }}
+                                                                            sx={{ fontSize: '0.7rem', whiteSpace: 'nowrap', }}
                                                                         />
                                                                     </TableCell>
 
-                                                                    <TableCell align="right">
+                                                                    <TableCell align="right" sx={{ whiteSpace: 'nowrap', }}>
                                                                         <Typography variant="body2" fontWeight={600}>
                                                                             {formatNumber(invoice.quantity || 0)}
                                                                         </Typography>

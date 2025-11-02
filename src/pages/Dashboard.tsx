@@ -17,6 +17,9 @@ import {
 } from "@/theme/customizations";
 import { Outlet } from "react-router-dom";
 import RoundedButton from "@/common/buttons/RoundedButton";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { ROLE_ENUM } from "@/utils/enums";
 
 const xThemeComponents = {
   ...chartsCustomizations,
@@ -29,13 +32,15 @@ export default function Dashboard(props: {
   disableCustomTheme?: boolean;
 }) {
 
+  const { user } = useSelector((state: RootState) => state.auth);
+
   return (
     <AppTheme {...props} themeComponents={xThemeComponents}>
       <CssBaseline enableColorScheme />
       <Box sx={{ display: "flex", position: "relative" }}>
         <SideMenu />
         <AppNavbar />
-        <RoundedButton />
+        {user?.user_type !== ROLE_ENUM.ADMIN && <RoundedButton />}
         {/* Main content */}
         <Box
           component="main"

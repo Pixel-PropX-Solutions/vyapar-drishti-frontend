@@ -21,6 +21,7 @@ const drawerWidth = 280; // Slightly wider for more breathing room
 const AnimatedDrawer = styled(MuiDrawer)(({ theme }) => ({
   width: drawerWidth,
   flexShrink: 0,
+  zIndex: 1100,
   boxSizing: "border-box",
   transition: theme.transitions.create(['width', 'transform'], {
     easing: theme.transitions.easing.sharp,

@@ -141,6 +141,7 @@ const InvoiceChip = styled(Chip)(({ theme }) => ({
 
 const ValueBox = styled(Box)(({ theme }) => ({
     display: 'flex',
+    whiteSpace: 'nowrap',
     flexDirection: 'column',
     alignItems: 'flex-end',
     '& .value': {
@@ -227,7 +228,7 @@ export const CustomerSummaryRow = (props: InventoryRowRowProps) => {
                 onClick={handleRowClick}
             >
                 <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, whiteSpace: 'nowrap', }}>
                         <SerialBadge
                             sx={{
                                 transform: isHovered ? 'scale(1.1)' : 'scale(1)',
@@ -276,7 +277,7 @@ export const CustomerSummaryRow = (props: InventoryRowRowProps) => {
 
 
                 <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, whiteSpace: 'nowrap', }}>
                         <Avatar
                             sx={{
                                 width: 32,
@@ -306,7 +307,7 @@ export const CustomerSummaryRow = (props: InventoryRowRowProps) => {
                     </Box>
                 </TableCell>
 
-                <TableCell>
+                <TableCell sx={{ whiteSpace: 'nowrap', }}>
                     <Box>
                         <Typography variant="body1" fontWeight="600" color="primary.main">
                             {row.party_tin}
@@ -318,7 +319,7 @@ export const CustomerSummaryRow = (props: InventoryRowRowProps) => {
                 </TableCell>
 
                 <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ display: 'flex', whiteSpace: 'nowrap', alignItems: 'center', gap: 1 }}>
                         <Typography variant="h6" fontWeight="700" color="primary.main">
                             {formatNumber(row.quantity || 0)}
                         </Typography>
@@ -431,31 +432,31 @@ export const CustomerSummaryRow = (props: InventoryRowRowProps) => {
                                                 <TableHead>
                                                     <TableRow>
                                                         <TableCell>
-                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                            <Box sx={{ display: 'flex', alignItems: 'center', whiteSpace: 'nowrap', gap: 1 }}>
                                                                 <CalendarTodayIcon fontSize="small" />
                                                                 Date
                                                             </Box>
                                                         </TableCell>
 
-                                                        <TableCell sx={{ textAlign: 'center' }}>
+                                                        <TableCell sx={{ whiteSpace: 'nowrap', textAlign: 'center' }}>
                                                             Type
                                                         </TableCell>
                                                         <TableCell >
                                                             Invoice No.
                                                         </TableCell>
-                                                        <TableCell sx={{ textAlign: 'center' }}>
+                                                        <TableCell sx={{ whiteSpace: 'nowrap', textAlign: 'center' }}>
                                                             Total Items
                                                         </TableCell>
-                                                        <TableCell sx={{ textAlign: 'right' }}>
+                                                        <TableCell sx={{ whiteSpace: 'nowrap', textAlign: 'right' }}>
                                                             QTY
                                                         </TableCell>
-                                                        <TableCell sx={{ textAlign: 'right' }}>
+                                                        <TableCell sx={{ whiteSpace: 'nowrap', textAlign: 'right' }}>
                                                             Total Amount
                                                         </TableCell>
-                                                        <TableCell sx={{ textAlign: 'right' }}>
+                                                        <TableCell sx={{ whiteSpace: 'nowrap', textAlign: 'right' }}>
                                                             Taxable Value
                                                         </TableCell>
-                                                        <TableCell sx={{ textAlign: 'right' }}>
+                                                        <TableCell sx={{ whiteSpace: 'nowrap', textAlign: 'right' }}>
                                                             Tax Amount
                                                         </TableCell>
                                                     </TableRow>
@@ -471,6 +472,7 @@ export const CustomerSummaryRow = (props: InventoryRowRowProps) => {
                                                                 <TableRow
                                                                     hover
                                                                     sx={{
+                                                                        whiteSpace: 'nowrap',
                                                                         cursor: 'pointer',
                                                                         transition: 'all 0.2s ease',
                                                                         '&:hover': {
@@ -480,7 +482,7 @@ export const CustomerSummaryRow = (props: InventoryRowRowProps) => {
                                                                         }
                                                                     }}
                                                                 >
-                                                                    <TableCell>
+                                                                    <TableCell sx={{ whiteSpace: 'nowrap', }}>
                                                                         <Box>
                                                                             <Typography variant="body2" fontWeight={600}>
                                                                                 {formatDate(invoice.date)}
@@ -500,7 +502,7 @@ export const CustomerSummaryRow = (props: InventoryRowRowProps) => {
                                                                     </TableCell>
 
                                                                     <TableCell>
-                                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                        <Box sx={{ whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 1 }}>
                                                                             <Typography variant="body2" fontWeight={600} color="primary.main">
                                                                                 {invoice.voucher_number}
                                                                             </Typography>
@@ -517,31 +519,31 @@ export const CustomerSummaryRow = (props: InventoryRowRowProps) => {
                                                                         </Box>
                                                                     </TableCell>
 
-                                                                    <TableCell align="center">
+                                                                    <TableCell align="center" sx={{ whiteSpace: 'nowrap', }}>
                                                                         <Typography variant="body2" fontWeight={600}>
                                                                             {formatNumber(invoice.items || 0)}
                                                                         </Typography>
                                                                     </TableCell>
 
-                                                                    <TableCell align="right">
+                                                                    <TableCell align="right" sx={{ whiteSpace: 'nowrap', }}>
                                                                         <Typography variant="body2" fontWeight={600}>
                                                                             {formatNumber(invoice.quantity || 0)}
                                                                         </Typography>
                                                                     </TableCell>
 
-                                                                    <TableCell align="right">
+                                                                    <TableCell align="right" sx={{ whiteSpace: 'nowrap', }}>
                                                                         <Typography variant="body2" fontWeight={700} color="success.main">
                                                                             {formatCurrency(invoice.total_amount || 0)}
                                                                         </Typography>
                                                                     </TableCell>
 
-                                                                    <TableCell align="right">
+                                                                    <TableCell align="right" sx={{ whiteSpace: 'nowrap', }}>
                                                                         <Typography variant="body2" fontWeight={600} color="primary.main">
                                                                             {formatCurrency(invoice.taxable_value || 0)}
                                                                         </Typography>
                                                                     </TableCell>
 
-                                                                    <TableCell align="right">
+                                                                    <TableCell align="right" sx={{ whiteSpace: 'nowrap', }}>
                                                                         <Typography variant="body2" fontWeight={600} color="warning.main">
                                                                             {formatCurrency(invoice.total_tax || 0)}
                                                                         </Typography>
@@ -575,7 +577,7 @@ export const CustomerSummaryRow = (props: InventoryRowRowProps) => {
                                                     {row.invoices && row.invoices.length > 0 && (
                                                         <TotalsRow>
                                                             <TableCell>
-                                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                <Box sx={{ whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 1 }}>
                                                                     <AssessmentIcon fontSize="small" color="primary" />
                                                                     <Typography variant="subtitle2" fontWeight={800}>
                                                                         Totals
@@ -596,17 +598,17 @@ export const CustomerSummaryRow = (props: InventoryRowRowProps) => {
                                                             <TableCell align="right">
 
                                                             </TableCell>
-                                                            <TableCell align="right">
+                                                            <TableCell align="right" sx={{ whiteSpace: 'nowrap', }}>
                                                                 <Typography variant="subtitle2" fontWeight={800} color="success.main">
                                                                     {formatCurrency(invoiceTotals.totalAmount)}
                                                                 </Typography>
                                                             </TableCell>
-                                                            <TableCell align="right">
+                                                            <TableCell align="right" sx={{ whiteSpace: 'nowrap', }}>
                                                                 <Typography variant="subtitle2" fontWeight={800} color="primary.main">
                                                                     {formatCurrency(invoiceTotals.taxableValue)}
                                                                 </Typography>
                                                             </TableCell>
-                                                            <TableCell align="right">
+                                                            <TableCell align="right" sx={{ whiteSpace: 'nowrap', }}>
                                                                 <Typography variant="subtitle2" fontWeight={800} color="warning.main">
                                                                     {formatCurrency(invoiceTotals.totalTax)}
                                                                 </Typography>
