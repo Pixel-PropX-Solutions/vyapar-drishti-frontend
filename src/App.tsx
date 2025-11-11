@@ -36,7 +36,6 @@ import Transactions from "./pages/Transactions";
 import Inventory from "./pages/Inventory";
 import EditCustomer from "./features/customer/EditCustomer";
 import CustomerProfile from "./features/customer/CustomerProfile";
-import Xyz from "./pages/xyz";
 import toast from "react-hot-toast";
 import CenterLoader from "./common/loaders/CenterLoader";
 import ContactPage from "./components/Contact/ContactPage";
@@ -51,6 +50,7 @@ import Accounts from "./pages/Accounts";
 import AccountsProfile from "./components/Accounts/AccountsProfile";
 import UserAdminDashboard from "./pages/AdminDashboard";
 import CompanyProfile from "./pages/CompanyProfile";
+import Expenses from "./pages/Expenses";
 
 const xThemeComponents = {
   ...chartsCustomizations,
@@ -151,6 +151,8 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
                 <Route path="/transactions/create/:type" element={<PaymentReceiptInvoice />} />
                 <Route path="/transactions/update/:type/:voucher_id" element={<UpdatePaymentReceipt />} />
 
+                <Route path="/expenses" element={<Expenses />} />
+
                 <Route path="/invoices" element={<Invoices />} />
                 <Route path="/invoices/:invoice_id" element={<ViewInvoiceInfo />} />
                 <Route path="/invoices/create/:type" element={<SalePurchaseInvoiceCreation />} />
@@ -158,8 +160,6 @@ const App: React.FC<{ themeComponents?: object }> = (props) => {
 
                 <Route path="/reports" element={<Analytics />} />
                 {tax_enable && <Route path="/summary" element={<Summary />} />}
-
-                <Route path="/xyz" element={<Xyz />} />
                 {/* <Route path="/*" element={<Navigate to="/" replace />} /> */}
               </Route>
             )}

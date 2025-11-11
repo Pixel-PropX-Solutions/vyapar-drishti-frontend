@@ -34,7 +34,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import toast from "react-hot-toast";
 import { GetInventoryGroups, SortOrder, UpdateInventoryGroup, } from "@/utils/types";
-import TabPanel from "@/features/upload-documents/components/TabPanel";
+import TabPanel from "@/common/TabPanel";
 import { viewAllCustomerGroups } from "@/services/accountingGroup";
 import InvoiceTypeCardSkeleton from "@/components/GroupsAndTypes/InvoiceTypeCardSkeleton";
 import InvoiceTypesCard from "@/components/GroupsAndTypes/InvoiceTypesCard";

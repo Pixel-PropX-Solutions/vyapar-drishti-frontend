@@ -22,7 +22,7 @@ import {
     PhotoCamera as PhotoCameraIcon
 } from '@mui/icons-material';
 import { FormCreateProduct } from '@/utils/types';
-import { units } from '@/internals/data/units';
+import { units } from '@/data/units';
 
 interface BasicDetailsSectionProps {
     data: FormCreateProduct;

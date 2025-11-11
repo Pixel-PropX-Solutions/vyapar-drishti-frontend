@@ -1,6 +1,6 @@
 import React from "react";
 import { Autocomplete, Box, InputAdornment, TextField } from "@mui/material";
-import CountryCodes from '../internals/data/CountryCodes.json';
+import CountryCodes from '../data/CountryCodes.json';
 
 interface PhoneNumberProps {
     code: string;

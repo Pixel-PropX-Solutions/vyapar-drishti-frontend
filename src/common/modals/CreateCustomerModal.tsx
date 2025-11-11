@@ -38,7 +38,7 @@ import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { createCustomer } from "@/services/customers";
-import countries from "@/internals/data/CountriesStates.json";
+import countries from "@/data/CountriesStates.json";
 import { capitalizeInput } from "@/utils/functions";
 
 interface CreateCustomerModalProps {

@@ -1,5 +1,5 @@
 import React, { useEffect, useId, useRef, useState } from "react";
-import RegistrationForm from "@/features/auth/components/RegisterForm";
+import RegistrationForm from "@/features/auth/RegisterForm";
 import { Box, Grid, useTheme } from "@mui/material";
 import centerImage from "../assets/herosection.webp";
 import Logo1 from "../assets/1.webp";

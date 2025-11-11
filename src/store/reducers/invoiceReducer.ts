@@ -1,12 +1,13 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AuthStates } from "@/utils/enums";
 import { GetAllInvoiceGroups, GetAllVouchars, GetInvoiceData, InvoicesSortField, PageMeta, SortOrder } from "@/utils/types";
-import { deleteTAXInvoice, deleteInvoice, updateInvoice, viewAllInvoiceGroups, viewAllInvoices, viewInvoice } from "@/services/invoice";
+import { deleteInvoice, updateInvoice, viewAllInvoiceGroups, viewAllInvoices, viewInvoice, viewAllInvoicesParentType } from "@/services/invoice";
 import { getAllInvoiceGroups } from "@/services/invoice";
 
 interface InvoiceState {
     authState: AuthStates;
     invoices: Array<GetAllVouchars> | [];
+    expenses: Array<GetAllVouchars> | [];
     invoiceData: GetInvoiceData | null;
     editingInvoice: GetInvoiceData | null;
     invoiceType_id: string | null;
@@ -22,6 +23,14 @@ interface InvoiceState {
         total: number;
         total_debit: number;
         total_credit: number;
+    };
+    expensePageMeta: {
+        page: number,
+        limit: number,
+        total: number,
+        total_expense: number,
+        pending: number,
+        paid: number,
     };
     loading: boolean;
     isInvoiceFecthing: boolean;
@@ -42,6 +51,7 @@ interface InvoiceState {
 const initialState: InvoiceState = {
     authState: AuthStates.INITIALIZING,
     invoices: [],
+    expenses: [],
     invoiceData: null,
     editingInvoice: null,
     invoiceType_id: null,
@@ -52,6 +62,14 @@ const initialState: InvoiceState = {
         limit: 0,
         total: 0,
         unique: [],
+    },
+    expensePageMeta: {
+        page: 0,
+        limit: 0,
+        total: 0,
+        total_expense: 0,
+        pending: 0,
+        paid: 0,
     },
     pageMeta: {
         page: 0,
@@ -109,6 +127,23 @@ const invoiceSlice = createSlice({
                 }
             )
             .addCase(viewAllInvoices.rejected, (state, action) => {
+                state.error = action.payload as string;
+                state.loading = false;
+            })
+            
+            .addCase(viewAllInvoicesParentType.pending, (state) => {
+                state.error = null;
+                state.loading = true;
+            })
+            .addCase(
+                viewAllInvoicesParentType.fulfilled,
+                (state, action: PayloadAction<any>) => {
+                    state.expenses = action.payload.expenses;
+                    state.expensePageMeta = action.payload.expensePageMeta;
+                    state.loading = false;
+                }
+            )
+            .addCase(viewAllInvoicesParentType.rejected, (state, action) => {
                 state.error = action.payload as string;
                 state.loading = false;
             })
@@ -177,18 +212,6 @@ const invoiceSlice = createSlice({
                 state.loading = false;
             })
             .addCase(deleteInvoice.rejected, (state, action) => {
-                state.error = action.payload as string;
-                state.loading = false;
-            })
-
-            .addCase(deleteTAXInvoice.pending, (state) => {
-                state.error = null;
-                state.loading = true;
-            })
-            .addCase(deleteTAXInvoice.fulfilled, (state) => {
-                state.loading = false;
-            })
-            .addCase(deleteTAXInvoice.rejected, (state, action) => {
                 state.error = action.payload as string;
                 state.loading = false;
             })

@@ -170,7 +170,7 @@ const Accounts: React.FC = () => {
                 title="Accounts Directory"
                 subtitle="Manage your accounts, view their details, and perform actions like adding, editing, or deleting accounts."
             />
-
+ 
             {/* Search and Filter Controls */}
             <Box sx={{ display: "flex", mb: 3, gap: 2, flexWrap: "wrap" }}>
                 <TextField

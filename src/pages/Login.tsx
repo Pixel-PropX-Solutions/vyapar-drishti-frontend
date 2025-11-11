@@ -1,9 +1,9 @@
 import React from "react";
 import { Box, Grid } from "@mui/material";
-import LoginForm from "@/features/auth/components/LoginForm";
+import LoginForm from "@/features/auth/LoginForm";
 import ParticleBackground from "@/common/background/ParticleBackground";
 import ScaleAnimationView from "@/common/background/ScaleAnimation";
-import Icons from "@/internals/data/icons";
+import Icons from "@/data/icons";
 
 
 const LoginPage: React.FC = () => {

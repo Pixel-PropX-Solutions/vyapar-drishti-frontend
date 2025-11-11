@@ -817,7 +817,10 @@ export interface GetAllVouchars {
   narration: string;
   party_name: string;
   created_at: string;
-  amount: number,
+  payment_mode: string;
+  amount: number;
+  paid_amount: number;
+  grand_total: number;
 }
 
 export interface GetAllAccountingGroups {

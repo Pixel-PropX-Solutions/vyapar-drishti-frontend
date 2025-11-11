@@ -1,9 +1,9 @@
 import React from "react";
-import RegistrationForm from "@/features/auth/components/RegisterForm";
+import RegistrationForm from "@/features/auth/RegisterForm";
 import { Box, Grid, } from "@mui/material";
 import ParticleBackground from "@/common/background/ParticleBackground";
 import ScaleAnimationView from "@/common/background/ScaleAnimation";
-import Icons from "@/internals/data/icons";
+import Icons from "@/data/icons";
 
 const SignUpPage: React.FC = () => {
 

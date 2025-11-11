@@ -11,7 +11,7 @@ import Logo7 from "../assets/7.webp";
 import Logo from "../assets/Logo.webp";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
-import ResetPasswordForm from "@/features/auth/components/ResetPasswordForm";
+import ResetPasswordForm from "@/features/auth/ResetPasswordForm";
 
 
 const ResetPassword: React.FC = () => {

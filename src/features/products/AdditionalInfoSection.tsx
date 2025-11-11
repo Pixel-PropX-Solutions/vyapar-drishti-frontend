@@ -22,7 +22,7 @@ import {
     ProductionQuantityLimitsOutlined,
 } from '@mui/icons-material';
 import { CategoryLists, FormCreateProduct, InventoryGroupList } from '@/utils/types';
-import { units } from '@/internals/data/units';
+import { units } from '@/data/units';
 
 interface AdditionalInfoSectionProps {
     data: FormCreateProduct;

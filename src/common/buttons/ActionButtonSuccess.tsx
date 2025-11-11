@@ -16,6 +16,7 @@ interface ActionButtonProps {
     onClick: React.MouseEventHandler<HTMLButtonElement>;
     disabled?: boolean;
     text?: React.ReactNode | string;
+    size?: 'small' | 'medium' | 'large';
 }
 const ActionButtonSuccess: React.FC<ActionButtonProps> = ({
     variant,
@@ -23,10 +24,12 @@ const ActionButtonSuccess: React.FC<ActionButtonProps> = ({
     onClick,
     disabled,
     text,
+    size = 'medium'
 }) => {
     const theme = useTheme();
     return (
         <ActionButton
+            size={size}
             variant={variant || 'contained'}
             startIcon={startIcon}
             color="success"

@@ -26,10 +26,12 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { GetUserLedgers } from "@/utils/types";
 import {
+    AddCircle,
     // AddCircle,
     Close,
     MoreVert,
     PeopleAlt,
+    RemoveCircle,
     // RemoveCircle,
     SwapHoriz,
     Today
@@ -40,6 +42,10 @@ import { setInvoiceTypeId } from "@/store/reducers/invoiceReducer";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import ContraSideModal from "@/common/modals/ContraSideModal";
+import { PaymentReceiptSideModal } from "@/common/modals/PaymentReceiptSideModal";
+
+interface Bank { _id: string, ledger_name: string, balance: number }
+
 
 interface CustomerRowProps {
     cus: GetUserLedgers;
@@ -59,6 +65,9 @@ export const AccountsRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onView,
     const [isHovered, setIsHovered] = useState(false);
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
+    const [paymentModal, setPaymentModal] = useState<boolean>(false);
+    const [type, setType] = useState<'payment' | 'receipt'>('payment');
+    const [bank, setBank] = useState<Bank>({ _id: '', ledger_name: '', balance: 0 });
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -113,7 +122,10 @@ export const AccountsRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onView,
                         },
                         borderLeft: `4px solid ${isHovered ? theme.palette.primary.main : 'transparent'}`,
                     }}
-                    onClick={() => onView(cus)}
+                    onClick={(e) => {
+                        onView(cus);
+                        e.stopPropagation();
+                    }}
                 >
 
                     {/* Created At Date */}
@@ -260,13 +272,10 @@ export const AccountsRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onView,
                                     anchorEl={anchorEl}
                                     id="notifications-menu"
                                     open={open}
-                                    onClose={(e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-                                        handleClose();
-                                        e.stopPropagation();
-                                    }}
+                                    onClose={handleClose}
                                     onClick={(e) => {
-                                        handleClose();
                                         e.stopPropagation();
+                                        handleClose();
                                     }}
                                     slotProps={{
                                         paper: {
@@ -292,14 +301,50 @@ export const AccountsRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onView,
                                             py: .5
                                         }}
                                         onClick={(e) => {
-                                            dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Receipt'))?._id || ''));
+                                            handleClose();
+                                            onView(cus);
+                                            e.stopPropagation();
+                                        }}
+                                    >
+                                        <VisibilityIcon fontSize="small" sx={{ color: theme.palette.info.main }} />
+                                        <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.info.main }}>
+                                            View
+                                        </Typography>
+                                    </MenuItem>
+                                    {/* <MenuItem
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1,
+                                            py: .5
+                                        }}
+                                        onClick={(e) => {
+                                            handleClose();
+                                            onEdit(cus);
+                                            e.stopPropagation();
+                                        }}
+                                    >
+                                        <EditIcon fontSize="small" sx={{ color: theme.palette.warning.main }} />
+                                        <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.warning.main }}>
+                                            Edit
+                                        </Typography>
+                                    </MenuItem> */}
+
+                                    <MenuItem
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1,
+                                            py: .5
+                                        }}
+                                        onClick={(e) => {
                                             handleClose();
                                             setContraModal(true);
                                             e.stopPropagation();
                                         }}
                                     >
-                                        <SwapHoriz fontSize="small" sx={{ color: theme.palette.success.main }} />
-                                        <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.success.main }}>
+                                        <SwapHoriz fontSize="small" sx={{ color: theme.palette.info.main }} />
+                                        <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.info.main }}>
                                             Transfer funds
                                         </Typography>
                                     </MenuItem>
@@ -312,16 +357,25 @@ export const AccountsRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onView,
                                             py: .5
                                         }}
                                         onClick={(e) => {
+                                            dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Receipt'))?._id || ''));
+                                            handleClose();
+                                            setBank({
+                                                _id: cus._id,
+                                                ledger_name: cus.ledger_name,
+                                                balance: cus.total_amount,
+                                            });
+                                            setType('receipt');
+                                            setPaymentModal(true);
                                             e.stopPropagation();
-                                            onView(cus);
                                         }}
                                     >
-                                        <VisibilityIcon fontSize="small" sx={{ color: theme.palette.info.dark }} />
-                                        <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.info.dark }}>
-                                            View
+                                        <AddCircle fontSize="small" sx={{ color: theme.palette.success.main }} />
+                                        <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.success.main }}>
+                                            You Got
                                         </Typography>
                                     </MenuItem>
-                                    {/* <MenuItem
+
+                                    <MenuItem
                                         sx={{
                                             display: 'flex',
                                             alignItems: 'center',
@@ -329,15 +383,24 @@ export const AccountsRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onView,
                                             py: .5
                                         }}
                                         onClick={(e) => {
+                                            handleClose();
+                                            dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Payment'))?._id || ''));
+                                            setBank({
+                                                _id: cus._id,
+                                                ledger_name: cus.ledger_name,
+                                                balance: cus.total_amount,
+                                            });
+                                            setType('payment');
+                                            setPaymentModal(true);
                                             e.stopPropagation();
-                                            onEdit(cus);
                                         }}
                                     >
-                                        <EditIcon fontSize="small" sx={{ color: theme.palette.warning.dark }} />
-                                        <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.warning.dark }}>
-                                            Edit
+                                        <RemoveCircle fontSize="small" sx={{ color: theme.palette.error.light }} />
+                                        <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.error.light }}>
+                                            You give
                                         </Typography>
-                                    </MenuItem> */}
+                                    </MenuItem>
+
                                     <MenuItem
                                         sx={{
                                             display: 'flex',
@@ -350,8 +413,8 @@ export const AccountsRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onView,
                                             e.stopPropagation();
                                         }}
                                     >
-                                        <DeleteIcon fontSize="small" sx={{ color: theme.palette.error.light }} />
-                                        <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.error.light }}>
+                                        <DeleteIcon fontSize="small" />
+                                        <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', }}>
                                             Delete
                                         </Typography>
                                     </MenuItem>
@@ -437,8 +500,22 @@ export const AccountsRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onView,
                     </Button>
                 </DialogActions>
             </Dialog>
-
-            <ContraSideModal open={contraModal} onClose={() => setContraModal(false)} contraId={null} />
+            {paymentModal && <PaymentReceiptSideModal
+                open={paymentModal}
+                onClose={() => {
+                    setBank({
+                        _id: '',
+                        ledger_name: '',
+                        balance: 0,
+                    })
+                    setType('payment');
+                    setPaymentModal(false);
+                }}
+                entity='Accounts'
+                type={type}
+                bankAccount={bank}
+            />}
+            {contraModal && <ContraSideModal open={contraModal} onClose={() => setContraModal(false)} contraId={null} />}
         </>
     );
 };

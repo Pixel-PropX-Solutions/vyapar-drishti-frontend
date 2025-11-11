@@ -1,5 +1,5 @@
 import { Avatar, Box, FormControl, FormHelperText, ListItemIcon, ListItemText, MenuItem, Select, useTheme } from "@mui/material";
-import CountryCodes from '../internals/data/CountryCodes.json';
+import CountryCodes from '../data/CountryCodes.json';
 
 interface CountryCodeProps {
     handleInputChange: (field: string, value: string) => void;

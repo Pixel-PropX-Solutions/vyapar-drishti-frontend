@@ -403,7 +403,7 @@ const CustomerLedger: React.FC = () => {
                   </TableSortLabel>
                 </Tooltip>
               </TableCell>
-              <TableCell align="center" >
+              <TableCell align="right" >
                 <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
                   Actions
                 </Typography>
