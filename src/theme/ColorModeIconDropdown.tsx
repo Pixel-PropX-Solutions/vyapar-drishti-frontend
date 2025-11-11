@@ -60,7 +60,7 @@ function ColorModeIconDropdown(props: IconButtonOwnProps) {
 
   // Determine the current resolved mode
   const resolvedMode = (systemMode || mode) as "light" | "dark";
-  
+
   // Icon mapping with improved accessibility
   const modeIcons = {
     light: <LightModeIcon aria-label="Light mode" />,
@@ -89,7 +89,10 @@ function ColorModeIconDropdown(props: IconButtonOwnProps) {
         id="color-scheme-menu"
         open={open}
         onClose={handleClose}
-        onClick={handleClose}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleClose();
+        }}
         slotProps={{
           paper: {
             elevation: 2,
@@ -103,11 +106,11 @@ function ColorModeIconDropdown(props: IconButtonOwnProps) {
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
-        <MenuItem 
-          selected={mode === "system"} 
+        <MenuItem
+          selected={mode === "system"}
           onClick={handleMode("system")}
-          sx={{ 
-            display: 'flex', 
+          sx={{
+            display: 'flex',
             alignItems: 'center',
             gap: 2,
           }}
@@ -117,11 +120,11 @@ function ColorModeIconDropdown(props: IconButtonOwnProps) {
           </ListItemIcon>
           <ListItemText primary="System" secondary="Follow device settings" />
         </MenuItem>
-        <MenuItem 
-          selected={mode === "light"} 
+        <MenuItem
+          selected={mode === "light"}
           onClick={handleMode("light")}
-          sx={{ 
-            display: 'flex', 
+          sx={{
+            display: 'flex',
             alignItems: 'center',
             gap: 2,
           }}
@@ -131,11 +134,11 @@ function ColorModeIconDropdown(props: IconButtonOwnProps) {
           </ListItemIcon>
           <ListItemText primary="Light" secondary="Always use light theme" />
         </MenuItem>
-        <MenuItem 
-          selected={mode === "dark"} 
+        <MenuItem
+          selected={mode === "dark"}
           onClick={handleMode("dark")}
-          sx={{ 
-            display: 'flex', 
+          sx={{
+            display: 'flex',
             alignItems: 'center',
             gap: 2,
           }}

@@ -296,17 +296,19 @@ const ContraSideModal: React.FC<ContraSideModalProps> = ({
     const isFormValid = data.fromAccount && data.toAccount && data.amount > 0 && data.date;
 
     const loadAccounts = async () => {
-        dispatch(viewAllCustomerWithType({
-            company_id: currentCompanyId || '',
-            customerType: 'Accounts',
-        })).then((response) => {
-            if (response.meta.requestStatus === 'fulfilled') {
-                const ledgersWithType = response.payload;
-                setAccounts(ledgersWithType.map((part: any) => ({ name: part.ledger_name, id: part._id })));
-            }
-        }).catch((error) => {
-            toast.error(error || "An unexpected error occurred. Please try again later.");
-        });
+        if (open) {
+            dispatch(viewAllCustomerWithType({
+                company_id: currentCompanyId || '',
+                customerType: 'Accounts',
+            })).then((response) => {
+                if (response.meta.requestStatus === 'fulfilled') {
+                    const ledgersWithType = response.payload;
+                    setAccounts(ledgersWithType.map((part: any) => ({ name: part.ledger_name, id: part._id })));
+                }
+            }).catch((error) => {
+                toast.error(error || "An unexpected error occurred. Please try again later.");
+            });
+        }
     }
 
     const loadCounter = async () => {

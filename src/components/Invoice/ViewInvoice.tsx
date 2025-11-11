@@ -50,7 +50,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';
 import { ActionButton } from '@/common/buttons/ActionButton';
 import toast from 'react-hot-toast';
-import { deleteInvoice, deleteTAXInvoice, getInvoicesPDF, getPaymentPdf, getRecieptPdf, getTaxInvoicesPDF, viewInvoice } from '@/services/invoice';
+import { deleteInvoice, getInvoicesPDF, getPaymentPdf, getRecieptPdf, getTaxInvoicesPDF, viewInvoice } from '@/services/invoice';
 import usePDFHandler from '@/common/hooks/usePDFHandler';
 import BackDropLoading from '@/common/loaders/BackDropLoading';
 
@@ -133,21 +133,13 @@ export const ViewInvoiceInfo = () => {
     };
 
     const handleDeleteInvoice = (invoiceId: string) => {
-        if (tax_enable) {
-            dispatch(deleteTAXInvoice({ vouchar_id: invoiceId, company_id: currentCompanyDetails?._id ?? '' })).unwrap().then(() => {
-                navigate("/invoices")
-                toast.success("Invoice deleted successfully!");
-            }).catch((error) => {
-                toast.error(error || 'An unexpected error occurred. Please try again later.');
-            })
-        } else {
-            dispatch(deleteInvoice({ vouchar_id: invoiceId, company_id: currentCompanyDetails?._id ?? '' })).unwrap().then(() => {
-                toast.success("Invoice deleted successfully!");
-                navigate("/invoices")
-            }).catch((error) => {
-                toast.error(error || 'An unexpected error occurred. Please try again later.');
-            })
-        }
+        dispatch(deleteInvoice({ vouchar_id: invoiceId, company_id: currentCompanyDetails?._id ?? '' })).unwrap().then(() => {
+            toast.success("Invoice deleted successfully!");
+            navigate("/invoices")
+        }).catch((error) => {
+            toast.error(error || 'An unexpected error occurred. Please try again later.');
+        })
+
     };
 
     const sortedInventory = useMemo(

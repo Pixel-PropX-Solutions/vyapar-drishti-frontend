@@ -90,7 +90,10 @@ export default function CustomNotification() {
         id="notifications-menu"
         open={open}
         onClose={handleClose}
-        onClick={handleClose}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleClose();
+        }}
         slotProps={{
           paper: {
             variant: "outlined",

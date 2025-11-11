@@ -211,7 +211,6 @@ const JournalSideModal: React.FC<ContraSideModalProps> = ({
             { id: '', name: '', type: 'From', amount: '' },
         ]);
         setFormErrors({});
-        loadCounter();
     };
 
     const handleSubmit = async () => {
@@ -289,20 +288,22 @@ const JournalSideModal: React.FC<ContraSideModalProps> = ({
     };
 
     const loadLedgers = async () => {
-        dispatch(viewAllCustomerWithType({
-            company_id: current_company_id || '',
-            customerType: '',
-        })).then((response) => {
-            if (response.meta.requestStatus === 'fulfilled') {
-                const ledgersWithType = response.payload;
-                setLedgers(ledgersWithType.filter((part: any) => !['Sales', 'Purchases'].includes(part.ledger_name)).map((part: any) => ({
-                    name: part.ledger_name,
-                    id: part._id
-                })));
-            }
-        }).catch((error) => {
-            toast.error(error || "An unexpected error occurred. Please try again later.");
-        });
+        if (open) {
+            dispatch(viewAllCustomerWithType({
+                company_id: current_company_id || '',
+                customerType: '',
+            })).then((response) => {
+                if (response.meta.requestStatus === 'fulfilled') {
+                    const ledgersWithType = response.payload;
+                    setLedgers(ledgersWithType.filter((part: any) => !['Sales', 'Purchases'].includes(part.ledger_name)).map((part: any) => ({
+                        name: part.ledger_name,
+                        id: part._id
+                    })));
+                }
+            }).catch((error) => {
+                toast.error(error || "An unexpected error occurred. Please try again later.");
+            });
+        }
     }
 
     const loadCounter = async () => {

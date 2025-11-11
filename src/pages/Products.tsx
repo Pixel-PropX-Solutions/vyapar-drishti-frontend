@@ -34,7 +34,7 @@ import toast from "react-hot-toast";
 import { CategorySortField, GetCategory, GetInventoryGroups, GetStockItem, GroupSortField, ProductSortField, ProductUpdate, SortOrder, UpdateCategory, UpdateInventoryGroup } from "@/utils/types";
 import ProductsSideModal from "@/features/products/ProductsSideModal";
 import { deleteCategory, viewAllCategory } from "@/services/category";
-import TabPanel from "@/features/upload-documents/components/TabPanel";
+import TabPanel from "@/common/TabPanel";
 import { ProductRow } from "@/features/products/ProductRow";
 import CategoryCreateModal from "@/features/category/CategoryCreateModal";
 import { ProductRowSkeleton } from "@/common/skeletons/ProductRowSkeleton";

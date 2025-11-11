@@ -39,7 +39,7 @@ import AdvancedSettingsSection from './AdvancedSettingsSection';
 import CategoryCreateModal from '../category/CategoryCreateModal';
 import CreateInventoryGroupModal from '../Group/CreateInventoryGroupModal';
 import { viewAllInventoryGroups } from '@/services/inventoryGroup';
-import { units } from '@/internals/data/units';
+import { units } from '@/data/units';
 import { roundToDigits } from '@/utils/functions';
 
 interface SideModalProps {

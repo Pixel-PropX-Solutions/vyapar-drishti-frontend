@@ -18,7 +18,7 @@ import ViewTimelineIcon from '@mui/icons-material/ViewTimeline';
 // import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
 import { ROLE_ENUM } from '@/utils/enums';
-import { Assessment, PaymentsOutlined, People, Person2, ReceiptOutlined } from '@mui/icons-material';
+import { Assessment, PaymentsOutlined, People, Person2, ReceiptOutlined, WalletOutlined } from '@mui/icons-material';
 
 type ProductSortState = {
   search: string;
@@ -329,6 +329,7 @@ export const createMainListItems = (role: string, tax_enable: boolean): MenuItem
     { text: "Customers", path: "/customers", icon: <People />, requiredRole: 'user' },
     { text: "Accounts", path: "/accounts", icon: <People />, requiredRole: 'user' },
     { text: "Invoices", path: "/invoices", icon: <ReceiptOutlined />, requiredRole: 'user' },
+    { text: "Expenses", path: "/expenses", icon: <WalletOutlined />, requiredRole: 'user' },
     { text: "Transactions", path: "/transactions", icon: <PaymentsOutlined />, requiredRole: 'user' },
     { text: "Reports", path: "/reports", icon: <Assessment />, requiredRole: 'user' },
     { text: "Summary", path: "/summary", icon: <Assessment />, requiredRole: 'user' }
@@ -339,6 +340,7 @@ export const createMainListItems = (role: string, tax_enable: boolean): MenuItem
     { text: "Customers", path: "/customers", icon: <People />, requiredRole: 'user' },
     { text: "Accounts", path: "/accounts", icon: <People />, requiredRole: 'user' },
     { text: "Invoices", path: "/invoices", icon: <ReceiptOutlined />, requiredRole: 'user' },
+    { text: "Expenses", path: "/expenses", icon: <WalletOutlined />, requiredRole: 'user' },
     { text: "Transactions", path: "/transactions", icon: <PaymentsOutlined />, requiredRole: 'user' },
     { text: "Reports", path: "/reports", icon: <Assessment />, requiredRole: 'user' }];
 

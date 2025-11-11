@@ -63,6 +63,7 @@ export const viewAllCustomerWithType = createAsyncThunk(
                 `/ledger/view/ledgers/with/type?company_id=${company_id}&type=${customerType}`
             );
 
+            console.log('response View Customer with Type', response)
 
             if (response.data.success === true) {
                 const ledgersWithType = response.data.data;
@@ -97,7 +98,7 @@ export const viewAllCustomerWithTypes = createAsyncThunk(
 
             if (response.data.success === true) {
                 const customerTypes = response.data.data;
-                return {customerTypes};
+                return { customerTypes };
             } else return rejectWithValue("Login Failed: No access token recieved.");
         } catch (error: any) {
             return rejectWithValue(error?.response?.data?.message);
@@ -270,11 +271,34 @@ export const getCustomerInvoices = createAsyncThunk(
     }
 );
 
+
+export const updateCustomerDetails = createAsyncThunk(
+    'update/customer/details',
+    async ({ ledger_details, id }: { ledger_details: { [key: string]: any }; id: string }, { rejectWithValue }) => {
+        try {
+
+            const response = await userApi.put(`/ledger/update/details/${id}`, ledger_details);
+
+            console.log('updateCustomer details response', response);
+
+            if (response.data.success === true) {
+                return;
+            } else { return rejectWithValue('Login Failed: No access token recieved.'); }
+        } catch (error: any) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                'Login failed: Invalid credentials or server error.'
+            );
+        }
+    }
+);
+
 export const deleteCustomer = createAsyncThunk(
     "delete/customer",
     async (customer_id: string, { rejectWithValue }) => {
         try {
             const response = await userApi.delete(`/ledger/delete/${customer_id}`);
+            console.log('Response Delete Customer', response);
 
             if (response.data.success === true) {
                 return;

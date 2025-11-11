@@ -32,7 +32,7 @@ import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { viewProductsWithId } from "@/services/products";
-import { units } from "@/internals/data/units";
+import { units } from "@/data/units";
 import ProductsSideModal from "@/features/products/ProductsSideModal";
 
 // Interfaces

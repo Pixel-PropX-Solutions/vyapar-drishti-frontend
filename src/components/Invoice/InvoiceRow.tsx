@@ -243,7 +243,10 @@ export const InvoicerRow: React.FC<ProductRowProps> = ({ inv, onDelete, onEdit, 
                                 id="notifications-menu"
                                 open={open}
                                 onClose={handleClose}
-                                onClick={handleClose}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleClose();
+                                }}
                                 slotProps={{
                                     paper: {
                                         variant: "outlined",

@@ -103,7 +103,7 @@ export default function MenuContent({ toggleDrawer }: SideMenuMobileProps) {
                     <ListItemIcon
                       sx={{
                         minWidth: 0,
-                        mr: isSmallScreen ? 0 : 3,
+                        mr: isSmallScreen ? 0 : 2,
                         justifyContent: 'center',
                       }}
                     >

@@ -2,7 +2,7 @@ import React from "react";
 import { alpha, Avatar, Box, FormControl, FormHelperText, InputAdornment, InputLabel, ListItemIcon, ListItemText, MenuItem, Select, Slide } from "@mui/material";
 import theme from "@/theme";
 import { Public, KeyboardArrowRight } from "@mui/icons-material";
-import CountryCodes from '../internals/data/CountryCodes.json';
+import CountryCodes from '../data/CountryCodes.json';
 interface CountryNameProps {
     handleInputChange: (field: string, value: string) => void;
     value: string,

@@ -95,6 +95,54 @@ export const viewAllInvoices = createAsyncThunk(
 );
 
 
+export const viewAllInvoicesParentType = createAsyncThunk(
+    'view/all/invoices/parent/type',
+    async (
+        {
+            company_id,
+            pageNumber,
+            searchQuery,
+            type,
+            limit,
+            sortField,
+            sortOrder,
+            start_date,
+            end_date,
+        }: {
+            company_id: string;
+            pageNumber: number;
+            type: string;
+            searchQuery: string;
+            sortField: string;
+            limit: number;
+            sortOrder: string;
+            start_date: string;
+            end_date: string;
+        },
+        { rejectWithValue }
+    ) => {
+        try {
+            const response = await userApi.get(
+                `invoices/view/all/vouchar/party/type?company_id=${company_id}${searchQuery !== '' ? '&search=' + searchQuery : ''}${type !== 'All' ? '&type=' + type : ''}&start_date=${start_date}&end_date=${end_date}&page_no=${pageNumber}&limit=${limit}&sortField=${sortField}&sortOrder=${sortOrder === "asc" ? "1" : "-1"}`
+            );
+            console.log('viewAllInvoicesParentType response', response.data);
+
+            if (response.data.success === true) {
+                const expenses = response.data.data.docs;
+                const expensePageMeta = response.data.data.meta;
+                return { expenses, expensePageMeta };
+            } else { return rejectWithValue('Login Failed: No access token recieved.'); }
+        } catch (error: any) {
+            return rejectWithValue(
+                error.response?.data?.message ||
+                'Login failed: Invalid credentials or server error.'
+            );
+        }
+    }
+);
+
+
+
 export const viewInvoice = createAsyncThunk(
     "view/invoices",
     async (
@@ -438,33 +486,6 @@ export const deleteInvoice = createAsyncThunk(
         try {
             const response = await userApi.delete(
                 `/invoices/delete/${vouchar_id}?company_id=${company_id}`
-            );
-
-            if (response.data.success === true) {
-                return;
-            } else return rejectWithValue("Login Failed: No access token recieved.");
-        } catch (error: any) {
-            return rejectWithValue(error?.response?.data?.message);
-        }
-    }
-);
-
-
-export const deleteTAXInvoice = createAsyncThunk(
-    "delete/tax/invoice",
-    async (
-        {
-            vouchar_id,
-            company_id,
-        }: {
-            vouchar_id: string;
-            company_id: string;
-        },
-        { rejectWithValue }
-    ) => {
-        try {
-            const response = await userApi.delete(
-                `/invoices/tax/delete/${vouchar_id}?company_id=${company_id}`
             );
 
             if (response.data.success === true) {

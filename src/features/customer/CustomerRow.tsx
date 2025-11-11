@@ -33,14 +33,18 @@ import {
     PeopleAlt,
     Phone,
     RemoveCircle,
+    SwapHoriz,
     Today
 } from "@mui/icons-material";
 import { formatDate } from "@/utils/functions";
 import MenuButton from "@/components/MaterialUI/MenuButton";
-import PaymentReceiptSideModal from "@/common/modals/PaymentReceiptSideModal";
 import { setInvoiceTypeId } from "@/store/reducers/invoiceReducer";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
+import JournalSideModal from "@/common/modals/JournalSideModal";
+import { PaymentReceiptSideModal } from "@/common/modals/PaymentReceiptSideModal";
+
+interface Bank { _id: string, ledger_name: string, balance: number }
 
 interface CustomerRowProps {
     cus: GetUserLedgers;
@@ -56,10 +60,12 @@ export const CustomerRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit,
     const dispatch = useDispatch<AppDispatch>();
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [openExpenseIncomeModal, setOpenExpenseIncomeModal] = useState(false);
+    const [isJournalModalOpen, setIsJournalModalOpen] = useState(false);
     const { invoiceGroups } = useSelector((state: RootState) => state.invoice);
     const [isHovered, setIsHovered] = useState(false);
     const [type, setType] = useState<'payment' | 'receipt' | null>(null);
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+    const [bank, setBank] = useState<Bank>({ _id: '', ledger_name: '', balance: 0 });
     const open = Boolean(anchorEl);
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -201,7 +207,7 @@ export const CustomerRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit,
                         </Box>
                         {!cus.email && !cus.phone?.number && (
                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
-                                
+
                             </Box>
                         )}
                     </TableCell>
@@ -250,150 +256,175 @@ export const CustomerRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit,
                     </TableCell>
 
                     {/* Actions */}
-                    <TableCell align="center">
+                    <TableCell align="right">
                         <Zoom appear in timeout={200}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'center' }}>
-                                <Tooltip title="View Details" arrow>
-                                    <IconButton
-                                        size="small"
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'flex-end' }}>
+                                <MenuButton
+                                    data-screenshot="toggle-mode"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleClick(e);
+                                    }}
+                                    disableRipple
+                                    size="small"
+                                    aria-label="Open notifications"
+                                    aria-controls={open ? "notifications-menu" : undefined}
+                                    aria-haspopup="true"
+                                    aria-expanded={open ? "true" : undefined}
+                                >
+                                    <MoreVert />
+                                </MenuButton>
+                                <Menu
+                                    anchorEl={anchorEl}
+                                    id="notifications-menu"
+                                    open={open}
+                                    onClose={handleClose}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleClose();
+                                    }}
+                                    slotProps={{
+                                        paper: {
+                                            variant: "outlined",
+
+                                            elevation: 0,
+                                            sx: {
+                                                my: "4px",
+                                                maxHeight: "400px",
+                                                overflowY: "auto",
+                                                borderColor: theme.palette.primary.main,
+                                            },
+                                        },
+                                    }}
+                                    transformOrigin={{ horizontal: "right", vertical: "top" }}
+                                    anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+                                >
+                                    <MenuItem
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1,
+                                            py: .5
+                                        }}
                                         onClick={(e) => {
-                                            e.stopPropagation();
+                                            handleClose();
                                             onView(cus);
-                                        }}
-                                        sx={{
-                                            bgcolor: alpha(theme.palette.info.main, 0.1),
-                                            color: theme.palette.info.main,
-                                            transition: 'all 0.3s ease',
-                                            '&:hover': {
-                                                bgcolor: alpha(theme.palette.info.main, 0.2),
-                                                transform: 'scale(1.1)',
-                                            },
+                                            e.stopPropagation();
                                         }}
                                     >
-                                        <VisibilityIcon fontSize="small" />
-                                    </IconButton>
-                                </Tooltip>
-
-                                <Tooltip title="Edit Customer" arrow>
-                                    <IconButton
-                                        size="small"
+                                        <VisibilityIcon fontSize="small" sx={{ color: theme.palette.info.main }} />
+                                        <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.info.main }}>
+                                            View
+                                        </Typography>
+                                    </MenuItem>
+                                    <MenuItem
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1,
+                                            py: .5
+                                        }}
                                         onClick={(e) => {
-                                            e.stopPropagation();
+                                            handleClose();
                                             onEdit(cus);
-                                        }}
-                                        sx={{
-                                            bgcolor: alpha(theme.palette.warning.main, 0.1),
-                                            color: theme.palette.warning.main,
-                                            transition: 'all 0.3s ease',
-                                            '&:hover': {
-                                                bgcolor: alpha(theme.palette.warning.main, 0.2),
-                                                transform: 'scale(1.1)',
-                                            },
-                                        }}
-                                    >
-                                        <EditIcon fontSize="small" />
-                                    </IconButton>
-                                </Tooltip>
-
-                                <>
-                                    <MenuButton
-                                        data-screenshot="toggle-mode"
-                                        onClick={(e) => {
                                             e.stopPropagation();
-                                            handleClick(e);
                                         }}
-                                        disableRipple
-                                        size="small"
-                                        aria-label="Open notifications"
-                                        aria-controls={open ? "notifications-menu" : undefined}
-                                        aria-haspopup="true"
-                                        aria-expanded={open ? "true" : undefined}
                                     >
-                                        <MoreVert />
-                                    </MenuButton>
-                                    <Menu
-                                        anchorEl={anchorEl}
-                                        id="notifications-menu"
-                                        open={open}
-                                        onClose={handleClose}
-                                        onClick={handleClose}
-                                        slotProps={{
-                                            paper: {
-                                                variant: "outlined",
+                                        <EditIcon fontSize="small" sx={{ color: theme.palette.warning.main }} />
+                                        <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.warning.main }}>
+                                            Edit
+                                        </Typography>
+                                    </MenuItem>
 
-                                                elevation: 0,
-                                                sx: {
-                                                    my: "4px",
-                                                    maxHeight: "400px",
-                                                    overflowY: "auto",
-                                                    borderColor: theme.palette.primary.main,
-                                                },
-                                            },
+                                    <MenuItem
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1,
+                                            py: .5
                                         }}
-                                        transformOrigin={{ horizontal: "right", vertical: "top" }}
-                                        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+                                        onClick={(e) => {
+                                            handleClose();
+                                            setIsJournalModalOpen(true);
+                                            e.stopPropagation();
+                                        }}
                                     >
-                                        <MenuItem
-                                            sx={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: 1,
-                                                py: .5
-                                            }}
-                                            onClick={(e) => {
-                                                dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Receipt'))?._id || ''));
-                                                handleClose();
-                                                setType('receipt');
-                                                setOpenExpenseIncomeModal(true);
-                                                e.stopPropagation();
-                                            }}
-                                        >
-                                            <AddCircle fontSize="small" sx={{ color: theme.palette.success.main }} />
-                                            <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.success.main }}>
-                                                You Got
-                                            </Typography>
-                                        </MenuItem>
+                                        <SwapHoriz fontSize="small" sx={{ color: theme.palette.info.main }} />
+                                        <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.info.main }}>
+                                            Add Journal
+                                        </Typography>
+                                    </MenuItem>
 
-                                        <MenuItem
-                                            sx={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: 1,
-                                                py: .5
-                                            }}
-                                            onClick={(e) => {
-                                                handleClose();
-                                                dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Payment'))?._id || ''));
-                                                setType('payment');
-                                                setOpenExpenseIncomeModal(true);
-                                                e.stopPropagation();
-                                            }}
-                                        >
-                                            <RemoveCircle fontSize="small" sx={{ color: theme.palette.error.light }} />
-                                            <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.error.light }}>
-                                                You give
-                                            </Typography>
-                                        </MenuItem>
+                                    <MenuItem
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1,
+                                            py: .5
+                                        }}
+                                        onClick={(e) => {
+                                            dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Receipt'))?._id || ''));
+                                            handleClose();
+                                            setBank({
+                                                _id: cus._id,
+                                                ledger_name: cus.ledger_name,
+                                                balance: cus.total_amount,
+                                            });
+                                            setType('receipt');
+                                            setOpenExpenseIncomeModal(true);
+                                            e.stopPropagation();
+                                        }}
+                                    >
+                                        <AddCircle fontSize="small" sx={{ color: theme.palette.success.main }} />
+                                        <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.success.main }}>
+                                            You Got
+                                        </Typography>
+                                    </MenuItem>
 
-                                        <MenuItem
-                                            sx={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: 1,
-                                                py: .5
-                                            }}
-                                            onClick={(e) => {
-                                                setOpenDeleteDialog(true);
-                                                e.stopPropagation();
-                                            }}
-                                        >
-                                            <DeleteIcon fontSize="small" />
-                                            <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', }}>
-                                                Delete
-                                            </Typography>
-                                        </MenuItem>
-                                    </Menu>
-                                </>
+                                    <MenuItem
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1,
+                                            py: .5
+                                        }}
+                                        onClick={(e) => {
+                                            handleClose();
+                                            dispatch(setInvoiceTypeId(invoiceGroups.find((group) => group.name.includes('Payment'))?._id || ''));
+                                            setBank({
+                                                _id: cus._id,
+                                                ledger_name: cus.ledger_name,
+                                                balance: cus.total_amount,
+                                            });
+                                            setType('payment');
+                                            setOpenExpenseIncomeModal(true);
+                                            e.stopPropagation();
+                                        }}
+                                    >
+                                        <RemoveCircle fontSize="small" sx={{ color: theme.palette.error.light }} />
+                                        <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', color: theme.palette.error.light }}>
+                                            You give
+                                        </Typography>
+                                    </MenuItem>
+
+                                    <MenuItem
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1,
+                                            py: .5
+                                        }}
+                                        onClick={(e) => {
+                                            setOpenDeleteDialog(true);
+                                            e.stopPropagation();
+                                        }}
+                                    >
+                                        <DeleteIcon fontSize="small" />
+                                        <Typography fontSize="small" variant="subtitle1" sx={{ fontWeight: 'bold', }}>
+                                            Delete
+                                        </Typography>
+                                    </MenuItem>
+                                </Menu>
                             </Box>
                         </Zoom>
                     </TableCell>
@@ -476,14 +507,22 @@ export const CustomerRow: React.FC<CustomerRowProps> = ({ cus, onDelete, onEdit,
                 </DialogActions>
             </Dialog>
 
-            <PaymentReceiptSideModal
+            {openExpenseIncomeModal && <PaymentReceiptSideModal
                 open={openExpenseIncomeModal}
-                customerName={cus.ledger_name}
-                customerId={cus._id}
+                onClose={() => {
+                    setBank({
+                        _id: '',
+                        ledger_name: '',
+                        balance: 0,
+                    })
+                    setType('payment');
+                    setOpenExpenseIncomeModal(false);
+                }}
+                entity='Customers'
                 type={type}
-                closingBalance={cus.total_amount}
-                onClose={() => setOpenExpenseIncomeModal(false)}
-            />
+                bankAccount={bank}
+            />}
+            {isJournalModalOpen && <JournalSideModal open={isJournalModalOpen} onClose={() => setIsJournalModalOpen(false)} />}
         </>
     );
 };

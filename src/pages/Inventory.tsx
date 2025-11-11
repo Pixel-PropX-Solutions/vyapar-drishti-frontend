@@ -29,7 +29,7 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
 import { useNavigate } from 'react-router-dom';
-import TabPanel from '@/features/upload-documents/components/TabPanel';
+import TabPanel from '@/common/TabPanel';
 import InventoryTable from '@/features/inventory/InventoryTable';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '@/store/store';

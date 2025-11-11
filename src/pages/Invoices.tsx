@@ -34,7 +34,7 @@ import { SortOrder, GetAllVouchars, InvoicesSortField } from "@/utils/types";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
 import { useNavigate } from "react-router-dom";
-import { deleteTAXInvoice, deleteInvoice, getTaxInvoicesPDF, viewAllInvoices, getInvoicesPDF, getPaymentPdf, getRecieptPdf } from "@/services/invoice";
+import { deleteInvoice, getTaxInvoicesPDF, viewAllInvoices, getInvoicesPDF, getPaymentPdf, getRecieptPdf } from "@/services/invoice";
 import { InvoicerRow } from "@/components/Invoice/InvoiceRow";
 import { getAllInvoiceGroups } from "@/services/invoice";
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -191,21 +191,12 @@ const Invoices: React.FC = () => {
 
   // Handle Delete Invoice details
   const handleDeleteInvoice = (inv: GetAllVouchars) => {
-    if (tax_enable) {
-      dispatch(deleteTAXInvoice({ vouchar_id: inv._id, company_id: currentCompanyId })).unwrap().then(() => {
-        fetchInvoices();
-        toast.success("Invoice deleted successfully!");
-      }).catch((error) => {
-        toast.error(error || 'An unexpected error occurred. Please try again later.');
-      })
-    } else {
-      dispatch(deleteInvoice({ vouchar_id: inv._id, company_id: currentCompanyId })).unwrap().then(() => {
-        toast.success("Invoice deleted successfully!");
-        fetchInvoices();
-      }).catch((error) => {
-        toast.error(error || 'An unexpected error occurred. Please try again later.');
-      })
-    }
+    dispatch(deleteInvoice({ vouchar_id: inv._id, company_id: currentCompanyId })).unwrap().then(() => {
+      toast.success("Invoice deleted successfully!");
+      fetchInvoices();
+    }).catch((error) => {
+      toast.error(error || 'An unexpected error occurred. Please try again later.');
+    })
   };
 
   return (
